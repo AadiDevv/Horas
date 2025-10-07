@@ -6,11 +6,16 @@ generator client {
 }
 
 datasource db {
+<<<<<<< HEAD
   provider = "postgresql"
+=======
+  provider = "sqlite"
+>>>>>>> b2172dd (feat(backend): init)
   url      = env("DATABASE_URL")
 }
 
 model User {
+<<<<<<< HEAD
   id        String   @id @default(uuid())
   email     String   @unique
   hashedPassword  String
@@ -22,5 +27,15 @@ model User {
   lastLoginAt DateTime
   phone     String  @default("")
   address   String  @default("")
+=======
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+
+  @@map("users")
+>>>>>>> b2172dd (feat(backend): init)
 }
 
