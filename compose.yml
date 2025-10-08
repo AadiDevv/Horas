@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    restart: unless-stopped
+
+  backend:
+    build: ./backend-app
+    environment:
+      - HOST_PORT=${BACKEND_PORT:-5000}
+      - FRONTEND_PORT=${FRONTEND_PORT:-3000}
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    restart: unless-stopped
