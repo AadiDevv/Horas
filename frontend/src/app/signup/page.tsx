@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -26,15 +26,15 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (formData.password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setError("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
 
@@ -42,7 +42,7 @@ export default function SignupPage() {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/users/register',
+        "http://localhost:5000/api/users/register",
         {
           username: formData.username,
           email: formData.email,
@@ -51,13 +51,13 @@ export default function SignupPage() {
       );
 
       if (response.status === 201 || response.status === 200) {
-        console.log('Inscription réussie !');
-        router.push('/login');
+        console.log("Inscription réussie !");
+        router.push("/login");
       }
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          'Échec de l\'inscription. Veuillez réessayer.'
+          "Échec de l'inscription. Veuillez réessayer."
       );
     } finally {
       setIsLoading(false);
@@ -74,6 +74,13 @@ export default function SignupPage() {
           <p className="text-gray-600 dark:text-gray-400">
             Rejoignez Horas dès maintenant
           </p>
+
+          <button
+            onClick={() => router.push("/")}
+            className="mt-4 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200"
+          >
+            Retour à l'accueil
+          </button>
         </div>
 
         <div className="bg-[#F5F5F0] rounded-lg shadow-lg p-8 border">
@@ -185,7 +192,7 @@ export default function SignupPage() {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -234,9 +241,7 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Minimum 8 caractères
-              </p>
+              <p className="mt-1 text-xs text-gray-500">Minimum 8 caractères</p>
             </div>
 
             {/* Confirmation mot de passe */}
@@ -266,7 +271,7 @@ export default function SignupPage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -327,15 +332,18 @@ export default function SignupPage() {
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </div>
-              <label htmlFor="terms" className="ml-2 block text-sm text-[#333333]">
-                J'accepte les{' '}
+              <label
+                htmlFor="terms"
+                className="ml-2 block text-sm text-[#333333]"
+              >
+                J'accepte les{" "}
                 <a
                   href="#"
                   className="text-blue-600 hover:text-blue-500 transition duration-200"
                 >
                   conditions d'utilisation
-                </a>{' '}
-                et la{' '}
+                </a>{" "}
+                et la{" "}
                 <a
                   href="#"
                   className="text-blue-600 hover:text-blue-500 transition duration-200"
@@ -384,10 +392,10 @@ export default function SignupPage() {
 
         {/* Lien de connexion */}
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
-          Vous avez déjà un compte ?{' '}
+          Vous avez déjà un compte ?{" "}
           <button
             className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200"
-            onClick={() => router.push('/login')}
+            onClick={() => router.push("/login")}
           >
             Se connecter
           </button>

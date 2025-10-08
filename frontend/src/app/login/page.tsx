@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -12,13 +12,17 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
+      interface LoginResponse {
+        accessToken: string;
+      }
+
+      const response = await axios.post<LoginResponse>(
         "http://localhost:5000/api/users/login",
         { email, password }
       );
@@ -27,10 +31,6 @@ export default function LoginPage() {
         const { accessToken } = response.data;
         localStorage.setItem("token", accessToken);
         setIsLoggedIn(true);
-
-
-        console.log("Connexion réussie !");
-        await new Promise((resolve) => setTimeout(resolve, 1000));
         setError("");
       }
     } catch (err) {
@@ -38,13 +38,31 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      const timer = setTimeout(() => {
+        router.push("/home");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoggedIn, router]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f3f6f4]">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#333333] mb-2">Bienvenue sur Horas</h1>
           <p className="text-gray-600 dark:text-gray-400">Connectez-vous pour continuer</p>
+          <button onClick={() => router.push("/")} className="mt-4 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200">
+            Retour à l'accueil
+          </button>
         </div>
+            {isLoggedIn ? (
+              <p className="mt-4 text-sm text-green-600">Connexion réussie ! Redirection...</p>
+            ) : (
+              error && <p className="mt-4 text-sm text-red-600">{error}</p>
+            )}
+
 
         <div className="bg-[#F5F5F0] rounded-lg shadow-lg p-8 border">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -150,7 +168,7 @@ export default function LoginPage() {
             Créer un compte
           </button>
         </p>
+        </div>
       </div>
-    </div>
   );
 }
