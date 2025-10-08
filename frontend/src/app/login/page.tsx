@@ -1,16 +1,41 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/login",
+        { email, password }
+      );
+
+      if (response.status === 200) {
+        const { accessToken } = response.data;
+        localStorage.setItem("token", accessToken);
+        setIsLoggedIn(true);
+
+
+        console.log("Connexion réussie !");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setError("");
+      }
+    } catch (err) {
+        setError("Échec de la connexion. Veuillez vérifier vos informations.");
+    }
   };
 
   return (
@@ -121,9 +146,9 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
           Vous n'avez pas de compte ?{' '}
-          <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200">
+          <button className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200" onClick={() => router.push("/signup")}>
             Créer un compte
-          </a>
+          </button>
         </p>
       </div>
     </div>

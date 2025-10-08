@@ -2,9 +2,11 @@
 
 import Button from './button';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import productImage from '../assets/preview.png'; // remplace par ton image
 
 export default function Hero() {
+  const router = useRouter();
   return (
     <section className="bg-white min-h-screen flex items-center px-6 sm:px-16 font-sans">
       <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full max-w-7xl mx-auto gap-10">
@@ -18,7 +20,7 @@ export default function Hero() {
             Horas vous aide à organiser vos journées, suivre vos tâches et rester productif avec simplicité.
           </p>
           <Button
-            onClick={() => alert('Commencer !')}
+            onClick={() => router.push('/login')}
             className="text-white px-6 py-3 rounded-lg shadow-lg transition duration-300"
           >
             Commencer
