@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { prisma } from './prisma.service';
 import { Logger } from '../../shared/utils/logger';
 
 async function main() {
