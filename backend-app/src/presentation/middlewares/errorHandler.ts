@@ -1,34 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
-
-export interface AppError extends Error {
-  statusCode?: number;
-}
+import { AppError } from '@/domain/error/AppError';
 
 export const errorHandler = (
-  err: AppError,
+  error: Error,
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
-  console.error(err.stack);
-  
-  const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'development' 
-    ? err.message 
-    : 'Internal server error';
+) => {
+  console.error('Error:', error);
 
-  res.status(statusCode).json({ 
-    error: 'Something went wrong!',
-    message
-  });
-};
+  // Si c'est une erreur métier (AppError)
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      success: false,
+      error: error.message,
+      code: error.errorCode,
+      timestamp: new Date().toISOString()
+    });
+  }
 
-export const notFoundHandler = (
-  req: Request,
-  res: Response
-): void => {
-  res.status(404).json({ 
-    error: 'Route not found',
-    path: req.originalUrl 
+  // Erreurs de validation (Joi, etc.)
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      error: error.message,
+      code: 'VALIDATION_ERROR',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Erreurs JWT
+  if (error.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      success: false,
+      error: 'Token invalide',
+      code: 'AUTH_ERROR',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Erreurs par défaut
+  return res.status(500).json({
+    success: false,
+    error: 'Erreur serveur interne',
+    code: 'SERVER_ERROR',
+    timestamp: new Date().toISOString()
   });
 };

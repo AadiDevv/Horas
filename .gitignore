@@ -1,4 +1,123 @@
+# ============================================
+# Variables d'environnement
+# ============================================
+.env
 .env.local
-.env.production
 .env.development
-node_modulesmerge 
+.env.production
+.env.test
+.env*.local
+
+# ============================================
+# Node.js
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+
+# ============================================
+# Build & Distribution
+# ============================================
+dist/
+build/
+out/
+*.tsbuildinfo
+.next/
+.nuxt/
+.cache/
+
+# ============================================
+# TypeScript
+# ============================================
+*.js.map
+*.d.ts.map
+
+# ============================================
+# Prisma
+# ============================================
+*.db
+*.db-journal
+*.db-wal
+prisma/*.db
+prisma/*.db-journal
+prisma/migrations/*_draft/
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# Tests & Coverage
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+junit.xml
+
+# ============================================
+# IDE & Éditeurs
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+.classpath
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# Temporaires
+# ============================================
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.cache
+
+# ============================================
+# Sécurité & Secrets
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
+.secrets/
+secrets/
+
+# ============================================
+# Divers
+# ============================================
+.turbo/
+.vercel/
+.netlify/
