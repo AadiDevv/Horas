@@ -18,7 +18,7 @@ export const swaggerDefinition: SwaggerDefinition = {
     },
     servers: [
         {
-            url: process.env.API_URL || 'http://localhost:5000',
+            url: `http://localhost:${process.env.HOST_PORT}` || 'http://localhost:5000',
             description: 'Serveur de développement'
         },
         {
