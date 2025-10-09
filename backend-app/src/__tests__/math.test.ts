@@ -1,4 +1,3 @@
-// Une fonction simple à tester
 function somme(a: number, b: number): number {
   return a + b;
 }

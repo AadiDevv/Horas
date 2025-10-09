@@ -3,23 +3,22 @@ name: Horas tests
 on:
   push:
     branches:
-      - main
-      - dev
-      - devback
       - back-tests
 
 jobs:
-  unit-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./backend-app
-      - name: Run tests
-        run: npm test
-        working-directory: ./backend-app
+
+      - name: Set up Docker (Compose v2 is included)
+        run: docker compose version
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Run tests inside backend container
+        run: docker compose exec backend npm test
+
+      - name: Tear down containers
+        run: docker compose down
