@@ -3,6 +3,11 @@
 import Navbar from './components/navbar';
 import Hero from './components/herobanner';
 import Feature from './components/featuresection';
+import Testimonial from './components/testimonialsection';
+import Contact from './components/contactsection';
+import Footer from './components/footer';
+
+
 
 export default function Home() {
   return (
@@ -10,6 +15,9 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Feature />
+      <Testimonial />
+      <Contact />
+      <Footer />
     </div>
   );
 }
