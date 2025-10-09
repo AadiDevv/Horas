@@ -1,7 +1,12 @@
 name: Horas tests
 
-on: [push]
-
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - devback
+      - back-tests
 
 jobs:
   unit-tests:
@@ -12,5 +17,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm install
-      - run: npm test
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./backend-app
+      - name: Run tests
+        run: npm test
+        working-directory: ./backend-app
