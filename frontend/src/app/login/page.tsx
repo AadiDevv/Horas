@@ -30,6 +30,7 @@ export default function LoginPage() {
       if (response.status === 200) {
         const { accessToken } = response.data;
         localStorage.setItem("token", accessToken);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         setIsLoggedIn(true);
         setError("");
       }
