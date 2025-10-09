@@ -1,12 +1,7 @@
 name: Horas tests
 
-on:
-  push:
-    branches:
-      - main
-      - dev
-      - devback
-      - back-/*
+on: [push]
+
 
 jobs:
   unit-tests:
