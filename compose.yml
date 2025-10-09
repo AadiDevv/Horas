@@ -1,8 +1,10 @@
 services:
   frontend:
     build: ./frontend
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT:-3000}
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
     restart: unless-stopped
 
   backend:
