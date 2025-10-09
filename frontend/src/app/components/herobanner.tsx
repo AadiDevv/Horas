@@ -3,7 +3,7 @@
 import Button from './button';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import productImage from '../assets/preview.png'; // remplace par ton image
+import productImage from '../assets/dashboard-manager.png';
 
 export default function Hero() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function Hero() {
             Gérez votre temps efficacement
           </h1>
           <p className="text-gray-700 text-lg sm:text-xl mb-8 max-w-lg">
-            Horas vous aide à organiser vos journées, suivre vos tâches et rester productif avec simplicité.
+            Horas vous aide à organiser vos journées, suivre vos équipes et émarger avec simplicité.
           </p>
           <Button
             onClick={() => router.push('/login')}

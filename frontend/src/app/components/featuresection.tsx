@@ -1,27 +1,27 @@
 'use client';
 
 import Image from 'next/image';
-import featureImage from '../assets/preview.png'; // remplace par ton image
+import featureImage from '../assets/dashbaord-agent.png';
 
 export default function Features() {
   const features = [
     {
-      title: 'Gagnez du temps',
+      title: 'Suivez vos heures simplement',
       description:
-        'Automatisez vos tâches répétitives et concentrez-vous sur l’essentiel.',
+        'Enregistrez vos arrivées, départs et pauses en un clic. Fini les feuilles de présence manuelles.',
       icon: '⏱️',
     },
     {
-      title: 'Travaillez efficacement',
+      title: 'Gérez vos équipes en temps réel',
       description:
-        'Visualisez vos priorités et suivez vos progrès en temps réel.',
-      icon: '⚡',
+        'Visualisez la présence de vos agents, leurs heures travaillées et les absences depuis un tableau clair et centralisé.',
+      icon: '👥',
     },
     {
-      title: 'Restez organisé',
+      title: 'Pilotez avec des indicateurs fiables',
       description:
-        'Une interface claire et intuitive pour planifier vos journées sans stress.',
-      icon: '📅',
+        'Accédez à des statistiques précises sur le temps de travail, les retards et la productivité de vos équipes.',
+      icon: '📊',
     },
   ];
 
@@ -34,7 +34,7 @@ export default function Features() {
             src={featureImage}
             alt="Présentation du produit Horas"
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
           />
         </div>
