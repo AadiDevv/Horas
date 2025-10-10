@@ -12,7 +12,7 @@ export class AuthController {
     const [user, accessToken] = await this.UC_auth.registerUser(userRegisterDto);
 
     if (!user.id) throw new ValidationError("No user id")
-    const { createdAt, updatedAt, lastLoginAt, deletedAt, password_hash, ...rest } = user
+    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
     const userResponse: UserReadDTO = {
       ...rest,
       id: user.id,
@@ -39,7 +39,7 @@ export class AuthController {
 
     if (!user.id) throw new ValidationError("User id is missing");
 
-    const { createdAt, updatedAt, lastLoginAt, deletedAt, password_hash, ...rest } = user
+    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
     const userResponse: UserReadDTO = {
       ...rest,
       id: user.id,

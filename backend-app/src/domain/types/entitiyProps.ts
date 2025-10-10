@@ -1,6 +1,6 @@
 export type UserProps = {
     email: string,
-    password_hash: string,
+    hashedPassword: string,
     prenom: string,
     nom: string,
     role: string,

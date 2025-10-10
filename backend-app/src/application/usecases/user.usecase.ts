@@ -11,7 +11,7 @@ export class AuthUseCase {
     async registerUser(dto: UserCreateDTO): Promise<[User, string]> {
         // #region - Verification
         User.validateDTO(dto) // Validation implicite : si email, mdp, username etc.. sont invalides, une erreur est levée
-        const hashedPassword = JWTService.hashPassword(dto.password)
+        const hashedPassword = JWTService.hashedPassword(dto.password)
 
         const user = User.fromCreateDTOtoEntity(dto, hashedPassword)
         const bdUser = await this.R_auth.getUser_ByEmail(user.email)

@@ -50,7 +50,7 @@ model User {
   nom            String    @db.VarChar(100)
   email          String    @unique @db.VarChar(255)
   telephone      String?   @db.VarChar(20)
-  password_hash  String    @db.VarChar(255)
+  hashedPassword  String    @db.VarChar(255)
   role           Role      @default(employe)
   isActive       Boolean   @default(false)
   equipeId       Int?

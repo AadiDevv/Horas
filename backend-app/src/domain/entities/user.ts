@@ -6,7 +6,7 @@ import { UserCreateDTO } from "@/application/DTOS";
 export class User {
   public readonly id?: number;
   public email: string;
-  public password_hash: string;
+  public hashedPassword: string;
   public prenom: string;
   public nom: string;
   public role: string;
@@ -27,7 +27,7 @@ export class User {
     // Attribution des valeurs
     this.id = props.id;
     this.email = props.email;
-    this.password_hash = props.password_hash;
+    this.hashedPassword = props.hashedPassword;
     this.prenom = props.prenom;
     this.nom = props.nom;
     this.role = props.role;
@@ -50,7 +50,7 @@ export class User {
       throw new ValidationError('Format d\'email invalide');
     }
 
-    if (!User.validatePassword(this.password_hash)) {
+    if (!User.validatePassword(this.hashedPassword)) {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
@@ -115,7 +115,7 @@ export class User {
   // #region UserAuthentication Methods
 
   public async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, this.password_hash);
+    return await bcrypt.compare(plainPassword, this.hashedPassword);
   }
 
   public toJwtPayload(): Record<string, any> {
@@ -186,7 +186,7 @@ export class User {
   public static fromCreateDTOtoEntity(dto: UserCreateDTO, hashedPassword: string): User {
     const userProps: UserProps = {
       ...dto,
-      password_hash: hashedPassword,
+      hashedPassword: hashedPassword,
       role: 'employe',
       isActive: false,
     }
