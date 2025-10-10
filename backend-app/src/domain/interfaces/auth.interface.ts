@@ -3,7 +3,7 @@ import { User } from "@/domain/entities/user";
 export interface IAuth {
   // #region Read
   getAllUsers(): Promise<User[]>;
-  getUser_ById(id: string): Promise<User | null>;
+  getUser_ById(id: number): Promise<User | null>;
   getUser_ByEmail(email: string): Promise<User | null>;
   // #endregion
   // #region Update

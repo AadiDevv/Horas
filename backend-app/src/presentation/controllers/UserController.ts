@@ -12,13 +12,14 @@ export class AuthController {
     const [user, accessToken] = await this.UC_auth.registerUser(userRegisterDto);
 
     if (!user.id) throw new ValidationError("No user id")
-    const { createdAt, lastLoginAt, updatedAt, hashedPassword, ...rest } = user
+    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
     const userResponse: UserReadDTO = {
       ...rest,
       id: user.id,
       createdAt: createdAt!.toISOString(),
+      updatedAt: updatedAt ? updatedAt.toISOString() : null,
       lastLoginAt: lastLoginAt ? lastLoginAt.toISOString() : null,
-      updatedAt: updatedAt ? updatedAt.toISOString() : null
+      deletedAt: deletedAt ? deletedAt.toISOString() : null
     };
 
     const tokenResponse: TokenResponse = {
@@ -26,7 +27,7 @@ export class AuthController {
       tokenType: "bearer",
       expiresIn: 1800,
       user: userResponse,
-      isAdmin: user.isAdmin
+      role: user.role
     };
 
     res.success(tokenResponse, "Utilisateur inscrit avec succès");
@@ -38,13 +39,14 @@ export class AuthController {
 
     if (!user.id) throw new ValidationError("User id is missing");
 
-    const { createdAt, lastLoginAt, updatedAt, hashedPassword, ...rest } = user
+    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
     const userResponse: UserReadDTO = {
       ...rest,
       id: user.id,
       createdAt: createdAt!.toISOString(),
+      updatedAt: updatedAt ? updatedAt.toISOString() : null,
       lastLoginAt: lastLoginAt ? lastLoginAt.toISOString() : null,
-      updatedAt: updatedAt ? updatedAt.toISOString() : null
+      deletedAt: deletedAt ? deletedAt.toISOString() : null
     };
 
     const tokenResponse: TokenResponse = {
@@ -52,7 +54,7 @@ export class AuthController {
       tokenType: "bearer",
       expiresIn: 1800,
       user: userResponse,
-      isAdmin: user.isAdmin
+      role: user.role
     };
 
     res.success(tokenResponse, "Connexion réussie");

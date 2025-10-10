@@ -16,19 +16,20 @@ export const authPaths = {
                             basic: {
                                 summary: 'Inscription basique',
                                 value: {
-                                    username: 'johndoe',
-                                    email: 'john.doe@example.com',
+                                    prenom: 'Jean',
+                                    nom: 'Dupont',
+                                    email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123'
                                 }
                             },
                             complete: {
                                 summary: 'Inscription complète',
                                 value: {
-                                    username: 'johndoe',
-                                    email: 'john.doe@example.com',
+                                    prenom: 'Jean',
+                                    nom: 'Dupont',
+                                    email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    phone: '+33 6 12 34 56 78',
-                                    address: '123 Rue de la Paix, 75001 Paris'
+                                    telephone: '+33 6 12 34 56 78'
                                 }
                             }
                         }
@@ -72,12 +73,21 @@ export const authPaths = {
                                         statusCode: 400
                                     }
                                 },
-                                invalidUsername: {
-                                    summary: 'Nom d\'utilisateur invalide',
+                                invalidNom: {
+                                    summary: 'Nom invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Nom d\'utilisateur invalide (minimum 3 caractères, alphanumérique + underscore)',
+                                        message: 'Nom invalide (minimum 2 caractères)',
+                                        statusCode: 400
+                                    }
+                                },
+                                invalidPrenom: {
+                                    summary: 'Prénom invalide',
+                                    value: {
+                                        success: false,
+                                        error: 'ValidationError',
+                                        message: 'Prénom invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 }
@@ -128,7 +138,7 @@ export const authPaths = {
                             $ref: '#/components/schemas/UserLoginDTO'
                         },
                         example: {
-                            email: 'john.doe@example.com',
+                            email: 'jean.dupont@example.com',
                             password: 'SecureP@ss123'
                         }
                     }
