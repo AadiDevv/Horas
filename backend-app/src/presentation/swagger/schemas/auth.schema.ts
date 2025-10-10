@@ -3,19 +3,24 @@ export const authSchemas = {
     // #region Request DTOs
     UserCreateDTO: {
         type: 'object',
-        required: ['username', 'email', 'password'],
+        required: ['prenom', 'nom', 'email', 'password'],
         properties: {
-            username: {
+            prenom: {
                 type: 'string',
-                minLength: 3,
-                pattern: '^[a-zA-Z0-9_]+$',
-                example: 'johndoe',
-                description: 'Nom d\'utilisateur (minimum 3 caractères, alphanumérique + underscore)'
+                minLength: 2,
+                example: 'Jean',
+                description: 'Prénom de l\'utilisateur (minimum 2 caractères)'
+            },
+            nom: {
+                type: 'string',
+                minLength: 2,
+                example: 'Dupont',
+                description: 'Nom de l\'utilisateur (minimum 2 caractères)'
             },
             email: {
                 type: 'string',
                 format: 'email',
-                example: 'john.doe@example.com',
+                example: 'jean.dupont@example.com',
                 description: 'Adresse email valide'
             },
             password: {
@@ -25,16 +30,11 @@ export const authSchemas = {
                 example: 'SecureP@ss123',
                 description: 'Mot de passe (minimum 6 caractères)'
             },
-            phone: {
+            telephone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone (optionnel)'
-            },
-            address: {
-                type: 'string',
-                example: '123 Rue de la Paix, 75001 Paris',
-                description: 'Adresse postale (optionnel)'
             }
         }
     },
@@ -64,41 +64,54 @@ export const authSchemas = {
         type: 'object',
         properties: {
             id: {
-                type: 'string',
-                format: 'uuid',
-                example: '123e4567-e89b-12d3-a456-426614174000',
+                type: 'integer',
+                example: 1,
                 description: 'Identifiant unique de l\'utilisateur'
             },
-            username: {
+            prenom: {
                 type: 'string',
-                example: 'johndoe',
-                description: 'Nom d\'utilisateur'
+                example: 'Jean',
+                description: 'Prénom de l\'utilisateur'
+            },
+            nom: {
+                type: 'string',
+                example: 'Dupont',
+                description: 'Nom de l\'utilisateur'
             },
             email: {
                 type: 'string',
                 format: 'email',
-                example: 'john.doe@example.com',
+                example: 'jean.dupont@example.com',
                 description: 'Adresse email'
+            },
+            role: {
+                type: 'string',
+                enum: ['admin', 'manager', 'employe'],
+                example: 'employe',
+                description: 'Rôle de l\'utilisateur'
             },
             isActive: {
                 type: 'boolean',
-                example: true,
+                example: false,
                 description: 'Indique si le compte est actif'
             },
-            isAdmin: {
-                type: 'boolean',
-                example: false,
-                description: 'Indique si l\'utilisateur a les privilèges administrateur'
-            },
-            phone: {
+            telephone: {
                 type: 'string',
+                nullable: true,
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone'
             },
-            address: {
-                type: 'string',
-                example: '123 Rue de la Paix, 75001 Paris',
-                description: 'Adresse postale'
+            equipeId: {
+                type: 'integer',
+                nullable: true,
+                example: 5,
+                description: 'ID de l\'équipe à laquelle appartient l\'utilisateur'
+            },
+            plageHoraireId: {
+                type: 'integer',
+                nullable: true,
+                example: 2,
+                description: 'ID de la plage horaire assignée à l\'utilisateur'
             },
             createdAt: {
                 type: 'string',
@@ -119,6 +132,13 @@ export const authSchemas = {
                 nullable: true,
                 example: '2025-10-07T10:30:00.000Z',
                 description: 'Date de dernière connexion'
+            },
+            deletedAt: {
+                type: 'string',
+                format: 'date-time',
+                nullable: true,
+                example: null,
+                description: 'Date de suppression logique (soft delete)'
             }
         }
     },
@@ -157,10 +177,11 @@ export const authSchemas = {
                     user: {
                         $ref: '#/components/schemas/UserReadDTO'
                     },
-                    isAdmin: {
-                        type: 'boolean',
-                        example: false,
-                        description: 'Indique si l\'utilisateur est administrateur'
+                    role: {
+                        type: 'string',
+                        enum: ['admin', 'manager', 'employe'],
+                        example: 'employe',
+                        description: 'Rôle de l\'utilisateur'
                     }
                 }
             }
@@ -169,4 +190,6 @@ export const authSchemas = {
     // #endregion
 };
 // #endregion
+
+
 

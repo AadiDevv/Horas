@@ -1,10 +1,10 @@
 // DTOs pour l'authentification
 export interface UserCreateDTO {
-    username: string;
+    prenom: string;
+    nom: string;
     email: string;
     password: string;
-    phone?: string;
-    address?: string;
+    telephone?: string;
 }
 
 export interface UserLoginDTO {
@@ -13,14 +13,19 @@ export interface UserLoginDTO {
 }
 
 export interface UserReadDTO {
-    id: string;
-    username: string;
+    id: number;
+    prenom: string;
+    nom: string;
     email: string;
+    role: string;
     isActive: boolean;
+    telephone?: string | null;
+    equipeId?: number | null;
+    plageHoraireId?: number | null;
     createdAt: string;
     updatedAt: string | null;
     lastLoginAt: string | null;
-    isAdmin: boolean;
+    deletedAt: string | null;
 }
 
 export interface TokenResponse {
@@ -28,5 +33,5 @@ export interface TokenResponse {
     tokenType: string;
     expiresIn: number;
     user: UserReadDTO;
-    isAdmin: boolean;
+    role: string;
 }

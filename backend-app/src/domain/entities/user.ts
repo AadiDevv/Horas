@@ -4,19 +4,22 @@ import * as bcrypt from "bcrypt";
 import { UserCreateDTO } from "@/application/DTOS";
 
 export class User {
-  public readonly id?: string;
+  public readonly id?: number;
   public email: string;
-  public hashedPassword: string;
-  public username: string;
+  public password_hash: string;
+  public prenom: string;
+  public nom: string;
+  public role: string;
   public isActive: boolean;
-  public isAdmin: boolean;
 
   public createdAt: Date;
   public updatedAt?: Date;
-  public lastLoginAt?: Date;
+  public lastLoginAt?: Date | null;
+  public deletedAt?: Date | null;
 
-  public phone?: string;
-  public address?: string;
+  public telephone?: string | null;
+  public equipeId?: number | null;
+  public plageHoraireId?: number | null;
 
   constructor(
     props: UserProps
@@ -24,15 +27,18 @@ export class User {
     // Attribution des valeurs
     this.id = props.id;
     this.email = props.email;
-    this.hashedPassword = props.hashedPassword;
-    this.username = props.username;
+    this.password_hash = props.password_hash;
+    this.prenom = props.prenom;
+    this.nom = props.nom;
+    this.role = props.role;
     this.isActive = props.isActive;
-    this.isAdmin = props.isAdmin;
-    this.phone = props.phone;
-    this.address = props.address;
+    this.telephone = props.telephone ?? undefined;
+    this.equipeId = props.equipeId ?? undefined;
+    this.plageHoraireId = props.plageHoraireId ?? undefined;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
-    this.lastLoginAt = props.lastLoginAt;
+    this.lastLoginAt = props.lastLoginAt ?? undefined;
+    this.deletedAt = props.deletedAt ?? undefined;
 
     // Validation après attribution
     this.validateMe();
@@ -44,20 +50,23 @@ export class User {
       throw new ValidationError('Format d\'email invalide');
     }
 
-    if (!User.validatePassword(this.hashedPassword)) {
+    if (!User.validatePassword(this.password_hash)) {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
-    if (!User.validateUsername(this.username)) {
-      throw new ValidationError('Nom d\'utilisateur invalide (minimum 3 caractères, alphanumérique + underscore)');
+    if (!User.validateNom(this.nom)) {
+      throw new ValidationError('Nom invalide (minimum 2 caractères)');
     }
 
-    if (this.phone && this.phone.trim() !== '' && !User.validatePhone(this.phone)) {
+    if (!User.validatePrenom(this.prenom)) {
+      throw new ValidationError('Prénom invalide (minimum 2 caractères)');
+    }
+
+    if (this.telephone && this.telephone.trim() !== '' && !User.validatePhone(this.telephone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
-
-
   }
+
   public static validateDTO(dto: UserCreateDTO): void {
     if (!User.validateEmail(dto.email)) {
       throw new ValidationError('Format d\'email invalide');
@@ -67,14 +76,19 @@ export class User {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
-    if (!this.validateUsername(dto.username)) {
-      throw new ValidationError('Nom d\'utilisateur invalide (minimum 3 caractères, alphanumérique + underscore)');
+    if (!this.validateNom(dto.nom)) {
+      throw new ValidationError('Nom invalide (minimum 2 caractères)');
     }
 
-    if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
+    if (!this.validatePrenom(dto.prenom)) {
+      throw new ValidationError('Prénom invalide (minimum 2 caractères)');
+    }
+
+    if (dto.telephone && dto.telephone.trim() !== '' && !this.validatePhone(dto.telephone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
   }
+
   public static validatePhone(phone: string): boolean {
     const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
     return phoneRegex.test(phone!);
@@ -85,8 +99,12 @@ export class User {
     return emailRegex.test(email);
   }
 
-  public static validateUsername(username: string): boolean {
-    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  public static validateNom(nom: string): boolean {
+    return nom.length >= 2;
+  }
+
+  public static validatePrenom(prenom: string): boolean {
+    return prenom.length >= 2;
   }
 
   public static validatePassword(password: string): boolean {
@@ -97,8 +115,9 @@ export class User {
   // #region UserAuthentication Methods
 
   public async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, this.hashedPassword);
+    return await bcrypt.compare(plainPassword, this.password_hash);
   }
+
   public toJwtPayload(): Record<string, any> {
     if (!this.id) {
       throw new Error('Impossible de générer JWT pour un utilisateur sans ID');
@@ -107,8 +126,10 @@ export class User {
     return {
       sub: this.id,
       email: this.email,
-      username: this.username,
-      isAdmin: this.isAdmin,
+      prenom: this.prenom,
+      nom: this.nom,
+      role: this.role,
+      isActive: this.isActive,
       lastLoginAt: this.lastLoginAt
     };
   }
@@ -120,34 +141,44 @@ export class User {
 
   // #region UserDisplay Methods
   public getDisplayName(): string {
-    return this.username.charAt(0).toUpperCase() + this.username.slice(1);
+    return `${this.prenom} ${this.nom}`;
   }
 
   public toJSON(): Record<string, any> {
     return {
       id: this.id,
       email: this.email,
-      username: this.username,
+      prenom: this.prenom,
+      nom: this.nom,
+      role: this.role,
       isActive: this.isActive,
-      isAdmin: this.isAdmin,
-      phone: this.phone,
-      address: this.address,
+      telephone: this.telephone,
+      equipeId: this.equipeId,
+      plageHoraireId: this.plageHoraireId,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
-      lastLoginAt: this.lastLoginAt?.toISOString()
+      lastLoginAt: this.lastLoginAt?.toISOString(),
+      deletedAt: this.deletedAt?.toISOString()
     };
   }
   // #endregion
 
   // #region Change UserState Methods
 
+  public activate(): void {
+    this.isActive = true;
+  }
 
   public deactivate(): void {
     this.isActive = false;
   }
 
-  public activate(): void {
-    this.isActive = true;
+  public softDelete(): void {
+    this.deletedAt = new Date();
+  }
+
+  public restore(): void {
+    this.deletedAt = undefined;
   }
   // #endregion
 
@@ -155,12 +186,11 @@ export class User {
   public static fromCreateDTOtoEntity(dto: UserCreateDTO, hashedPassword: string): User {
     const userProps: UserProps = {
       ...dto,
-      hashedPassword,
+      password_hash: hashedPassword,
+      role: 'employe',
       isActive: false,
-      isAdmin: false,
     }
-    return new User(
-      userProps)
+    return new User(userProps)
   }
   // #endregion
 }

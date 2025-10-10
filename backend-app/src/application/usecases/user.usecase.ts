@@ -1,7 +1,7 @@
 import { UserCreateDTO, UserLoginDTO } from "@/application/DTOS/";
 import { User } from "@/domain/entities/user";
 import { IAuth } from "@/domain/interfaces/auth.interface";
-import { AlreadyExistsError, InvalidCredentialsError, NotFoundError } from "@/domain/error/AppError";
+import { AlreadyExistsError, InvalidCredentialsError } from "@/domain/error/AppError";
 import { JWTService } from "@/application/services/";
 
 export class AuthUseCase {

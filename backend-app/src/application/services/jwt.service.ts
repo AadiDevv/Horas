@@ -20,8 +20,8 @@ export class JWTService {
    */
   public createAccessToken(user: User, expiresDelta?: number): string {
     const payload = user.toJwtPayload();
-    
-    const expire = expiresDelta 
+
+    const expire = expiresDelta
       ? new Date(Date.now() + expiresDelta * 60 * 1000) // minutes to milliseconds
       : new Date(Date.now() + this.accessTokenExpireMinutes * 60 * 1000);
 
@@ -64,8 +64,11 @@ export class JWTService {
     return {
       userId: userId,
       email: payload.email,
-      username: payload.username,
-      isAdmin: payload.isAdmin || false
+      prenom: payload.prenom,
+      nom: payload.nom,
+      role: payload.role || 'employe',
+      isActive: payload.isActive || false,
+      lastLoginAt: payload.lastLoginAt
     };
   }
   public static hashPassword(password: string): string {

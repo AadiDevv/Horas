@@ -52,10 +52,12 @@ model User {
   telephone      String?   @db.VarChar(20)
   password_hash  String    @db.VarChar(255)
   role           Role      @default(employe)
+  isActive       Boolean   @default(false)
   equipeId       Int?
   plageHoraireId Int?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
+  lastLoginAt    DateTime?
   deletedAt      DateTime?
 
   equipe         Equipe?       @relation("EquipeMembres", fields: [equipeId], references: [id], onDelete: SetNull)
