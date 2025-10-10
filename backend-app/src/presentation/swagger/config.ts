@@ -1,0 +1,52 @@
+import { SwaggerDefinition } from 'swagger-jsdoc';
+
+// #region Swagger Configuration
+export const swaggerDefinition: SwaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+        title: 'Horas API',
+        version: '1.0.0',
+        description: 'API REST pour la gestion du temps de travail - Horas',
+        contact: {
+            name: 'API Support',
+            email: 'support@horas.com'
+        },
+        license: {
+            name: 'MIT',
+            url: 'https://opensource.org/licenses/MIT'
+        }
+    },
+    servers: [
+        {
+            url: `http://localhost:${process.env.HOST_PORT}` || 'http://localhost:5000',
+            description: 'Serveur de développement'
+        },
+        {
+            url: process.env.API_URL_PROD || 'https://api.horas.com',
+            description: 'Serveur de production'
+        }
+    ],
+    tags: [
+        {
+            name: 'Health',
+            description: 'Endpoints pour vérifier l\'état de santé de l\'API'
+        },
+        {
+            name: 'Authentication',
+            description: 'Endpoints pour l\'authentification et la gestion des utilisateurs'
+        }
+    ]
+};
+// #endregion
+
+// #region Security Schemes
+export const securitySchemes = {
+    bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Token JWT pour l\'authentification'
+    }
+};
+// #endregion
+

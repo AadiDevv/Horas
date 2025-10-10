@@ -3,24 +3,31 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './shared/config/swagger';
+import { swaggerSpec } from './presentation/swagger';
 import routes from './presentation/routes';
-import { errorHandler, notFoundHandler } from './presentation/middlewares/errorHandler';
+import { errorHandler, } from './presentation/middlewares/errorHandler';
 import { Logger } from './shared/utils/logger';
-
+import { responseMiddleware } from './presentation/middlewares/response.middleware';
+import { initializeApp, shutdownApp } from './config';
 dotenv.config();
 
+// #region Application Initialization
+initializeApp();
+// #endregion
+
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
+const HOST_PORT = process.env.HOST_PORT;
 
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: `http://localhost:${process.env.FRONTEND_PORT}` || '*',
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(responseMiddleware);
 
 // Documentation Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -29,11 +36,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', routes);
 
 // Handlers d'erreurs
-app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  Logger.info(`🚀 Server running on http://localhost:${PORT}`);
-  Logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
-  Logger.info(`💚 Health check: http://localhost:${PORT}/api/health`);
+const server = app.listen(PORT, () => {
+  Logger.info(`🚀 Server running on http://localhost:${HOST_PORT}`);
+  Logger.info(`📚 API Documentation: http://localhost:${HOST_PORT}/api-docs`);
+  Logger.info(`💚 Health check: http://localhost:${HOST_PORT}/api/health`);
+});
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  await shutdownApp();
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

@@ -1,7 +1,23 @@
+'use client';
+
+import Navbar from './components/navbar';
+import Hero from './components/herobanner';
+import Feature from './components/featuresection';
+import Testimonial from './components/testimonialsection';
+import Contact from './components/contactsection';
+import Footer from './components/footer';
+
+
+
 export default function Home() {
   return (
-    <main className="flex h-screen items-center justify-center">
-      <h1 className="text-3xl font-bold">Welcome to Horas</h1>
-    </main>
+    <div className="bg-white min-h-screen font-sans">
+      <Navbar />
+      <Hero />
+      <Feature />
+      <Testimonial />
+      <Contact />
+      <Footer />
+    </div>
   );
 }
