@@ -44,7 +44,7 @@ export default function SignupPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/register",
+        "/api/users/register",
         {
           prenom: formData.prenom,
           nom: formData.nom,

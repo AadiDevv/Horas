@@ -1,4 +1,5 @@
-// TIME MANAGER Prisma Schema (Version Hybride Optimisée)
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
   provider = "postgresql" // change si tu utilises MySQL
@@ -7,28 +8,67 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+enum Role {
+  admin
+  manager
+  employe
+}
+
+enum TypePlage {
+  journee
+  soir
+  nuit
+}
+
+enum StatusPointage {
+  normal
+  retard
+  absence
+  incomplet
+}
+
+enum TypeAbsence {
+  conge
+  maladie
+  rtt
+  formation
+  autre
+}
+
+enum StatutAbsence {
+  en_attente
+  approuve
+  refuse
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  prenom          String    @db.VarChar(100)
-  nom             String    @db.VarChar(100)
-  email           String    @unique @db.VarChar(255)
-  telephone       String?   @db.VarChar(20)
-  password_hash   String    @db.VarChar(255)
-  role            Role      @default(employe)
-  equipeId        Int?
-  plageHoraireId  Int?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now())
-  deletedAt       DateTime?
+  id             Int       @id @default(autoincrement())
+  prenom         String    @db.VarChar(100)
+  nom            String    @db.VarChar(100)
+  email          String    @unique @db.VarChar(255)
+  telephone      String?   @db.VarChar(20)
+  hashedPassword  String    @db.VarChar(255)
+  role           Role      @default(employe)
+  isActive       Boolean   @default(false)
+  equipeId       Int?
+  plageHoraireId Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  lastLoginAt    DateTime?
+  deletedAt      DateTime?
 
-  equipe          Equipe?   @relation(fields: [equipeId], references: [id], onDelete: SetNull)
-  plageHoraire    Horaire?  @relation(fields: [plageHoraireId], references: [id], onDelete: SetNull)
-  equipesManagees Equipe[]  @relation("EquipeManager")
-  pointages       Pointage[]
-  rapports        Rapport[] @relation("ManagerRapport")
-  horairesEx      HoraireExceptionnel[]
+  equipe         Equipe?       @relation("EquipeMembres", fields: [equipeId], references: [id], onDelete: SetNull)
+  equipeGeree    Equipe[]      @relation("EquipeManager")
+  plageHoraire   PlageHoraire? @relation(fields: [plageHoraireId], references: [id], onDelete: SetNull)
+  pointages      Pointage[]
+  tempsTravailles TempsTravailler[]
+  rapports       Rapport[]     @relation("ManagerRapport")
+  absences       Absence[]
+  horairesExceptionnels HoraireExceptionnel[]
 
   @@index([email])
   @@index([role])
@@ -37,53 +77,73 @@ model User {
 }
 
 model Equipe {
-  id             Int       @id @default(autoincrement())
-  nom            String    @db.VarChar(100)
-  description    String?
-  managerId      Int
-  horaireId      Int?      // ajout : lien vers Horaire
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now())
-  deletedAt      DateTime?
+  id          Int       @id @default(autoincrement())
+  nom         String    @db.VarChar(100)
+  description String?
+  managerId   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  deletedAt   DateTime?
 
-  manager User   @relation("EquipeManager", fields: [managerId], references: [id], onDelete: Restrict)
-  membres User[]
-  rapports Rapport[]
-  horaire Horaire? @relation(fields: [horaireId], references: [id], onDelete: SetNull)
+  manager   User       @relation("EquipeManager", fields: [managerId], references: [id], onDelete: Restrict)
+  users     User[]     @relation("EquipeMembres")
+  rapports  Rapport[]
 
   @@index([managerId])
-  @@index([horaireId])
 }
 
-model Horaire {
-  id          Int      @id @default(autoincrement())
-  nom         String   @db.VarChar(100)
-  heureDebut  DateTime @db.Time
-  heureFin    DateTime @db.Time
-  joursActifs Json     // [1,2,3,4,5] = Lun-Ven ; 1=Lundi, 7=Dimanche
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+model PlageHoraire {
+  id               Int       @id @default(autoincrement())
+  nom              String    @db.VarChar(100)
+  nombreDePointage Int
+  type             TypePlage
+  heureDebut       DateTime  @db.Time
+  heureFin         DateTime  @db.Time
+  toleranceRetard  Int       @default(15)
+  joursActifs      Json
+  heuresParSemaine Decimal   @db.Decimal(5, 2)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now())
 
-  users      User[]
-  equipes    Equipe[]
-  horairesEx HoraireExceptionnel[]
+  users                   User[]
+  horairesExceptionnels   HoraireExceptionnel[]
+
+  @@index([type])
 }
 
 model Pointage {
-  id         Int       @id @default(autoincrement())
-  employeId  Int
-  date       DateTime  @db.Date
-  heure      DateTime
-  clockin    Boolean   // true=arrivée, false=départ
-  status     Status    @default(normal)
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now())
+  id        Int       @id @default(autoincrement())
+  employeId Int
+  date      DateTime  @db.Date
+  heure     DateTime
+  clockin   Boolean
+  status    StatusPointage @default(normal)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
 
   employe User @relation(fields: [employeId], references: [id], onDelete: Cascade)
 
   @@index([employeId])
   @@index([date])
+  @@index([employeId, date])
   @@index([status])
+}
+
+model TempsTravailler {
+  id          Int       @id @default(autoincrement())
+  employeId   Int
+  date        DateTime  @db.Date
+  heureDebut  DateTime
+  heureFin    DateTime?
+  dureeMinutes Int?
+  estComplet  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  employe User @relation(fields: [employeId], references: [id], onDelete: Cascade)
+
+  @@index([employeId])
+  @@index([date])
   @@index([employeId, date])
 }
 
@@ -107,30 +167,33 @@ model Rapport {
   @@index([periodeDebut, periodeFin])
 }
 
-model HoraireExceptionnel {
-  id             Int      @id @default(autoincrement())
-  employeId      Int
-  date           DateTime @db.Date
-  plageHoraireId Int
-  createdAt      DateTime @default(now())
+model Absence {
+  id        Int       @id @default(autoincrement())
+  employeId Int
+  dateDebut DateTime  @db.Date
+  dateFin   DateTime  @db.Date
+  type      TypeAbsence
+  statut    StatutAbsence
+  createdAt DateTime  @default(now())
 
-  employe User   @relation(fields: [employeId], references: [id])
-  horaire Horaire @relation(fields: [plageHoraireId], references: [id])
+  employe User @relation(fields: [employeId], references: [id], onDelete: Cascade)
+
+  @@index([employeId])
+  @@index([statut])
+}
+
+model HoraireExceptionnel {
+  id             Int       @id @default(autoincrement())
+  employeId      Int
+  date           DateTime  @db.Date
+  plageHoraireId Int
+
+  createdAt DateTime @default(now())
+
+  employe       User         @relation(fields: [employeId], references: [id], onDelete: Cascade)
+  plageHoraire  PlageHoraire @relation(fields: [plageHoraireId], references: [id], onDelete: SetNull)
 
   @@index([employeId])
   @@index([date])
   @@index([plageHoraireId])
-}
-
-enum Role {
-  admin
-  manager
-  employe
-}
-
-enum Status {
-  normal
-  retard
-  absence
-  incomplet
 }

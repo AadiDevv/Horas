@@ -188,7 +188,6 @@ export class User {
     const userProps: UserProps = {
       ...dto,
       hashedPassword: hashedPassword,
-      role: 'employe',
       isActive: false,
     }
     return new User(userProps)

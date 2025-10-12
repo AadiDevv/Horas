@@ -120,7 +120,7 @@ tags: [
 Une fois le serveur lancé, la documentation est accessible à :
 
 ```
-http://localhost:5000/api-docs
+http://localhost:8080/api/docs
 ```
 
 ## 🎯 Bonnes pratiques

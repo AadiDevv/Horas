@@ -18,8 +18,8 @@ export const swaggerDefinition: SwaggerDefinition = {
     },
     servers: [
         {
-            url: `http://localhost:${process.env.HOST_PORT}` || 'http://localhost:5000',
-            description: 'Serveur de développement'
+            url: process.env.NGINX_PORT ? `http://localhost:${process.env.NGINX_PORT}` : 'http://localhost:8080',
+            description: 'Serveur de développement (via Nginx)'
         },
         {
             url: process.env.API_URL_PROD || 'https://api.horas.com',

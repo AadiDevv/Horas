@@ -216,7 +216,7 @@ export const authSchemas = {
             },
             message: {
                 type: 'string',
-                example: 'Employé créé avec succès',
+                example: 'Utilisateur créé avec succès',
                 description: 'Message de confirmation'
             },
             data: {
