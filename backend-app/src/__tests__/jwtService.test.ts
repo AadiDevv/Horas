@@ -1,4 +1,4 @@
-import { JWTService } from '@/infra/services/jwtService';
+import { JWTService } from '@/application/services/';
 import { User } from '@/domain/entities/user';
 
 describe('JWTService', () => {
