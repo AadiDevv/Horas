@@ -27,3 +27,4 @@ services:
     depends_on:
       - frontend
       - backend
+    restart: no
