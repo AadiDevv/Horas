@@ -17,11 +17,12 @@ initializeApp();
 
 const app = express();
 const PORT = 5000;
+const HOST_PORT = process.env.HOST_PORT;
 
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: "http://localhost",
+  origin: `http://localhost:${process.env.FRONTEND_PORT}` || '*',
   credentials: true
 }));
 app.use(express.json());
@@ -29,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(responseMiddleware);
 
 // Documentation Swagger
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use('/api', routes);
@@ -38,9 +39,9 @@ app.use('/api', routes);
 app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
-  Logger.info("🚀 Server running on http://localhost/api");
-  Logger.info("📚 API Documentation: http://localhost/api/docs");
-  Logger.info("💚 Health check: http://localhost/api/health");
+  Logger.info(`🚀 Server running on http://localhost:${HOST_PORT}`);
+  Logger.info(`📚 API Documentation: http://localhost:${HOST_PORT}/api-docs`);
+  Logger.info(`💚 Health check: http://localhost:${HOST_PORT}/api/health`);
 });
 // Graceful shutdown
 process.on('SIGTERM', async () => {
