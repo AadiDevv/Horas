@@ -1,26 +1,27 @@
-import { JWTService } from '@/application/services/';
-import { User } from '@/domain/entities/user';
+import { JWTService } from '../application/services/';
+import { User } from '../domain/entities/user';
 
 describe('JWTService', () => {
   const jwtService = new JWTService();
 
-  // Fake User with method toJwtPayload()
-  const user: User = {
-    id: '123',
+  const password = 'secured-password-123';
+  const hashedPassword = JWTService.hashedPassword(password);
+
+  // 👇 Fake UserCreateDTO
+  const fakeDTO = {
     email: 'test@example.com',
     prenom: 'Jean',
     nom: 'Dupont',
-    isActive: true,
-    lastLoginAt: new Date(),
-    toJwtPayload: () => ({
-      sub: '123',
-      email: 'test@example.com',
-      prenom: 'Jean',
-      nom: 'Dupont',
-      isActive: true,
-      lastLoginAt: new Date().toISOString(),
-    })
+    password,
+    telephone: undefined,
+    equipeId: null,
+    plageHoraireId: null,
   };
+
+  const user = User.fromCreateDTOtoEntity(fakeDTO, hashedPassword);
+  Object.assign(user, { id: 123 });
+  user.isActive = true;
+  user.lastLoginAt = new Date();
 
   test('createAccessToken should return a valid JWT token', () => {
     const token = jwtService.createAccessToken(user);
