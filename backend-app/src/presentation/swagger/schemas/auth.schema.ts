@@ -3,7 +3,7 @@ export const authSchemas = {
     // #region Request DTOs
     UserCreateDTO: {
         type: 'object',
-        required: ['prenom', 'nom', 'email', 'password'],
+        required: ['prenom', 'nom', 'email', 'password', 'role'],
         properties: {
             prenom: {
                 type: 'string',
@@ -30,11 +30,29 @@ export const authSchemas = {
                 example: 'SecureP@ss123',
                 description: 'Mot de passe (minimum 6 caractères)'
             },
+            role: {
+                type: 'string',
+                enum: ['admin', 'manager', 'employe'],
+                example: 'employe',
+                description: 'Rôle de l\'utilisateur (employe par défaut pour l\'auto-inscription)'
+            },
             telephone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone (optionnel)'
+            },
+            equipeId: {
+                type: 'integer',
+                nullable: true,
+                example: 5,
+                description: 'ID de l\'équipe (optionnel)'
+            },
+            plageHoraireId: {
+                type: 'integer',
+                nullable: true,
+                example: 2,
+                description: 'ID de la plage horaire (optionnel)'
             }
         }
     },
@@ -184,6 +202,31 @@ export const authSchemas = {
                         description: 'Rôle de l\'utilisateur'
                     }
                 }
+            }
+        }
+    },
+
+    UserCreatedResponse: {
+        type: 'object',
+        properties: {
+            success: {
+                type: 'boolean',
+                example: true,
+                description: 'Indique si l\'opération a réussi'
+            },
+            message: {
+                type: 'string',
+                example: 'Employé créé avec succès',
+                description: 'Message de confirmation'
+            },
+            data: {
+                $ref: '#/components/schemas/UserReadDTO'
+            },
+            timestamp: {
+                type: 'string',
+                format: 'date-time',
+                example: '2025-10-10T12:00:00.000Z',
+                description: 'Horodatage de la réponse'
             }
         }
     }

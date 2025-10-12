@@ -136,9 +136,32 @@ http://localhost:5000/api-docs
 
 ### Endpoints documentés
 
-- ✅ `GET /api/health` - Vérification de santé
-- ✅ `POST /api/users/register` - Inscription
-- ✅ `POST /api/users/login` - Connexion
+#### Health
+- ✅ `GET /api/health` - Vérification de santé de l'API
+
+#### Authentication (Public)
+- ✅ `POST /api/users/register` - Auto-inscription (employé uniquement)
+- ✅ `POST /api/users/login` - Connexion utilisateur
+
+#### Authentication (Protégé 🔒)
+- ✅ `POST /api/users/register/employe` - Création d'employé (Manager/Admin) 🔐
+- ✅ `POST /api/users/register/manager` - Création de manager (Admin uniquement) 🔐
+
+**Légende :**
+- 🔐 = Requiert un token JWT Bearer
+
+### Architecture de sécurité
+
+Les routes protégées utilisent :
+1. **`authMiddleware`** : Vérifie et décode le JWT
+2. **`requireRole()`** : Vérifie les permissions selon le rôle
+
+| Route | Accès | Middlewares |
+|-------|-------|-------------|
+| `/register` | Public | - |
+| `/register/employe` | Manager/Admin | `authMiddleware`, `managerOrAdmin` |
+| `/register/manager` | Admin | `authMiddleware`, `adminOnly` |
+| `/login` | Public | - |
 
 ### À venir (selon TECHNICAL_SPECS.md)
 

@@ -1,4 +1,13 @@
 // #region Authentication Paths
+/**
+ * Routes d'authentification et de gestion des utilisateurs
+ * 
+ * Architecture de sécurité :
+ * - /register : Public - Auto-inscription (employe uniquement)
+ * - /register/employe : Protégé - Création d'employé (manager/admin)
+ * - /register/manager : Protégé - Création de manager (admin uniquement)
+ * - /login : Public - Connexion
+ */
 export const authPaths = {
     '/api/users/register': {
         post: {
@@ -107,6 +116,257 @@ export const authPaths = {
                                 error: 'AlreadyExistsError',
                                 message: 'User already exists',
                                 statusCode: 409
+                            }
+                        }
+                    }
+                },
+                500: {
+                    description: 'Erreur serveur',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    '/api/users/register/employe': {
+        post: {
+            summary: 'Création d\'un employé (Manager/Admin)',
+            description: 'Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.',
+            tags: ['Authentication'],
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/UserCreateDTO'
+                        },
+                        examples: {
+                            employeeBasic: {
+                                summary: 'Création basique',
+                                value: {
+                                    prenom: 'Marie',
+                                    nom: 'Martin',
+                                    email: 'marie.martin@example.com',
+                                    password: 'SecureP@ss123',
+                                    role: 'employe'
+                                }
+                            },
+                            employeeComplete: {
+                                summary: 'Création complète avec équipe',
+                                value: {
+                                    prenom: 'Marie',
+                                    nom: 'Martin',
+                                    email: 'marie.martin@example.com',
+                                    password: 'SecureP@ss123',
+                                    role: 'employe',
+                                    telephone: '+33 6 12 34 56 78',
+                                    equipeId: 5
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: 'Employé créé avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/UserCreatedResponse'
+                            }
+                        }
+                    }
+                },
+                400: {
+                    description: 'Erreur de validation',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            },
+                            examples: {
+                                invalidRole: {
+                                    summary: 'Rôle invalide',
+                                    value: {
+                                        success: false,
+                                        error: 'ValidationError',
+                                        message: 'User role is not valid',
+                                        code: 'VALIDATION_ERROR',
+                                        timestamp: '2025-10-10T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                401: {
+                    description: 'Non authentifié ou non autorisé',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            },
+                            examples: {
+                                noToken: {
+                                    summary: 'Token manquant',
+                                    value: {
+                                        success: false,
+                                        error: 'Token manquant ou invalide'
+                                    }
+                                },
+                                unauthorized: {
+                                    summary: 'Permissions insuffisantes',
+                                    value: {
+                                        success: false,
+                                        error: 'AuthenticationError',
+                                        message: 'Role employe non autorisé, pour cette route, seulement les roles suivants sont autorisés: manager, admin',
+                                        code: 'AUTH_ERROR',
+                                        timestamp: '2025-10-10T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                409: {
+                    description: 'L\'utilisateur existe déjà',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            }
+                        }
+                    }
+                },
+                500: {
+                    description: 'Erreur serveur',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    '/api/users/register/manager': {
+        post: {
+            summary: 'Création d\'un manager (Admin uniquement)',
+            description: 'Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.',
+            tags: ['Authentication'],
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/UserCreateDTO'
+                        },
+                        examples: {
+                            managerBasic: {
+                                summary: 'Création basique',
+                                value: {
+                                    prenom: 'Paul',
+                                    nom: 'Bernard',
+                                    email: 'paul.bernard@example.com',
+                                    password: 'SecureP@ss123',
+                                    role: 'manager'
+                                }
+                            },
+                            managerComplete: {
+                                summary: 'Création complète',
+                                value: {
+                                    prenom: 'Paul',
+                                    nom: 'Bernard',
+                                    email: 'paul.bernard@example.com',
+                                    password: 'SecureP@ss123',
+                                    role: 'manager',
+                                    telephone: '+33 6 98 76 54 32'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: 'Manager créé avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/UserCreatedResponse'
+                            }
+                        }
+                    }
+                },
+                400: {
+                    description: 'Erreur de validation',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            },
+                            examples: {
+                                invalidRole: {
+                                    summary: 'Rôle invalide',
+                                    value: {
+                                        success: false,
+                                        error: 'ValidationError',
+                                        message: 'User role is not valid',
+                                        code: 'VALIDATION_ERROR',
+                                        timestamp: '2025-10-10T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                401: {
+                    description: 'Non authentifié ou non autorisé',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
+                            },
+                            examples: {
+                                noToken: {
+                                    summary: 'Token manquant',
+                                    value: {
+                                        success: false,
+                                        error: 'Token manquant ou invalide'
+                                    }
+                                },
+                                unauthorized: {
+                                    summary: 'Seul un admin peut créer un manager',
+                                    value: {
+                                        success: false,
+                                        error: 'AuthenticationError',
+                                        message: 'Role manager non autorisé, pour cette route, seulement les roles suivants sont autorisés: admin',
+                                        code: 'AUTH_ERROR',
+                                        timestamp: '2025-10-10T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                409: {
+                    description: 'L\'utilisateur existe déjà',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#/components/schemas/Error'
                             }
                         }
                     }
