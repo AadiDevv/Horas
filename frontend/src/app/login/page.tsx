@@ -23,7 +23,7 @@ export default function LoginPage() {
       }
 
       const response = await axios.post<LoginResponse>(
-        "http://localhost:5000/api/users/login",
+        "/api/users/login",
         { email, password }
       );
 

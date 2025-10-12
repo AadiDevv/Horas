@@ -21,7 +21,7 @@ const PORT = 5000;
 // Middlewares
 app.use(helmet());
 app.use(cors({
-  origin: "http://localhost",
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
