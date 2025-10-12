@@ -3,6 +3,7 @@ name: Horas tests
 on:
   push:
     branches:
+      - dev
       - back-tests
 
 jobs:
@@ -18,7 +19,13 @@ jobs:
         run: docker compose up -d --build
 
       - name: Run tests inside backend container
-        run: docker compose exec backend npm test
+        run: docker compose exec backend npm test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov-report
 
       - name: Tear down containers
         run: docker compose down
