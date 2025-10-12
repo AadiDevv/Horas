@@ -2,6 +2,7 @@ import { UserProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import { UserCreateDTO } from "@/application/DTOS";
+import { Role } from "../types";
 
 export class User {
   public readonly id?: number;
@@ -9,7 +10,7 @@ export class User {
   public hashedPassword: string;
   public prenom: string;
   public nom: string;
-  public role: string;
+  public role: Role;
   public isActive: boolean;
 
   public createdAt: Date;
@@ -187,7 +188,6 @@ export class User {
     const userProps: UserProps = {
       ...dto,
       hashedPassword: hashedPassword,
-      role: 'employe',
       isActive: false,
     }
     return new User(userProps)

@@ -1,10 +1,15 @@
+import { Role } from "@/domain/types";
 // DTOs pour l'authentification
 export interface UserCreateDTO {
     prenom: string;
     nom: string;
     email: string;
     password: string;
+    role: Role;
+    equipeId?: number;
+    plageHoraireId?: number;
     telephone?: string;
+
 }
 
 export interface UserLoginDTO {
@@ -17,7 +22,7 @@ export interface UserReadDTO {
     prenom: string;
     nom: string;
     email: string;
-    role: string;
+    role: Role;
     isActive: boolean;
     telephone?: string | null;
     equipeId?: number | null;

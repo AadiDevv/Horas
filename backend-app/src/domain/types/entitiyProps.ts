@@ -1,9 +1,10 @@
+import { Role } from "./valueType";
 export type UserProps = {
     email: string,
     hashedPassword: string,
     prenom: string,
     nom: string,
-    role: string,
+    role: Role,
     isActive: boolean,
 
     createdAt?: Date,

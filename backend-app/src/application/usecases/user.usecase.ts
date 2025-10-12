@@ -8,7 +8,7 @@ export class AuthUseCase {
 
     constructor(private readonly R_auth: IAuth) { }
 
-    async registerUser(dto: UserCreateDTO): Promise<[User, string]> {
+    async registerUser(dto: UserCreateDTO): Promise<User> {
         // #region - Verification
         User.validateDTO(dto) // Validation implicite : si email, mdp, username etc.. sont invalides, une erreur est levée
         const hashedPassword = JWTService.hashedPassword(dto.password)
@@ -21,15 +21,13 @@ export class AuthUseCase {
         }
         // #endregion
 
-        // #region - Create user and token
         const createdUser = await this.R_auth.registerUser(user) // [Communication Bdd] Possibilité de lever une erreur ici
 
-        const JwtSrv = new JWTService()
-        const token = JwtSrv.createAccessToken(createdUser) // [Communication Service] Possibilité de lever une erreur ici
-        // #endregion
 
-        return [createdUser, token]
+
+        return createdUser
     }
+    
     async loginUser(userDTO: UserLoginDTO): Promise<[User, string]> {
         // #region - Verify email and password
         const user: User | null = await this.R_auth.getUser_ByEmail(userDTO.email)
