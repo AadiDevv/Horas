@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, Menu, Bell, Play, AlertCircle, X, Loader2 } from 'lucide-react';
+import { Clock, Menu, Bell, Play, Pause, AlertCircle, X, Loader2 } from 'lucide-react';
 
 // Mock Data
 const mockUsers = [
@@ -91,6 +91,7 @@ export default function Page() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [formData, setFormData] = useState({
     prenom: '',
@@ -129,7 +130,20 @@ export default function Page() {
     // Charger les données utilisateur au montage
     loadUserData();
     
-    return () => clearInterval(timer);
+    // Fermer le dropdown si on clique ailleurs
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.dropdown-container')) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
   const loadUserData = async () => {
@@ -221,8 +235,6 @@ export default function Page() {
         email: formData.email,
         password: formData.newPassword ? formData.newPassword : undefined,
         photo: formData.photo ? formData.photo : undefined,
-        // photo: photoPreview, // TODO: Gérer l'upload de l'image
-        // password changes to be handled separately
       });
       
       if (response.success) {
@@ -263,7 +275,14 @@ export default function Page() {
         confirmPassword: ''
       });
       setSettingsOpen(true);
+      setDropdownOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    console.log('🚪 Déconnexion...');
+    localStorage.removeItem('authToken');
+    window.location.href = '/login';
   };
 
   const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
@@ -291,7 +310,7 @@ export default function Page() {
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
         <div className="flex items-center gap-6">
-          <h1 className="text-2xl font-bold tracking-tight">HORAS.</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Horas.</h1>
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -306,15 +325,50 @@ export default function Page() {
             <Bell size={20} />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-          <button 
-            onClick={handleOpenSettings}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
+          
+          {/* Dropdown Menu */}
+          <div className="relative dropdown-container">
+            <button 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+
+            {/* Dropdown Content */}
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={handleOpenSettings}
+                  className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 transition flex items-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  Paramètres
+                </button>
+                
+                <div className="border-t border-gray-100 my-1"></div>
+                
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-3"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Déconnexion
+                </button>
+              </div>
+            )}
+          </div>
+          
           <div className="flex items-center gap-3">
             <div className="text-right">
               {loading ? (
@@ -458,38 +512,6 @@ export default function Page() {
 
       {/* Main Content */}
       <div className="flex">
-        {/* Sidebar */}
-        {sidebarOpen && (
-          <aside className="w-64 p-6 space-y-4 border-r border-gray-200">
-            <button className="w-full flex items-center gap-3 px-4 py-3 bg-black text-white rounded-xl font-medium transition hover:bg-gray-800">
-              <div className="grid grid-cols-2 gap-0.5">
-                <div className="w-2 h-2 bg-white rounded-sm"></div>
-                <div className="w-2 h-2 bg-white rounded-sm"></div>
-                <div className="w-2 h-2 bg-white rounded-sm"></div>
-                <div className="w-2 h-2 bg-white rounded-sm"></div>
-              </div>
-              Tableau de bord
-            </button>
-            
-            <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 rounded-xl font-medium transition hover:bg-gray-100">
-              <Clock size={20} />
-              Feuille de temps
-            </button>
-
-            <div className="pt-6">
-              <label className="block text-xs text-gray-500 mb-2 px-4">Filtré par</label>
-              <select 
-                value={selectedDomain}
-                onChange={(e) => setSelectedDomain(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl font-medium text-sm focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
-              >
-                <option>Matrix Domain</option>
-                <option>Design Domain</option>
-                <option>Dev Domain</option>
-              </select>
-            </div>
-          </aside>
-        )}
 
         {/* Main Dashboard */}
         <main className="flex-1 p-8">
@@ -504,7 +526,11 @@ export default function Page() {
             >
               {isClockingIn ? 'Clock Out' : 'Émarger'}
               <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <Play size={24} className="fill-white text-white" />
+                {isClockingIn ? (
+                  <Pause size={24} className="fill-black" />
+                ) : (
+                  <Play size={24} className="fill-black" />
+                )}
               </div>
             </button>
           </div>
