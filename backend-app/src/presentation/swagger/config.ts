@@ -34,6 +34,22 @@ export const swaggerDefinition: SwaggerDefinition = {
         {
             name: 'Authentication',
             description: 'Endpoints pour l\'authentification et la gestion des utilisateurs'
+        },
+        {
+            name: 'Users (À venir)',
+            description: '🔮 Routes de gestion des utilisateurs (listing, modification, suppression)'
+        },
+        {
+            name: 'Équipes (À venir)',
+            description: '🔮 Routes de gestion des équipes de travail'
+        },
+        {
+            name: 'Horaires (À venir)',
+            description: '🔮 Routes de gestion des horaires de travail'
+        },
+        {
+            name: 'Pointages (À venir)',
+            description: '🔮 Routes de gestion des pointages (clock-in/clock-out, corrections, statistiques)'
         }
     ]
 };

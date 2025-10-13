@@ -39,9 +39,9 @@ app.use('/api', routes);
 app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
-  Logger.info("🚀 Server running on http://localhost/api");
-  Logger.info("📚 API Documentation: http://localhost/api/docs");
-  Logger.info("💚 Health check: http://localhost/api/health");
+  Logger.info("🚀 Server running on http://localhost:8080/api");
+  Logger.info("📚 API Documentation: http://localhost:8080/api/docs");
+  Logger.info("💚 Health check: http://localhost:8080/api/health");
 });
 // Graceful shutdown
 process.on('SIGTERM', async () => {
