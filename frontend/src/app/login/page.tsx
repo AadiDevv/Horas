@@ -39,10 +39,11 @@ export default function LoginPage() {
       });
 
       if (response.status === 200) {
-        const { accessToken, user } = response.data.data;
+        const { accessToken, user, role } = response.data.data;
 
         localStorage.setItem("token", accessToken);
         localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", role);
 
         axios.defaults.headers.common[
           "Authorization"
@@ -57,8 +58,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isLoggedIn) {
+      const userRole = localStorage.getItem("role");
+      let redirectPath = "/home";
+      if (userRole === "employe") {
+        redirectPath = "/dashboard-agent";
+      } else if (userRole === "manager") {
+        redirectPath = "/dashboard-manager";
+      }
       const timer = setTimeout(() => {
-        router.push("/home");
+        router.push(redirectPath);
       }, 1000);
       return () => clearTimeout(timer);
     }

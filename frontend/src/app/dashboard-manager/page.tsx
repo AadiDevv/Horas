@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clock, Menu, Bell, Users, UserPlus, Folder, Settings, FileText, User } from 'lucide-react';
+import Navbar from '../components/navbar';
 
 export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -89,34 +90,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <header className="flex items-center justify-between px-8 py-5 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="flex items-center gap-6">
-          <h1 className="text-2xl font-semibold tracking-tight">HORAS.</h1>
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
-          >
-            <Menu size={22} strokeWidth={2} />
-          </button>
-          <span className="text-base font-medium text-gray-700">Tableau de bord</span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <button className="relative p-2.5 hover:bg-gray-100 rounded-xl transition-all duration-200">
-            <Bell size={20} strokeWidth={2} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-          <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div className="text-right">
-              <p className="text-sm font-semibold">Karim Gupta</p>
-              <p className="text-xs text-gray-500">Manager</p>
-            </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-rose-500 rounded-full"></div>
-          </div>
-        </div>
-      </header>
-
+      <Navbar/>
       <div className="flex">
         {/* Sidebar */}
         {sidebarOpen && (
