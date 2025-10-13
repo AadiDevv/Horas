@@ -69,13 +69,15 @@ export default function Navbar() {
 
         {isAuthenticated && (
           <>
-            <span className="text-lg font-medium">Tableau de bord</span>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-            >
-              <Menu size={24} />
-            </button>
+
+            {(user?.role === "manager" || user?.role === "admin") && (
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <Menu size={24} />
+              </button>
+            )}
           </>
         )}
       </div>
