@@ -55,7 +55,7 @@ export class Equipe {
             description: dto.description ?? existingEquipe.description,
             managerId: dto.managerId ?? existingEquipe.managerId,
             horaireId: dto.horaireId ?? existingEquipe.horaireId,
-            updatedAt: new Date(),
+            updatedAt: new Date(Date.now()),
         });
     }
     // #endregion
