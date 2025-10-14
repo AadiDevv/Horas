@@ -1,0 +1,4 @@
+# Stratégie de merge pour schema.prisma
+# Utilise toujours la version de la branche source (theirs)
+prisma/schema.prisma merge=theirs
+
