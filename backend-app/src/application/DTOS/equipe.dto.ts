@@ -1,4 +1,31 @@
-import { Role } from "@/domain/types";
+// #region Nested DTOs (Types réutilisables)
+/**
+ * Format d'un manager pour les DTOs d'équipe
+ * Utilisé dans EquipeReadDTO et EquipeWithMembresDTO
+ */
+export interface EquipeManagerDTO {
+    id: number;
+    prenom: string;
+    nom: string;
+    email: string;
+    role: "admin" | "manager" | "employe";
+}
+
+/**
+ * Format d'un membre (employé) pour les DTOs d'équipe
+ * Utilisé dans EquipeWithMembresDTO
+ */
+export interface EquipeMembreDTO {
+    id: number;
+    prenom: string;
+    nom: string;
+    email: string;
+    role: "admin" | "manager" | "employe";
+    isActive: boolean;
+    telephone?: string;
+    horaireId?: number;
+}
+// #endregion
 
 // #region Create DTO
 /**
@@ -9,6 +36,7 @@ export interface EquipeCreateDTO {
     nom: string;
     description?: string;
     managerId: number;
+    horaireId?: number;
 }
 // #endregion
 
@@ -21,6 +49,7 @@ export interface EquipeUpdateDTO {
     nom?: string;
     description?: string;
     managerId?: number;
+    horaireId?: number;
 }
 // #endregion
 
@@ -34,18 +63,13 @@ export interface EquipeReadDTO {
     nom: string;
     description?: string;
     managerId: number;
+    horaireId?: number;
     createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    updatedAt?: string;
+    deletedAt?: string;
 
     // Informations enrichies pour le frontend
-    manager?: {
-        id: number;
-        prenom: string;
-        nom: string;
-        email: string;
-        role: Role;
-    };
+    manager?: EquipeManagerDTO;
 
     membresCount?: number; // Nombre de membres dans l'équipe
 }
@@ -55,15 +79,7 @@ export interface EquipeReadDTO {
  * Utilisé pour GET /equipes/:id avec include=membres
  */
 export interface EquipeWithMembresDTO extends EquipeReadDTO {
-    membres: {
-        id: number;
-        prenom: string;
-        nom: string;
-        email: string;
-        role: Role;
-        isActive: boolean;
-        telephone: string | null;
-    }[];
+    membres: EquipeMembreDTO[];
 }
 // #endregion
 
@@ -74,8 +90,9 @@ export interface EquipeWithMembresDTO extends EquipeReadDTO {
 export interface EquipeListItemDTO {
     id: number;
     nom: string;
-    description: string | null;
+    description?: string;
     managerId: number;
+    horaireId?: number;
     managerNom: string; // Nom complet du manager (prenom + nom)
     membresCount: number;
     createdAt: string;

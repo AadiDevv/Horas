@@ -22,7 +22,7 @@ model User {
   role            Role      @default(employe)
   isActive        Boolean   @default(false)
   equipeId        Int?
-  plageHoraireId  Int?
+  horaireId       Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @default(now())
   deletedAt       DateTime?
@@ -30,7 +30,7 @@ model User {
 
   // Relations
   equipe          Equipe?   @relation(fields: [equipeId], references: [id], onDelete: SetNull)
-  plageHoraire    Horaire?  @relation(fields: [plageHoraireId], references: [id], onDelete: SetNull)
+  horaire         Horaire?  @relation(fields: [horaireId], references: [id], onDelete: SetNull)
   managedEquipes  Equipe[]  @relation("ManagerEquipes")
   pointages       Pointage[]
   rapports        Rapport[] @relation("RapportManager")
@@ -39,7 +39,7 @@ model User {
   @@index([email])
   @@index([role])
   @@index([equipeId])
-  @@index([plageHoraireId])
+  @@index([horaireId])
 }
 
 model Equipe {
@@ -120,16 +120,16 @@ model HoraireExceptionnel {
   id             Int       @id @default(autoincrement())
   employeId      Int
   date           DateTime  @db.Date
-  plageHoraireId Int
+  horaireId      Int
   createdAt      DateTime  @default(now())
 
   // Relations
   employe        User      @relation(fields: [employeId], references: [id], onDelete: Cascade)
-  plageHoraire   Horaire   @relation(fields: [plageHoraireId], references: [id])
+  horaire        Horaire   @relation(fields: [horaireId], references: [id])
 
   @@index([employeId])
   @@index([date])
-  @@index([plageHoraireId])
+  @@index([horaireId])
 }
 
 // =========================================
