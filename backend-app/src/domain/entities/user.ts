@@ -2,6 +2,7 @@ import { UserProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import { UserCreateDTO } from "@/application/DTOS";
+import { EquipeManagerDTO, EquipeMembreDTO } from "@/application/DTOS/equipe.dto";
 import { Role } from "../types";
 
 export class User {
@@ -15,12 +16,12 @@ export class User {
 
   public createdAt: Date;
   public updatedAt?: Date;
-  public lastLoginAt?: Date | null;
-  public deletedAt?: Date | null;
+  public lastLoginAt?: Date;
+  public deletedAt?: Date;
 
-  public telephone?: string | null;
-  public equipeId?: number | null;
-  public plageHoraireId?: number | null;
+  public telephone?: string;
+  public equipeId?: number;
+  public horaireId?: number;
 
   constructor(
     props: UserProps
@@ -33,13 +34,13 @@ export class User {
     this.nom = props.nom;
     this.role = props.role;
     this.isActive = props.isActive;
-    this.telephone = props.telephone ?? undefined;
-    this.equipeId = props.equipeId ?? undefined;
-    this.plageHoraireId = props.plageHoraireId ?? undefined;
+    this.telephone = props.telephone;
+    this.equipeId = props.equipeId;
+    this.horaireId = props.horaireId;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
-    this.lastLoginAt = props.lastLoginAt ?? undefined;
-    this.deletedAt = props.deletedAt ?? undefined;
+    this.lastLoginAt = props.lastLoginAt;
+    this.deletedAt = props.deletedAt;
 
     // Validation après attribution
     this.validateMe();
@@ -155,11 +156,52 @@ export class User {
       isActive: this.isActive,
       telephone: this.telephone,
       equipeId: this.equipeId,
-      plageHoraireId: this.plageHoraireId,
+      horaireId: this.horaireId,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
       deletedAt: this.deletedAt?.toISOString()
+    };
+  }
+  // #endregion
+
+  // #region Transformation Methods (pour Equipe)
+  /**
+   * Convertit l'utilisateur en EquipeManagerDTO
+   * Utilisé dans les DTOs d'équipe pour afficher les infos du manager
+   */
+  public toEquipeManagerDTO(): EquipeManagerDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en EquipeManagerDTO");
+    }
+
+    return {
+      id: this.id,
+      prenom: this.prenom,
+      nom: this.nom,
+      email: this.email,
+      role: this.role,
+    };
+  }
+
+  /**
+   * Convertit l'utilisateur en EquipeMembreDTO
+   * Utilisé dans les DTOs d'équipe pour afficher les infos des membres
+   */
+  public toEquipeMembreDTO(): EquipeMembreDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en EquipeMembreDTO");
+    }
+
+    return {
+      id: this.id,
+      prenom: this.prenom,
+      nom: this.nom,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      telephone: this.telephone,
+      horaireId: this.horaireId,
     };
   }
   // #endregion

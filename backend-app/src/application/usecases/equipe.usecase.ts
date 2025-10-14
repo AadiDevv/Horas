@@ -1,7 +1,7 @@
 import { EquipeCreateDTO, EquipeUpdateDTO, EquipeFilterDTO } from "@/application/DTOS";
 import { Equipe } from "@/domain/entities/equipe";
 import { IEquipe } from "@/domain/interfaces/equipe.interface";
-import { AlreadyExistsError, NotFoundError, ValidationError } from "@/domain/error/AppError";
+import { AlreadyExistsError, NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
 
 /**
  * Use Case pour la gestion des équipes
@@ -16,24 +16,58 @@ export class EquipeUseCase {
      * Récupère les équipes selon le rôle de l'utilisateur
      * 
      * Logique métier :
-     * - Manager : retourne SES équipes (managerId déduit ou vérifié)
-     * - Admin : retourne toutes les équipes OU filtre par managerId
-     * - Employé : accès refusé
+     * - Manager SANS managerId fourni → retourne SES équipes (userId utilisé)
+     * - Manager AVEC managerId fourni → vérifie que c'est son ID, sinon 403
+     * - Admin SANS managerId → erreur 400 (doit spécifier le managerId)
+     * - Admin AVEC managerId → retourne les équipes du manager spécifié
+     * - Employé → 403 (déjà géré par le middleware managerOrAdmin)
+     * 
+     * Résultat : on obtient toujours un managerId unique pour interroger le repository
      * 
      * @param userRole - Rôle de l'utilisateur connecté (depuis JWT)
      * @param userId - ID de l'utilisateur connecté (depuis JWT)
      * @param filter - Filtres optionnels (managerId)
+     * @returns Liste des équipes du manager spécifié
      */
     async getEquipes(userRole: string, userId: number, filter?: EquipeFilterDTO): Promise<Equipe[]> {
-        // TODO: Implémenter la logique de filtrage selon le rôle
-        // 1. Si employe → throw new ValidationError('Les employés ne peuvent pas accéder aux équipes')
-        // 2. Si manager :
-        //    - Si filter.managerId fourni ET !== userId → throw new ValidationError('Vous ne pouvez consulter que vos propres équipes')
-        //    - Sinon → retourner R_equipe.getEquipes_ByManagerId(userId)
-        // 3. Si admin :
-        //    - Si filter.managerId fourni → retourner R_equipe.getEquipes_ByManagerId(filter.managerId)
-        //    - Sinon → retourner R_equipe.getAllEquipes()
-        throw new Error("Method not implemented.");
+        let managerId: number;
+
+        // #region - Détermination du managerId selon le rôle et les filtres
+        if (userRole === "manager") {
+            // CAS MANAGER
+            if (filter?.managerId) {
+                // Manager a fourni un managerId → vérifier que c'est le sien
+                if (filter.managerId !== userId) {
+                    throw new ForbiddenError("Vous ne pouvez consulter que vos propres équipes");
+                }
+                managerId = userId;
+            } else {
+                // Manager n'a pas fourni de managerId → utiliser son propre ID
+                managerId = userId;
+            }
+        }
+        else if (userRole === "admin") {
+            // CAS ADMIN
+            if (!filter?.managerId) {
+                // Admin doit obligatoirement spécifier le managerId
+                throw new ValidationError("En tant qu'admin, vous devez spécifier le managerId dans les paramètres");
+            }
+            // Admin a fourni un managerId → l'utiliser
+            managerId = filter.managerId;
+        }
+        else {
+            // CAS AUTRE (employé ou rôle invalide)
+            // Normalement impossible grâce au middleware managerOrAdmin
+            throw new ForbiddenError(`Accès interdit pour le rôle ${userRole}`);
+        }
+        // #endregion
+
+        // #region - Récupération des équipes via le repository
+        // À ce stade, on a toujours un managerId défini
+        const equipes = await this.R_equipe.getEquipes_ByManagerId(managerId);
+        const equipeEntities : Equipe[] = equipes.map(equipe => new Equipe({...equipe}));
+        return equipes;
+        // #endregion
     }
 
     async getEquipe_ById(id: number): Promise<Equipe> {
