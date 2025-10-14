@@ -1,0 +1,108 @@
+// TIME MANAGER Database Schema (Optimized Hybrid Version)
+// Usage on dbdiagram.io
+
+Table user {
+  id              int [pk, increment]
+  firstName       varchar(100) [not null]
+  lastName        varchar(100) [not null]
+  email           varchar(255) [unique, not null]
+  phone           varchar(20)
+  hashedPassword  varchar(255) [not null]
+  role            enum('admin', 'manager', 'employee') [not null, default: 'employee']
+  isActive        boolean [default: `false`]
+  teamId          int [null]
+  scheduleId      int [null]
+  createdAt       datetime [default: `now()`]
+  updatedAt       datetime [default: `now()`]
+  deletedAt       datetime [null]
+
+  indexes {
+    email
+    role
+    teamId
+    scheduleId
+  }
+}
+
+Table team {
+  id          int [pk, increment]
+  name        varchar(100) [not null]
+  description text
+  managerId   int [not null]
+  createdAt   datetime [default: `now()`]
+  updatedAt   datetime [default: `now()`]
+  deletedAt   datetime [null]
+
+  indexes {
+    managerId
+  }
+}
+
+Table schedule {
+  id           int [pk, increment]
+  name         varchar(100) [not null]
+  start_hour   time [not null]
+  end_hour     time [not null]
+  active_days  json [not null, note: '[1,2,3,4,5] = Mon-Fri, 1=Monday, 7=Sunday']
+  createdAt    datetime [default: `now()`]
+  updatedAt    datetime [default: `now()`]
+}
+
+Table timesheet {
+  id           int [pk, increment]
+  employeeId   int [not null]
+  date         date [not null]
+  hour         datetime [not null]
+  clockin      boolean [not null, note: 'true=clockin, false=clockout']
+  status       enum('normal', 'delay', 'absence', 'incomplete') [default: 'normal']
+  createdAt    datetime [default: `now()`]
+  updatedAt    datetime [default: `now()`]
+
+  indexes {
+    employeeId
+    date
+    (employeeId, date)
+    status
+  }
+}
+
+Table report {
+  id           int [pk, increment]
+  managerId    int [null]
+  teamId       int [null]
+  periodStart  date [not null]
+  periodEnd    date [not null]
+  kpiType      varchar(50) [not null, note: 'e.g. delay_rate, overtime_hours, absenteeism']
+  value        float [not null]
+  metadata     json [null, note: 'Additional KPI data']
+  createdAt    datetime [default: `now()`]
+
+  indexes {
+    managerId
+    teamId
+    kpiType
+    (periodStart, periodEnd)
+  }
+}
+
+Table exceptional_schedule {
+  id           int [pk, increment]
+  employeeId   int [not null]
+  date         date [not null]
+  scheduleId   int [not null]
+  createdAt    datetime [default: `now()`]
+
+  indexes {
+    employeeId
+    date
+    scheduleId
+  }
+}
+
+// Relations
+Ref: user.teamId > team.id [delete: set null]
+Ref: user.scheduleId > schedule.id [delete: set null]
+Ref: team.managerId > user.id [delete: restrict]
+Ref: timesheet.employeeId > user.id [delete: cascade]
+Ref: report.managerId > user.id [delete: set null]
+Ref: report.teamId > team.id [delete: set null]
