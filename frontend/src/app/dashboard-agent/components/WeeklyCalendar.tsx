@@ -1,5 +1,6 @@
 import { Clock, User } from 'lucide-react';
 import { DayKey, TimeLog, Horaire } from '../types';
+import TimeLogBar from './TimeLogBar';
 
 interface WeeklyCalendarProps {
   timeLogs: Record<DayKey, TimeLog[]>;

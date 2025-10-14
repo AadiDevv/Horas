@@ -52,4 +52,4 @@ export type {
   PointageCreateDTO,
   ApiSuccessResponse,
   UserReadDTO
-} from '../../types/backend-generated';
+} from '../types/backend-generated';

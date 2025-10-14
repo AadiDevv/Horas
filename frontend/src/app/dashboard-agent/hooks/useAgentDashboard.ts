@@ -1,7 +1,12 @@
 import { useState } from 'react';
+<<<<<<< HEAD
 import { DayKey, TimeLog, User, UserFormData, Horaire } from '../types';
 import { getUser, updateUser, changePassword } from '../services/userService';
 import { getEquipeHoraires } from '../services/equipeService';
+=======
+import { DayKey, TimeLog, User, UserFormData } from '../types';
+import { getUser, updateUser, changePassword } from '../services/userService';
+>>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
 
 export function useUserData() {
   const [userData, setUserData] = useState<User | null>(null);
@@ -153,6 +158,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
   };
 }
 
+<<<<<<< HEAD
 export function useTeamSchedule(userData: User | null) {
   const [teamSchedule, setTeamSchedule] = useState<Horaire[]>([]);
   const [loading, setLoading] = useState(false);
@@ -190,6 +196,8 @@ export function useTeamSchedule(userData: User | null) {
   };
 }
 
+=======
+>>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
 export function useTimeClock() {
   const [timeLogs, setTimeLogs] = useState<Record<DayKey, TimeLog[]>>({
     Mon: [],
@@ -202,16 +210,20 @@ export function useTimeClock() {
   });
   const [isClockingIn, setIsClockingIn] = useState(false);
   const [currentDayLogs, setCurrentDayLogs] = useState<TimeLog>({ start: '' });
+<<<<<<< HEAD
   const [pointageLoading, setPointageLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [lastClockIn, setLastClockIn] = useState<any | null>(null);
+=======
+>>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
 
   const getDayKey = (): DayKey => {
     const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return days[new Date().getDay()];
   };
 
+<<<<<<< HEAD
   /**
    * Convertit une date ISO en DayKey
    */
@@ -369,10 +381,32 @@ export function useTimeClock() {
   // handleClockOut n'est plus utilisé car tout passe par handleClockIn
   const handleClockOut = handleClockIn;
 
+=======
+  const handleClockIn = () => {
+    setIsClockingIn(true);
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    setCurrentDayLogs({ start: time });
+  };
+
+  const handleClockOut = () => {
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const dayKey = getDayKey();
+    setTimeLogs(prev => ({
+      ...prev,
+      [dayKey]: [...prev[dayKey], { ...currentDayLogs, end: time }]
+    }));
+    setIsClockingIn(false);
+    setCurrentDayLogs({ start: '' });
+  };
+
+>>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
   return {
     timeLogs,
     isClockingIn,
     currentDayLogs,
+<<<<<<< HEAD
     pointageLoading,
     successMessage,
     errorMessage,
@@ -382,5 +416,10 @@ export function useTimeClock() {
     handleClockOut,
     checkTodayPointages,
     loadWeekPointages
+=======
+    getDayKey,
+    handleClockIn,
+    handleClockOut
+>>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
   };
 }

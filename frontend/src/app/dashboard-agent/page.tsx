@@ -4,10 +4,6 @@ import { useState, useEffect } from "react";
 import { Clock, AlertCircle } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
-<<<<<<< Updated upstream
-import { StatCard, ClockButton, WeeklyCalendar, SettingsModal } from "./components";
-import { useUserData, useSettings, useTimeClock } from "./hooks/useAgentDashboard";
-=======
 import {
   StatCard,
   ClockButton,
@@ -20,7 +16,6 @@ import {
   useTimeClock,
   useTeamSchedule,
 } from "./hooks/useAgentDashboard";
->>>>>>> Stashed changes
 import { formatDate } from "./utils/dateUtils";
 
 export default function Page() {
@@ -49,12 +44,8 @@ export default function Page() {
     getDayKey,
     handleClockIn,
     handleClockOut,
-<<<<<<< Updated upstream
-    checkTodayPointages
-=======
     checkTodayPointages,
     loadWeekPointages,
->>>>>>> Stashed changes
   } = useTimeClock();
   const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
@@ -73,19 +64,17 @@ export default function Page() {
     };
   }, []);
 
-<<<<<<< Updated upstream
-  const handleLogout = () => {
-    console.log('🚪 Déconnexion...');
-    window.location.href = '/login';
-  };
-=======
   // Charger les horaires de l'équipe quand userData est disponible
   useEffect(() => {
     if (userData) {
       loadTeamSchedule();
     }
   }, [userData]);
->>>>>>> Stashed changes
+
+  const handleLogout = () => {
+    console.log('🚪 Déconnexion...');
+    window.location.href = '/login';
+  };
 
   return (
     <RoleProtection allowedRoles={['manager', 'admin', 'employe']}>
