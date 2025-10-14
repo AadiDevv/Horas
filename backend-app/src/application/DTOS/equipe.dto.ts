@@ -32,10 +32,10 @@ export interface EquipeUpdateDTO {
 export interface EquipeReadDTO {
     id: number;
     nom: string;
-    description: string | null;
+    description?: string;
     managerId: number;
     createdAt: string;
-    updatedAt: string;
+    updatedAt: string | null;
     deletedAt: string | null;
 
     // Informations enrichies pour le frontend
@@ -79,6 +79,19 @@ export interface EquipeListItemDTO {
     managerNom: string; // Nom complet du manager (prenom + nom)
     membresCount: number;
     createdAt: string;
+}
+
+/**
+ * DTO pour filtrer les équipes (Query Params)
+ * Utilisé dans GET /api/equipes?managerId=X
+ * 
+ * Logique métier :
+ * - Manager : managerId optionnel (déduit du JWT si omis, vérifié si fourni)
+ * - Admin : managerId optionnel (retourne toutes les équipes si omis)
+ * - Employé : accès refusé
+ */
+export interface EquipeFilterDTO {
+    managerId?: number; // ID du manager dont on veut voir les équipes
 }
 // #endregion
 

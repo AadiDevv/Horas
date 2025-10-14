@@ -13,15 +13,64 @@ export const equipePaths = {
     '/api/equipes': {
         get: {
             summary: 'Liste des équipes',
-            description: 'Récupère la liste de toutes les équipes avec les informations de base',
+            description: `Récupère la liste des équipes avec logique intelligente selon le rôle :
+      
+**Manager :**
+- Sans \`managerId\` → retourne SES équipes (ID déduit du JWT)
+- Avec \`managerId\` → vérifie que c'est SON ID, sinon erreur 403
+
+**Admin :**
+- Sans \`managerId\` → retourne TOUTES les équipes
+- Avec \`managerId\` → retourne les équipes du manager spécifié
+
+**Employé :** Accès refusé (403)`,
             tags: ['Équipes (À venir)'],
             security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'managerId',
+                    in: 'query',
+                    schema: { type: 'integer' },
+                    description: 'ID du manager (optionnel). Si omis, comportement selon le rôle (voir description)',
+                    example: 5
+                }
+            ],
             responses: {
                 200: {
                     description: 'Liste des équipes récupérée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/EquipeListResponse' }
+                            schema: { $ref: '#/components/schemas/EquipeListResponse' },
+                            examples: {
+                                managerTeams: {
+                                    summary: 'Équipes d\'un manager',
+                                    value: {
+                                        success: true,
+                                        data: [
+                                            {
+                                                id: 1,
+                                                nom: 'Équipe Production',
+                                                description: 'Équipe du matin',
+                                                managerId: 5,
+                                                managerNom: 'Marie Durand',
+                                                membresCount: 12,
+                                                createdAt: '2025-10-01T10:00:00.000Z'
+                                            },
+                                            {
+                                                id: 2,
+                                                nom: 'Équipe Logistique',
+                                                description: null,
+                                                managerId: 5,
+                                                managerNom: 'Marie Durand',
+                                                membresCount: 8,
+                                                createdAt: '2025-10-05T10:00:00.000Z'
+                                            }
+                                        ],
+                                        message: 'Liste des équipes récupérée avec succès',
+                                        timestamp: '2025-10-12T10:00:00.000Z'
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -30,6 +79,34 @@ export const equipePaths = {
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Non autorisé',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                employeeForbidden: {
+                                    summary: 'Employé non autorisé',
+                                    value: {
+                                        success: false,
+                                        error: 'Les employés ne peuvent pas accéder aux équipes',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-12T10:00:00.000Z'
+                                    }
+                                },
+                                managerWrongId: {
+                                    summary: 'Manager tente d\'accéder aux équipes d\'un autre',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez consulter que vos propres équipes',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-12T10:00:00.000Z'
+                                    }
+                                }
+                            }
                         }
                     }
                 }

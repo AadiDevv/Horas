@@ -43,7 +43,7 @@ model User {
 
 model Equipe {
   id          Int       @id @default(autoincrement())
-  nom         String    @db.VarChar(100)
+  nom         String    @db.VarChar(100)        
   description String?
   managerId   Int
   createdAt   DateTime  @default(now())
