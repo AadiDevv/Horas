@@ -11,6 +11,7 @@ const mockUsers = [
     nom: "Gupta",
     email: "manijay@example.com",
     role: "employe",
+    oldPassword: "password123",
     isActive: true,
     telephone: "+33 6 12 34 56 78",
     equipeId: 5,
@@ -85,6 +86,54 @@ async function updateUser(userId: number, updates: any) {
   return user;
 }
 
+// PATCH /api/users/{id}/password
+async function changePassword(userId: number, oldPassword: string, newPassword: string) {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    console.log('🔒 Mock PATCH /api/users/' + userId + '/password');
+    console.log('📝 Changement de mot de passe simulé');
+    
+    // Simuler une validation de l'ancien mot de passe
+    const user = mockUsers.find(u => u.id === userId);
+    if (user && user.oldPassword !== oldPassword) {
+      return {
+        success: false,
+        message: "L'ancien mot de passe est incorrect",
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    if (!oldPassword) {
+      return {
+        success: false,
+        message: "Ancien mot de passe requis",
+        timestamp: new Date().toISOString()
+      };
+    }
+    
+    return {
+      success: true,
+      message: "Mot de passe modifié avec succès",
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  const requete = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ oldPassword, newPassword })
+  });
+  
+  const response = await requete.json();
+  
+  if (!requete.ok || !response.success) {
+    throw new Error(response.message || "Erreur lors du changement de mot de passe");
+  }
+  
+  return response;
+}
+
 export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [selectedDomain, setSelectedDomain] = useState('Matrix Domain');
@@ -97,14 +146,13 @@ export default function Page() {
     prenom: '',
     nom: '',
     email: '',
-    photo: '',
     oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-  const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
   type TimeLog = { start: string; end?: string };
@@ -127,10 +175,8 @@ export default function Page() {
       setCurrentTime(new Date());
     }, 1000);
     
-    // Charger les données utilisateur au montage
     loadUserData();
     
-    // Fermer le dropdown si on clique ailleurs
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.dropdown-container')) {
@@ -149,7 +195,7 @@ export default function Page() {
   const loadUserData = async () => {
     try {
       setLoading(true);
-      const userId = 1; // TODO: Récupérer depuis JWT/Auth
+      const userId = 1;
       const response = await getUser(userId);
       
       if (response.success) {
@@ -158,14 +204,10 @@ export default function Page() {
           prenom: response.data.prenom,
           nom: response.data.nom,
           email: response.data.email,
-          photo: response.data.photo || '',
           oldPassword: '',
           newPassword: '',
           confirmPassword: ''
         });
-        if (response.data.photo) {
-          setPhotoPreview(response.data.photo);
-        }
       }
     } catch (error) {
       console.error('❌ Erreur chargement utilisateur:', error);
@@ -212,52 +254,79 @@ export default function Page() {
     setCurrentDayLogs({ start: '' });
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleSaveSettings = async () => {
     try {
       setSaving(true);
       setSuccessMessage('');
+      setErrorMessage('');
       
-      // ✅ Pour l'instant, seule la route PATCH nom prenom et email fonctionne
+      // Vérifier si l'utilisateur veut changer le mot de passe
+      const wantsToChangePassword = formData.newPassword || formData.confirmPassword || formData.oldPassword;
+      
+      if (wantsToChangePassword) {
+        // Validations du mot de passe
+        if (!formData.oldPassword) {
+          setErrorMessage('❌ L\'ancien mot de passe est requis pour changer le mot de passe');
+          setSaving(false);
+          return;
+        }
+        
+        if (!formData.newPassword) {
+          setErrorMessage('❌ Le nouveau mot de passe est requis');
+          setSaving(false);
+          return;
+        }
+        
+        if (formData.newPassword.length < 6) {
+          setErrorMessage('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
+          setSaving(false);
+          return;
+        }
+        
+        if (formData.newPassword !== formData.confirmPassword) {
+          setErrorMessage('❌ Les mots de passe ne correspondent pas');
+          setSaving(false);
+          return;
+        }
+        
+        // Appeler l'API de changement de mot de passe
+        const passwordResponse = await changePassword(
+          userData.id,
+          formData.oldPassword,
+          formData.newPassword
+        );
+        
+        if (!passwordResponse.success) {
+          setErrorMessage('❌ ' + passwordResponse.message);
+          setSaving(false);
+          return;
+        }
+      }
+      
+      // Mettre à jour les autres informations
       const response = await updateUser(userData.id, {
         nom: formData.nom,
         prenom: formData.prenom,
-        email: formData.email,
-        password: formData.newPassword ? formData.newPassword : undefined,
-        photo: formData.photo ? formData.photo : undefined,
+        email: formData.email
       });
       
       if (response.success) {
         setUserData(response.data);
-        setSuccessMessage('✅ user modifié avec succès !');
-        
-        // TODO: Implémenter plus tard
-        console.log('⏳ À implémenter plus tard:');
-        if (formData.newPassword) {
-          console.log('  - Changement mot de passe');
+        const messages = ['✅ Informations modifiées avec succès !'];
+        if (wantsToChangePassword) {
+          messages.push('Mot de passe modifié avec succès !');
         }
-        if (photoPreview && photoPreview !== userData.photo) {
-          console.log('  - Upload photo');
-        }
+        setSuccessMessage(messages.join(' '));
         
         setTimeout(() => {
           setSettingsOpen(false);
           setSuccessMessage('');
+          setErrorMessage('');
         }, 1500);
       }
     } catch (error) {
       console.error('❌ Erreur sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde');
+      setErrorMessage('❌ Erreur lors de la sauvegarde : ' + (error as Error).message);
     } finally {
       setSaving(false);
     }
@@ -269,11 +338,12 @@ export default function Page() {
         prenom: userData.prenom,
         nom: userData.nom,
         email: userData.email,
-        photo: userData.photo || '',
         oldPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
+      setSuccessMessage('');
+      setErrorMessage('');
       setSettingsOpen(true);
       setDropdownOpen(false);
     }
@@ -281,16 +351,10 @@ export default function Page() {
 
   const handleLogout = () => {
     console.log('🚪 Déconnexion...');
-    localStorage.removeItem('authToken');
     window.location.href = '/login';
   };
 
   const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
-
-  const timeToPixels = (timeStr: string) => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return (hours * 60 + minutes) * 1;
-  };
 
   const getLogHeight = (log: {start: string, end?: string}) => {
     if (!log.end) {
@@ -310,7 +374,7 @@ export default function Page() {
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
         <div className="flex items-center gap-6">
-          <h1 className="text-2xl font-bold tracking-tight">Horas.</h1>
+          <h1 className="text-2xl font-bold tracking-tight">HORAS.</h1>
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -326,7 +390,6 @@ export default function Page() {
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
           
-          {/* Dropdown Menu */}
           <div className="relative dropdown-container">
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -338,7 +401,6 @@ export default function Page() {
               </svg>
             </button>
 
-            {/* Dropdown Content */}
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
                 <button
@@ -386,7 +448,7 @@ export default function Page() {
         </div>
       </header>
 
-      {/* Settings Modal - CRUD complet */}
+      {/* Settings Modal */}
       {settingsOpen && userData && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -398,26 +460,6 @@ export default function Page() {
             </div>
 
             <div className="space-y-4">
-              {/* Photo de profil */}
-              <div className="flex flex-col items-center mb-6">
-                <label className="block text-sm font-semibold mb-3 w-full text-center">Photo de profil</label>
-                <div className="relative">
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="Avatar" className="w-20 h-20 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full"></div>
-                  )}
-                  <input 
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="absolute inset-0 w-full h-full rounded-full cursor-pointer opacity-0"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">Cliquez pour changer</p>
-              </div>
-
-              {/* Prénom */}
               <div>
                 <label className="block text-sm font-semibold mb-2">Prénom</label>
                 <input 
@@ -428,7 +470,6 @@ export default function Page() {
                 />
               </div>
 
-              {/* Nom */}
               <div>
                 <label className="block text-sm font-semibold mb-2">Nom</label>
                 <input 
@@ -439,7 +480,6 @@ export default function Page() {
                 />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-semibold mb-2">Email</label>
                 <input 
@@ -450,40 +490,49 @@ export default function Page() {
                 />
               </div>
 
-              {/* Mot de passe */}
               <div className="border-t border-gray-200 pt-4 mt-4">
                 <h3 className="text-sm font-semibold mb-3">Changer le mot de passe</h3>
+                <p className="text-xs text-gray-500 mb-4">Laissez vide si vous ne souhaitez pas changer le mot de passe</p>
                 
                 <div className="mb-3">
-                  <label className="block text-xs text-gray-600 mb-1">Ancien mot de passe</label>
+                  <label className="block text-xs text-gray-600 mb-1">Ancien mot de passe *</label>
                   <input 
                     type="password"
                     value={formData.oldPassword}
                     onChange={(e) => setFormData({...formData, oldPassword: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    placeholder="Requis pour changer le mot de passe"
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="block text-xs text-gray-600 mb-1">Nouveau mot de passe</label>
+                  <label className="block text-xs text-gray-600 mb-1">Nouveau mot de passe * (min. 6 caractères)</label>
                   <input 
                     type="password"
                     value={formData.newPassword}
                     onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    placeholder="Au moins 6 caractères"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Confirmer le mot de passe</label>
+                  <label className="block text-xs text-gray-600 mb-1">Confirmer le mot de passe *</label>
                   <input 
                     type="password"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    placeholder="Retapez le nouveau mot de passe"
                   />
                 </div>
               </div>
+
+              {errorMessage && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                  {errorMessage}
+                </div>
+              )}
 
               {successMessage && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
@@ -512,8 +561,6 @@ export default function Page() {
 
       {/* Main Content */}
       <div className="flex">
-
-        {/* Main Dashboard */}
         <main className="flex-1 p-8">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -585,21 +632,53 @@ export default function Page() {
                 <div key={day} className="flex flex-col">
                   <div className="font-semibold text-gray-700 text-center mb-3 pb-2 border-b-2 border-gray-200">{day}</div>
                   <div className="flex-1 border-t-2 border-gray-200 pt-4 relative min-h-[200px]">
-                    {timeLogs[day].length === 0 && !isClockingIn ? (
+                    {timeLogs[day].length === 0 && !(isClockingIn && getDayKey() === day) ? (
                       <span className="text-gray-400 text-xs text-center block">Aucune heure</span>
                     ) : (
                       <div className="space-y-2">
-                        {timeLogs[day].map((log, idx) => (
-                          <div 
-                            key={idx}
-                            className="bg-gradient-to-b from-gray-800 to-gray-700 text-white px-2 py-2 rounded-lg text-xs font-medium"
-                            style={{ height: `${getLogHeight(log)}px`, minHeight: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-                          >
-                            <div>{log.start}</div>
-                            <div className="text-center my-1">-</div>
-                            <div>{log.end || 'en cours'}</div>
-                          </div>
-                        ))}
+                        {timeLogs[day].map((log, idx) => {
+                          const height = getLogHeight(log);
+                          const isSmall = height < 60;
+                          
+                          return (
+                            <div 
+                              key={idx}
+                              className="bg-gradient-to-b from-gray-800 to-gray-700 text-white px-2 py-2 rounded-lg text-xs font-medium relative group"
+                              style={{ 
+                                height: `${height}px`, 
+                                minHeight: '30px', 
+                                display: 'flex', 
+                                flexDirection: isSmall ? 'row' : 'column', 
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: isSmall ? '4px' : '0'
+                              }}
+                            >
+                              {isSmall ? (
+                                <>
+                                  <div className="text-[10px]">{log.start}</div>
+                                  <div className="text-[10px]">→</div>
+                                  <div className="text-[10px]">{log.end || 'en cours'}</div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>{log.start}</div>
+                                  <div className="text-center my-1">-</div>
+                                  <div>{log.end || 'en cours'}</div>
+                                </>
+                              )}
+                              
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
+                                {log.start} - {log.end || 'en cours'}
+                                {log.end && (
+                                  <div className="text-[10px] text-gray-400 mt-1">
+                                    Durée: {Math.floor(((parseInt(log.end.split(':')[0]) * 60 + parseInt(log.end.split(':')[1])) - (parseInt(log.start.split(':')[0]) * 60 + parseInt(log.start.split(':')[1]))) / 60)}h {((parseInt(log.end.split(':')[0]) * 60 + parseInt(log.end.split(':')[1])) - (parseInt(log.start.split(':')[0]) * 60 + parseInt(log.start.split(':')[1]))) % 60}m
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                         {isClockingIn && getDayKey() === day && (
                           <div 
                             className="bg-gradient-to-b from-blue-500 to-blue-600 text-white px-2 py-2 rounded-lg text-xs font-medium animate-pulse"
