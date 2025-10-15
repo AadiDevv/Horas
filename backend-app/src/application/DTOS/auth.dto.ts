@@ -11,7 +11,7 @@ export interface UserRegisterDTO {
     password: string;
     role: Role;
     equipeId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     telephone?: string;
 }
 
@@ -46,7 +46,7 @@ export interface UserAuthDTO {
     isActive: boolean;
     telephone?: string;
     equipeId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;

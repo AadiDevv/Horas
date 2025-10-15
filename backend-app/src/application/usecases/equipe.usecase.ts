@@ -78,14 +78,13 @@ export class EquipeUseCase {
      * @returns L'équipe avec ses relations chargées
      * @throws NotFoundError si l'équipe n'existe pas
      */
-    async getEquipe_ById(id: number): Promise<EquipeWithMembresDTO> {
+    async getEquipe_ById(id: number): Promise<Equipe> {
         const equipe = await this.R_equipe.getEquipe_ById(id);
-        const equipeWithMembres: EquipeWithMembresDTO = equipe?.toWithMembresDTO();
         if (!equipe) {
             throw new NotFoundError(`Équipe avec l'ID ${id} introuvable`);
         }
 
-        return equipeWithMembres;
+        return equipe;
     }
     // #endregion
 
@@ -108,10 +107,6 @@ export class EquipeUseCase {
         }
         // Création de l'entité depuis le DTO
         const equipe = Equipe.fromCreateDTO(dto);
-
-        // Validation métier
-        equipe.validate();
-
         // Sauvegarde dans le repository
         const equipeCreated = await this.R_equipe.createEquipe(equipe);
 
@@ -125,7 +120,7 @@ export class EquipeUseCase {
      * 
      * Règles métier :
      * - Le managerId ne peut PAS être modifié (une équipe reste liée à son manager)
-     * - Seuls nom, description et horaireId peuvent être modifiés
+     * - Seuls nom, description et plageHoraireId peuvent être modifiés
      * 
      * @param id - ID de l'équipe à modifier
      * @param dto - Données de mise à jour

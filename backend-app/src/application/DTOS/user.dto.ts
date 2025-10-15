@@ -12,7 +12,7 @@ export interface UserCreateDTO {
     password: string;
     role: Role;
     equipeId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     telephone?: string;
 }
 // #endregion
@@ -31,7 +31,7 @@ export interface UserUpdateDTO {
     role?: Role;
     isActive?: boolean;
     equipeId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface UserReadDTO {
     isActive: boolean;
     telephone?: string;
     equipeId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;
