@@ -22,7 +22,7 @@ export const userSchemas = {
                 example: 'jean.dupont@example.com',
                 description: 'Adresse email'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
@@ -39,13 +39,13 @@ export const userSchemas = {
                 example: true,
                 description: 'Statut actif/inactif'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -126,13 +126,13 @@ export const userSchemas = {
                 example: true,
                 description: 'Statut actif'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe'
             },
-            equipelastName: {
+            teamlastName: {
                 type: 'string',
                 nullable: true,
                 example: 'Équipe Production',

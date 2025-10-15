@@ -2,7 +2,7 @@ import { UserProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import { UserCreateDTO } from "@/application/DTOS";
-import { EquipeManagerDTO, EquipeMembreDTO } from "@/application/DTOS/equipe.dto";
+import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
 import { Role } from "../types";
 
 export class User {
@@ -19,9 +19,9 @@ export class User {
   public lastLoginAt?: Date;
   public deletedAt?: Date;
 
-  public telephone?: string;
-  public equipeId?: number;
-  public plageHoraireId?: number;
+  public phone?: string;
+  public teamId?: number;
+  public scheduleId?: number;
 
   constructor(
     props: UserProps
@@ -34,9 +34,9 @@ export class User {
     this.lastName = props.lastName;
     this.role = props.role;
     this.isActive = props.isActive;
-    this.telephone = props.telephone;
-    this.equipeId = props.equipeId;
-    this.plageHoraireId = props.plageHoraireId;
+    this.phone = props.phone;
+    this.teamId = props.teamId;
+    this.scheduleId = props.scheduleId;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
     this.lastLoginAt = props.lastLoginAt;
@@ -64,7 +64,7 @@ export class User {
       throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
     }
 
-    if (this.telephone && this.telephone.trim() !== '' && !User.validatePhone(this.telephone)) {
+    if (this.phone && this.phone.trim() !== '' && !User.validatePhone(this.phone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
   }
@@ -86,7 +86,7 @@ export class User {
       throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
     }
 
-    if (dto.telephone && dto.telephone.trim() !== '' && !this.validatePhone(dto.telephone)) {
+    if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
   }
@@ -154,9 +154,9 @@ export class User {
       lastName: this.lastName,
       role: this.role,
       isActive: this.isActive,
-      telephone: this.telephone,
-      equipeId: this.equipeId,
-      plageHoraireId: this.plageHoraireId,
+      phone: this.phone,
+      teamId: this.teamId,
+      scheduleId: this.scheduleId,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
@@ -165,14 +165,14 @@ export class User {
   }
   // #endregion
 
-  // #region Transformation Methods (pour Equipe)
+  // #region Transformation Methods (pour Team)
   /**
-   * Convertit l'utilisateur en EquipeManagerDTO
+   * Convertit l'utilisateur en TeamManagerDTO
    * Utilisé dans les DTOs d'équipe pour afficher les infos du manager
    */
-  public toEquipeManagerDTO(): EquipeManagerDTO {
+  public toTeamManagerDTO(): TeamManagerDTO {
     if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en EquipeManagerDTO");
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamManagerDTO");
     }
 
     return {
@@ -185,12 +185,12 @@ export class User {
   }
 
   /**
-   * Convertit l'utilisateur en EquipeMembreDTO
+   * Convertit l'utilisateur en TeamMembreDTO
    * Utilisé dans les DTOs d'équipe pour afficher les infos des membres
    */
-  public toEquipeMembreDTO(): EquipeMembreDTO {
+  public toTeamMembreDTO(): TeamMembreDTO {
     if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en EquipeMembreDTO");
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamMembreDTO");
     }
 
     return {
@@ -200,8 +200,8 @@ export class User {
       email: this.email,
       role: this.role,
       isActive: this.isActive,
-      telephone: this.telephone,
-      plageHoraireId: this.plageHoraireId,
+      phone: this.phone,
+      scheduleId: this.scheduleId,
     };
   }
   // #endregion

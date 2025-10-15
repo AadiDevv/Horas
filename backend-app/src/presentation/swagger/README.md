@@ -167,8 +167,8 @@ Les routes protégées utilisent :
 
 - ⏳ `GET /api/teams` - Liste des équipes
 - ⏳ `POST /api/teams` - Création d'équipe
-- ⏳ `POST /api/clocks` - Enregistrement de pointage
-- ⏳ `GET /api/reports` - Génération de rapports
+- ⏳ `POST /api/clocks` - Enregistrement de timesheet
+- ⏳ `GET /api/reports` - Génération de reports
 
 ---
 

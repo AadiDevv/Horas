@@ -1,17 +1,17 @@
-import { IEquipe } from "@/domain/interfaces/equipe.interface";
-import { Equipe } from "@/domain/entities/equipe";
+import { ITeam } from "@/domain/interfaces/team.interface";
+import { Team } from "@/domain/entities/team";
 import { prisma } from "../prisma.service";
 import { User } from "@/domain/entities/user";
 import { ValidationError } from "@/domain/error/AppError";
-import { EquipeFilterDTO } from "@/application/DTOS";
+import { TeamFilterDTO } from "@/application/DTOS";
 
-export class EquipeRepository implements IEquipe {
+export class TeamRepository implements ITeam {
 
     // #region Read
-    async getAllEquipes(filter?: EquipeFilterDTO): Promise<Equipe[]> {
+    async getAllTeams(filter?: TeamFilterDTO): Promise<Team[]> {
         const { managerId } = filter || {};
 
-        const equipes = await prisma.equipe.findMany({
+        const teams = await prisma.team.findMany({
             where: {
                 ...(managerId && { managerId }) // Filtre uniquement si managerId est fourni
             },
@@ -34,17 +34,17 @@ export class EquipeRepository implements IEquipe {
             }
         });
 
-        return equipes.map(equipe =>
-            new Equipe({
-                ...equipe,
-                plageHoraireId: equipe.plageHoraireId ?? undefined,
-                manager: new User({ ...equipe.manager })
+        return teams.map(team =>
+            new Team({
+                ...team,
+                scheduleId: team.scheduleId ?? undefined,
+                manager: new User({ ...team.manager })
             })
         );
     }
 
-    async getEquipe_ById(id: number): Promise<Equipe | null> {
-        const equipe = await prisma.equipe.findUnique({
+    async getTeam_ById(id: number): Promise<Team | null> {
+        const team = await prisma.team.findUnique({
             where: { id },
             include: {
                 _count: {
@@ -70,27 +70,27 @@ export class EquipeRepository implements IEquipe {
                         email: true,
                         role: true,
                         isActive: true,
-                        telephone: true,
-                        plageHoraireId: true,
+                        phone: true,
+                        scheduleId: true,
                     }
                 }
             }
         });
 
-        if (!equipe) {
+        if (!team) {
             return null;
         }
 
-        return new Equipe({
-            ...equipe,
-            plageHoraireId: equipe.plageHoraireId ?? undefined,
-            manager: new User({ ...equipe.manager }),
-            membres: equipe.membres.map(membre => new User({ ...membre, plageHoraireId: membre.plageHoraireId ?? undefined }))
+        return new Team({
+            ...team,
+            scheduleId: team.scheduleId ?? undefined,
+            manager: new User({ ...team.manager }),
+            membres: team.membres.map(membre => new User({ ...membre, scheduleId: membre.scheduleId ?? undefined }))
         });
     }
 
-    async getEquipes_ByManagerId(managerId: number): Promise<Equipe[]> {
-        const equipes = await prisma.equipe.findMany({
+    async getTeams_ByManagerId(managerId: number): Promise<Team[]> {
+        const teams = await prisma.team.findMany({
             where: {
                 managerId
             },
@@ -111,22 +111,22 @@ export class EquipeRepository implements IEquipe {
                 }
             }
         })
-        return equipes.map(equipe => new Equipe({
-            ...equipe,
-            plageHoraireId: equipe.plageHoraireId ?? undefined,
-            manager: new User({ ...equipe.manager })
+        return teams.map(team => new Team({
+            ...team,
+            scheduleId: team.scheduleId ?? undefined,
+            manager: new User({ ...team.manager })
         }));
     }
     // #endregion
 
     // #region Create
-    async createEquipe(equipe: Equipe): Promise<Equipe> {
-        const equipeCreated = await prisma.equipe.create({
+    async createTeam(team: Team): Promise<Team> {
+        const teamCreated = await prisma.team.create({
             data: {
-                lastName: equipe.lastName,
-                description: equipe.description,
-                managerId: equipe.managerId,
-                plageHoraireId: equipe.plageHoraireId,
+                lastName: team.lastName,
+                description: team.description,
+                managerId: team.managerId,
+                scheduleId: team.scheduleId,
             },
             include: {
                 _count: {
@@ -147,26 +147,26 @@ export class EquipeRepository implements IEquipe {
             }
         });
 
-        return new Equipe({
-            ...equipeCreated,
-            plageHoraireId: equipeCreated.plageHoraireId ?? undefined,
-            manager: new User({ ...equipeCreated.manager })
+        return new Team({
+            ...teamCreated,
+            scheduleId: teamCreated.scheduleId ?? undefined,
+            manager: new User({ ...teamCreated.manager })
         });
     }
     // #endregion
 
     // #region Update
-    async updateEquipe_ById(equipe: Equipe): Promise<Equipe> {
-        if (!equipe.id) {
+    async updateTeam_ById(team: Team): Promise<Team> {
+        if (!team.id) {
             throw new ValidationError("L'équipe doit avoir un ID pour être mise à jour");
         }
 
-        const equipeUpdated = await prisma.equipe.update({
-            where: { id: equipe.id },
+        const teamUpdated = await prisma.team.update({
+            where: { id: team.id },
             data: {
-                lastName: equipe.lastName,
-                description: equipe.description,
-                plageHoraireId: equipe.plageHoraireId,
+                lastName: team.lastName,
+                description: team.description,
+                scheduleId: team.scheduleId,
                 updatedAt: new Date(),
             },
             include: {
@@ -188,17 +188,17 @@ export class EquipeRepository implements IEquipe {
             }
         });
 
-        return new Equipe({
-            ...equipeUpdated,
-            plageHoraireId: equipeUpdated.plageHoraireId ?? undefined,
-            manager: new User({ ...equipeUpdated.manager })
+        return new Team({
+            ...teamUpdated,
+            scheduleId: teamUpdated.scheduleId ?? undefined,
+            manager: new User({ ...teamUpdated.manager })
         });
     }
     // #endregion
 
     // #region Delete
-    async deleteEquipe_ById(id: number): Promise<Equipe> {
-        const equipeDeleted = await prisma.equipe.update({
+    async deleteTeam_ById(id: number): Promise<Team> {
+        const teamDeleted = await prisma.team.update({
             where: { id },
             data: {
                 deletedAt: new Date(),
@@ -222,10 +222,10 @@ export class EquipeRepository implements IEquipe {
             }
         });
 
-        return new Equipe({
-            ...equipeDeleted,
-            plageHoraireId: equipeDeleted.plageHoraireId ?? undefined,
-            manager: new User({ ...equipeDeleted.manager })
+        return new Team({
+            ...teamDeleted,
+            scheduleId: teamDeleted.scheduleId ?? undefined,
+            manager: new User({ ...teamDeleted.manager })
         });
     }
     // #endregion

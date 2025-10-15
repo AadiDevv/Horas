@@ -18,7 +18,7 @@ export const userPaths = {
                     description: 'Filtrer par rôle'
                 },
                 {
-                    name: 'equipeId',
+                    name: 'teamId',
                     in: 'query',
                     schema: { type: 'integer' },
                     description: 'Filtrer par équipe'

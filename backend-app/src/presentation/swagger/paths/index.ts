@@ -1,18 +1,18 @@
 import { healthPaths } from './health.paths';
 import { authPaths } from './auth.paths';
 import { userPaths } from './user.paths';
-import { equipePaths } from './equipe.paths';
+import { teamPaths } from './team.paths';
 import { horairePaths } from './horaire.paths';
-import { pointagePaths } from './pointage.paths';
+import { timesheetPaths } from './timesheet.paths';
 
 // #region Export All Paths
 export const paths = {
     ...healthPaths,
     ...authPaths,
     ...userPaths,
-    ...equipePaths,
+    ...teamPaths,
     ...horairePaths,
-    ...pointagePaths
+    ...timesheetPaths
 };
 // #endregion
 

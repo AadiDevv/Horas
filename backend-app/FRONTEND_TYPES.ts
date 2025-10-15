@@ -13,7 +13,7 @@
 // =========================================
 
 export type Role = 'admin' | 'manager' | 'employe';
-export type PointageStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
+export type TimesheetStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
 
 // =========================================
 // RÉPONSES STANDARD
@@ -47,9 +47,9 @@ export interface UserCreateDTO {
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 
 export interface UserLoginDTO {
@@ -61,11 +61,11 @@ export interface UserUpdateDTO {
     firstName?: string;
     lastName?: string;
     email?: string;
-    telephone?: string;
+    phone?: string;
     role?: Role;
     isActive?: boolean;
-    equipeId?: number | null;
-    plageHoraireId?: number | null;
+    teamId?: number | null;
+    scheduleId?: number | null;
 }
 
 export interface UserChangePasswordDTO {
@@ -84,13 +84,13 @@ export interface UserReadDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    telephone: string | null;
-    equipeId: number | null;
-    plageHoraireId: number | null;
+    phone: string | null;
+    teamId: number | null;
+    scheduleId: number | null;
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
-    equipe?: {
+    team?: {
         id: number;
         lastName: string;
     };
@@ -109,13 +109,13 @@ export interface UserListItemDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    equipeId: number | null;
-    equipelastName: string | null;
+    teamId: number | null;
+    teamlastName: string | null;
 }
 
 export interface UserFilterDTO {
     role?: Role;
-    equipeId?: number;
+    teamId?: number;
     isActive?: boolean;
     search?: string;
 }
@@ -134,21 +134,21 @@ export interface TokenResponse {
 // 2. ÉQUIPE
 // =========================================
 
-// #region Equipe DTOs
+// #region Team DTOs
 
-export interface EquipeCreateDTO {
+export interface TeamCreateDTO {
     lastName: string;
     description?: string;
     managerId: number;
 }
 
-export interface EquipeUpdateDTO {
+export interface TeamUpdateDTO {
     lastName?: string;
     description?: string;
     managerId?: number;
 }
 
-export interface EquipeReadDTO {
+export interface TeamReadDTO {
     id: number;
     lastName: string;
     description: string | null;
@@ -166,7 +166,7 @@ export interface EquipeReadDTO {
     membresCount?: number;
 }
 
-export interface EquipeWithMembresDTO extends EquipeReadDTO {
+export interface TeamWithMembresDTO extends TeamReadDTO {
     membres: {
         id: number;
         firstName: string;
@@ -174,11 +174,11 @@ export interface EquipeWithMembresDTO extends EquipeReadDTO {
         email: string;
         role: Role;
         isActive: boolean;
-        telephone: string | null;
+        phone: string | null;
     }[];
 }
 
-export interface EquipeListItemDTO {
+export interface TeamListItemDTO {
     id: number;
     lastName: string;
     description: string | null;
@@ -246,34 +246,34 @@ export interface HoraireListItemDTO {
 // 4. POINTAGE
 // =========================================
 
-// #region Pointage DTOs
+// #region Timesheet DTOs
 
-export interface PointageCreateDTO {
+export interface TimesheetCreateDTO {
     employeId: number;
     date: string;      // Format: "YYYY-MM-DD"
     heure: string;     // Format: "HH:mm:ss"
     clockin: boolean;  // true = entrée, false = sortie
-    status?: PointageStatus;
+    status?: TimesheetStatus;
 }
 
-export interface PointageQuickDTO {
+export interface TimesheetQuickDTO {
     clockin: boolean;
 }
 
-export interface PointageUpdateDTO {
+export interface TimesheetUpdateDTO {
     date?: string;
     heure?: string;
     clockin?: boolean;
-    status?: PointageStatus;
+    status?: TimesheetStatus;
 }
 
-export interface PointageReadDTO {
+export interface TimesheetReadDTO {
     id: number;
     employeId: number;
     date: string;
     heure: string;
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
     createdAt: string;
     updatedAt: string;
     employe?: {
@@ -284,34 +284,34 @@ export interface PointageReadDTO {
     };
 }
 
-export interface PointageListItemDTO {
+export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
     employelastName: string;
     date: string;
     heure: string;
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
 }
 
-export interface PointageFilterDTO {
+export interface TimesheetFilterDTO {
     employeId?: number;
     dateDebut?: string;
     dateFin?: string;
-    status?: PointageStatus;
+    status?: TimesheetStatus;
     clockin?: boolean;
 }
 
-export interface PointageStatsDTO {
+export interface TimesheetStatsDTO {
     employeId: number;
     periodeDebut: string;
     periodeFin: string;
-    totalPointages: number;
+    totalTimesheets: number;
     totalEntrees: number;
     totalSorties: number;
-    pointagesNormaux: number;
-    pointagesRetard: number;
-    pointagesIncomplete: number;
+    timesheetsNormaux: number;
+    timesheetsRetard: number;
+    timesheetsIncomplete: number;
     joursPointes: number;
 }
 
@@ -360,11 +360,11 @@ export function isApiError(response: ApiResponse<any>): response is ApiErrorResp
 /**
  * EXEMPLE AVEC FETCH
  * 
- * import type { ApiSuccessResponse, EquipeListItemDTO } from '@/types/api';
+ * import type { ApiSuccessResponse, TeamListItemDTO } from '@/types/api';
  * 
- * async function getEquipes(): Promise<EquipeListItemDTO[]> {
- *   const response = await fetch('/api/equipes');
- *   const json = await response.json() as ApiSuccessResponse<EquipeListItemDTO[]>;
+ * async function getTeams(): Promise<TeamListItemDTO[]> {
+ *   const response = await fetch('/api/teams');
+ *   const json = await response.json() as ApiSuccessResponse<TeamListItemDTO[]>;
  *   return json.data;
  * }
  */

@@ -1,15 +1,15 @@
-import { EquipeCreateDTO, EquipeUpdateDTO, EquipeFilterDTO, EquipeWithMembresDTO } from "@/application/DTOS";
-import { Equipe } from "@/domain/entities/equipe";
-import { IEquipe } from "@/domain/interfaces/equipe.interface";
+import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembresDTO } from "@/application/DTOS";
+import { Team } from "@/domain/entities/team";
+import { ITeam } from "@/domain/interfaces/team.interface";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
 
 /**
  * Use Case pour la gestion des équipes
  * Contient la logique métier et les règles de gestion
  */
-export class EquipeUseCase {
+export class TeamUseCase {
 
-    constructor(private readonly R_equipe: IEquipe) { }
+    constructor(private readonly R_team: ITeam) { }
 
     // #region Read
     /**
@@ -29,7 +29,7 @@ export class EquipeUseCase {
      * @param filter - Filtres optionnels (managerId)
      * @returns Liste des équipes du manager spécifié
      */
-    async getEquipes(userRole: string, userId: number, filter?: EquipeFilterDTO): Promise<Equipe[]> {
+    async getTeams(userRole: string, userId: number, filter?: TeamFilterDTO): Promise<Team[]> {
         let managerId: number;
 
         // #region - Détermination du managerId selon le rôle et les filtres
@@ -64,9 +64,9 @@ export class EquipeUseCase {
 
         // #region - Récupération des équipes via le repository
         // À ce stade, on a toujours un managerId défini
-        const equipes = await this.R_equipe.getEquipes_ByManagerId(managerId);
-        const equipeEntities: Equipe[] = equipes.map(equipe => new Equipe({ ...equipe }));
-        return equipeEntities;
+        const teams = await this.R_team.getTeams_ByManagerId(managerId);
+        const teamEntities: Team[] = teams.map(team => new Team({ ...team }));
+        return teamEntities;
         // #endregion
     }
 
@@ -78,13 +78,13 @@ export class EquipeUseCase {
      * @returns L'équipe avec ses relations chargées
      * @throws NotFoundError si l'équipe n'existe pas
      */
-    async getEquipe_ById(id: number): Promise<Equipe> {
-        const equipe = await this.R_equipe.getEquipe_ById(id);
-        if (!equipe) {
+    async getTeam_ById(id: number): Promise<Team> {
+        const team = await this.R_team.getTeam_ById(id);
+        if (!team) {
             throw new NotFoundError(`Équipe avec l'ID ${id} introuvable`);
         }
 
-        return equipe;
+        return team;
     }
     // #endregion
 
@@ -101,18 +101,18 @@ export class EquipeUseCase {
      * @returns L'équipe créée
      * @throws ValidationError si les données sont invalides
      */
-    async createEquipe(dto: EquipeCreateDTO, userId: number): Promise<Equipe> {
+    async createTeam(dto: TeamCreateDTO, userId: number): Promise<Team> {
         console.log("managerId from dto : ", dto.managerId);
         console.log("userId from jwt : ", userId);
         if (dto.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
         // Création de l'entité depuis le DTO
-        const equipe = Equipe.fromCreateDTO(dto);
+        const team = Team.fromCreateDTO(dto);
         // Sauvegarde dans le repository
-        const equipeCreated = await this.R_equipe.createEquipe(equipe);
+        const teamCreated = await this.R_team.createTeam(team);
 
-        return equipeCreated;
+        return teamCreated;
     }
     // #endregion
 
@@ -122,7 +122,7 @@ export class EquipeUseCase {
      * 
      * Règles métier :
      * - Le managerId ne peut PAS être modifié (une équipe reste liée à son manager)
-     * - Seuls lastName, description et plageHoraireId peuvent être modifiés
+     * - Seuls lastName, description et scheduleId peuvent être modifiés
      * 
      * @param id - ID de l'équipe à modifier
      * @param dto - Données de mise à jour
@@ -130,7 +130,7 @@ export class EquipeUseCase {
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si tentative de modification du managerId
      */
-    async updateEquipe(id: number, dto: EquipeUpdateDTO, userId: number): Promise<Equipe> {
+    async updateTeam(id: number, dto: TeamUpdateDTO, userId: number): Promise<Team> {
         // Vérification : interdiction de changer le manager
         if (dto.managerId !== undefined) {
             throw new ValidationError(
@@ -143,18 +143,18 @@ export class EquipeUseCase {
         }
 
         // Récupération de l'équipe existante
-        const existingEquipe = await this.getEquipe_ById(id);
+        const existingTeam = await this.getTeam_ById(id);
 
         // Mise à jour via la factory method
-        const updatedEquipe = Equipe.fromUpdateDTO(existingEquipe, dto);
+        const updatedTeam = Team.fromUpdateDTO(existingTeam, dto);
 
         // Validation métier
-        updatedEquipe.validate();
+        updatedTeam.validate();
 
         // Sauvegarde via le repository
-        const equipeUpdated = await this.R_equipe.updateEquipe_ById(updatedEquipe);
+        const teamUpdated = await this.R_team.updateTeam_ById(updatedTeam);
 
-        return equipeUpdated;
+        return teamUpdated;
     }
     // #endregion
 
@@ -170,24 +170,24 @@ export class EquipeUseCase {
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si l'équipe contient des membres
      */
-    async deleteEquipe(id: number, userId: number): Promise<void> {
+    async deleteTeam(id: number, userId: number): Promise<void> {
         // Récupération de l'équipe avec ses membres (chargés par le repository)
-        const equipe = await this.getEquipe_ById(id);
-        if (equipe.managerId !== userId) {
+        const team = await this.getTeam_ById(id);
+        if (team.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
 
         // Vérification : l'équipe ne doit pas contenir de membres
-        const membresCount = equipe.membres?.length ?? 0;
+        const membresCount = team.membres?.length ?? 0;
         if (membresCount > 0) {
             throw new ValidationError(
-                `L'équipe "${equipe.lastName}" contient ${membresCount} membre(s). ` +
+                `L'équipe "${team.lastName}" contient ${membresCount} membre(s). ` +
                 `Veuillez d'abord déplacer ou retirer les membres avant de supprimer l'équipe.`
             );
         }
 
         // Suppression logique via le repository
-        await this.R_equipe.deleteEquipe_ById(id);
+        await this.R_team.deleteTeam_ById(id);
     }
     // #endregion
 }

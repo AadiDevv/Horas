@@ -14,9 +14,9 @@ describe('JWTService', () => {
     lastName: 'Dupont',
     password,
     role: 'employe' as const, // Requis depuis la mise à jour de l'auth
-    telephone: undefined,
-    equipeId: undefined,
-    plageHoraireId: undefined,
+    phone: undefined,
+    teamId: undefined,
+    scheduleId: undefined,
   };
 
   const user = User.fromCreateDTOtoEntity(fakeDTO, hashedPassword);

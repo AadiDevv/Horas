@@ -57,9 +57,9 @@ Ils sont gérés via les variables d'enviroinnement dans le `.env`
 | POST | `/teams` | Crée une équipe |
 | PUT | `/teams/{id}` | Met à jour une équipe |
 | DELETE | `/teams/{id}` | Supprime une équipe |
-| POST | `/clocks` | Enregistre un pointage |
+| POST | `/clocks` | Enregistre un timesheet |
 | GET | `/users/{id}/clock` | Sommaire des départs et arrivées d'un employé |
-| GET | `/reports` | Génères un rapport global basé sur un KPI en particulier |
+| GET | `/reports` | Génères un report global basé sur un KPI en particulier |
 | POST | `/auth/login` | Authentification JWT |
 
 ### Persistance des données
@@ -76,7 +76,7 @@ Ils sont gérés via les variables d'enviroinnement dans le `.env`
 
 Deux rôles :
 - **EMPLOYEE** : pointer, consulter ses heures, éditer son profil.
-- **MANAGER** : gérer équipes, consulter rapports et KPIs.
+- **MANAGER** : gérer équipes, consulter reports et KPIs.
 
 ### Authentication JWT
 

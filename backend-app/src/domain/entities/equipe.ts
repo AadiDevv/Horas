@@ -1,14 +1,14 @@
-import { EquipeProps } from "../types/entitiyProps";
+import { TeamProps } from "../types/entitiyProps";
 import { User } from "./user";
-import { EquipeCreateDTO, EquipeUpdateDTO, EquipeReadDTO, EquipeListItemDTO, EquipeWithMembresDTO } from "@/application/DTOS";
+import { TeamCreateDTO, TeamUpdateDTO, TeamReadDTO, TeamListItemDTO, TeamWithMembresDTO } from "@/application/DTOS";
 import { ValidationError } from "../error/AppError";
 
-export class Equipe {
+export class Team {
     public readonly id?: number;
     public lastName: string;
     public description?: string;
     public managerId: number;
-    public plageHoraireId?: number;
+    public scheduleId?: number;
     public createdAt: Date;
     public updatedAt?: Date;
     public deletedAt?: Date | null;
@@ -16,12 +16,12 @@ export class Equipe {
     public membres?: User[];
     public membresCount?: number;
 
-    constructor(props: EquipeProps) {
+    constructor(props: TeamProps) {
         this.id = props.id;
         this.lastName = props.lastName;
         this.description = props.description;
         this.managerId = props.managerId;
-        this.plageHoraireId = props.plageHoraireId;
+        this.scheduleId = props.scheduleId;
         this.createdAt = props.createdAt || new Date(Date.now());
         this.updatedAt = props.updatedAt;
         this.deletedAt = props.deletedAt || null;
@@ -33,29 +33,29 @@ export class Equipe {
 
     // #region Factory Methods (DTO → Entité)
     /**
-     * Crée une entité Equipe à partir d'un DTO de création
+     * Crée une entité Team à partir d'un DTO de création
      * Utilisé lors de la création d'une nouvelle équipe
      */
-    static fromCreateDTO(dto: EquipeCreateDTO): Equipe {
-        return new Equipe({
+    static fromCreateDTO(dto: TeamCreateDTO): Team {
+        return new Team({
             lastName: dto.lastName,
             description: dto.description,
             managerId: dto.managerId,
-            plageHoraireId: dto.plageHoraireId,
+            scheduleId: dto.scheduleId,
         });
     }
 
     /**
-     * Met à jour une entité Equipe existante avec les données d'un DTO de mise à jour
+     * Met à jour une entité Team existante avec les données d'un DTO de mise à jour
      * Retourne une nouvelle instance (immutabilité)
      */
-    static fromUpdateDTO(existingEquipe: Equipe, dto: EquipeUpdateDTO): Equipe {
-        return new Equipe({
-            ...existingEquipe,
-            lastName: dto.lastName ?? existingEquipe.lastName,
-            description: dto.description ?? existingEquipe.description,
-            managerId: dto.managerId ?? existingEquipe.managerId,
-            plageHoraireId: dto.plageHoraireId ?? existingEquipe.plageHoraireId,
+    static fromUpdateDTO(existingTeam: Team, dto: TeamUpdateDTO): Team {
+        return new Team({
+            ...existingTeam,
+            lastName: dto.lastName ?? existingTeam.lastName,
+            description: dto.description ?? existingTeam.description,
+            managerId: dto.managerId ?? existingTeam.managerId,
+            scheduleId: dto.scheduleId ?? existingTeam.scheduleId,
             updatedAt: new Date(Date.now()),
         });
     }
@@ -75,10 +75,10 @@ export class Equipe {
     }
 
     /**
-     * Convertit l'entité en EquipeReadDTO (détail complet)
-     * Utilisé pour GET /equipes/:id
+     * Convertit l'entité en TeamReadDTO (détail complet)
+     * Utilisé pour GET /teams/:id
      */
-    toReadDTO(): EquipeReadDTO {
+    toReadDTO(): TeamReadDTO {
         if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
 
         return {
@@ -86,18 +86,18 @@ export class Equipe {
             lastName: this.lastName,
             description: this.description,
             managerId: this.managerId,
-            plageHoraireId: this.plageHoraireId,
+            scheduleId: this.scheduleId,
             ...this.toDateStrings(),
-            manager: this.manager?.toEquipeManagerDTO(),
+            manager: this.manager?.toTeamManagerDTO(),
             membresCount: this.membres?.length ?? this.membresCount ?? 0,
         };
     }
 
     /**
-     * Convertit l'entité en EquipeListItemDTO (liste simplifiée)
-     * Utilisé pour GET /equipes (liste)
+     * Convertit l'entité en TeamListItemDTO (liste simplifiée)
+     * Utilisé pour GET /teams (liste)
      */
-    toListItemDTO(): EquipeListItemDTO {
+    toListItemDTO(): TeamListItemDTO {
         if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
 
         return {
@@ -105,7 +105,7 @@ export class Equipe {
             lastName: this.lastName,
             description: this.description,
             managerId: this.managerId,
-            plageHoraireId: this.plageHoraireId,
+            scheduleId: this.scheduleId,
             managerlastName: this.manager ? `${this.manager.firstName} ${this.manager.lastName}` : "Manager inconnu",
             membresCount: this.membres?.length ?? this.membresCount ?? 0,
             createdAt: this.createdAt.toISOString(),
@@ -113,16 +113,16 @@ export class Equipe {
     }
 
     /**
-     * Convertit l'entité en EquipeWithMembresDTO (avec liste des membres)
-     * Utilisé pour GET /equipes/:id?include=membres
+     * Convertit l'entité en TeamWithMembresDTO (avec liste des membres)
+     * Utilisé pour GET /teams/:id?include=membres
      */
-    toWithMembresDTO(): EquipeWithMembresDTO {
+    toWithMembresDTO(): TeamWithMembresDTO {
         if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
         if (!this.membres) throw new ValidationError("Les membres doivent être chargés pour utiliser toWithMembresDTO()");
 
         return {
             ...this.toReadDTO(),
-            membres: this.membres.map(membre => membre.toEquipeMembreDTO()),
+            membres: this.membres.map(membre => membre.toTeamMembreDTO()),
         };
     }
     // #endregion

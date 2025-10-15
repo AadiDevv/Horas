@@ -1,9 +1,9 @@
-import { AuthUseCase, EquipeUseCase } from "@/application/usecases";
+import { AuthUseCase, TeamUseCase } from "@/application/usecases";
 import { infra } from "./repository.factory";
 
 class ApplicationFactory {
     private static authUseCase: AuthUseCase | null;
-    private static equipeUseCase: EquipeUseCase | null;
+    private static teamUseCase: TeamUseCase | null;
 
     public static getAuthUseCase(): AuthUseCase {
         if (!this.authUseCase) {
@@ -13,21 +13,21 @@ class ApplicationFactory {
         return this.authUseCase;
     }
 
-    public static getEquipeUseCase(): EquipeUseCase {
-        if (!this.equipeUseCase) {
-            const equipeRepo = infra.getEquipeRepo();
-            this.equipeUseCase = new EquipeUseCase(equipeRepo);
+    public static getTeamUseCase(): TeamUseCase {
+        if (!this.teamUseCase) {
+            const teamRepo = infra.getTeamRepo();
+            this.teamUseCase = new TeamUseCase(teamRepo);
         }
-        return this.equipeUseCase;
+        return this.teamUseCase;
     }
 
     public static reset(): void {
         this.authUseCase = null;
-        this.equipeUseCase = null;
+        this.teamUseCase = null;
     }
 }
 export const app = {
     getAuthUseCase: () => ApplicationFactory.getAuthUseCase(),
-    getEquipeUseCase: () => ApplicationFactory.getEquipeUseCase(),
+    getTeamUseCase: () => ApplicationFactory.getTeamUseCase(),
     reset: () => ApplicationFactory.reset()
 };
