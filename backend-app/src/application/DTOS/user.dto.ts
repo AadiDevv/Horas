@@ -80,15 +80,15 @@ export interface UserReadDTO {
     schedule?: {
         id: number;
         lastName: string;
-        heureDebut: string;
-        heureFin: string;
+        startHour: string;
+        endHour: string;
     };
 }
 // #endregion
 
 // #region List DTO
 /**
- * DTO pour la liste des utilisateurs (version simplifiée)
+ * DTO pour la liste des users (version simplifiée)
  */
 export interface UserListItemDTO {
     id: number;
@@ -102,7 +102,7 @@ export interface UserListItemDTO {
 }
 
 /**
- * DTO pour filtrer les utilisateurs
+ * DTO pour filtrer les users
  * Query params: GET /users?role=employe&teamId=1&isActive=true
  */
 export interface UserFilterDTO {

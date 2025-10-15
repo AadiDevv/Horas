@@ -76,7 +76,7 @@ membersCount?: number,
 // Remplacer
 employe
 // Par
-employee
+employe
 ```
 
 **Créer nouveau fichier** : `src/domain/types/timesheetStatus.ts`

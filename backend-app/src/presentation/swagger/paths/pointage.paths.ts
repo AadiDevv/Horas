@@ -7,7 +7,7 @@
  * - Pas de DTO de création côté client
  * - Les données sont automatiquement gérées côté serveur :
  *   • employeId extrait du JWT
- *   • date et heure au moment de la requête
+ *   • date et hour au moment de la requête
  *   • status calculé automatiquement
  * 
  * Permissions :
@@ -22,7 +22,7 @@ export const timesheetPaths = {
     '/api/timesheets/clockin': {
         post: {
             summary: 'Pointer l\'entrée',
-            description: 'Enregistre l\'heure d\'arrivée de l\'employé. L\'employeId est extrait du JWT, la date et l\'heure sont automatiques.',
+            description: 'Enregistre l\'hour d\'arrivée de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
             tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             responses: {
@@ -37,7 +37,7 @@ export const timesheetPaths = {
                                     id: 1,
                                     employeId: 10,
                                     date: '2025-10-12',
-                                    heure: '2025-10-12T09:05:30.000Z',
+                                    hour: '2025-10-12T09:05:30.000Z',
                                     clockin: true,
                                     status: 'normal',
                                     createdAt: '2025-10-12T09:05:35.000Z',
@@ -89,7 +89,7 @@ export const timesheetPaths = {
     '/api/timesheets/clockout': {
         post: {
             summary: 'Pointer la sortie',
-            description: 'Enregistre l\'heure de départ de l\'employé. L\'employeId est extrait du JWT, la date et l\'heure sont automatiques.',
+            description: 'Enregistre l\'hour de départ de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
             tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             responses: {
@@ -104,7 +104,7 @@ export const timesheetPaths = {
                                     id: 2,
                                     employeId: 10,
                                     date: '2025-10-12',
-                                    heure: '2025-10-12T17:35:00.000Z',
+                                    hour: '2025-10-12T17:35:00.000Z',
                                     clockin: false,
                                     status: 'normal',
                                     createdAt: '2025-10-12T17:35:05.000Z',
@@ -270,9 +270,9 @@ export const timesheetPaths = {
                         schema: { $ref: '#/components/schemas/TimesheetUpdateDTO' },
                         examples: {
                             correctTime: {
-                                summary: 'Corriger l\'heure',
+                                summary: 'Corriger l\'hour',
                                 value: {
-                                    heure: '09:00:00'
+                                    hour: '09:00:00'
                                 }
                             },
                             changeStatus: {

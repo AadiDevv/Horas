@@ -140,7 +140,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-### 1.5 Liste des utilisateurs
+### 1.5 Liste des users
 
 **Endpoint:** `GET /api/users`  
 **Query Params (optionnels):**
@@ -177,7 +177,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "teamlastName": "Équipe Production"
     }
   ],
-  "message": "Liste des utilisateurs récupérée avec succès",
+  "message": "Liste des users récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
@@ -212,8 +212,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "schedule": {
       "id": 2,
       "lastName": "Schedule de journée",
-      "heureDebut": "09:00",
-      "heureFin": "17:30"
+      "startHour": "09:00",
+      "endHour": "17:30"
     }
   },
   "message": "Utilisateur récupéré avec succès",
@@ -478,15 +478,15 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "lastName": "Schedule de journée",
-  "heureDebut": "09:00",
-  "heureFin": "17:30",
-  "joursActifs": [1, 2, 3, 4, 5]
+  "startHour": "09:00",
+  "endHour": "17:30",
+  "activeDays": [1, 2, 3, 4, 5]
 }
 ```
 
 **Notes:**
-- `heureDebut` et `heureFin` au format **HH:mm**
-- `joursActifs` : tableau de lastNamebres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
+- `startHour` et `endHour` au format **HH:mm**
+- `activeDays` : tableau de lastNamebres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
 
 **Response (201):**
 ```json
@@ -495,12 +495,12 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": {
     "id": 1,
     "lastName": "Schedule de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-12T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 0
+    "usersCount": 0
   },
   "message": "Schedule créé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
@@ -521,18 +521,18 @@ Cette API suit une architecture REST avec des réponses standardisées :
     {
       "id": 1,
       "lastName": "Schedule de journée",
-      "heureDebut": "09:00",
-      "heureFin": "17:30",
-      "joursActifs": [1, 2, 3, 4, 5],
-      "utilisateursCount": 25
+      "startHour": "09:00",
+      "endHour": "17:30",
+      "activeDays": [1, 2, 3, 4, 5],
+      "usersCount": 25
     },
     {
       "id": 2,
       "lastName": "Schedule de nuit",
-      "heureDebut": "22:00",
-      "heureFin": "06:00",
-      "joursActifs": [1, 2, 3, 4, 5, 6, 7],
-      "utilisateursCount": 8
+      "startHour": "22:00",
+      "endHour": "06:00",
+      "activeDays": [1, 2, 3, 4, 5, 6, 7],
+      "usersCount": 8
     }
   ],
   "message": "Liste des schedules récupérée avec succès",
@@ -546,41 +546,41 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Endpoint:** `GET /api/schedules/:id`  
 **Query Params (optionnels):**
-- `include=utilisateurs` : inclure la liste des utilisateurs assignés
+- `include=users` : inclure la liste des users assignés
 
-**Response (200) sans `include=utilisateurs`:**
+**Response (200) sans `include=users`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
     "lastName": "Schedule de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-01T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 25
+    "usersCount": 25
   },
   "message": "Schedule récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
-**Response (200) avec `include=utilisateurs`:**
+**Response (200) avec `include=users`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
     "lastName": "Schedule de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-01T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 2,
-    "utilisateurs": [
+    "usersCount": 2,
+    "users": [
       {
         "id": 10,
         "firstName": "Pierre",
@@ -614,9 +614,9 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "lastName": "Schedule de journée modifié",
-  "heureDebut": "08:30",
-  "heureFin": "18:00",
-  "joursActifs": [1, 2, 3, 4, 5, 6]
+  "startHour": "08:30",
+  "endHour": "18:00",
+  "activeDays": [1, 2, 3, 4, 5, 6]
 }
 ```
 
@@ -641,7 +641,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-## 📍 4. POINTAGES (POINTAGE)
+## 📍 4. TIMESHEETS (TIMESHEET)
 
 ### 4.1 Créer un timesheet (admin/manager)
 
@@ -654,7 +654,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 {
   "employeId": 10,
   "date": "2025-10-12",
-  "heure": "09:05:30",
+  "hour": "09:05:30",
   "clockin": true,
   "status": "normal"
 }
@@ -662,7 +662,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Notes:**
 - `date` : format **YYYY-MM-DD**
-- `heure` : format **HH:mm:ss** ou ISO DateTime
+- `hour` : format **HH:mm:ss** ou ISO DateTime
 - `clockin` : `true` = entrée, `false` = sortie
 - `status` : 'normal' | 'retard' | 'absence' | 'incomplet' (optionnel, calculé automatiquement)
 
@@ -674,7 +674,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "id": 1,
     "employeId": 10,
     "date": "2025-10-12",
-    "heure": "2025-10-12T09:05:30.000Z",
+    "hour": "2025-10-12T09:05:30.000Z",
     "clockin": true,
     "status": "normal",
     "createdAt": "2025-10-12T09:05:35.000Z",
@@ -708,7 +708,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Notes:**
 - L'employé est déduit du JWT
-- La date et l'heure sont automatiquement définies au moment de la requête
+- La date et l'hour sont automatiquement définies au moment de la requête
 - Le statut est calculé automatiquement
 
 **Response (201):** *(même format que TimesheetReadDTO)*
@@ -737,7 +737,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "employeId": 10,
       "employelastName": "Pierre Martin",
       "date": "2025-10-12",
-      "heure": "09:05:30",
+      "hour": "09:05:30",
       "clockin": true,
       "status": "normal"
     },
@@ -746,7 +746,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "employeId": 10,
       "employelastName": "Pierre Martin",
       "date": "2025-10-12",
-      "heure": "17:35:00",
+      "hour": "17:35:00",
       "clockin": false,
       "status": "normal"
     }
@@ -770,7 +770,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "id": 1,
     "employeId": 10,
     "date": "2025-10-12",
-    "heure": "2025-10-12T09:05:30.000Z",
+    "hour": "2025-10-12T09:05:30.000Z",
     "clockin": true,
     "status": "normal",
     "createdAt": "2025-10-12T09:05:35.000Z",
@@ -799,7 +799,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "date": "2025-10-12",
-  "heure": "09:00:00",
+  "hour": "09:00:00",
   "clockin": true,
   "status": "normal"
 }
@@ -842,8 +842,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "employeId": 10,
-    "periodeDebut": "2025-10-01",
-    "periodeFin": "2025-10-31",
+    "periodStart": "2025-10-01",
+    "periodEnd": "2025-10-31",
     "totalTimesheets": 42,
     "totalEntrees": 21,
     "totalSorties": 21,
@@ -1006,7 +1006,7 @@ export const handlers = [
           id: 1,
           employeId: 10,
           date: '2025-10-12',
-          heure: new Date().toISOString(),
+          hour: new Date().toISOString(),
           clockin: true,
           status: 'normal',
           createdAt: new Date().toISOString(),

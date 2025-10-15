@@ -33,11 +33,11 @@ export const swaggerDefinition: SwaggerDefinition = {
         },
         {
             name: 'Authentication',
-            description: 'Endpoints pour l\'authentification et la gestion des utilisateurs'
+            description: 'Endpoints pour l\'authentification et la gestion des users'
         },
         {
             name: 'Users (À venir)',
-            description: '🔮 Routes de gestion des utilisateurs (listing, modification, suppression)'
+            description: '🔮 Routes de gestion des users (listing, modification, suppression)'
         },
         {
             name: 'Équipes',

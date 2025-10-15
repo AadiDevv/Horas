@@ -6,7 +6,7 @@ import { TimesheetStatus } from "@/domain/types";
  */
 export interface TimesheetUpdateDTO {
     date?: string;    // Format: "YYYY-MM-DD"
-    heure?: string;   // Format: "HH:mm:ss" ou ISO DateTime
+    hour?: string;   // Format: "HH:mm:ss" ou ISO DateTime
     clockin?: boolean;
     status?: TimesheetStatus;
 }
@@ -20,7 +20,7 @@ export interface TimesheetReadDTO {
     id: number;
     employeId: number;
     date: string;      // Format: "YYYY-MM-DD"
-    heure: string;     // Format ISO DateTime complet
+    hour: string;     // Format ISO DateTime complet
     clockin: boolean;
     status: TimesheetStatus;
     createdAt: string;
@@ -57,7 +57,7 @@ export interface TimesheetListItemDTO {
     employeId: number;
     employelastName: string; // firstName + lastName
     date: string;
-    heure: string;
+    hour: string;
     clockin: boolean;
     status: TimesheetStatus;
 }
@@ -70,8 +70,8 @@ export interface TimesheetListItemDTO {
  */
 export interface TimesheetStatsDTO {
     employeId: number;
-    periodeDebut: string;
-    periodeFin: string;
+    periodStart: string;
+    periodEnd: string;
     totalTimesheets: number;
     totalEntrees: number;
     totalSorties: number;

@@ -3,7 +3,7 @@ export const scheduleSchemas = {
     // #region Request DTOs
     ScheduleCreateDTO: {
         type: 'object',
-        required: ['lastName', 'heureDebut', 'heureFin', 'joursActifs'],
+        required: ['lastName', 'startHour', 'endHour', 'activeDays'],
         properties: {
             lastName: {
                 type: 'string',
@@ -12,19 +12,19 @@ export const scheduleSchemas = {
                 example: 'Schedule de journée',
                 description: 'lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '09:00',
-                description: 'Heure de début au format HH:mm (ex: 09:00)'
+                description: 'Hour de début au format HH:mm (ex: 09:00)'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '17:30',
-                description: 'Heure de fin au format HH:mm (ex: 17:30)'
+                description: 'Hour de fin au format HH:mm (ex: 17:30)'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer',
@@ -48,19 +48,19 @@ export const scheduleSchemas = {
                 example: 'Schedule de journée modifié',
                 description: 'Nouveau lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '08:30',
-                description: 'Nouvelle heure de début'
+                description: 'Nouvelle hour de début'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '18:00',
-                description: 'Nouvelle heure de fin'
+                description: 'Nouvelle hour de fin'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer',
@@ -89,17 +89,17 @@ export const scheduleSchemas = {
                 example: 'Schedule de journée',
                 description: 'lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 example: '09:00',
-                description: 'Heure de début au format HH:mm'
+                description: 'Hour de début au format HH:mm'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 example: '17:30',
-                description: 'Heure de fin au format HH:mm'
+                description: 'Hour de fin au format HH:mm'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer'
@@ -119,15 +119,15 @@ export const scheduleSchemas = {
                 example: '2025-01-15T14:30:00.000Z',
                 description: 'Date de dernière modification'
             },
-            utilisateursCount: {
+            usersCount: {
                 type: 'integer',
                 example: 25,
-                description: 'lastNamebre d\'utilisateurs assignés à cet schedule'
+                description: 'lastNamebre d\'users assignés à cet schedule'
             }
         }
     },
 
-    ScheduleWithUtilisateursDTO: {
+    ScheduleWithUsersDTO: {
         allOf: [
             {
                 $ref: '#/components/schemas/ScheduleReadDTO'
@@ -135,9 +135,9 @@ export const scheduleSchemas = {
             {
                 type: 'object',
                 properties: {
-                    utilisateurs: {
+                    users: {
                         type: 'array',
-                        description: 'Liste des utilisateurs assignés à cet schedule',
+                        description: 'Liste des users assignés à cet schedule',
                         items: {
                             type: 'object',
                             properties: {
@@ -181,22 +181,22 @@ export const scheduleSchemas = {
                 type: 'string',
                 example: 'Schedule de journée'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 example: '09:00'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 example: '17:30'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer'
                 },
                 example: [1, 2, 3, 4, 5]
             },
-            utilisateursCount: {
+            usersCount: {
                 type: 'integer',
                 example: 25
             }

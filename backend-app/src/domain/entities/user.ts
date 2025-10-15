@@ -26,7 +26,7 @@ export class User {
   constructor(
     props: UserProps
   ) {
-    // Attribution des valeurs
+    // Attribution des values
     this.id = props.id;
     this.email = props.email;
     this.hashedPassword = props.hashedPassword;

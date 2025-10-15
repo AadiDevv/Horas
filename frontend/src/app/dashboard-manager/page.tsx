@@ -151,7 +151,7 @@ export default function Page() {
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-6 mb-8">
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
-                <h3 className="text-base font-semibold text-gray-800 mb-4">Heures Total Semaine</h3>
+                <h3 className="text-base font-semibold text-gray-800 mb-4">Hours Total Semaine</h3>
                 <div className="flex items-center justify-between">
                   <span className="text-4xl font-semibold">40:00:05</span>
                   <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -233,7 +233,7 @@ export default function Page() {
               {/* Weekly Hours Chart */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Heures par jours</h3>
+                  <h3 className="text-xl font-semibold">Hours par jours</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <circle cx="10" cy="5" r="1.5" fill="currentColor" />
@@ -313,7 +313,7 @@ export default function Page() {
               {/* Agent Hours Chart */}
               <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Heures par agent</h3>
+                  <h3 className="text-xl font-semibold">Hours par agent</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <circle cx="10" cy="5" r="1.5" fill="currentColor" />

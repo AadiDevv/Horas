@@ -97,8 +97,8 @@ export interface UserReadDTO {
     schedule?: {
         id: number;
         lastName: string;
-        heureDebut: string;
-        heureFin: string;
+        startHour: string;
+        endHour: string;
     };
 }
 
@@ -198,31 +198,31 @@ export interface TeamListItemDTO {
 
 export interface ScheduleCreateDTO {
     lastName: string;
-    heureDebut: string; // Format: "HH:mm"
-    heureFin: string;   // Format: "HH:mm"
-    joursActifs: number[]; // 1=Lundi, 7=Dimanche
+    startHour: string; // Format: "HH:mm"
+    endHour: string;   // Format: "HH:mm"
+    activeDays: number[]; // 1=Lundi, 7=Dimanche
 }
 
 export interface ScheduleUpdateDTO {
     lastName?: string;
-    heureDebut?: string;
-    heureFin?: string;
-    joursActifs?: number[];
+    startHour?: string;
+    endHour?: string;
+    activeDays?: number[];
 }
 
 export interface ScheduleReadDTO {
     id: number;
     lastName: string;
-    heureDebut: string;
-    heureFin: string;
-    joursActifs: number[];
+    startHour: string;
+    endHour: string;
+    activeDays: number[];
     createdAt: string;
     updatedAt: string;
-    utilisateursCount?: number;
+    usersCount?: number;
 }
 
-export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
-    utilisateurs: {
+export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
+    users: {
         id: number;
         firstName: string;
         lastName: string;
@@ -234,16 +234,16 @@ export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
 export interface ScheduleListItemDTO {
     id: number;
     lastName: string;
-    heureDebut: string;
-    heureFin: string;
-    joursActifs: number[];
-    utilisateursCount: number;
+    startHour: string;
+    endHour: string;
+    activeDays: number[];
+    usersCount: number;
 }
 
 // #endregion
 
 // =========================================
-// 4. POINTAGE
+// 4. TIMESHEET
 // =========================================
 
 // #region Timesheet DTOs
@@ -251,7 +251,7 @@ export interface ScheduleListItemDTO {
 export interface TimesheetCreateDTO {
     employeId: number;
     date: string;      // Format: "YYYY-MM-DD"
-    heure: string;     // Format: "HH:mm:ss"
+    hour: string;     // Format: "HH:mm:ss"
     clockin: boolean;  // true = entrée, false = sortie
     status?: TimesheetStatus;
 }
@@ -262,7 +262,7 @@ export interface TimesheetQuickDTO {
 
 export interface TimesheetUpdateDTO {
     date?: string;
-    heure?: string;
+    hour?: string;
     clockin?: boolean;
     status?: TimesheetStatus;
 }
@@ -271,7 +271,7 @@ export interface TimesheetReadDTO {
     id: number;
     employeId: number;
     date: string;
-    heure: string;
+    hour: string;
     clockin: boolean;
     status: TimesheetStatus;
     createdAt: string;
@@ -289,7 +289,7 @@ export interface TimesheetListItemDTO {
     employeId: number;
     employelastName: string;
     date: string;
-    heure: string;
+    hour: string;
     clockin: boolean;
     status: TimesheetStatus;
 }
@@ -304,8 +304,8 @@ export interface TimesheetFilterDTO {
 
 export interface TimesheetStatsDTO {
     employeId: number;
-    periodeDebut: string;
-    periodeFin: string;
+    periodStart: string;
+    periodEnd: string;
     totalTimesheets: number;
     totalEntrees: number;
     totalSorties: number;

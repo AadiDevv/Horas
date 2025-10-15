@@ -559,7 +559,7 @@ export default function Page() {
                     <div className="font-semibold text-gray-700 text-center mb-3 pb-2 border-b-2 border-gray-200">{day}</div>
                     <div className="flex-1 border-t-2 border-gray-200 pt-4 relative min-h-[200px]">
                       {timeLogs[day].length === 0 && !(isClockingIn && getDayKey() === day) ? (
-                        <span className="text-gray-400 text-xs text-center block">Aucune heure</span>
+                        <span className="text-gray-400 text-xs text-center block">Aucune hour</span>
                       ) : (
                         <div className="space-y-2">
                           {timeLogs[day].map((log, idx) => {

@@ -4,7 +4,7 @@
  * Tag: Équipes (À venir)
  * 
  * Permissions :
- * - GET /teams : Tous les utilisateurs authentifiés
+ * - GET /teams : Tous les users authentifiés
  * - POST /teams : Admin uniquement
  * - PATCH /teams/:id : Admin uniquement
  * - DELETE /teams/:id : Admin uniquement
@@ -89,7 +89,7 @@ export const teamPaths = {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
                             examples: {
-                                employeeForbidden: {
+                                employeForbidden: {
                                     summary: 'Employé non autorisé',
                                     value: {
                                         success: false,

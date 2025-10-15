@@ -1,10 +1,10 @@
 export type Role = 'admin' | 'manager' | 'employe';
 export type TimesheetStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
 export type Status = 'normal' | 'retard';
-export type KpiType = 'total' | 'heures' | 'absences';
+export type KpiType = 'total' | 'hours' | 'absences';
 export type ScheduleType = 'normal' | 'exceptionnel';
 export type ScheduleJour = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type ScheduleHeure = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23;
+export type ScheduleHour = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23;
 export type ScheduleMinute = 0 | 15 | 30 | 45;
 export type ScheduleSeconde = 0 | 15 | 30 | 45;
 export type ScheduleMilliseconde = 0 | 15 | 30 | 45;

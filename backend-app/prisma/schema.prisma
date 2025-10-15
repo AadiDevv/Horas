@@ -19,7 +19,7 @@ generator client {
 enum Role {
   admin
   manager
-  employee
+  employe
 }
 
 enum TimesheetStatus {
@@ -40,7 +40,7 @@ model User {
   email              String    @unique @db.VarChar(255)
   phone              String    @db.VarChar(20) @default("")
   hashedPassword     String    @db.VarChar(255)
-  role               Role      @default(employee)
+  role               Role      @default(employe)
   isActive           Boolean   @default(false)
   teamId             Int?
   scheduleId         Int?
@@ -99,7 +99,7 @@ model Schedule {
 
 model Timesheet {
   id           Int             @id @default(autoincrement())
-  employeeId   Int
+  employeId   Int
   date         DateTime         @db.Date
   hour         DateTime
   clockin      Boolean
@@ -108,12 +108,12 @@ model Timesheet {
   updatedAt    DateTime         @default(now())
 
   // Relations
-  employee     User             @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employe     User             @relation(fields: [employeId], references: [id], onDelete: Cascade)
 
-  @@index([employeeId])
+  @@index([employeId])
   @@index([date])
   @@index([status])
-  @@index([employeeId, date])
+  @@index([employeId, date])
 }
 
 model Report {
@@ -139,16 +139,16 @@ model Report {
 
 model ExceptionalSchedule {
   id             Int       @id @default(autoincrement())
-  employeeId     Int
+  employeId     Int
   date           DateTime  @db.Date
   scheduleId     Int
   createdAt      DateTime  @default(now())
 
   // Relations
-  employee       User      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employe       User      @relation(fields: [employeId], references: [id], onDelete: Cascade)
   schedule       Schedule  @relation(fields: [scheduleId], references: [id])
 
-  @@index([employeeId])
+  @@index([employeId])
   @@index([date])
   @@index([scheduleId])
 }

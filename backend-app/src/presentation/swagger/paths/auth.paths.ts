@@ -1,6 +1,6 @@
 // #region Authentication Paths
 /**
- * Routes d'authentification et de gestion des utilisateurs
+ * Routes d'authentification et de gestion des users
  * 
  * Architecture de sécurité :
  * - /register : Public - Auto-inscription (employe uniquement)
@@ -148,7 +148,7 @@ export const authPaths = {
                             $ref: '#/components/schemas/UserCreateDTO'
                         },
                         examples: {
-                            employeeBasic: {
+                            employeBasic: {
                                 summary: 'Création basique',
                                 value: {
                                     firstName: 'Marie',
@@ -158,7 +158,7 @@ export const authPaths = {
                                     role: 'employe'
                                 }
                             },
-                            employeeComplete: {
+                            employeComplete: {
                                 summary: 'Création complète avec équipe',
                                 value: {
                                     firstName: 'Marie',

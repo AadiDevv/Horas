@@ -4,7 +4,7 @@
  * Tag: Schedules (À venir)
  * 
  * Permissions :
- * - GET /schedules : Tous les utilisateurs authentifiés
+ * - GET /schedules : Tous les users authentifiés
  * - POST /schedules : Admin ou Manager
  * - PATCH /schedules/:id : Admin ou Manager
  * - DELETE /schedules/:id : Admin uniquement
@@ -51,18 +51,18 @@ export const schedulePaths = {
                                 summary: 'Schedule de journée (Lun-Ven)',
                                 value: {
                                     lastName: 'Schedule de journée',
-                                    heureDebut: '09:00',
-                                    heureFin: '17:30',
-                                    joursActifs: [1, 2, 3, 4, 5]
+                                    startHour: '09:00',
+                                    endHour: '17:30',
+                                    activeDays: [1, 2, 3, 4, 5]
                                 }
                             },
                             nuit: {
                                 summary: 'Schedule de nuit (tous les jours)',
                                 value: {
                                     lastName: 'Schedule de nuit',
-                                    heureDebut: '22:00',
-                                    heureFin: '06:00',
-                                    joursActifs: [1, 2, 3, 4, 5, 6, 7]
+                                    startHour: '22:00',
+                                    endHour: '06:00',
+                                    activeDays: [1, 2, 3, 4, 5, 6, 7]
                                 }
                             }
                         }
@@ -79,17 +79,17 @@ export const schedulePaths = {
                     }
                 },
                 400: {
-                    description: 'Données invalides (heures au mauvais format, jours invalides)',
+                    description: 'Données invalides (hours au mauvais format, jours invalides)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
                             examples: {
                                 invalidTime: {
-                                    summary: 'Format d\'heure invalide',
+                                    summary: 'Format d\'hour invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Le format d\'heure doit être HH:mm',
+                                        message: 'Le format d\'hour doit être HH:mm',
                                         code: 'VALIDATION_ERROR',
                                         timestamp: '2025-10-12T10:00:00.000Z'
                                     }
@@ -113,7 +113,7 @@ export const schedulePaths = {
     '/api/schedules/{id}': {
         get: {
             summary: 'Détail d\'un schedule',
-            description: 'Récupère les informations détaillées d\'un schedule. Utiliser ?include=utilisateurs pour obtenir la liste des utilisateurs assignés.',
+            description: 'Récupère les informations détaillées d\'un schedule. Utiliser ?include=users pour obtenir la liste des users assignés.',
             tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -127,8 +127,8 @@ export const schedulePaths = {
                 {
                     name: 'include',
                     in: 'query',
-                    schema: { type: 'string', enum: ['utilisateurs'] },
-                    description: 'Inclure la liste des utilisateurs assignés'
+                    schema: { type: 'string', enum: ['users'] },
+                    description: 'Inclure la liste des users assignés'
                 }
             ],
             responses: {
@@ -151,7 +151,7 @@ export const schedulePaths = {
                                         type: 'object',
                                         properties: {
                                             success: { type: 'boolean', example: true },
-                                            data: { $ref: '#/components/schemas/ScheduleWithUtilisateursDTO' },
+                                            data: { $ref: '#/components/schemas/ScheduleWithUsersDTO' },
                                             message: { type: 'string' },
                                             timestamp: { type: 'string', format: 'date-time' }
                                         }
@@ -224,7 +224,7 @@ export const schedulePaths = {
 
         delete: {
             summary: 'Supprimer un schedule',
-            description: 'Supprime un schedule. Admin uniquement. Attention : les utilisateurs assignés à cet schedule seront dissociés.',
+            description: 'Supprime un schedule. Admin uniquement. Attention : les users assignés à cet schedule seront dissociés.',
             tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
