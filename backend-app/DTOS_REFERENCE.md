@@ -22,7 +22,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 // Format de réponse standard (erreur)
 {
   "success": false,
-  "error": "Nom de l'erreur",
+  "error": "lastName de l'erreur",
   "code": "ERROR_CODE",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
@@ -39,14 +39,14 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body:**
 ```json
 {
-  "prenom": "Jean",
-  "nom": "Dupont",
+  "firstName": "Jean",
+  "lastName": "Dupont",
   "email": "jean.dupont@example.com",
   "password": "SecureP@ss123",
   "role": "employe",
-  "telephone": "+33 6 12 34 56 78",
-  "equipeId": 5,
-  "plageHoraireId": 2
+  "phone": "+33 6 12 34 56 78",
+  "teamId": 5,
+  "scheduleId": 2
 }
 ```
 
@@ -60,14 +60,14 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "expiresIn": 1800,
     "user": {
       "id": 1,
-      "prenom": "Jean",
-      "nom": "Dupont",
+      "firstName": "Jean",
+      "lastName": "Dupont",
       "email": "jean.dupont@example.com",
       "role": "employe",
       "isActive": false,
-      "telephone": "+33 6 12 34 56 78",
-      "equipeId": 5,
-      "plageHoraireId": 2,
+      "phone": "+33 6 12 34 56 78",
+      "teamId": 5,
+      "scheduleId": 2,
       "createdAt": "2025-10-12T10:00:00.000Z",
       "updatedAt": "2025-10-12T10:00:00.000Z",
       "deletedAt": null
@@ -111,14 +111,14 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 10,
-    "prenom": "Pierre",
-    "nom": "Martin",
+    "firstName": "Pierre",
+    "lastName": "Martin",
     "email": "pierre.martin@example.com",
     "role": "employe",
     "isActive": false,
-    "telephone": null,
-    "equipeId": null,
-    "plageHoraireId": null,
+    "phone": null,
+    "teamId": null,
+    "scheduleId": null,
     "createdAt": "2025-10-12T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
     "deletedAt": null
@@ -140,16 +140,16 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-### 1.5 Liste des utilisateurs
+### 1.5 Liste des users
 
 **Endpoint:** `GET /api/users`  
 **Query Params (optionnels):**
 - `role` : 'admin' | 'manager' | 'employe'
-- `equipeId` : number
+- `teamId` : number
 - `isActive` : boolean
-- `search` : string (recherche nom/prénom/email)
+- `search` : string (recherche lastName/prélastName/email)
 
-**Example:** `GET /api/users?role=employe&equipeId=5&isActive=true`
+**Example:** `GET /api/users?role=employe&teamId=5&isActive=true`
 
 **Response (200):**
 ```json
@@ -158,26 +158,26 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com",
       "role": "employe",
       "isActive": true,
-      "equipeId": 5,
-      "equipeNom": "Équipe Production"
+      "teamId": 5,
+      "teamlastName": "Équipe Production"
     },
     {
       "id": 11,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "employe",
       "isActive": true,
-      "equipeId": 5,
-      "equipeNom": "Équipe Production"
+      "teamId": 5,
+      "teamlastName": "Équipe Production"
     }
   ],
-  "message": "Liste des utilisateurs récupérée avec succès",
+  "message": "Liste des users récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
@@ -194,26 +194,26 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 10,
-    "prenom": "Pierre",
-    "nom": "Martin",
+    "firstName": "Pierre",
+    "lastName": "Martin",
     "email": "pierre.martin@example.com",
     "role": "employe",
     "isActive": true,
-    "telephone": "+33 6 12 34 56 78",
-    "equipeId": 5,
-    "plageHoraireId": 2,
+    "phone": "+33 6 12 34 56 78",
+    "teamId": 5,
+    "scheduleId": 2,
     "createdAt": "2025-10-01T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
     "deletedAt": null,
-    "equipe": {
+    "team": {
       "id": 5,
-      "nom": "Équipe Production"
+      "lastName": "Équipe Production"
     },
-    "horaire": {
+    "schedule": {
       "id": 2,
-      "nom": "Horaire de journée",
-      "heureDebut": "09:00",
-      "heureFin": "17:30"
+      "lastName": "Schedule de journée",
+      "startHour": "09:00",
+      "endHour": "17:30"
     }
   },
   "message": "Utilisateur récupéré avec succès",
@@ -231,14 +231,14 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "prenom": "Pierre",
-  "nom": "Martin-Dupont",
+  "firstName": "Pierre",
+  "lastName": "Martin-Dupont",
   "email": "pierre.martin@example.com",
-  "telephone": "+33 6 99 88 77 66",
+  "phone": "+33 6 99 88 77 66",
   "role": "manager",
   "isActive": true,
-  "equipeId": 7,
-  "plageHoraireId": 3
+  "teamId": 7,
+  "scheduleId": 3
 }
 ```
 
@@ -270,18 +270,18 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-## 🏢 2. ÉQUIPES (EQUIPE)
+## 🏢 2. ÉQUIPES (TEAM)
 
 ### 2.1 Créer une équipe
 
-**Endpoint:** `POST /api/equipes`  
+**Endpoint:** `POST /api/teams`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin
 
 **Request Body:**
 ```json
 {
-  "nom": "Équipe Production",
+  "lastName": "Équipe Production",
   "description": "Équipe responsable de la production du matin",
   "managerId": 5
 }
@@ -293,7 +293,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production du matin",
     "managerId": 5,
     "createdAt": "2025-10-12T10:00:00.000Z",
@@ -301,12 +301,12 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 0
+    "membersCount": 0
   },
   "message": "Équipe créée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
@@ -317,7 +317,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ### 2.2 Liste des équipes
 
-**Endpoint:** `GET /api/equipes`
+**Endpoint:** `GET /api/teams`
 
 **Response (200):**
 ```json
@@ -326,20 +326,20 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 1,
-      "nom": "Équipe Production",
+      "lastName": "Équipe Production",
       "description": "Équipe responsable de la production",
       "managerId": 5,
-      "managerNom": "Marie Durand",
-      "membresCount": 12,
+      "managerlastName": "Marie Durand",
+      "membersCount": 12,
       "createdAt": "2025-10-01T10:00:00.000Z"
     },
     {
       "id": 2,
-      "nom": "Équipe Logistique",
+      "lastName": "Équipe Logistique",
       "description": null,
       "managerId": 6,
-      "managerNom": "Jean Martin",
-      "membresCount": 8,
+      "managerlastName": "Jean Martin",
+      "membersCount": 8,
       "createdAt": "2025-10-05T10:00:00.000Z"
     }
   ],
@@ -352,17 +352,17 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ### 2.3 Détail d'une équipe
 
-**Endpoint:** `GET /api/equipes/:id`  
+**Endpoint:** `GET /api/teams/:id`  
 **Query Params (optionnels):**
-- `include=membres` : inclure la liste complète des membres
+- `include=members` : inclure la liste complète des members
 
-**Response (200) sans `include=membres`:**
+**Response (200) sans `include=members`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production",
     "managerId": 5,
     "createdAt": "2025-10-01T10:00:00.000Z",
@@ -370,25 +370,25 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 12
+    "membersCount": 12
   },
   "message": "Équipe récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
-**Response (200) avec `include=membres`:**
+**Response (200) avec `include=members`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production",
     "managerId": 5,
     "createdAt": "2025-10-01T10:00:00.000Z",
@@ -396,30 +396,30 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 2,
-    "membres": [
+    "membersCount": 2,
+    "members": [
       {
         "id": 10,
-        "prenom": "Pierre",
-        "nom": "Martin",
+        "firstName": "Pierre",
+        "lastName": "Martin",
         "email": "pierre.martin@example.com",
         "role": "employe",
         "isActive": true,
-        "telephone": "+33 6 12 34 56 78"
+        "phone": "+33 6 12 34 56 78"
       },
       {
         "id": 11,
-        "prenom": "Sophie",
-        "nom": "Bernard",
+        "firstName": "Sophie",
+        "lastName": "Bernard",
         "email": "sophie.bernard@example.com",
         "role": "employe",
         "isActive": true,
-        "telephone": null
+        "phone": null
       }
     ]
   },
@@ -432,26 +432,26 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ### 2.4 Mettre à jour une équipe
 
-**Endpoint:** `PATCH /api/equipes/:id`  
+**Endpoint:** `PATCH /api/teams/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin
 
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "nom": "Équipe Production - Matin",
+  "lastName": "Équipe Production - Matin",
   "description": "Nouvelle description",
   "managerId": 7
 }
 ```
 
-**Response (200):** *(EquipeReadDTO complet)*
+**Response (200):** *(TeamReadDTO complet)*
 
 ---
 
 ### 2.5 Supprimer une équipe
 
-**Endpoint:** `DELETE /api/equipes/:id`  
+**Endpoint:** `DELETE /api/teams/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin
 
@@ -466,27 +466,27 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-## ⏰ 3. HORAIRES (HORAIRE)
+## ⏰ 3. SCHEDULES (SCHEDULE)
 
-### 3.1 Créer un horaire
+### 3.1 Créer un schedule
 
-**Endpoint:** `POST /api/horaires`  
+**Endpoint:** `POST /api/schedules`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
 **Request Body:**
 ```json
 {
-  "nom": "Horaire de journée",
-  "heureDebut": "09:00",
-  "heureFin": "17:30",
-  "joursActifs": [1, 2, 3, 4, 5]
+  "lastName": "Schedule de journée",
+  "startHour": "09:00",
+  "endHour": "17:30",
+  "activeDays": [1, 2, 3, 4, 5]
 }
 ```
 
 **Notes:**
-- `heureDebut` et `heureFin` au format **HH:mm**
-- `joursActifs` : tableau de nombres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
+- `startHour` et `endHour` au format **HH:mm**
+- `activeDays` : tableau de lastNamebres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
 
 **Response (201):**
 ```json
@@ -494,24 +494,24 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "lastName": "Schedule de journée",
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-12T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 0
+    "usersCount": 0
   },
-  "message": "Horaire créé avec succès",
+  "message": "Schedule créé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.2 Liste des horaires
+### 3.2 Liste des schedules
 
-**Endpoint:** `GET /api/horaires`
+**Endpoint:** `GET /api/schedules`
 
 **Response (200):**
 ```json
@@ -520,113 +520,113 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 1,
-      "nom": "Horaire de journée",
-      "heureDebut": "09:00",
-      "heureFin": "17:30",
-      "joursActifs": [1, 2, 3, 4, 5],
-      "utilisateursCount": 25
+      "lastName": "Schedule de journée",
+      "startHour": "09:00",
+      "endHour": "17:30",
+      "activeDays": [1, 2, 3, 4, 5],
+      "usersCount": 25
     },
     {
       "id": 2,
-      "nom": "Horaire de nuit",
-      "heureDebut": "22:00",
-      "heureFin": "06:00",
-      "joursActifs": [1, 2, 3, 4, 5, 6, 7],
-      "utilisateursCount": 8
+      "lastName": "Schedule de nuit",
+      "startHour": "22:00",
+      "endHour": "06:00",
+      "activeDays": [1, 2, 3, 4, 5, 6, 7],
+      "usersCount": 8
     }
   ],
-  "message": "Liste des horaires récupérée avec succès",
+  "message": "Liste des schedules récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.3 Détail d'un horaire
+### 3.3 Détail d'un schedule
 
-**Endpoint:** `GET /api/horaires/:id`  
+**Endpoint:** `GET /api/schedules/:id`  
 **Query Params (optionnels):**
-- `include=utilisateurs` : inclure la liste des utilisateurs assignés
+- `include=users` : inclure la liste des users assignés
 
-**Response (200) sans `include=utilisateurs`:**
+**Response (200) sans `include=users`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "lastName": "Schedule de journée",
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-01T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 25
+    "usersCount": 25
   },
-  "message": "Horaire récupéré avec succès",
+  "message": "Schedule récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
-**Response (200) avec `include=utilisateurs`:**
+**Response (200) avec `include=users`:**
 ```json
 {
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
-    "heureDebut": "09:00",
-    "heureFin": "17:30",
-    "joursActifs": [1, 2, 3, 4, 5],
+    "lastName": "Schedule de journée",
+    "startHour": "09:00",
+    "endHour": "17:30",
+    "activeDays": [1, 2, 3, 4, 5],
     "createdAt": "2025-10-01T10:00:00.000Z",
     "updatedAt": "2025-10-12T10:00:00.000Z",
-    "utilisateursCount": 2,
-    "utilisateurs": [
+    "usersCount": 2,
+    "users": [
       {
         "id": 10,
-        "prenom": "Pierre",
-        "nom": "Martin",
+        "firstName": "Pierre",
+        "lastName": "Martin",
         "email": "pierre.martin@example.com",
         "role": "employe"
       },
       {
         "id": 11,
-        "prenom": "Sophie",
-        "nom": "Bernard",
+        "firstName": "Sophie",
+        "lastName": "Bernard",
         "email": "sophie.bernard@example.com",
         "role": "employe"
       }
     ]
   },
-  "message": "Horaire récupéré avec succès",
+  "message": "Schedule récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.4 Mettre à jour un horaire
+### 3.4 Mettre à jour un schedule
 
-**Endpoint:** `PATCH /api/horaires/:id`  
+**Endpoint:** `PATCH /api/schedules/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "nom": "Horaire de journée modifié",
-  "heureDebut": "08:30",
-  "heureFin": "18:00",
-  "joursActifs": [1, 2, 3, 4, 5, 6]
+  "lastName": "Schedule de journée modifié",
+  "startHour": "08:30",
+  "endHour": "18:00",
+  "activeDays": [1, 2, 3, 4, 5, 6]
 }
 ```
 
-**Response (200):** *(HoraireReadDTO complet)*
+**Response (200):** *(ScheduleReadDTO complet)*
 
 ---
 
-### 3.5 Supprimer un horaire
+### 3.5 Supprimer un schedule
 
-**Endpoint:** `DELETE /api/horaires/:id`  
+**Endpoint:** `DELETE /api/schedules/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin
 
@@ -634,18 +634,18 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "success": true,
-  "message": "Horaire supprimé avec succès",
+  "message": "Schedule supprimé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-## 📍 4. POINTAGES (POINTAGE)
+## 📍 4. TIMESHEETS (TIMESHEET)
 
-### 4.1 Créer un pointage (admin/manager)
+### 4.1 Créer un timesheet (admin/manager)
 
-**Endpoint:** `POST /api/pointages`  
+**Endpoint:** `POST /api/timesheets`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
@@ -654,7 +654,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 {
   "employeId": 10,
   "date": "2025-10-12",
-  "heure": "09:05:30",
+  "hour": "09:05:30",
   "clockin": true,
   "status": "normal"
 }
@@ -662,7 +662,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Notes:**
 - `date` : format **YYYY-MM-DD**
-- `heure` : format **HH:mm:ss** ou ISO DateTime
+- `hour` : format **HH:mm:ss** ou ISO DateTime
 - `clockin` : `true` = entrée, `false` = sortie
 - `status` : 'normal' | 'retard' | 'absence' | 'incomplet' (optionnel, calculé automatiquement)
 
@@ -674,28 +674,28 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "id": 1,
     "employeId": 10,
     "date": "2025-10-12",
-    "heure": "2025-10-12T09:05:30.000Z",
+    "hour": "2025-10-12T09:05:30.000Z",
     "clockin": true,
     "status": "normal",
     "createdAt": "2025-10-12T09:05:35.000Z",
     "updatedAt": "2025-10-12T09:05:35.000Z",
     "employe": {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com"
     }
   },
-  "message": "Pointage enregistré avec succès",
+  "message": "Timesheet enregistré avec succès",
   "timestamp": "2025-10-12T09:05:35.000Z"
 }
 ```
 
 ---
 
-### 4.2 Pointage rapide (employé)
+### 4.2 Timesheet rapide (employé)
 
-**Endpoint:** `POST /api/pointages/quick`  
+**Endpoint:** `POST /api/timesheets/quick`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Tous (employé pointe lui-même)
 
@@ -708,16 +708,16 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Notes:**
 - L'employé est déduit du JWT
-- La date et l'heure sont automatiquement définies au moment de la requête
+- La date et l'hour sont automatiquement définies au moment de la requête
 - Le statut est calculé automatiquement
 
-**Response (201):** *(même format que PointageReadDTO)*
+**Response (201):** *(même format que TimesheetReadDTO)*
 
 ---
 
-### 4.3 Liste des pointages
+### 4.3 Liste des timesheets
 
-**Endpoint:** `GET /api/pointages`  
+**Endpoint:** `GET /api/timesheets`  
 **Query Params (optionnels):**
 - `employeId` : number
 - `dateDebut` : YYYY-MM-DD
@@ -725,7 +725,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 - `status` : 'normal' | 'retard' | 'absence' | 'incomplet'
 - `clockin` : boolean (true=entrées, false=sorties)
 
-**Example:** `GET /api/pointages?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31&status=retard`
+**Example:** `GET /api/timesheets?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31&status=retard`
 
 **Response (200):**
 ```json
@@ -735,32 +735,32 @@ Cette API suit une architecture REST avec des réponses standardisées :
     {
       "id": 1,
       "employeId": 10,
-      "employeNom": "Pierre Martin",
+      "employelastName": "Pierre Martin",
       "date": "2025-10-12",
-      "heure": "09:05:30",
+      "hour": "09:05:30",
       "clockin": true,
       "status": "normal"
     },
     {
       "id": 2,
       "employeId": 10,
-      "employeNom": "Pierre Martin",
+      "employelastName": "Pierre Martin",
       "date": "2025-10-12",
-      "heure": "17:35:00",
+      "hour": "17:35:00",
       "clockin": false,
       "status": "normal"
     }
   ],
-  "message": "Liste des pointages récupérée avec succès",
+  "message": "Liste des timesheets récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 4.4 Détail d'un pointage
+### 4.4 Détail d'un timesheet
 
-**Endpoint:** `GET /api/pointages/:id`
+**Endpoint:** `GET /api/timesheets/:id`
 
 **Response (200):**
 ```json
@@ -770,28 +770,28 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "id": 1,
     "employeId": 10,
     "date": "2025-10-12",
-    "heure": "2025-10-12T09:05:30.000Z",
+    "hour": "2025-10-12T09:05:30.000Z",
     "clockin": true,
     "status": "normal",
     "createdAt": "2025-10-12T09:05:35.000Z",
     "updatedAt": "2025-10-12T09:05:35.000Z",
     "employe": {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com"
     }
   },
-  "message": "Pointage récupéré avec succès",
+  "message": "Timesheet récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 4.5 Corriger un pointage
+### 4.5 Corriger un timesheet
 
-**Endpoint:** `PATCH /api/pointages/:id`  
+**Endpoint:** `PATCH /api/timesheets/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
@@ -799,19 +799,19 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "date": "2025-10-12",
-  "heure": "09:00:00",
+  "hour": "09:00:00",
   "clockin": true,
   "status": "normal"
 }
 ```
 
-**Response (200):** *(PointageReadDTO complet)*
+**Response (200):** *(TimesheetReadDTO complet)*
 
 ---
 
-### 4.6 Supprimer un pointage
+### 4.6 Supprimer un timesheet
 
-**Endpoint:** `DELETE /api/pointages/:id`  
+**Endpoint:** `DELETE /api/timesheets/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
@@ -819,22 +819,22 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "success": true,
-  "message": "Pointage supprimé avec succès",
+  "message": "Timesheet supprimé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 4.7 Statistiques de pointage
+### 4.7 Statistiques de timesheet
 
-**Endpoint:** `GET /api/pointages/stats`  
+**Endpoint:** `GET /api/timesheets/stats`  
 **Query Params (requis):**
 - `employeId` : number
 - `dateDebut` : YYYY-MM-DD
 - `dateFin` : YYYY-MM-DD
 
-**Example:** `GET /api/pointages/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31`
+**Example:** `GET /api/timesheets/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31`
 
 **Response (200):**
 ```json
@@ -842,17 +842,17 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "employeId": 10,
-    "periodeDebut": "2025-10-01",
-    "periodeFin": "2025-10-31",
-    "totalPointages": 42,
+    "periodStart": "2025-10-01",
+    "periodEnd": "2025-10-31",
+    "totalTimesheets": 42,
     "totalEntrees": 21,
     "totalSorties": 21,
-    "pointagesNormaux": 38,
-    "pointagesRetard": 3,
-    "pointagesIncomplete": 1,
+    "timesheetsNormaux": 38,
+    "timesheetsRetard": 3,
+    "timesheetsIncomplete": 1,
     "joursPointes": 21
   },
-  "message": "Statistiques des pointages calculées avec succès",
+  "message": "Statistiques des timesheets calculées avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
@@ -900,8 +900,8 @@ Le token JWT contient les informations suivantes (payload décodé) :
 {
   "sub": 10,
   "email": "pierre.martin@example.com",
-  "prenom": "Pierre",
-  "nom": "Martin",
+  "firstName": "Pierre",
+  "lastName": "Martin",
   "role": "employe",
   "isActive": true,
   "lastLoginAt": "2025-10-12T10:00:00.000Z",
@@ -922,13 +922,13 @@ Le token JWT contient les informations suivantes (payload décodé) :
 | `POST /users/register/manager` | ❌ | ❌ | ✅ |
 | `GET /users` | ✅ | ✅ | ✅ |
 | `PATCH /users/:id` | ✅ (soi-même) | ✅ (son équipe) | ✅ |
-| `POST /equipes` | ❌ | ❌ | ✅ |
-| `PATCH /equipes/:id` | ❌ | ❌ | ✅ |
-| `POST /horaires` | ❌ | ✅ | ✅ |
-| `PATCH /horaires/:id` | ❌ | ✅ | ✅ |
-| `POST /pointages/quick` | ✅ | ✅ | ✅ |
-| `POST /pointages` | ❌ | ✅ | ✅ |
-| `PATCH /pointages/:id` | ❌ | ✅ | ✅ |
+| `POST /teams` | ❌ | ❌ | ✅ |
+| `PATCH /teams/:id` | ❌ | ❌ | ✅ |
+| `POST /schedules` | ❌ | ✅ | ✅ |
+| `PATCH /schedules/:id` | ❌ | ✅ | ✅ |
+| `POST /timesheets/quick` | ✅ | ✅ | ✅ |
+| `POST /timesheets` | ❌ | ✅ | ✅ |
+| `PATCH /timesheets/:id` | ❌ | ✅ | ✅ |
 
 ---
 
@@ -953,14 +953,14 @@ export const handlers = [
           expiresIn: 1800,
           user: {
             id: 1,
-            prenom: 'Jean',
-            nom: 'Dupont',
+            firstName: 'Jean',
+            lastName: 'Dupont',
             email: 'jean.dupont@example.com',
             role: 'employe',
             isActive: true,
-            telephone: null,
-            equipeId: null,
-            plageHoraireId: null,
+            phone: null,
+            teamId: null,
+            scheduleId: null,
             createdAt: '2025-10-12T10:00:00.000Z',
             updatedAt: '2025-10-12T10:00:00.000Z',
             deletedAt: null
@@ -974,7 +974,7 @@ export const handlers = [
   }),
 
   // Liste des équipes
-  rest.get('/api/equipes', (req, res, ctx) => {
+  rest.get('/api/teams', (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -982,11 +982,11 @@ export const handlers = [
         data: [
           {
             id: 1,
-            nom: 'Équipe Production',
+            lastName: 'Équipe Production',
             description: 'Équipe responsable de la production',
             managerId: 5,
-            managerNom: 'Marie Durand',
-            membresCount: 12,
+            managerlastName: 'Marie Durand',
+            membersCount: 12,
             createdAt: '2025-10-01T10:00:00.000Z'
           }
         ],
@@ -996,8 +996,8 @@ export const handlers = [
     );
   }),
 
-  // Pointage rapide
-  rest.post('/api/pointages/quick', (req, res, ctx) => {
+  // Timesheet rapide
+  rest.post('/api/timesheets/quick', (req, res, ctx) => {
     return res(
       ctx.status(201),
       ctx.json({
@@ -1006,19 +1006,19 @@ export const handlers = [
           id: 1,
           employeId: 10,
           date: '2025-10-12',
-          heure: new Date().toISOString(),
+          hour: new Date().toISOString(),
           clockin: true,
           status: 'normal',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           employe: {
             id: 10,
-            prenom: 'Pierre',
-            nom: 'Martin',
+            firstName: 'Pierre',
+            lastName: 'Martin',
             email: 'pierre.martin@example.com'
           }
         },
-        message: 'Pointage enregistré avec succès',
+        message: 'Timesheet enregistré avec succès',
         timestamp: new Date().toISOString()
       })
     );

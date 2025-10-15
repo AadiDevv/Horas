@@ -5,14 +5,14 @@ import { Role } from "@/domain/types";
  * DTO pour l'inscription d'un utilisateur
  */
 export interface UserRegisterDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 
 /**
@@ -39,14 +39,14 @@ export interface TokenResponse {
  */
 export interface UserAuthDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
-    telephone?: string;
-    equipeId?: number;
-    plageHoraireId?: number;
+    phone?: string;
+    teamId?: number;
+    scheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;

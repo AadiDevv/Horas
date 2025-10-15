@@ -1,4 +1,4 @@
-export { AuthController } from './UserController';
-export { HealthController } from './HealthController';
+export { AuthController } from './user.controller';
+export { HealthController } from './health.controller';
 export { ApiController } from './ApiController';
-export { EquipeController } from './EquipeController';
+export { TeamController } from './team.controller';

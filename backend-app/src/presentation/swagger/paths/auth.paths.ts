@@ -1,6 +1,6 @@
 // #region Authentication Paths
 /**
- * Routes d'authentification et de gestion des utilisateurs
+ * Routes d'authentification et de gestion des users
  * 
  * Architecture de sécurité :
  * - /register : Public - Auto-inscription (employe uniquement)
@@ -25,8 +25,8 @@ export const authPaths = {
                             basic: {
                                 summary: 'Inscription basique',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123'
                                 }
@@ -34,11 +34,11 @@ export const authPaths = {
                             complete: {
                                 summary: 'Inscription complète',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    telephone: '+33 6 12 34 56 78'
+                                    phone: '+33 6 12 34 56 78'
                                 }
                             }
                         }
@@ -82,21 +82,21 @@ export const authPaths = {
                                         statusCode: 400
                                     }
                                 },
-                                invalidNom: {
-                                    summary: 'Nom invalide',
+                                invalidlastName: {
+                                    summary: 'lastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Nom invalide (minimum 2 caractères)',
+                                        message: 'lastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 },
-                                invalidPrenom: {
-                                    summary: 'Prénom invalide',
+                                invalidfirstName: {
+                                    summary: 'PrélastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Prénom invalide (minimum 2 caractères)',
+                                        message: 'PrélastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 }
@@ -148,26 +148,26 @@ export const authPaths = {
                             $ref: '#/components/schemas/UserCreateDTO'
                         },
                         examples: {
-                            employeeBasic: {
+                            employeBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe'
                                 }
                             },
-                            employeeComplete: {
+                            employeComplete: {
                                 summary: 'Création complète avec équipe',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe',
-                                    telephone: '+33 6 12 34 56 78',
-                                    equipeId: 5
+                                    phone: '+33 6 12 34 56 78',
+                                    teamId: 5
                                 }
                             }
                         }
@@ -277,8 +277,8 @@ export const authPaths = {
                             managerBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager'
@@ -287,12 +287,12 @@ export const authPaths = {
                             managerComplete: {
                                 summary: 'Création complète',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager',
-                                    telephone: '+33 6 98 76 54 32'
+                                    phone: '+33 6 98 76 54 32'
                                 }
                             }
                         }

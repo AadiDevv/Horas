@@ -4,14 +4,14 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 import { adminOnly, managerOrAdmin } from '../middlewares/role.middleweare';
 
 const router = Router();
-const equipeController = controllers.EquipeController();
+const teamController = controllers.TeamController();
 
 // TODO: Implémenter les routes pour la gestion des équipes
 // Architecture similaire à auth.route.ts
 
 // #region GET Routes
 /**
- * GET /api/equipes?managerId=X
+ * GET /api/teams?managerId=X
  * Liste des équipes avec logique selon le rôle
  * - Manager: ses équipes uniquement
  * - Admin: toutes les équipes ou filtre par managerId
@@ -21,7 +21,7 @@ router.get('/',
     managerOrAdmin,      // 2️⃣ Vérifie que c'est manager ou admin (pas employe)
     async (req, res, next) => {
         try {
-            await equipeController.getEquipes(req, res);
+            await teamController.getTeams(req, res);
         } catch (error) {
             next(error);
         }
@@ -29,14 +29,14 @@ router.get('/',
 );
 
 /**
- * GET /api/equipes/:id
+ * GET /api/teams/:id
  * Détail d'une équipe par ID
  */
 router.get('/:id',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await equipeController.getEquipe_ById(req, res);
+            await teamController.getTeam_ById(req, res);
         } catch (error) {
             next(error);
         }
@@ -46,7 +46,7 @@ router.get('/:id',
 
 // #region POST Routes
 /**
- * POST /api/equipes
+ * POST /api/teams
  * Créer une nouvelle équipe (Admin uniquement)
  */
 router.post('/',
@@ -54,7 +54,7 @@ router.post('/',
     managerOrAdmin,           // 3️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
-            await equipeController.createEquipe(req, res);
+            await teamController.createTeam(req, res);
         } catch (error) {
             next(error);
         }
@@ -64,7 +64,7 @@ router.post('/',
 
 // #region PATCH Routes
 /**
- * PATCH /api/equipes/:id
+ * PATCH /api/teams/:id
  * Modifier une équipe (Admin uniquement)
  */
 router.patch('/:id',
@@ -72,7 +72,7 @@ router.patch('/:id',
     managerOrAdmin,
     async (req, res, next) => {
         try {
-            await equipeController.updateEquipe(req, res);
+            await teamController.updateTeam(req, res);
         } catch (error) {
             next(error);
         }
@@ -82,7 +82,7 @@ router.patch('/:id',
 
 // #region DELETE Routes
 /**
- * DELETE /api/equipes/:id
+ * DELETE /api/teams/:id
  * Supprimer une équipe (Admin uniquement)
  */
 router.delete('/:id',
@@ -90,7 +90,7 @@ router.delete('/:id',
     managerOrAdmin,
     async (req, res, next) => {
         try {
-            await equipeController.deleteEquipe(req, res);
+            await teamController.deleteTeam(req, res);
         } catch (error) {
             next(error);
         }
