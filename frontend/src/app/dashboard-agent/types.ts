@@ -34,6 +34,16 @@ export type DayKey = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
-  message: string;
-  timestamp: string;
+  message?: string;
+  error?: string;
+  timestamp?: string;
 }
+
+// Import des types générés par le backend pour les pointages
+export type {
+  PointageStatus,
+  PointageReadDTO,
+  PointageCreateDTO,
+  ApiSuccessResponse,
+  UserReadDTO
+} from '../../types/backend-generated';

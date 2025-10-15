@@ -15,22 +15,26 @@ export default function Page() {
 
   // Custom hooks
   const { userData, setUserData, loading, formData, setFormData, loadUserData } = useUserData();
-  const { 
-    settingsOpen, 
-    setSettingsOpen, 
-    saving, 
-    successMessage, 
-    errorMessage, 
-    handleOpenSettings, 
-    handleSaveSettings 
+  const {
+    settingsOpen,
+    setSettingsOpen,
+    saving,
+    successMessage: settingsSuccessMessage,
+    errorMessage: settingsErrorMessage,
+    handleOpenSettings,
+    handleSaveSettings
   } = useSettings(userData, formData);
   const {
     timeLogs,
     isClockingIn,
     currentDayLogs,
+    pointageLoading,
+    successMessage,
+    errorMessage,
     getDayKey,
     handleClockIn,
-    handleClockOut
+    handleClockOut,
+    checkTodayPointages
   } = useTimeClock();
 
   useEffect(() => {
@@ -39,9 +43,10 @@ export default function Page() {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     loadUserData();
-    
+    checkTodayPointages();
+
     return () => {
       clearInterval(timer);
     };
@@ -55,7 +60,7 @@ export default function Page() {
   return (
     <RoleProtection allowedRoles={['manager', 'admin', 'employe']}>
       <div className="min-h-screen bg-white">
-        <Navbar 
+        <Navbar
           onOpenSettings={handleOpenSettings}
           onLogout={handleLogout}
           sidebarOpen={sidebarOpen}
@@ -72,8 +77,8 @@ export default function Page() {
             setFormData={setFormData}
             onSave={() => handleSaveSettings(setUserData, setFormData)}
             saving={saving}
-            successMessage={successMessage}
-            errorMessage={errorMessage}
+            successMessage={settingsSuccessMessage}
+            errorMessage={settingsErrorMessage}
           />
         )}
 
@@ -92,6 +97,9 @@ export default function Page() {
                 isClockingIn={isClockingIn}
                 onClockIn={handleClockIn}
                 onClockOut={handleClockOut}
+                pointageLoading={pointageLoading}
+                successMessage={successMessage}
+                errorMessage={errorMessage}
               />
             </div>
 
