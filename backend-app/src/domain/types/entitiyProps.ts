@@ -21,7 +21,7 @@ export type UserProps = {
 
 export type TeamProps = {
     id?: number,
-    lastName: string,
+    name: string,
     description?: string,
     managerId: number,
     scheduleId?: number,
