@@ -44,7 +44,7 @@ export class EquipeController {
     async createEquipe(req: Request, res: Response): Promise<void> {
         const equipeDto: EquipeCreateDTO = req.body;
         const userId = req.user!.id;
-        if (!equipeDto.nom) throw new ValidationError("Le nom de l'équipe est requis");
+        if (!equipeDto.lastName) throw new ValidationError("Le lastName de l'équipe est requis");
         if (!equipeDto.managerId) throw new ValidationError("Le managerId est requis");
 
         const equipe = await this.UC_equipe.createEquipe(equipeDto, userId);

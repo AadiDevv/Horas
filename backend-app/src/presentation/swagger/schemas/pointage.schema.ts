@@ -93,11 +93,11 @@ export const pointageSchemas = {
                         type: 'integer',
                         example: 10
                     },
-                    prenom: {
+                    firstName: {
                         type: 'string',
                         example: 'Pierre'
                     },
-                    nom: {
+                    lastName: {
                         type: 'string',
                         example: 'Martin'
                     },
@@ -123,10 +123,10 @@ export const pointageSchemas = {
                 type: 'integer',
                 example: 10
             },
-            employeNom: {
+            employelastName: {
                 type: 'string',
                 example: 'Pierre Martin',
-                description: 'Nom complet de l\'employé (prenom + nom)'
+                description: 'lastName complet de l\'employé (firstName + lastName)'
             },
             date: {
                 type: 'string',
@@ -211,37 +211,37 @@ export const pointageSchemas = {
             totalPointages: {
                 type: 'integer',
                 example: 42,
-                description: 'Nombre total de pointages'
+                description: 'lastNamebre total de pointages'
             },
             totalEntrees: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre d\'entrées (clock-in)'
+                description: 'lastNamebre d\'entrées (clock-in)'
             },
             totalSorties: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre de sorties (clock-out)'
+                description: 'lastNamebre de sorties (clock-out)'
             },
             pointagesNormaux: {
                 type: 'integer',
                 example: 38,
-                description: 'Nombre de pointages à l\'heure'
+                description: 'lastNamebre de pointages à l\'heure'
             },
             pointagesRetard: {
                 type: 'integer',
                 example: 3,
-                description: 'Nombre de retards'
+                description: 'lastNamebre de retards'
             },
             pointagesIncomplete: {
                 type: 'integer',
                 example: 1,
-                description: 'Nombre de pointages incomplets (entrée sans sortie)'
+                description: 'lastNamebre de pointages incomplets (entrée sans sortie)'
             },
             joursPointes: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre de jours uniques avec au moins un pointage'
+                description: 'lastNamebre de jours uniques avec au moins un pointage'
             }
         }
     },

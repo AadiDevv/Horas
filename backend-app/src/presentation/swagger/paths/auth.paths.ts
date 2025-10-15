@@ -25,8 +25,8 @@ export const authPaths = {
                             basic: {
                                 summary: 'Inscription basique',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123'
                                 }
@@ -34,8 +34,8 @@ export const authPaths = {
                             complete: {
                                 summary: 'Inscription complète',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
                                     telephone: '+33 6 12 34 56 78'
@@ -82,21 +82,21 @@ export const authPaths = {
                                         statusCode: 400
                                     }
                                 },
-                                invalidNom: {
-                                    summary: 'Nom invalide',
+                                invalidlastName: {
+                                    summary: 'lastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Nom invalide (minimum 2 caractères)',
+                                        message: 'lastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 },
-                                invalidPrenom: {
-                                    summary: 'Prénom invalide',
+                                invalidfirstName: {
+                                    summary: 'PrélastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Prénom invalide (minimum 2 caractères)',
+                                        message: 'PrélastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 }
@@ -151,8 +151,8 @@ export const authPaths = {
                             employeeBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe'
@@ -161,8 +161,8 @@ export const authPaths = {
                             employeeComplete: {
                                 summary: 'Création complète avec équipe',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe',
@@ -277,8 +277,8 @@ export const authPaths = {
                             managerBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager'
@@ -287,8 +287,8 @@ export const authPaths = {
                             managerComplete: {
                                 summary: 'Création complète',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager',

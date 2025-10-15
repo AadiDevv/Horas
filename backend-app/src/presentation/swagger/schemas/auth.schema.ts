@@ -3,19 +3,19 @@ export const authSchemas = {
     // #region Request DTOs
     UserCreateDTO: {
         type: 'object',
-        required: ['prenom', 'nom', 'email', 'password', 'role'],
+        required: ['firstName', 'lastName', 'email', 'password', 'role'],
         properties: {
-            prenom: {
+            firstName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Jean',
-                description: 'Prénom de l\'utilisateur (minimum 2 caractères)'
+                description: 'PrélastName de l\'utilisateur (minimum 2 caractères)'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Dupont',
-                description: 'Nom de l\'utilisateur (minimum 2 caractères)'
+                description: 'lastName de l\'utilisateur (minimum 2 caractères)'
             },
             email: {
                 type: 'string',
@@ -86,15 +86,15 @@ export const authSchemas = {
                 example: 1,
                 description: 'Identifiant unique de l\'utilisateur'
             },
-            prenom: {
+            firstName: {
                 type: 'string',
                 example: 'Jean',
-                description: 'Prénom de l\'utilisateur'
+                description: 'PrélastName de l\'utilisateur'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Dupont',
-                description: 'Nom de l\'utilisateur'
+                description: 'lastName de l\'utilisateur'
             },
             email: {
                 type: 'string',

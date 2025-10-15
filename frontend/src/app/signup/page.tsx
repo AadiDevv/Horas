@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    prenom: "",
-    nom: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -46,8 +46,8 @@ export default function SignupPage() {
       const response = await axios.post(
         "/api/users/register",
         {
-          prenom: formData.prenom,
-          nom: formData.nom,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
           telephone: formData.telephone || undefined,
@@ -95,13 +95,13 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Prénom */}
+            {/* PrélastName */}
             <div>
               <label
-                htmlFor="prenom"
+                htmlFor="firstName"
                 className="block text-sm font-medium text-[#333333] mb-2"
               >
-                Prénom
+                PrélastName
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -120,11 +120,11 @@ export default function SignupPage() {
                   </svg>
                 </div>
                 <input
-                  id="prenom"
-                  name="prenom"
+                  id="firstName"
+                  name="firstName"
                   type="text"
                   required
-                  value={formData.prenom}
+                  value={formData.firstName}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-3 border dark:border-gray-600 rounded-lg bg-[#F5F5F0] text-gray-900 dark:text-black placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-grey-500 focus:border-transparent transition duration-200"
                   placeholder="Jean"
@@ -132,13 +132,13 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Nom */}
+            {/* lastName */}
             <div>
               <label
-                htmlFor="nom"
+                htmlFor="lastName"
                 className="block text-sm font-medium text-[#333333] mb-2"
               >
-                Nom
+                lastName
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -157,11 +157,11 @@ export default function SignupPage() {
                   </svg>
                 </div>
                 <input
-                  id="nom"
-                  name="nom"
+                  id="lastName"
+                  name="lastName"
                   type="text"
                   required
-                  value={formData.nom}
+                  value={formData.lastName}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-3 border dark:border-gray-600 rounded-lg bg-[#F5F5F0] text-gray-900 dark:text-black placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-grey-500 focus:border-transparent transition duration-200"
                   placeholder="Dupont"

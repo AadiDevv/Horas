@@ -23,7 +23,7 @@ export default function ContactSection() {
       >
         <div className="mb-5">
           <label htmlFor="name" className="block text-sm font-medium text-[#333333] mb-2">
-            Nom
+            lastName
           </label>
           <input
             type="text"

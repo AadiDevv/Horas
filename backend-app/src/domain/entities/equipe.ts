@@ -5,7 +5,7 @@ import { ValidationError } from "../error/AppError";
 
 export class Equipe {
     public readonly id?: number;
-    public nom: string;
+    public lastName: string;
     public description?: string;
     public managerId: number;
     public plageHoraireId?: number;
@@ -18,7 +18,7 @@ export class Equipe {
 
     constructor(props: EquipeProps) {
         this.id = props.id;
-        this.nom = props.nom;
+        this.lastName = props.lastName;
         this.description = props.description;
         this.managerId = props.managerId;
         this.plageHoraireId = props.plageHoraireId;
@@ -38,7 +38,7 @@ export class Equipe {
      */
     static fromCreateDTO(dto: EquipeCreateDTO): Equipe {
         return new Equipe({
-            nom: dto.nom,
+            lastName: dto.lastName,
             description: dto.description,
             managerId: dto.managerId,
             plageHoraireId: dto.plageHoraireId,
@@ -52,7 +52,7 @@ export class Equipe {
     static fromUpdateDTO(existingEquipe: Equipe, dto: EquipeUpdateDTO): Equipe {
         return new Equipe({
             ...existingEquipe,
-            nom: dto.nom ?? existingEquipe.nom,
+            lastName: dto.lastName ?? existingEquipe.lastName,
             description: dto.description ?? existingEquipe.description,
             managerId: dto.managerId ?? existingEquipe.managerId,
             plageHoraireId: dto.plageHoraireId ?? existingEquipe.plageHoraireId,
@@ -83,7 +83,7 @@ export class Equipe {
 
         return {
             id: this.id,
-            nom: this.nom,
+            lastName: this.lastName,
             description: this.description,
             managerId: this.managerId,
             plageHoraireId: this.plageHoraireId,
@@ -102,11 +102,11 @@ export class Equipe {
 
         return {
             id: this.id,
-            nom: this.nom,
+            lastName: this.lastName,
             description: this.description,
             managerId: this.managerId,
             plageHoraireId: this.plageHoraireId,
-            managerNom: this.manager ? `${this.manager.prenom} ${this.manager.nom}` : "Manager inconnu",
+            managerlastName: this.manager ? `${this.manager.firstName} ${this.manager.lastName}` : "Manager inconnu",
             membresCount: this.membres?.length ?? this.membresCount ?? 0,
             createdAt: this.createdAt.toISOString(),
         };
@@ -133,8 +133,8 @@ export class Equipe {
      * Peut être appelée avant la sauvegarde
      */
     validate(): void {
-        if (!this.nom || this.nom.trim().length < 2) {
-            throw new ValidationError("Le nom de l'équipe doit contenir au moins 2 caractères");
+        if (!this.lastName || this.lastName.trim().length < 2) {
+            throw new ValidationError("Le lastName de l'équipe doit contenir au moins 2 caractères");
         }
         if (!this.managerId || this.managerId <= 0) {
             throw new ValidationError("L'équipe doit avoir un manager valide");
@@ -144,10 +144,10 @@ export class Equipe {
 
     // #region Business Methods
     /**
-     * Retourne le nom d'affichage de l'équipe
+     * Retourne le lastName d'affichage de l'équipe
      */
     getDisplayName(): string {
-        return this.nom;
+        return this.lastName;
     }
     // #endregion
 }

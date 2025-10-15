@@ -24,8 +24,8 @@ export class EquipeRepository implements IEquipe {
                 manager: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -55,8 +55,8 @@ export class EquipeRepository implements IEquipe {
                 manager: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -65,8 +65,8 @@ export class EquipeRepository implements IEquipe {
                 membres: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -102,8 +102,8 @@ export class EquipeRepository implements IEquipe {
                 },
                 manager: {
                     select: {
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -123,7 +123,7 @@ export class EquipeRepository implements IEquipe {
     async createEquipe(equipe: Equipe): Promise<Equipe> {
         const equipeCreated = await prisma.equipe.create({
             data: {
-                nom: equipe.nom,
+                lastName: equipe.lastName,
                 description: equipe.description,
                 managerId: equipe.managerId,
                 plageHoraireId: equipe.plageHoraireId,
@@ -137,8 +137,8 @@ export class EquipeRepository implements IEquipe {
                 manager: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -164,7 +164,7 @@ export class EquipeRepository implements IEquipe {
         const equipeUpdated = await prisma.equipe.update({
             where: { id: equipe.id },
             data: {
-                nom: equipe.nom,
+                lastName: equipe.lastName,
                 description: equipe.description,
                 plageHoraireId: equipe.plageHoraireId,
                 updatedAt: new Date(),
@@ -178,8 +178,8 @@ export class EquipeRepository implements IEquipe {
                 manager: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,
@@ -212,8 +212,8 @@ export class EquipeRepository implements IEquipe {
                 manager: {
                     select: {
                         id: true,
-                        prenom: true,
-                        nom: true,
+                        firstName: true,
+                        lastName: true,
                         email: true,
                         role: true,
                         isActive: true,

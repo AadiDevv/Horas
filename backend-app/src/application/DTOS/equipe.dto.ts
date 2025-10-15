@@ -5,8 +5,8 @@
  */
 export interface EquipeManagerDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: "admin" | "manager" | "employe";
 }
@@ -17,8 +17,8 @@ export interface EquipeManagerDTO {
  */
 export interface EquipeMembreDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: "admin" | "manager" | "employe";
     isActive: boolean;
@@ -33,7 +33,7 @@ export interface EquipeMembreDTO {
  * Le managerId est fourni dans le body ou extrait du JWT selon les permissions
  */
 export interface EquipeCreateDTO {
-    nom: string;
+    lastName: string;
     description?: string;
     managerId: number;
     plageHoraireId?: number;
@@ -46,7 +46,7 @@ export interface EquipeCreateDTO {
  * Tous les champs sont optionnels pour permettre des updates partiels (PATCH)
  */
 export interface EquipeUpdateDTO {
-    nom?: string;
+    lastName?: string;
     description?: string;
     managerId?: number;
     plageHoraireId?: number;
@@ -56,11 +56,11 @@ export interface EquipeUpdateDTO {
 // #region Read DTO
 /**
  * DTO de retour pour une équipe
- * Inclut les informations du manager et le nombre de membres
+ * Inclut les informations du manager et le lastNamebre de membres
  */
 export interface EquipeReadDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description?: string;
     managerId: number;
     plageHoraireId?: number;
@@ -71,7 +71,7 @@ export interface EquipeReadDTO {
     // Informations enrichies pour le frontend
     manager?: EquipeManagerDTO;
 
-    membresCount?: number; // Nombre de membres dans l'équipe
+    membresCount?: number; // lastNamebre de membres dans l'équipe
 }
 
 /**
@@ -89,11 +89,11 @@ export interface EquipeWithMembresDTO extends EquipeReadDTO {
  */
 export interface EquipeListItemDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description?: string;
     managerId: number;
     plageHoraireId?: number;
-    managerNom: string; // Nom complet du manager (prenom + nom)
+    managerlastName: string; // lastName complet du manager (firstName + lastName)
     membresCount: number;
     createdAt: string;
 }

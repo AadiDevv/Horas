@@ -10,8 +10,8 @@ describe('JWTService', () => {
   // 👇 Fake UserCreateDTO
   const fakeDTO = {
     email: 'test@example.com',
-    prenom: 'Jean',
-    nom: 'Dupont',
+    firstName: 'Jean',
+    lastName: 'Dupont',
     password,
     role: 'employe' as const, // Requis depuis la mise à jour de l'auth
     telephone: undefined,
@@ -53,7 +53,7 @@ describe('JWTService', () => {
     expect(extracted).not.toBeNull();
     expect(extracted!.id).toBe(user.id);  // ✅ Changé de "userId" à "id"
     expect(extracted!.email).toBe(user.email);
-    expect(extracted!.prenom).toBe(user.prenom);
+    expect(extracted!.firstName).toBe(user.firstName);
     expect(extracted!.role).toBe('employe'); // default value
   });
 

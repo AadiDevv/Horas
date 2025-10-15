@@ -42,8 +42,8 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 // #region User DTOs
 
 export interface UserCreateDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
@@ -58,8 +58,8 @@ export interface UserLoginDTO {
 }
 
 export interface UserUpdateDTO {
-    prenom?: string;
-    nom?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
     telephone?: string;
     role?: Role;
@@ -79,8 +79,8 @@ export interface UserResetPasswordDTO {
 
 export interface UserReadDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
@@ -92,11 +92,11 @@ export interface UserReadDTO {
     deletedAt: string | null;
     equipe?: {
         id: number;
-        nom: string;
+        lastName: string;
     };
     horaire?: {
         id: number;
-        nom: string;
+        lastName: string;
         heureDebut: string;
         heureFin: string;
     };
@@ -104,13 +104,13 @@ export interface UserReadDTO {
 
 export interface UserListItemDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
     equipeId: number | null;
-    equipeNom: string | null;
+    equipelastName: string | null;
 }
 
 export interface UserFilterDTO {
@@ -137,20 +137,20 @@ export interface TokenResponse {
 // #region Equipe DTOs
 
 export interface EquipeCreateDTO {
-    nom: string;
+    lastName: string;
     description?: string;
     managerId: number;
 }
 
 export interface EquipeUpdateDTO {
-    nom?: string;
+    lastName?: string;
     description?: string;
     managerId?: number;
 }
 
 export interface EquipeReadDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description: string | null;
     managerId: number;
     createdAt: string;
@@ -158,8 +158,8 @@ export interface EquipeReadDTO {
     deletedAt: string | null;
     manager?: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: Role;
     };
@@ -169,8 +169,8 @@ export interface EquipeReadDTO {
 export interface EquipeWithMembresDTO extends EquipeReadDTO {
     membres: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: Role;
         isActive: boolean;
@@ -180,10 +180,10 @@ export interface EquipeWithMembresDTO extends EquipeReadDTO {
 
 export interface EquipeListItemDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description: string | null;
     managerId: number;
-    managerNom: string;
+    managerlastName: string;
     membresCount: number;
     createdAt: string;
 }
@@ -197,14 +197,14 @@ export interface EquipeListItemDTO {
 // #region Horaire DTOs
 
 export interface HoraireCreateDTO {
-    nom: string;
+    lastName: string;
     heureDebut: string; // Format: "HH:mm"
     heureFin: string;   // Format: "HH:mm"
     joursActifs: number[]; // 1=Lundi, 7=Dimanche
 }
 
 export interface HoraireUpdateDTO {
-    nom?: string;
+    lastName?: string;
     heureDebut?: string;
     heureFin?: string;
     joursActifs?: number[];
@@ -212,7 +212,7 @@ export interface HoraireUpdateDTO {
 
 export interface HoraireReadDTO {
     id: number;
-    nom: string;
+    lastName: string;
     heureDebut: string;
     heureFin: string;
     joursActifs: number[];
@@ -224,8 +224,8 @@ export interface HoraireReadDTO {
 export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
     utilisateurs: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: string;
     }[];
@@ -233,7 +233,7 @@ export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
 
 export interface HoraireListItemDTO {
     id: number;
-    nom: string;
+    lastName: string;
     heureDebut: string;
     heureFin: string;
     joursActifs: number[];
@@ -278,8 +278,8 @@ export interface PointageReadDTO {
     updatedAt: string;
     employe?: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
     };
 }
@@ -287,7 +287,7 @@ export interface PointageReadDTO {
 export interface PointageListItemDTO {
     id: number;
     employeId: number;
-    employeNom: string;
+    employelastName: string;
     date: string;
     heure: string;
     clockin: boolean;

@@ -5,8 +5,8 @@ import { Role } from "@/domain/types";
  * DTO pour l'inscription d'un utilisateur
  */
 export interface UserRegisterDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
@@ -39,8 +39,8 @@ export interface TokenResponse {
  */
 export interface UserAuthDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;

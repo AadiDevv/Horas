@@ -122,7 +122,7 @@ export class EquipeUseCase {
      * 
      * Règles métier :
      * - Le managerId ne peut PAS être modifié (une équipe reste liée à son manager)
-     * - Seuls nom, description et plageHoraireId peuvent être modifiés
+     * - Seuls lastName, description et plageHoraireId peuvent être modifiés
      * 
      * @param id - ID de l'équipe à modifier
      * @param dto - Données de mise à jour
@@ -181,7 +181,7 @@ export class EquipeUseCase {
         const membresCount = equipe.membres?.length ?? 0;
         if (membresCount > 0) {
             throw new ValidationError(
-                `L'équipe "${equipe.nom}" contient ${membresCount} membre(s). ` +
+                `L'équipe "${equipe.lastName}" contient ${membresCount} membre(s). ` +
                 `Veuillez d'abord déplacer ou retirer les membres avant de supprimer l'équipe.`
             );
         }
