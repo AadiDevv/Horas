@@ -21,7 +21,7 @@ export class User {
 
   public telephone?: string;
   public equipeId?: number;
-  public horaireId?: number;
+  public plageHoraireId?: number;
 
   constructor(
     props: UserProps
@@ -36,7 +36,7 @@ export class User {
     this.isActive = props.isActive;
     this.telephone = props.telephone;
     this.equipeId = props.equipeId;
-    this.horaireId = props.horaireId;
+    this.plageHoraireId = props.plageHoraireId;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
     this.lastLoginAt = props.lastLoginAt;
@@ -156,7 +156,7 @@ export class User {
       isActive: this.isActive,
       telephone: this.telephone,
       equipeId: this.equipeId,
-      horaireId: this.horaireId,
+      plageHoraireId: this.plageHoraireId,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
@@ -201,7 +201,7 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       telephone: this.telephone,
-      horaireId: this.horaireId,
+      plageHoraireId: this.plageHoraireId,
     };
   }
   // #endregion

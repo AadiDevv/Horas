@@ -15,7 +15,7 @@ export type UserProps = {
 
     telephone?: string,
     equipeId?: number,
-    horaireId?: number,
+    plageHoraireId?: number,
     id?: number,
 }
 
@@ -24,7 +24,7 @@ export type EquipeProps = {
     nom: string,
     description?: string,
     managerId: number,
-    horaireId?: number,
+    plageHoraireId?: number,
     createdAt?: Date,
     updatedAt?: Date,
     deletedAt?: Date,

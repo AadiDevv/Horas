@@ -23,7 +23,7 @@ export interface EquipeMembreDTO {
     role: "admin" | "manager" | "employe";
     isActive: boolean;
     telephone?: string;
-    horaireId?: number;
+    plageHoraireId?: number;
 }
 // #endregion
 
@@ -36,7 +36,7 @@ export interface EquipeCreateDTO {
     nom: string;
     description?: string;
     managerId: number;
-    horaireId?: number;
+    plageHoraireId?: number;
 }
 // #endregion
 
@@ -49,7 +49,7 @@ export interface EquipeUpdateDTO {
     nom?: string;
     description?: string;
     managerId?: number;
-    horaireId?: number;
+    plageHoraireId?: number;
 }
 // #endregion
 
@@ -63,7 +63,7 @@ export interface EquipeReadDTO {
     nom: string;
     description?: string;
     managerId: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     createdAt: string;
     updatedAt?: string;
     deletedAt?: string;
@@ -92,7 +92,7 @@ export interface EquipeListItemDTO {
     nom: string;
     description?: string;
     managerId: number;
-    horaireId?: number;
+    plageHoraireId?: number;
     managerNom: string; // Nom complet du manager (prenom + nom)
     membresCount: number;
     createdAt: string;

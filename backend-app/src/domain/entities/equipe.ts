@@ -8,7 +8,7 @@ export class Equipe {
     public nom: string;
     public description?: string;
     public managerId: number;
-    public horaireId?: number;
+    public plageHoraireId?: number;
     public createdAt: Date;
     public updatedAt?: Date;
     public deletedAt?: Date;
@@ -21,13 +21,14 @@ export class Equipe {
         this.nom = props.nom;
         this.description = props.description;
         this.managerId = props.managerId;
-        this.horaireId = props.horaireId;
+        this.plageHoraireId = props.plageHoraireId;
         this.createdAt = props.createdAt || new Date(Date.now());
         this.updatedAt = props.updatedAt;
         this.deletedAt = props.deletedAt;
         this.manager = props.manager;
         this.membres = props.membres;
         this.membresCount = props.membresCount;
+        this.validate();
     }
 
     // #region Factory Methods (DTO → Entité)
@@ -40,7 +41,7 @@ export class Equipe {
             nom: dto.nom,
             description: dto.description,
             managerId: dto.managerId,
-            horaireId: dto.horaireId,
+            plageHoraireId: dto.plageHoraireId,
         });
     }
 
@@ -54,7 +55,7 @@ export class Equipe {
             nom: dto.nom ?? existingEquipe.nom,
             description: dto.description ?? existingEquipe.description,
             managerId: dto.managerId ?? existingEquipe.managerId,
-            horaireId: dto.horaireId ?? existingEquipe.horaireId,
+            plageHoraireId: dto.plageHoraireId ?? existingEquipe.plageHoraireId,
             updatedAt: new Date(Date.now()),
         });
     }
@@ -85,7 +86,7 @@ export class Equipe {
             nom: this.nom,
             description: this.description,
             managerId: this.managerId,
-            horaireId: this.horaireId,
+            plageHoraireId: this.plageHoraireId,
             ...this.toDateStrings(),
             manager: this.manager?.toEquipeManagerDTO(),
             membresCount: this.membres?.length ?? this.membresCount ?? 0,
@@ -104,7 +105,7 @@ export class Equipe {
             nom: this.nom,
             description: this.description,
             managerId: this.managerId,
-            horaireId: this.horaireId,
+            plageHoraireId: this.plageHoraireId,
             managerNom: this.manager ? `${this.manager.prenom} ${this.manager.nom}` : "Manager inconnu",
             membresCount: this.membres?.length ?? this.membresCount ?? 0,
             createdAt: this.createdAt.toISOString(),
