@@ -64,7 +64,7 @@ export class EquipeController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
-        const equipe = await this.UC_equipe.updateEquipe(id, equipeDto);
+        const equipe = await this.UC_equipe.updateEquipe(id, equipeDto, req.user!.id);
         const equipeDTO = equipe.toReadDTO();
 
         res.success(equipeDTO, "Équipe modifiée avec succès");
@@ -76,7 +76,7 @@ export class EquipeController {
         const id = Number(req.params.id);
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        await this.UC_equipe.deleteEquipe(id);
+        await this.UC_equipe.deleteEquipe(id, req.user!.id);
 
         res.success(null, "Équipe supprimée avec succès");
     }

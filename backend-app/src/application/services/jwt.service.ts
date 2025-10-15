@@ -62,7 +62,7 @@ export class JWTService {
     }
 
     return {
-      userId: userId,
+      id: userId,
       email: payload.email,
       prenom: payload.prenom,
       nom: payload.nom,
