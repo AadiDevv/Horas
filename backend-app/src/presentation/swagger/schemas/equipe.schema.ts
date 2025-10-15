@@ -3,14 +3,14 @@ export const equipeSchemas = {
     // #region Request DTOs
     EquipeCreateDTO: {
         type: 'object',
-        required: ['nom', 'managerId'],
+        required: ['lastName', 'managerId'],
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             },
             description: {
                 type: 'string',
@@ -34,12 +34,12 @@ export const equipeSchemas = {
     EquipeUpdateDTO: {
         type: 'object',
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Équipe Production - Matin',
-                description: 'Nouveau nom de l\'équipe'
+                description: 'Nouveau lastName de l\'équipe'
             },
             description: {
                 type: 'string',
@@ -66,10 +66,10 @@ export const equipeSchemas = {
                 example: 1,
                 description: 'ID de l\'équipe'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             },
             description: {
                 type: 'string',
@@ -114,11 +114,11 @@ export const equipeSchemas = {
                         type: 'integer',
                         example: 5
                     },
-                    prenom: {
+                    firstName: {
                         type: 'string',
                         example: 'Marie'
                     },
-                    nom: {
+                    lastName: {
                         type: 'string',
                         example: 'Durand'
                     },
@@ -138,7 +138,7 @@ export const equipeSchemas = {
             membresCount: {
                 type: 'integer',
                 example: 12,
-                description: 'Nombre de membres dans l\'équipe'
+                description: 'lastNamebre de membres dans l\'équipe'
             }
         }
     },
@@ -161,11 +161,11 @@ export const equipeSchemas = {
                                     type: 'integer',
                                     example: 10
                                 },
-                                prenom: {
+                                firstName: {
                                     type: 'string',
                                     example: 'Pierre'
                                 },
-                                nom: {
+                                lastName: {
                                     type: 'string',
                                     example: 'Martin'
                                 },
@@ -209,7 +209,7 @@ export const equipeSchemas = {
                 type: 'integer',
                 example: 1
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Équipe Production'
             },
@@ -228,15 +228,15 @@ export const equipeSchemas = {
                 example: 1,
                 description: 'ID de la plage horaire de l\'équipe'
             },
-            managerNom: {
+            managerlastName: {
                 type: 'string',
                 example: 'Marie Durand',
-                description: 'Nom complet du manager (prenom + nom)'
+                description: 'lastName complet du manager (firstName + lastName)'
             },
             membresCount: {
                 type: 'integer',
                 example: 12,
-                description: 'Nombre de membres'
+                description: 'lastNamebre de membres'
             },
             createdAt: {
                 type: 'string',

@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 interface User {
   id: number;
   email: string;
-  prenom: string;
-  nom: string;
+  firstName: string;
+  lastName: string;
   role: string;
 }
 
@@ -20,7 +20,7 @@ interface RoleProtectionProps {
 export default function RoleProtection({
   children,
   allowedRoles,
-  redirectTo = "/unauthorized", 
+  redirectTo = "/unauthorized",
 }: RoleProtectionProps) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);

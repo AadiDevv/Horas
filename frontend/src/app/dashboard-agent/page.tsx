@@ -9,8 +9,8 @@ import RoleProtection from "../middleware/roleProtection";
 const mockUsers = [
   {
     id: 1,
-    prenom: "Manijay",
-    nom: "Gupta",
+    firstName: "Manijay",
+    lastName: "Gupta",
     email: "manijay@example.com",
     role: "employe",
     oldPassword: "password123",
@@ -35,7 +35,7 @@ async function getUser(userId: number) {
     const user = mockUsers.find(u => u.id === userId);
     console.log('🔍 Mock GET /api/users/' + userId);
     console.log('✅ Réponse:', user);
-    
+
     return {
       success: true,
       data: user,
@@ -43,7 +43,7 @@ async function getUser(userId: number) {
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const requete = await fetch(`${API_BASE_URL}/api/users/${userId}`);
   if (!requete.ok) {
     throw new Error("Erreur récupération utilisateur");
@@ -62,11 +62,11 @@ async function updateUser(userId: number, updates: any) {
       updatedAt: new Date().toISOString()
     };
     mockUsers[userIndex] = updatedUser;
-    
+
     console.log('🔄 Mock PATCH /api/users/' + userId);
     console.log('📝 Données envoyées:', updates);
     console.log('✅ Utilisateur mis à jour:', updatedUser);
-    
+
     return {
       success: true,
       data: updatedUser,
@@ -74,13 +74,13 @@ async function updateUser(userId: number, updates: any) {
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const requete = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates)
   });
-  
+
   if (!requete.ok) {
     throw new Error("Erreur mise à jour");
   }
@@ -91,10 +91,10 @@ async function updateUser(userId: number, updates: any) {
 async function changePassword(userId: number, oldPassword: string, newPassword: string) {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     console.log('🔒 Mock PATCH /api/users/' + userId + '/password');
     console.log('📝 Changement de mot de passe simulé');
-    
+
     const user = mockUsers.find(u => u.id === userId);
     if (user && user.oldPassword !== oldPassword) {
       return {
@@ -103,7 +103,7 @@ async function changePassword(userId: number, oldPassword: string, newPassword: 
         timestamp: new Date().toISOString()
       };
     }
-    
+
     if (!oldPassword) {
       return {
         success: false,
@@ -111,26 +111,26 @@ async function changePassword(userId: number, oldPassword: string, newPassword: 
         timestamp: new Date().toISOString()
       };
     }
-    
+
     return {
       success: true,
       message: "Mot de passe modifié avec succès",
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const requete = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ oldPassword, newPassword })
   });
-  
+
   const response = await requete.json();
-  
+
   if (!requete.ok || !response.success) {
     throw new Error(response.message || "Erreur lors du changement de mot de passe");
   }
-  
+
   return response;
 }
 
@@ -142,8 +142,8 @@ export default function Page() {
   const [userData, setUserData] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [formData, setFormData] = useState({
-    prenom: '',
-    nom: '',
+    firstName: '',
+    lastName: '',
     email: '',
     oldPassword: '',
     newPassword: '',
@@ -165,7 +165,7 @@ export default function Page() {
     Sun: []
   });
   const [isClockingIn, setIsClockingIn] = useState(false);
-  const [currentDayLogs, setCurrentDayLogs] = useState<{start: string, end?: string}>({start: ''});
+  const [currentDayLogs, setCurrentDayLogs] = useState<{ start: string, end?: string }>({ start: '' });
 
   useEffect(() => {
     setMounted(true);
@@ -173,9 +173,9 @@ export default function Page() {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     loadUserData();
-    
+
     return () => {
       clearInterval(timer);
     };
@@ -186,12 +186,12 @@ export default function Page() {
       setLoading(true);
       const userId = 1;
       const response = await getUser(userId);
-      
+
       if (response.success) {
         setUserData(response.data);
         setFormData({
-          prenom: response.data.prenom,
-          nom: response.data.nom,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
           email: response.data.email,
           oldPassword: '',
           newPassword: '',
@@ -251,53 +251,53 @@ export default function Page() {
       setSaving(true);
       setSuccessMessage('');
       setErrorMessage('');
-      
+
       const wantsToChangePassword = formData.newPassword || formData.confirmPassword || formData.oldPassword;
-      
+
       if (wantsToChangePassword) {
         if (!formData.oldPassword) {
           setErrorMessage('❌ L\'ancien mot de passe est requis pour changer le mot de passe');
           setSaving(false);
           return;
         }
-        
+
         if (!formData.newPassword) {
           setErrorMessage('❌ Le nouveau mot de passe est requis');
           setSaving(false);
           return;
         }
-        
+
         if (formData.newPassword.length < 6) {
           setErrorMessage('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
           setSaving(false);
           return;
         }
-        
+
         if (formData.newPassword !== formData.confirmPassword) {
           setErrorMessage('❌ Les mots de passe ne correspondent pas');
           setSaving(false);
           return;
         }
-        
+
         const passwordResponse = await changePassword(
           userData.id,
           formData.oldPassword,
           formData.newPassword
         );
-        
+
         if (!passwordResponse.success) {
           setErrorMessage('❌ ' + passwordResponse.message);
           setSaving(false);
           return;
         }
       }
-      
+
       const response = await updateUser(userData.id, {
-        nom: formData.nom,
-        prenom: formData.prenom,
+        lastName: formData.lastName,
+        firstName: formData.firstName,
         email: formData.email
       });
-      
+
       if (response.success) {
         setUserData(response.data);
         const messages = ['✅ Informations modifiées avec succès !'];
@@ -305,7 +305,7 @@ export default function Page() {
           messages.push('Mot de passe modifié avec succès !');
         }
         setSuccessMessage(messages.join(' '));
-        
+
         setTimeout(() => {
           setSettingsOpen(false);
           setSuccessMessage('');
@@ -323,8 +323,8 @@ export default function Page() {
   const handleOpenSettings = () => {
     if (userData) {
       setFormData({
-        prenom: userData.prenom,
-        nom: userData.nom,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         email: userData.email,
         oldPassword: '',
         newPassword: '',
@@ -343,7 +343,7 @@ export default function Page() {
 
   const dayKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
-  const getLogHeight = (log: {start: string, end?: string}) => {
+  const getLogHeight = (log: { start: string, end?: string }) => {
     if (!log.end) {
       const now = new Date();
       const endMinutes = now.getHours() * 60 + now.getMinutes();
@@ -358,10 +358,10 @@ export default function Page() {
 
   return (
     <RoleProtection allowedRoles={['manager', 'admin', 'employe']}>
-    
+
       <div className="min-h-screen bg-white">
         {/* Navbar unique */}
-        <Navbar 
+        <Navbar
           onOpenSettings={handleOpenSettings}
           onLogout={handleLogout}
           sidebarOpen={sidebarOpen}
@@ -381,31 +381,31 @@ export default function Page() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Prénom</label>
-                  <input 
+                  <label className="block text-sm font-semibold mb-2">PrélastName</label>
+                  <input
                     type="text"
-                    value={formData.prenom}
-                    onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Nom</label>
-                  <input 
+                  <label className="block text-sm font-semibold mb-2">lastName</label>
+                  <input
                     type="text"
-                    value={formData.nom}
-                    onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold mb-2">Email</label>
-                  <input 
+                  <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
@@ -413,13 +413,13 @@ export default function Page() {
                 <div className="border-t border-gray-200 pt-4 mt-4">
                   <h3 className="text-sm font-semibold mb-3">Changer le mot de passe</h3>
                   <p className="text-xs text-gray-500 mb-4">Laissez vide si vous ne souhaitez pas changer le mot de passe</p>
-                  
+
                   <div className="mb-3">
                     <label className="block text-xs text-gray-600 mb-1">Ancien mot de passe *</label>
-                    <input 
+                    <input
                       type="password"
                       value={formData.oldPassword}
-                      onChange={(e) => setFormData({...formData, oldPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, oldPassword: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
                       placeholder="Requis pour changer le mot de passe"
                     />
@@ -427,10 +427,10 @@ export default function Page() {
 
                   <div className="mb-3">
                     <label className="block text-xs text-gray-600 mb-1">Nouveau mot de passe * (min. 6 caractères)</label>
-                    <input 
+                    <input
                       type="password"
                       value={formData.newPassword}
-                      onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
                       placeholder="Au moins 6 caractères"
                     />
@@ -438,10 +438,10 @@ export default function Page() {
 
                   <div>
                     <label className="block text-xs text-gray-600 mb-1">Confirmer le mot de passe *</label>
-                    <input 
+                    <input
                       type="password"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
                       placeholder="Retapez le nouveau mot de passe"
                     />
@@ -460,7 +460,7 @@ export default function Page() {
                   </div>
                 )}
 
-                <button 
+                <button
                   onClick={handleSaveSettings}
                   disabled={saving}
                   className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -487,7 +487,7 @@ export default function Page() {
                 <h2 className="text-4xl font-semibold mb-2">Aujourd'hui</h2>
                 <p className="text-gray-600">{mounted && currentTime ? formatDate(currentTime) : 'Chargement...'}</p>
               </div>
-              <button 
+              <button
                 onClick={isClockingIn ? handleClockOut : handleClockIn}
                 className="flex items-center gap-6 px-8 py-4 bg-black text-white rounded-2xl font-semibold text-lg hover:bg-gray-800 transition"
               >
@@ -545,7 +545,7 @@ export default function Page() {
             <div className="bg-gray-50 rounded-3xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold">Planning Hebdomadaire</h3>
-                <button 
+                <button
                   onClick={() => setCurrentTime(new Date())}
                   className="px-4 py-2 bg-white hover:bg-gray-100 rounded-xl font-medium text-sm border border-gray-200 transition"
                 >
@@ -565,16 +565,16 @@ export default function Page() {
                           {timeLogs[day].map((log, idx) => {
                             const height = getLogHeight(log);
                             const isSmall = height < 60;
-                            
+
                             return (
-                              <div 
+                              <div
                                 key={idx}
                                 className="bg-gradient-to-b from-gray-800 to-gray-700 text-white px-2 py-2 rounded-lg text-xs font-medium relative group"
-                                style={{ 
-                                  height: `${height}px`, 
-                                  minHeight: '30px', 
-                                  display: 'flex', 
-                                  flexDirection: isSmall ? 'row' : 'column', 
+                                style={{
+                                  height: `${height}px`,
+                                  minHeight: '30px',
+                                  display: 'flex',
+                                  flexDirection: isSmall ? 'row' : 'column',
                                   alignItems: 'center',
                                   justifyContent: 'center',
                                   gap: isSmall ? '4px' : '0'
@@ -593,7 +593,7 @@ export default function Page() {
                                     <div>{log.end || 'en cours'}</div>
                                   </>
                                 )}
-                                
+
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
                                   {log.start} - {log.end || 'en cours'}
                                   {log.end && (
@@ -606,7 +606,7 @@ export default function Page() {
                             );
                           })}
                           {isClockingIn && getDayKey() === day && (
-                            <div 
+                            <div
                               className="bg-gradient-to-b from-blue-500 to-blue-600 text-white px-2 py-2 rounded-lg text-xs font-medium animate-pulse"
                               style={{ minHeight: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                             >

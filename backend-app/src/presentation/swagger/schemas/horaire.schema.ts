@@ -3,14 +3,14 @@ export const horaireSchemas = {
     // #region Request DTOs
     HoraireCreateDTO: {
         type: 'object',
-        required: ['nom', 'heureDebut', 'heureFin', 'joursActifs'],
+        required: ['lastName', 'heureDebut', 'heureFin', 'joursActifs'],
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Horaire de journée',
-                description: 'Nom de l\'horaire'
+                description: 'lastName de l\'horaire'
             },
             heureDebut: {
                 type: 'string',
@@ -41,12 +41,12 @@ export const horaireSchemas = {
     HoraireUpdateDTO: {
         type: 'object',
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Horaire de journée modifié',
-                description: 'Nouveau nom de l\'horaire'
+                description: 'Nouveau lastName de l\'horaire'
             },
             heureDebut: {
                 type: 'string',
@@ -84,10 +84,10 @@ export const horaireSchemas = {
                 example: 1,
                 description: 'ID de l\'horaire'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Horaire de journée',
-                description: 'Nom de l\'horaire'
+                description: 'lastName de l\'horaire'
             },
             heureDebut: {
                 type: 'string',
@@ -122,7 +122,7 @@ export const horaireSchemas = {
             utilisateursCount: {
                 type: 'integer',
                 example: 25,
-                description: 'Nombre d\'utilisateurs assignés à cet horaire'
+                description: 'lastNamebre d\'utilisateurs assignés à cet horaire'
             }
         }
     },
@@ -145,11 +145,11 @@ export const horaireSchemas = {
                                     type: 'integer',
                                     example: 10
                                 },
-                                prenom: {
+                                firstName: {
                                     type: 'string',
                                     example: 'Pierre'
                                 },
-                                nom: {
+                                lastName: {
                                     type: 'string',
                                     example: 'Martin'
                                 },
@@ -177,7 +177,7 @@ export const horaireSchemas = {
                 type: 'integer',
                 example: 1
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Horaire de journée'
             },

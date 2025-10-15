@@ -4,17 +4,17 @@ export const userSchemas = {
     UserUpdateDTO: {
         type: 'object',
         properties: {
-            prenom: {
+            firstName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Jean',
-                description: 'Prénom de l\'utilisateur'
+                description: 'PrélastName de l\'utilisateur'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Dupont',
-                description: 'Nom de l\'utilisateur'
+                description: 'lastName de l\'utilisateur'
             },
             email: {
                 type: 'string',
@@ -99,15 +99,15 @@ export const userSchemas = {
                 example: 1,
                 description: 'ID de l\'utilisateur'
             },
-            prenom: {
+            firstName: {
                 type: 'string',
                 example: 'Jean',
-                description: 'Prénom'
+                description: 'PrélastName'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Dupont',
-                description: 'Nom'
+                description: 'lastName'
             },
             email: {
                 type: 'string',
@@ -132,11 +132,11 @@ export const userSchemas = {
                 example: 5,
                 description: 'ID de l\'équipe'
             },
-            equipeNom: {
+            equipelastName: {
                 type: 'string',
                 nullable: true,
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             }
         }
     },

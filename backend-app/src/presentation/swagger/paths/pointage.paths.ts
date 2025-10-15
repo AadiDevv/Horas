@@ -44,8 +44,8 @@ export const pointagePaths = {
                                     updatedAt: '2025-10-12T09:05:35.000Z',
                                     employe: {
                                         id: 10,
-                                        prenom: 'Pierre',
-                                        nom: 'Martin',
+                                        firstName: 'Pierre',
+                                        lastName: 'Martin',
                                         email: 'pierre.martin@example.com'
                                     }
                                 },
@@ -111,8 +111,8 @@ export const pointagePaths = {
                                     updatedAt: '2025-10-12T17:35:05.000Z',
                                     employe: {
                                         id: 10,
-                                        prenom: 'Pierre',
-                                        nom: 'Martin',
+                                        firstName: 'Pierre',
+                                        lastName: 'Martin',
                                         email: 'pierre.martin@example.com'
                                     }
                                 },

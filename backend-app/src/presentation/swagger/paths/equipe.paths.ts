@@ -50,19 +50,19 @@ export const equipePaths = {
                                         data: [
                                             {
                                                 id: 1,
-                                                nom: 'Équipe Production',
+                                                lastName: 'Équipe Production',
                                                 description: 'Équipe du matin',
                                                 managerId: 5,
-                                                managerNom: 'Marie Durand',
+                                                managerlastName: 'Marie Durand',
                                                 membresCount: 12,
                                                 createdAt: '2025-10-01T10:00:00.000Z'
                                             },
                                             {
                                                 id: 2,
-                                                nom: 'Équipe Logistique',
+                                                lastName: 'Équipe Logistique',
                                                 description: null,
                                                 managerId: 5,
-                                                managerNom: 'Marie Durand',
+                                                managerlastName: 'Marie Durand',
                                                 membresCount: 8,
                                                 createdAt: '2025-10-05T10:00:00.000Z'
                                             }
@@ -129,7 +129,7 @@ export const equipePaths = {
                     'application/json': {
                         schema: { $ref: '#/components/schemas/EquipeCreateDTO' },
                         example: {
-                            nom: 'Équipe Production',
+                            lastName: 'Équipe Production',
                             description: 'Équipe responsable de la production du matin',
                             managerId: 5
                         }
@@ -222,7 +222,7 @@ export const equipePaths = {
 
         patch: {
             summary: 'Modifier une équipe',
-            description: 'Met à jour les informations d\'une équipe (nom, description, plageHoraireId). Le managerId ne peut PAS être modifié. Admin uniquement.',
+            description: 'Met à jour les informations d\'une équipe (lastName, description, plageHoraireId). Le managerId ne peut PAS être modifié. Admin uniquement.',
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
             parameters: [

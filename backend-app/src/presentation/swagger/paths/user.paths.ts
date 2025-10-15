@@ -33,7 +33,7 @@ export const userPaths = {
                     name: 'search',
                     in: 'query',
                     schema: { type: 'string' },
-                    description: 'Recherche par nom, prénom ou email'
+                    description: 'Recherche par lastName, prélastName ou email'
                 }
             ],
             responses: {

@@ -6,8 +6,8 @@ import { Role } from "@/domain/types";
  * Différent de UserRegisterDTO (auth.dto.ts) qui est pour l'auto-inscription
  */
 export interface UserCreateDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
@@ -24,8 +24,8 @@ export interface UserCreateDTO {
  * Le mot de passe n'est pas inclus ici (route séparée pour changer le mot de passe)
  */
 export interface UserUpdateDTO {
-    prenom?: string;
-    nom?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
     telephone?: string;
     role?: Role;
@@ -58,8 +58,8 @@ export interface UserResetPasswordDTO {
  */
 export interface UserReadDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
@@ -74,12 +74,12 @@ export interface UserReadDTO {
     // Informations enrichies (optionnelles selon le endpoint)
     equipe?: {
         id: number;
-        nom: string;
+        lastName: string;
     };
 
     horaire?: {
         id: number;
-        nom: string;
+        lastName: string;
         heureDebut: string;
         heureFin: string;
     };
@@ -92,13 +92,13 @@ export interface UserReadDTO {
  */
 export interface UserListItemDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
     equipeId?: number;
-    equipeNom?: string;
+    equipelastName?: string;
 }
 
 /**
@@ -109,7 +109,7 @@ export interface UserFilterDTO {
     role?: Role;
     equipeId?: number;
     isActive?: boolean;
-    search?: string; // Recherche par nom, prénom ou email
+    search?: string; // Recherche par lastName, prélastName ou email
 }
 // #endregion
 

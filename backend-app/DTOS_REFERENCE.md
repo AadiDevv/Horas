@@ -22,7 +22,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 // Format de réponse standard (erreur)
 {
   "success": false,
-  "error": "Nom de l'erreur",
+  "error": "lastName de l'erreur",
   "code": "ERROR_CODE",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
@@ -39,8 +39,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body:**
 ```json
 {
-  "prenom": "Jean",
-  "nom": "Dupont",
+  "firstName": "Jean",
+  "lastName": "Dupont",
   "email": "jean.dupont@example.com",
   "password": "SecureP@ss123",
   "role": "employe",
@@ -60,8 +60,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "expiresIn": 1800,
     "user": {
       "id": 1,
-      "prenom": "Jean",
-      "nom": "Dupont",
+      "firstName": "Jean",
+      "lastName": "Dupont",
       "email": "jean.dupont@example.com",
       "role": "employe",
       "isActive": false,
@@ -111,8 +111,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 10,
-    "prenom": "Pierre",
-    "nom": "Martin",
+    "firstName": "Pierre",
+    "lastName": "Martin",
     "email": "pierre.martin@example.com",
     "role": "employe",
     "isActive": false,
@@ -147,7 +147,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 - `role` : 'admin' | 'manager' | 'employe'
 - `equipeId` : number
 - `isActive` : boolean
-- `search` : string (recherche nom/prénom/email)
+- `search` : string (recherche lastName/prélastName/email)
 
 **Example:** `GET /api/users?role=employe&equipeId=5&isActive=true`
 
@@ -158,23 +158,23 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com",
       "role": "employe",
       "isActive": true,
       "equipeId": 5,
-      "equipeNom": "Équipe Production"
+      "equipelastName": "Équipe Production"
     },
     {
       "id": 11,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "employe",
       "isActive": true,
       "equipeId": 5,
-      "equipeNom": "Équipe Production"
+      "equipelastName": "Équipe Production"
     }
   ],
   "message": "Liste des utilisateurs récupérée avec succès",
@@ -194,8 +194,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 10,
-    "prenom": "Pierre",
-    "nom": "Martin",
+    "firstName": "Pierre",
+    "lastName": "Martin",
     "email": "pierre.martin@example.com",
     "role": "employe",
     "isActive": true,
@@ -207,11 +207,11 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "equipe": {
       "id": 5,
-      "nom": "Équipe Production"
+      "lastName": "Équipe Production"
     },
     "horaire": {
       "id": 2,
-      "nom": "Horaire de journée",
+      "lastName": "Horaire de journée",
       "heureDebut": "09:00",
       "heureFin": "17:30"
     }
@@ -231,8 +231,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "prenom": "Pierre",
-  "nom": "Martin-Dupont",
+  "firstName": "Pierre",
+  "lastName": "Martin-Dupont",
   "email": "pierre.martin@example.com",
   "telephone": "+33 6 99 88 77 66",
   "role": "manager",
@@ -281,7 +281,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body:**
 ```json
 {
-  "nom": "Équipe Production",
+  "lastName": "Équipe Production",
   "description": "Équipe responsable de la production du matin",
   "managerId": 5
 }
@@ -293,7 +293,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production du matin",
     "managerId": 5,
     "createdAt": "2025-10-12T10:00:00.000Z",
@@ -301,8 +301,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
@@ -326,19 +326,19 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 1,
-      "nom": "Équipe Production",
+      "lastName": "Équipe Production",
       "description": "Équipe responsable de la production",
       "managerId": 5,
-      "managerNom": "Marie Durand",
+      "managerlastName": "Marie Durand",
       "membresCount": 12,
       "createdAt": "2025-10-01T10:00:00.000Z"
     },
     {
       "id": 2,
-      "nom": "Équipe Logistique",
+      "lastName": "Équipe Logistique",
       "description": null,
       "managerId": 6,
-      "managerNom": "Jean Martin",
+      "managerlastName": "Jean Martin",
       "membresCount": 8,
       "createdAt": "2025-10-05T10:00:00.000Z"
     }
@@ -362,7 +362,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production",
     "managerId": 5,
     "createdAt": "2025-10-01T10:00:00.000Z",
@@ -370,8 +370,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
@@ -388,7 +388,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Équipe Production",
+    "lastName": "Équipe Production",
     "description": "Équipe responsable de la production",
     "managerId": 5,
     "createdAt": "2025-10-01T10:00:00.000Z",
@@ -396,8 +396,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "deletedAt": null,
     "manager": {
       "id": 5,
-      "prenom": "Marie",
-      "nom": "Durand",
+      "firstName": "Marie",
+      "lastName": "Durand",
       "email": "marie.durand@example.com",
       "role": "manager"
     },
@@ -405,8 +405,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "membres": [
       {
         "id": 10,
-        "prenom": "Pierre",
-        "nom": "Martin",
+        "firstName": "Pierre",
+        "lastName": "Martin",
         "email": "pierre.martin@example.com",
         "role": "employe",
         "isActive": true,
@@ -414,8 +414,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
       },
       {
         "id": 11,
-        "prenom": "Sophie",
-        "nom": "Bernard",
+        "firstName": "Sophie",
+        "lastName": "Bernard",
         "email": "sophie.bernard@example.com",
         "role": "employe",
         "isActive": true,
@@ -439,7 +439,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "nom": "Équipe Production - Matin",
+  "lastName": "Équipe Production - Matin",
   "description": "Nouvelle description",
   "managerId": 7
 }
@@ -477,7 +477,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body:**
 ```json
 {
-  "nom": "Horaire de journée",
+  "lastName": "Horaire de journée",
   "heureDebut": "09:00",
   "heureFin": "17:30",
   "joursActifs": [1, 2, 3, 4, 5]
@@ -486,7 +486,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Notes:**
 - `heureDebut` et `heureFin` au format **HH:mm**
-- `joursActifs` : tableau de nombres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
+- `joursActifs` : tableau de lastNamebres (1=Lundi, 2=Mardi, ..., 7=Dimanche)
 
 **Response (201):**
 ```json
@@ -494,7 +494,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
+    "lastName": "Horaire de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -520,7 +520,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 1,
-      "nom": "Horaire de journée",
+      "lastName": "Horaire de journée",
       "heureDebut": "09:00",
       "heureFin": "17:30",
       "joursActifs": [1, 2, 3, 4, 5],
@@ -528,7 +528,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     },
     {
       "id": 2,
-      "nom": "Horaire de nuit",
+      "lastName": "Horaire de nuit",
       "heureDebut": "22:00",
       "heureFin": "06:00",
       "joursActifs": [1, 2, 3, 4, 5, 6, 7],
@@ -554,7 +554,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
+    "lastName": "Horaire de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -573,7 +573,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "nom": "Horaire de journée",
+    "lastName": "Horaire de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -583,15 +583,15 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "utilisateurs": [
       {
         "id": 10,
-        "prenom": "Pierre",
-        "nom": "Martin",
+        "firstName": "Pierre",
+        "lastName": "Martin",
         "email": "pierre.martin@example.com",
         "role": "employe"
       },
       {
         "id": 11,
-        "prenom": "Sophie",
-        "nom": "Bernard",
+        "firstName": "Sophie",
+        "lastName": "Bernard",
         "email": "sophie.bernard@example.com",
         "role": "employe"
       }
@@ -613,7 +613,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "nom": "Horaire de journée modifié",
+  "lastName": "Horaire de journée modifié",
   "heureDebut": "08:30",
   "heureFin": "18:00",
   "joursActifs": [1, 2, 3, 4, 5, 6]
@@ -681,8 +681,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "updatedAt": "2025-10-12T09:05:35.000Z",
     "employe": {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com"
     }
   },
@@ -735,7 +735,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     {
       "id": 1,
       "employeId": 10,
-      "employeNom": "Pierre Martin",
+      "employelastName": "Pierre Martin",
       "date": "2025-10-12",
       "heure": "09:05:30",
       "clockin": true,
@@ -744,7 +744,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     {
       "id": 2,
       "employeId": 10,
-      "employeNom": "Pierre Martin",
+      "employelastName": "Pierre Martin",
       "date": "2025-10-12",
       "heure": "17:35:00",
       "clockin": false,
@@ -777,8 +777,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "updatedAt": "2025-10-12T09:05:35.000Z",
     "employe": {
       "id": 10,
-      "prenom": "Pierre",
-      "nom": "Martin",
+      "firstName": "Pierre",
+      "lastName": "Martin",
       "email": "pierre.martin@example.com"
     }
   },
@@ -900,8 +900,8 @@ Le token JWT contient les informations suivantes (payload décodé) :
 {
   "sub": 10,
   "email": "pierre.martin@example.com",
-  "prenom": "Pierre",
-  "nom": "Martin",
+  "firstName": "Pierre",
+  "lastName": "Martin",
   "role": "employe",
   "isActive": true,
   "lastLoginAt": "2025-10-12T10:00:00.000Z",
@@ -953,8 +953,8 @@ export const handlers = [
           expiresIn: 1800,
           user: {
             id: 1,
-            prenom: 'Jean',
-            nom: 'Dupont',
+            firstName: 'Jean',
+            lastName: 'Dupont',
             email: 'jean.dupont@example.com',
             role: 'employe',
             isActive: true,
@@ -982,10 +982,10 @@ export const handlers = [
         data: [
           {
             id: 1,
-            nom: 'Équipe Production',
+            lastName: 'Équipe Production',
             description: 'Équipe responsable de la production',
             managerId: 5,
-            managerNom: 'Marie Durand',
+            managerlastName: 'Marie Durand',
             membresCount: 12,
             createdAt: '2025-10-01T10:00:00.000Z'
           }
@@ -1013,8 +1013,8 @@ export const handlers = [
           updatedAt: new Date().toISOString(),
           employe: {
             id: 10,
-            prenom: 'Pierre',
-            nom: 'Martin',
+            firstName: 'Pierre',
+            lastName: 'Martin',
             email: 'pierre.martin@example.com'
           }
         },

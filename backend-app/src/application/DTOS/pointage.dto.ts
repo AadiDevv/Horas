@@ -29,8 +29,8 @@ export interface PointageReadDTO {
     // Informations enrichies pour le frontend
     employe?: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
     };
 }
@@ -55,7 +55,7 @@ export interface PointageFilterDTO {
 export interface PointageListItemDTO {
     id: number;
     employeId: number;
-    employeNom: string; // prenom + nom
+    employelastName: string; // firstName + lastName
     date: string;
     heure: string;
     clockin: boolean;
@@ -78,7 +78,7 @@ export interface PointageStatsDTO {
     pointagesNormaux: number;
     pointagesRetard: number;
     pointagesIncomplete: number;
-    joursPointes: number; // Nombre de jours uniques
+    joursPointes: number; // lastNamebre de jours uniques
 }
 // #endregion
 

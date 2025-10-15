@@ -3,8 +3,8 @@ import { User } from "../entities/user";
 export type UserProps = {
     email: string,
     hashedPassword?: string,
-    prenom: string,
-    nom: string,
+    firstName: string,
+    lastName: string,
     role: Role,
     isActive: boolean,
 
@@ -21,7 +21,7 @@ export type UserProps = {
 
 export type EquipeProps = {
     id?: number,
-    nom: string,
+    lastName: string,
     description?: string,
     managerId: number,
     plageHoraireId?: number,

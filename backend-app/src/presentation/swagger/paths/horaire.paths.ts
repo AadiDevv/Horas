@@ -50,7 +50,7 @@ export const horairePaths = {
                             journee: {
                                 summary: 'Horaire de journée (Lun-Ven)',
                                 value: {
-                                    nom: 'Horaire de journée',
+                                    lastName: 'Horaire de journée',
                                     heureDebut: '09:00',
                                     heureFin: '17:30',
                                     joursActifs: [1, 2, 3, 4, 5]
@@ -59,7 +59,7 @@ export const horairePaths = {
                             nuit: {
                                 summary: 'Horaire de nuit (tous les jours)',
                                 value: {
-                                    nom: 'Horaire de nuit',
+                                    lastName: 'Horaire de nuit',
                                     heureDebut: '22:00',
                                     heureFin: '06:00',
                                     joursActifs: [1, 2, 3, 4, 5, 6, 7]

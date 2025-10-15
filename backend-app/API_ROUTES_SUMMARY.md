@@ -52,7 +52,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 - `role` : 'admin' \| 'manager' \| 'employe'
 - `equipeId` : number
 - `isActive` : boolean
-- `search` : string (nom/prénom/email)
+- `search` : string (lastName/prélastName/email)
 
 ---
 
@@ -148,7 +148,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 - **PATCH & DELETE** : Uniquement Manager et Admin (corrections manuelles)
 
 **Users :**
-- Un employé peut **modifier son propre profil** (nom, téléphone, etc.)
+- Un employé peut **modifier son propre profil** (lastName, téléphone, etc.)
 - Seul un Admin peut **changer le rôle** d'un utilisateur
 
 ---
@@ -182,8 +182,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
   "sub": 10,
   "email": "pierre.martin@example.com",
-  "prenom": "Pierre",
-  "nom": "Martin",
+  "firstName": "Pierre",
+  "lastName": "Martin",
   "role": "employe",
   "isActive": true,
   "lastLoginAt": "2025-10-12T10:00:00.000Z",
