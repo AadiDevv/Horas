@@ -123,7 +123,7 @@ export class TeamRepository implements ITeam {
     async createTeam(team: Team): Promise<Team> {
         const teamCreated = await prisma.team.create({
             data: {
-                lastName: team.lastName,
+                name: team.name,
                 description: team.description,
                 managerId: team.managerId,
                 scheduleId: team.scheduleId,
@@ -164,7 +164,7 @@ export class TeamRepository implements ITeam {
         const teamUpdated = await prisma.team.update({
             where: { id: team.id },
             data: {
-                lastName: team.lastName,
+                name: team.name,
                 description: team.description,
                 scheduleId: team.scheduleId,
                 updatedAt: new Date(),
