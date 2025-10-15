@@ -8,7 +8,7 @@ import { Role } from "../types";
 export class User {
   public readonly id?: number;
   public email: string;
-  public hashedPassword: string;
+  public hashedPassword?: string;
   public prenom: string;
   public nom: string;
   public role: Role;
@@ -52,7 +52,7 @@ export class User {
       throw new ValidationError('Format d\'email invalide');
     }
 
-    if (!User.validatePassword(this.hashedPassword)) {
+    if (this.hashedPassword && !User.validatePassword(this.hashedPassword)) {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
@@ -117,7 +117,7 @@ export class User {
   // #region UserAuthentication Methods
 
   public async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, this.hashedPassword);
+    return await bcrypt.compare(plainPassword, this.hashedPassword || '');
   }
 
   public toJwtPayload(): Record<string, any> {

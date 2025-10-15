@@ -11,7 +11,7 @@ export class Equipe {
     public plageHoraireId?: number;
     public createdAt: Date;
     public updatedAt?: Date;
-    public deletedAt?: Date;
+    public deletedAt?: Date | null;
     public manager?: User;
     public membres?: User[];
     public membresCount?: number;
@@ -24,7 +24,7 @@ export class Equipe {
         this.plageHoraireId = props.plageHoraireId;
         this.createdAt = props.createdAt || new Date(Date.now());
         this.updatedAt = props.updatedAt;
-        this.deletedAt = props.deletedAt;
+        this.deletedAt = props.deletedAt || null;
         this.manager = props.manager;
         this.membres = props.membres;
         this.membresCount = props.membresCount;

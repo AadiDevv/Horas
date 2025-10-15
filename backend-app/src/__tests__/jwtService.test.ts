@@ -51,7 +51,7 @@ describe('JWTService', () => {
     const extracted = jwtService.getUserFromToken(token);
 
     expect(extracted).not.toBeNull();
-    expect(extracted!.userId).toBe(user.id);
+    expect(extracted!.id).toBe(user.id);  // ✅ Changé de "userId" à "id"
     expect(extracted!.email).toBe(user.email);
     expect(extracted!.prenom).toBe(user.prenom);
     expect(extracted!.role).toBe('employe'); // default value

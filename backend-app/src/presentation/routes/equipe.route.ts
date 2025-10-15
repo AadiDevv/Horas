@@ -69,7 +69,7 @@ router.post('/',
  */
 router.patch('/:id',
     authMiddleware,
-    adminOnly,
+    managerOrAdmin,
     async (req, res, next) => {
         try {
             await equipeController.updateEquipe(req, res);
@@ -87,7 +87,7 @@ router.patch('/:id',
  */
 router.delete('/:id',
     authMiddleware,
-    adminOnly,
+    managerOrAdmin,
     async (req, res, next) => {
         try {
             await equipeController.deleteEquipe(req, res);

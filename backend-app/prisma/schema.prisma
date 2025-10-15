@@ -17,7 +17,7 @@ model User {
   prenom          String    @db.VarChar(100)
   nom             String    @db.VarChar(100)
   email           String    @unique @db.VarChar(255)
-  telephone       String?   @db.VarChar(20)
+  telephone       String   @db.VarChar(20) @default("")
   hashedPassword  String    @db.VarChar(255)
   role            Role      @default(employe)
   isActive        Boolean   @default(false)
@@ -43,20 +43,23 @@ model User {
 }
 
 model Equipe {
-  id          Int       @id @default(autoincrement())
-  nom         String    @db.VarChar(100)
-  description String?
-  managerId   Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
-  deletedAt   DateTime?
+  id             Int       @id @default(autoincrement())
+  nom            String    @db.VarChar(100)
+  description    String    @default("")
+  managerId      Int
+  plageHoraireId Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
 
   // Relations
-  manager     User      @relation("ManagerEquipes", fields: [managerId], references: [id], onDelete: Restrict)
-  membres     User[]
-  rapports    Rapport[]
+  manager        User      @relation("ManagerEquipes", fields: [managerId], references: [id], onDelete: Restrict)
+  plageHoraire   Horaire?  @relation("EquipePlageHoraire", fields: [plageHoraireId], references: [id], onDelete: SetNull)
+  membres        User[]
+  rapports       Rapport[]
 
   @@index([managerId])
+  @@index([plageHoraireId])
 }
 
 model Horaire {
@@ -69,6 +72,7 @@ model Horaire {
   updatedAt    DateTime  @default(now())
 
   utilisateurs User[]
+  equipes      Equipe[]  @relation("EquipePlageHoraire")
   exceptions   HoraireExceptionnel[]
 }
 

@@ -102,6 +102,8 @@ export class EquipeUseCase {
      * @throws ValidationError si les données sont invalides
      */
     async createEquipe(dto: EquipeCreateDTO, userId: number): Promise<Equipe> {
+        console.log("managerId from dto : ", dto.managerId);
+        console.log("userId from jwt : ", userId);
         if (dto.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
@@ -128,13 +130,16 @@ export class EquipeUseCase {
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si tentative de modification du managerId
      */
-    async updateEquipe(id: number, dto: EquipeUpdateDTO): Promise<Equipe> {
+    async updateEquipe(id: number, dto: EquipeUpdateDTO, userId: number): Promise<Equipe> {
         // Vérification : interdiction de changer le manager
         if (dto.managerId !== undefined) {
             throw new ValidationError(
                 "Le managerId d'une équipe ne peut pas être modifié. " +
                 "Pour réassigner une équipe, veuillez la supprimer et en créer une nouvelle."
             );
+        }
+        if (dto.managerId !== userId) {
+            throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
 
         // Récupération de l'équipe existante
@@ -165,9 +170,12 @@ export class EquipeUseCase {
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si l'équipe contient des membres
      */
-    async deleteEquipe(id: number): Promise<void> {
+    async deleteEquipe(id: number, userId: number): Promise<void> {
         // Récupération de l'équipe avec ses membres (chargés par le repository)
         const equipe = await this.getEquipe_ById(id);
+        if (equipe.managerId !== userId) {
+            throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
+        }
 
         // Vérification : l'équipe ne doit pas contenir de membres
         const membresCount = equipe.membres?.length ?? 0;
