@@ -1,7 +1,8 @@
 import { Role } from "./valueType";
+import { User } from "../entities/user";
 export type UserProps = {
     email: string,
-    hashedPassword: string,
+    hashedPassword?: string,
     prenom: string,
     nom: string,
     role: Role,
@@ -9,11 +10,25 @@ export type UserProps = {
 
     createdAt?: Date,
     updatedAt?: Date,
-    lastLoginAt?: Date | null,
-    deletedAt?: Date | null,
+    lastLoginAt?: Date,
+    deletedAt?: Date,
 
-    telephone?: string | null,
-    equipeId?: number | null,
-    plageHoraireId?: number | null,
+    telephone?: string,
+    equipeId?: number,
+    plageHoraireId?: number,
     id?: number,
+}
+
+export type EquipeProps = {
+    id?: number,
+    nom: string,
+    description?: string,
+    managerId: number,
+    plageHoraireId?: number,
+    createdAt?: Date,
+    updatedAt?: Date,
+    deletedAt?: Date | null,
+    manager?: User,
+    membres?: User[],
+    membresCount?: number,
 }

@@ -1,6 +1,10 @@
 import { Role } from "@/domain/types";
-// DTOs pour l'authentification
-export interface UserCreateDTO {
+
+// #region Authentication DTOs
+/**
+ * DTO pour l'inscription d'un utilisateur
+ */
+export interface UserRegisterDTO {
     prenom: string;
     nom: string;
     email: string;
@@ -9,34 +13,43 @@ export interface UserCreateDTO {
     equipeId?: number;
     plageHoraireId?: number;
     telephone?: string;
-
 }
 
+/**
+ * DTO pour la connexion
+ */
 export interface UserLoginDTO {
     email: string;
     password: string;
 }
 
-export interface UserReadDTO {
+/**
+ * Réponse d'authentification avec token JWT
+ */
+export interface TokenResponse {
+    accessToken: string;
+    tokenType: string;
+    expiresIn: number;
+    user: UserAuthDTO;
+    role: string;
+}
+
+/**
+ * DTO utilisateur pour la réponse d'authentification (données minimales)
+ */
+export interface UserAuthDTO {
     id: number;
     prenom: string;
     nom: string;
     email: string;
     role: Role;
     isActive: boolean;
-    telephone?: string | null;
-    equipeId?: number | null;
-    plageHoraireId?: number | null;
+    telephone?: string;
+    equipeId?: number;
+    plageHoraireId?: number;
     createdAt: string;
-    updatedAt: string | null;
-    lastLoginAt: string | null;
-    deletedAt: string | null;
+    updatedAt?: string;
+    lastLoginAt?: string;
+    deletedAt?: string;
 }
-
-export interface TokenResponse {
-    accessToken: string;
-    tokenType: string;
-    expiresIn: number;
-    user: UserReadDTO;
-    role: string;
-}
+// #endregion

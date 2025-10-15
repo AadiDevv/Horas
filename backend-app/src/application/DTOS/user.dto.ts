@@ -1,9 +1,9 @@
 import { Role } from "@/domain/types";
 
-// #region Create DTO (déjà existant dans auth.dto.ts)
+// #region Create DTO
 /**
- * DTO pour créer un utilisateur
- * Utilisé lors de l'inscription ou de la création par un admin/manager
+ * DTO pour créer un utilisateur (via admin/manager)
+ * Différent de UserRegisterDTO (auth.dto.ts) qui est pour l'auto-inscription
  */
 export interface UserCreateDTO {
     prenom: string;
@@ -30,8 +30,8 @@ export interface UserUpdateDTO {
     telephone?: string;
     role?: Role;
     isActive?: boolean;
-    equipeId?: number | null;
-    plageHoraireId?: number | null;
+    equipeId?: number;
+    plageHoraireId?: number;
 }
 
 /**
@@ -51,9 +51,9 @@ export interface UserResetPasswordDTO {
 }
 // #endregion
 
-// #region Read DTO (déjà existant dans auth.dto.ts)
+// #region Read DTO
 /**
- * DTO de retour pour un utilisateur
+ * DTO de retour pour un utilisateur (complet)
  * Le mot de passe haché n'est jamais retourné
  */
 export interface UserReadDTO {
@@ -63,12 +63,13 @@ export interface UserReadDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    telephone: string | null;
-    equipeId: number | null;
-    plageHoraireId: number | null;
+    telephone?: string;
+    equipeId?: number;
+    plageHoraireId?: number;
     createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
+    updatedAt?: string;
+    lastLoginAt?: string;
+    deletedAt?: string;
 
     // Informations enrichies (optionnelles selon le endpoint)
     equipe?: {
@@ -96,8 +97,8 @@ export interface UserListItemDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    equipeId: number | null;
-    equipeNom: string | null;
+    equipeId?: number;
+    equipeNom?: string;
 }
 
 /**
@@ -109,21 +110,6 @@ export interface UserFilterDTO {
     equipeId?: number;
     isActive?: boolean;
     search?: string; // Recherche par nom, prénom ou email
-}
-// #endregion
-
-// #region Login DTO (déjà existant dans auth.dto.ts)
-export interface UserLoginDTO {
-    email: string;
-    password: string;
-}
-
-export interface TokenResponse {
-    accessToken: string;
-    tokenType: string;
-    expiresIn: number;
-    user: UserReadDTO;
-    role: string;
 }
 // #endregion
 

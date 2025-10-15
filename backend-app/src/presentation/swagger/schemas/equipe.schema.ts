@@ -21,6 +21,12 @@ export const equipeSchemas = {
                 type: 'integer',
                 example: 5,
                 description: 'ID du manager responsable de l\'équipe'
+            },
+            plageHoraireId: {
+                type: 'integer',
+                nullable: true,
+                example: 1,
+                description: 'ID de la plage horaire par défaut de l\'équipe (optionnel)'
             }
         }
     },
@@ -40,13 +46,14 @@ export const equipeSchemas = {
                 example: 'Description mise à jour',
                 description: 'Nouvelle description'
             },
-            managerId: {
+            plageHoraireId: {
                 type: 'integer',
-                example: 7,
-                description: 'Nouveau manager'
+                nullable: true,
+                example: 2,
+                description: 'Nouvelle plage horaire (optionnel). Note: le managerId ne peut PAS être modifié'
             }
         },
-        description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH)'
+        description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH). Le managerId ne peut PAS être modifié.'
     },
     // #endregion
 
@@ -74,6 +81,12 @@ export const equipeSchemas = {
                 type: 'integer',
                 example: 5,
                 description: 'ID du manager'
+            },
+            plageHoraireId: {
+                type: 'integer',
+                nullable: true,
+                example: 1,
+                description: 'ID de la plage horaire de l\'équipe'
             },
             createdAt: {
                 type: 'string',
@@ -174,6 +187,12 @@ export const equipeSchemas = {
                                     type: 'string',
                                     nullable: true,
                                     example: '+33 6 12 34 56 78'
+                                },
+                                plageHoraireId: {
+                                    type: 'integer',
+                                    nullable: true,
+                                    example: 1,
+                                    description: 'ID de la plage horaire du membre'
                                 }
                             }
                         }
@@ -202,6 +221,12 @@ export const equipeSchemas = {
             managerId: {
                 type: 'integer',
                 example: 5
+            },
+            plageHoraireId: {
+                type: 'integer',
+                nullable: true,
+                example: 1,
+                description: 'ID de la plage horaire de l\'équipe'
             },
             managerNom: {
                 type: 'string',

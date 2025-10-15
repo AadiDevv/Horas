@@ -13,7 +13,13 @@ export class AppError extends Error {
     }
   }
   
+
   // Erreurs spécifiques au domaine
+  export class ForbiddenError extends AppError {
+    constructor(message: string) {
+      super(message, 403, 'FORBIDDEN_ERROR');
+    }
+  }
   export class ValidationError extends AppError {
     constructor(message: string) {
       super(message, 400, 'VALIDATION_ERROR');
