@@ -17,15 +17,15 @@
 RelastNamemez ces fichiers dans votre explorateur VSCode :
 
 ```
-src/domain/entities/equipe.ts                    → team.ts
-src/domain/interfaces/equipe.interface.ts        → team.interface.ts
-src/application/DTOS/equipe.dto.ts               → team.dto.ts
-src/application/usecases/equipe.usecase.ts       → team.usecase.ts
-src/infrastructure/database/repositories/equipe.repository.ts → team.repository.ts
-src/presentation/controllers/EquipeController.ts → TeamController.ts
-src/presentation/routes/equipe.route.ts          → team.route.ts
-src/presentation/swagger/schemas/equipe.schema.ts → team.schema.ts
-src/presentation/swagger/paths/equipe.paths.ts   → team.paths.ts
+src/domain/entities/team.ts                    → team.ts
+src/domain/interfaces/team.interface.ts        → team.interface.ts
+src/application/DTOS/team.dto.ts               → team.dto.ts
+src/application/usecases/team.usecase.ts       → team.usecase.ts
+src/infrastructure/database/repositories/team.repository.ts → team.repository.ts
+src/presentation/controllers/TeamController.ts → TeamController.ts
+src/presentation/routes/team.route.ts          → team.route.ts
+src/presentation/swagger/schemas/team.schema.ts → team.schema.ts
+src/presentation/swagger/paths/team.paths.ts   → team.paths.ts
 ```
 
 ---
@@ -40,7 +40,7 @@ Puis remplacer :
 
 ```typescript
 // Remplacer
-export type EquipeProps
+export type TeamProps
 // Par
 export type TeamProps
 
@@ -53,7 +53,7 @@ description?: string,
 // Par (garder tel quel, juste vérifier)
 description?: string,
 
-plageHoraireId?: number,
+scheduleId?: number,
 // Par
 scheduleId?: number,
 
@@ -95,34 +95,34 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 
 | Find (Match Case ✓) | Replace | Scope |
 |---------------------|---------|-------|
-| `EquipeProps` | `TeamProps` | All files |
-| `EquipeCreateDTO` | `TeamCreateDTO` | All files |
-| `EquipeUpdateDTO` | `TeamUpdateDTO` | All files |
-| `EquipeReadDTO` | `TeamReadDTO` | All files |
-| `EquipeListItemDTO` | `TeamListItemDTO` | All files |
-| `EquipeWithMembresDTO` | `TeamWithMembersDTO` | All files |
-| `EquipeManagerDTO` | `TeamManagerDTO` | All files |
-| `EquipeMembreDTO` | `TeamMemberDTO` | All files |
-| `EquipeFilterDTO` | `TeamFilterDTO` | All files |
-| `export class Equipe` | `export class Team` | All files |
-| `new Equipe(` | `new Team(` | All files |
-| `IEquipe` | `ITeam` | All files |
-| `EquipeUseCase` | `TeamUseCase` | All files |
-| `EquipeRepository` | `TeamRepository` | All files |
-| `EquipeController` | `TeamController` | All files |
+| `TeamProps` | `TeamProps` | All files |
+| `TeamCreateDTO` | `TeamCreateDTO` | All files |
+| `TeamUpdateDTO` | `TeamUpdateDTO` | All files |
+| `TeamReadDTO` | `TeamReadDTO` | All files |
+| `TeamListItemDTO` | `TeamListItemDTO` | All files |
+| `TeamWithMembresDTO` | `TeamWithMembersDTO` | All files |
+| `TeamManagerDTO` | `TeamManagerDTO` | All files |
+| `TeamMembreDTO` | `TeamMemberDTO` | All files |
+| `TeamFilterDTO` | `TeamFilterDTO` | All files |
+| `export class Team` | `export class Team` | All files |
+| `new Team(` | `new Team(` | All files |
+| `ITeam` | `ITeam` | All files |
+| `TeamUseCase` | `TeamUseCase` | All files |
+| `TeamRepository` | `TeamRepository` | All files |
+| `TeamController` | `TeamController` | All files |
 
 #### **4.2 - Imports de fichiers**
 
 | Find | Replace |
 |------|---------|
-| `from './equipe'` | `from './team'` |
-| `from './equipe.interface'` | `from './team.interface'` |
-| `from '@/domain/entities/equipe'` | `from '@/domain/entities/team'` |
-| `from '@/domain/interfaces/equipe.interface'` | `from '@/domain/interfaces/team.interface'` |
-| `from '@/application/DTOS/equipe.dto'` | `from '@/application/DTOS/team.dto'` |
-| `from '@/application/usecases/equipe.usecase'` | `from '@/application/usecases/team.usecase'` |
+| `from './team'` | `from './team'` |
+| `from './team.interface'` | `from './team.interface'` |
+| `from '@/domain/entities/team'` | `from '@/domain/entities/team'` |
+| `from '@/domain/interfaces/team.interface'` | `from '@/domain/interfaces/team.interface'` |
+| `from '@/application/DTOS/team.dto'` | `from '@/application/DTOS/team.dto'` |
+| `from '@/application/usecases/team.usecase'` | `from '@/application/usecases/team.usecase'` |
 
-#### **4.3 - Propriétés Equipe/Team**
+#### **4.3 - Propriétés Team/Team**
 
 | Find (Match Case ✓) | Replace |
 |---------------------|---------|
@@ -131,10 +131,10 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 | `lastName:` | `name:` |
 | `lastName,` | `name,` |
 | `{ lastName` | `{ name` |
-| `\.plageHoraireId` | `.scheduleId` |
-| `: plageHoraireId` | `: scheduleId` |
-| `plageHoraireId:` | `scheduleId:` |
-| `plageHoraireId,` | `scheduleId,` |
+| `\.scheduleId` | `.scheduleId` |
+| `: scheduleId` | `: scheduleId` |
+| `scheduleId:` | `scheduleId:` |
+| `scheduleId,` | `scheduleId,` |
 | `\.membres` | `.members` |
 | `: membres` | `: members` |
 | `membres:` | `members:` |
@@ -156,21 +156,21 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 | `lastName:` | `lastName:` |
 | `lastName,` | `lastName,` |
 | `{ lastName` | `{ lastName` |
-| `\.telephone` | `.phone` |
-| `: telephone` | `: phone` |
-| `telephone:` | `phone:` |
-| `telephone,` | `phone,` |
-| `\.equipeId` | `.teamId` |
-| `: equipeId` | `: teamId` |
-| `equipeId:` | `teamId:` |
-| `equipeId,` | `teamId,` |
-| `\.equipe` | `.team` |
-| `: equipe` | `: team` |
-| `equipe:` | `team:` |
-| `managedEquipes` | `managedTeams` |
-| `\.plageHoraire` | `.schedule` |
-| `: plageHoraire` | `: schedule` |
-| `plageHoraire:` | `schedule:` |
+| `\.phone` | `.phone` |
+| `: phone` | `: phone` |
+| `phone:` | `phone:` |
+| `phone,` | `phone,` |
+| `\.teamId` | `.teamId` |
+| `: teamId` | `: teamId` |
+| `teamId:` | `teamId:` |
+| `teamId,` | `teamId,` |
+| `\.team` | `.team` |
+| `: team` | `: team` |
+| `team:` | `team:` |
+| `managedTeams` | `managedTeams` |
+| `\.schedule` | `.schedule` |
+| `: schedule` | `: schedule` |
+| `schedule:` | `schedule:` |
 
 #### **4.5 - Relations Prisma**
 
@@ -178,51 +178,51 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 
 | Find | Replace | Files |
 |------|---------|-------|
-| `prisma.equipe.` | `prisma.team.` | `*.repository.ts` |
+| `prisma.team.` | `prisma.team.` | `*.repository.ts` |
 | `prisma.user.` | `prisma.user.` | (reste pareil) |
 
 #### **4.6 - Routes et URLs**
 
 | Find | Replace |
 |------|---------|
-| `'/api/equipes'` | `'/api/teams'` |
-| `'/equipes'` | `'/teams'` |
-| `GET /equipes` | `GET /teams` |
-| `POST /equipes` | `POST /teams` |
-| `'/api/equipes/:id'` | `'/api/teams/:id'` |
+| `'/api/teams'` | `'/api/teams'` |
+| `'/teams'` | `'/teams'` |
+| `GET /teams` | `GET /teams` |
+| `POST /teams` | `POST /teams` |
+| `'/api/teams/:id'` | `'/api/teams/:id'` |
 
 #### **4.7 - Méthodes (lastNames de fonctions)**
 
 | Find | Replace |
 |------|---------|
-| `toEquipeManagerDTO` | `toTeamManagerDTO` |
-| `toEquipeMembreDTO` | `toTeamMemberDTO` |
-| `getAllEquipes` | `getAllTeams` |
-| `getEquipe_ById` | `getTeam_ById` |
-| `getEquipes_ByManagerId` | `getTeams_ByManagerId` |
-| `createEquipe` | `createTeam` |
-| `updateEquipe` | `updateTeam` |
-| `deleteEquipe` | `deleteTeam` |
+| `toTeamManagerDTO` | `toTeamManagerDTO` |
+| `toTeamMembreDTO` | `toTeamMemberDTO` |
+| `getAllTeams` | `getAllTeams` |
+| `getTeam_ById` | `getTeam_ById` |
+| `getTeams_ByManagerId` | `getTeams_ByManagerId` |
+| `createTeam` | `createTeam` |
+| `updateTeam` | `updateTeam` |
+| `deleteTeam` | `deleteTeam` |
 
 #### **4.8 - Variables et constantes**
 
 | Find | Replace |
 |------|---------|
-| `const equipe =` | `const team =` |
-| `const equipes =` | `const teams =` |
-| `let equipe =` | `let team =` |
-| `equipeDto` | `teamDto` |
-| `equipeCreated` | `teamCreated` |
-| `equipeUpdated` | `teamUpdated` |
-| `equipeDeleted` | `teamDeleted` |
-| `existingEquipe` | `existingTeam` |
-| `equipeEntities` | `teamEntities` |
-| `R_equipe` | `R_team` |
-| `UC_equipe` | `UC_team` |
-| `equipeController` | `teamController` |
-| `equipeRoutes` | `teamRoutes` |
-| `equipePaths` | `teamPaths` |
-| `equipeSchemas` | `teamSchemas` |
+| `const team =` | `const team =` |
+| `const teams =` | `const teams =` |
+| `let team =` | `let team =` |
+| `teamDto` | `teamDto` |
+| `teamCreated` | `teamCreated` |
+| `teamUpdated` | `teamUpdated` |
+| `teamDeleted` | `teamDeleted` |
+| `existingTeam` | `existingTeam` |
+| `teamEntities` | `teamEntities` |
+| `R_team` | `R_team` |
+| `UC_team` | `UC_team` |
+| `teamController` | `teamController` |
+| `teamRoutes` | `teamRoutes` |
+| `teamPaths` | `teamPaths` |
+| `teamSchemas` | `teamSchemas` |
 
 #### **4.9 - Messages et commentaires (optionnel, si vous voulez les traduire)**
 
@@ -244,8 +244,8 @@ Après tous les remplacements automatiques, vérifiez manuellement :
 Méthodes à relastNamemer :
 ```typescript
 // Chercher et remplacer dans user.ts
-toEquipeManagerDTO() → toTeamManagerDTO()
-toEquipeMembreDTO() → toTeamMemberDTO()
+toTeamManagerDTO() → toTeamManagerDTO()
+toTeamMembreDTO() → toTeamMemberDTO()
 ```
 
 #### **5.2 - Config files**
@@ -253,7 +253,7 @@ toEquipeMembreDTO() → toTeamMemberDTO()
 **Fichier** : `src/config/controller.factory.ts`
 ```typescript
 // Remplacer
-EquipeController: () => new EquipeController(usecases.EquipeUseCase()),
+TeamController: () => new TeamController(usecases.TeamUseCase()),
 // Par
 TeamController: () => new TeamController(usecases.TeamUseCase()),
 ```
@@ -261,7 +261,7 @@ TeamController: () => new TeamController(usecases.TeamUseCase()),
 **Fichier** : `src/config/usecase.factory.ts`
 ```typescript
 // Remplacer
-EquipeUseCase: () => new EquipeUseCase(repositories.EquipeRepository()),
+TeamUseCase: () => new TeamUseCase(repositories.TeamRepository()),
 // Par
 TeamUseCase: () => new TeamUseCase(repositories.TeamRepository()),
 ```
@@ -269,7 +269,7 @@ TeamUseCase: () => new TeamUseCase(repositories.TeamRepository()),
 **Fichier** : `src/config/repository.factory.ts`
 ```typescript
 // Remplacer
-EquipeRepository: () => new EquipeRepository(),
+TeamRepository: () => new TeamRepository(),
 // Par
 TeamRepository: () => new TeamRepository(),
 ```

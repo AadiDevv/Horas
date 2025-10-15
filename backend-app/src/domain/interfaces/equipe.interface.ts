@@ -1,48 +1,48 @@
-import { Equipe } from "@/domain/entities/equipe";
-import { EquipeFilterDTO } from "@/application/DTOS";
+import { Team } from "@/domain/entities/team";
+import { TeamFilterDTO } from "@/application/DTOS";
 
 /**
- * Interface du repository Equipe
+ * Interface du repository Team
  * Définit le contrat pour les opérations CRUD sur les équipes
  */
-export interface IEquipe {
+export interface ITeam {
     // #region Read
     /**
      * Récupère toutes les équipes (Admin) ou filtre par managerId
      * @param filter - Filtres optionnels (managerId)
      */
-    getAllEquipes(filter?: EquipeFilterDTO): Promise<Equipe[]>;
+    getAllTeams(filter?: TeamFilterDTO): Promise<Team[]>;
 
     /**
      * Récupère une équipe par son ID
      */
-    getEquipe_ById(id: number): Promise<Equipe | null>;
+    getTeam_ById(id: number): Promise<Team | null>;
 
     /**
      * Récupère les équipes d'un manager spécifique
      */
-    getEquipes_ByManagerId(managerId: number): Promise<Equipe[]>;
+    getTeams_ByManagerId(managerId: number): Promise<Team[]>;
     // #endregion
 
     // #region Create
     /**
      * Crée une nouvelle équipe
      */
-    createEquipe(equipe: Equipe): Promise<Equipe>;
+    createTeam(team: Team): Promise<Team>;
     // #endregion
 
     // #region Update
     /**
      * Met à jour une équipe
      */
-    updateEquipe_ById(equipe: Equipe): Promise<Equipe>;
+    updateTeam_ById(team: Team): Promise<Team>;
     // #endregion
 
     // #region Delete
     /**
      * Suppression logique d'une équipe (soft delete)
      */
-    deleteEquipe_ById(id: number): Promise<Equipe>;
+    deleteTeam_ById(id: number): Promise<Team>;
     // #endregion
 }
 

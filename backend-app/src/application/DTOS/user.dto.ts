@@ -11,9 +11,9 @@ export interface UserCreateDTO {
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 // #endregion
 
@@ -27,11 +27,11 @@ export interface UserUpdateDTO {
     firstName?: string;
     lastName?: string;
     email?: string;
-    telephone?: string;
+    phone?: string;
     role?: Role;
     isActive?: boolean;
-    equipeId?: number;
-    plageHoraireId?: number;
+    teamId?: number;
+    scheduleId?: number;
 }
 
 /**
@@ -63,16 +63,16 @@ export interface UserReadDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    telephone?: string;
-    equipeId?: number;
-    plageHoraireId?: number;
+    phone?: string;
+    teamId?: number;
+    scheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;
     deletedAt?: string;
 
     // Informations enrichies (optionnelles selon le endpoint)
-    equipe?: {
+    team?: {
         id: number;
         lastName: string;
     };
@@ -97,17 +97,17 @@ export interface UserListItemDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    equipeId?: number;
-    equipelastName?: string;
+    teamId?: number;
+    teamlastName?: string;
 }
 
 /**
  * DTO pour filtrer les utilisateurs
- * Query params: GET /users?role=employe&equipeId=1&isActive=true
+ * Query params: GET /users?role=employe&teamId=1&isActive=true
  */
 export interface UserFilterDTO {
     role?: Role;
-    equipeId?: number;
+    teamId?: number;
     isActive?: boolean;
     search?: string; // Recherche par lastName, prélastName ou email
 }

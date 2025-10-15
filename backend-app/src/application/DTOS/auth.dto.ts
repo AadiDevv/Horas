@@ -10,9 +10,9 @@ export interface UserRegisterDTO {
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 
 /**
@@ -44,9 +44,9 @@ export interface UserAuthDTO {
     email: string;
     role: Role;
     isActive: boolean;
-    telephone?: string;
-    equipeId?: number;
-    plageHoraireId?: number;
+    phone?: string;
+    teamId?: number;
+    scheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;

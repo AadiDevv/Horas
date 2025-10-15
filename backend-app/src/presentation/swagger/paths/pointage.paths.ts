@@ -1,7 +1,7 @@
-// #region Pointage Paths
+// #region Timesheet Paths
 /**
- * Routes de gestion des pointages
- * Tag: Pointages (À venir)
+ * Routes de gestion des timesheets
+ * Tag: Timesheets (À venir)
  * 
  * Architecture simplifiée :
  * - Pas de DTO de création côté client
@@ -11,26 +11,26 @@
  *   • status calculé automatiquement
  * 
  * Permissions :
- * - POST /pointages/clockin : Tous (employé pointe lui-même)
- * - POST /pointages/clockout : Tous (employé pointe lui-même)
- * - GET /pointages : Employé (ses pointages), Manager (son équipe), Admin (tous)
- * - GET /pointages/stats : Employé (ses stats), Manager (son équipe), Admin (tous)
- * - PATCH /pointages/:id : Manager ou Admin uniquement (correction)
- * - DELETE /pointages/:id : Manager ou Admin uniquement (suppression)
+ * - POST /timesheets/clockin : Tous (employé pointe lui-même)
+ * - POST /timesheets/clockout : Tous (employé pointe lui-même)
+ * - GET /timesheets : Employé (ses timesheets), Manager (son équipe), Admin (tous)
+ * - GET /timesheets/stats : Employé (ses stats), Manager (son équipe), Admin (tous)
+ * - PATCH /timesheets/:id : Manager ou Admin uniquement (correction)
+ * - DELETE /timesheets/:id : Manager ou Admin uniquement (suppression)
  */
-export const pointagePaths = {
-    '/api/pointages/clockin': {
+export const timesheetPaths = {
+    '/api/timesheets/clockin': {
         post: {
             summary: 'Pointer l\'entrée',
             description: 'Enregistre l\'heure d\'arrivée de l\'employé. L\'employeId est extrait du JWT, la date et l\'heure sont automatiques.',
-            tags: ['Pointages (À venir)'],
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             responses: {
                 201: {
-                    description: 'Pointage d\'entrée enregistré avec succès',
+                    description: 'Timesheet d\'entrée enregistré avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/PointageCreatedResponse' },
+                            schema: { $ref: '#/components/schemas/TimesheetCreatedResponse' },
                             example: {
                                 success: true,
                                 data: {
@@ -49,14 +49,14 @@ export const pointagePaths = {
                                         email: 'pierre.martin@example.com'
                                     }
                                 },
-                                message: 'Pointage d\'entrée enregistré avec succès',
+                                message: 'Timesheet d\'entrée enregistré avec succès',
                                 timestamp: '2025-10-12T09:05:35.000Z'
                             }
                         }
                     }
                 },
                 400: {
-                    description: 'Pointage impossible (ex: déjà pointé)',
+                    description: 'Timesheet impossible (ex: déjà pointé)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
@@ -86,18 +86,18 @@ export const pointagePaths = {
         }
     },
 
-    '/api/pointages/clockout': {
+    '/api/timesheets/clockout': {
         post: {
             summary: 'Pointer la sortie',
             description: 'Enregistre l\'heure de départ de l\'employé. L\'employeId est extrait du JWT, la date et l\'heure sont automatiques.',
-            tags: ['Pointages (À venir)'],
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             responses: {
                 201: {
-                    description: 'Pointage de sortie enregistré avec succès',
+                    description: 'Timesheet de sortie enregistré avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/PointageCreatedResponse' },
+                            schema: { $ref: '#/components/schemas/TimesheetCreatedResponse' },
                             example: {
                                 success: true,
                                 data: {
@@ -116,20 +116,20 @@ export const pointagePaths = {
                                         email: 'pierre.martin@example.com'
                                     }
                                 },
-                                message: 'Pointage de sortie enregistré avec succès',
+                                message: 'Timesheet de sortie enregistré avec succès',
                                 timestamp: '2025-10-12T17:35:05.000Z'
                             }
                         }
                     }
                 },
                 400: {
-                    description: 'Pointage impossible (ex: pas de pointage d\'entrée)',
+                    description: 'Timesheet impossible (ex: pas de timesheet d\'entrée)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
                             examples: {
                                 noClockIn: {
-                                    summary: 'Pas de pointage d\'entrée',
+                                    summary: 'Pas de timesheet d\'entrée',
                                     value: {
                                         success: false,
                                         error: 'Vous devez d\'abord pointer votre entrée',
@@ -145,11 +145,11 @@ export const pointagePaths = {
         }
     },
 
-    '/api/pointages': {
+    '/api/timesheets': {
         get: {
-            summary: 'Liste des pointages',
-            description: 'Récupère les pointages avec filtres optionnels. Un employé ne voit que ses propres pointages. Un manager voit ceux de son équipe. Un admin voit tous les pointages.',
-            tags: ['Pointages (À venir)'],
+            summary: 'Liste des timesheets',
+            description: 'Récupère les timesheets avec filtres optionnels. Un employé ne voit que ses propres timesheets. Un manager voit ceux de son équipe. Un admin voit tous les timesheets.',
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -187,10 +187,10 @@ export const pointagePaths = {
             ],
             responses: {
                 200: {
-                    description: 'Liste des pointages récupérée avec succès',
+                    description: 'Liste des timesheets récupérée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/PointageListResponse' }
+                            schema: { $ref: '#/components/schemas/TimesheetListResponse' }
                         }
                     }
                 },
@@ -206,11 +206,11 @@ export const pointagePaths = {
         }
     },
 
-    '/api/pointages/{id}': {
+    '/api/timesheets/{id}': {
         get: {
-            summary: 'Détail d\'un pointage',
-            description: 'Récupère les informations détaillées d\'un pointage',
-            tags: ['Pointages (À venir)'],
+            summary: 'Détail d\'un timesheet',
+            description: 'Récupère les informations détaillées d\'un timesheet',
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -218,19 +218,19 @@ export const pointagePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID du pointage'
+                    description: 'ID du timesheet'
                 }
             ],
             responses: {
                 200: {
-                    description: 'Pointage récupéré avec succès',
+                    description: 'Timesheet récupéré avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/PointageReadDTO' },
+                                    data: { $ref: '#/components/schemas/TimesheetReadDTO' },
                                     message: { type: 'string' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
@@ -239,7 +239,7 @@ export const pointagePaths = {
                     }
                 },
                 404: {
-                    description: 'Pointage non trouvé',
+                    description: 'Timesheet non trouvé',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -250,9 +250,9 @@ export const pointagePaths = {
         },
 
         patch: {
-            summary: 'Corriger un pointage',
-            description: 'Permet de corriger manuellement un pointage. Manager ou Admin uniquement.',
-            tags: ['Pointages (À venir)'],
+            summary: 'Corriger un timesheet',
+            description: 'Permet de corriger manuellement un timesheet. Manager ou Admin uniquement.',
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -260,14 +260,14 @@ export const pointagePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID du pointage'
+                    description: 'ID du timesheet'
                 }
             ],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/PointageUpdateDTO' },
+                        schema: { $ref: '#/components/schemas/TimesheetUpdateDTO' },
                         examples: {
                             correctTime: {
                                 summary: 'Corriger l\'heure',
@@ -287,15 +287,15 @@ export const pointagePaths = {
             },
             responses: {
                 200: {
-                    description: 'Pointage corrigé avec succès',
+                    description: 'Timesheet corrigé avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/PointageReadDTO' },
-                                    message: { type: 'string', example: 'Pointage corrigé avec succès' },
+                                    data: { $ref: '#/components/schemas/TimesheetReadDTO' },
+                                    message: { type: 'string', example: 'Timesheet corrigé avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -314,9 +314,9 @@ export const pointagePaths = {
         },
 
         delete: {
-            summary: 'Supprimer un pointage',
-            description: 'Supprime un pointage erroné. Manager ou Admin uniquement.',
-            tags: ['Pointages (À venir)'],
+            summary: 'Supprimer un timesheet',
+            description: 'Supprime un timesheet erroné. Manager ou Admin uniquement.',
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -324,19 +324,19 @@ export const pointagePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID du pointage'
+                    description: 'ID du timesheet'
                 }
             ],
             responses: {
                 200: {
-                    description: 'Pointage supprimé avec succès',
+                    description: 'Timesheet supprimé avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    message: { type: 'string', example: 'Pointage supprimé avec succès' },
+                                    message: { type: 'string', example: 'Timesheet supprimé avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -355,11 +355,11 @@ export const pointagePaths = {
         }
     },
 
-    '/api/pointages/stats': {
+    '/api/timesheets/stats': {
         get: {
-            summary: 'Statistiques des pointages',
-            description: 'Calcule les statistiques de pointage d\'un employé sur une période. Un employé ne voit que ses propres statistiques.',
-            tags: ['Pointages (À venir)'],
+            summary: 'Statistiques des timesheets',
+            description: 'Calcule les statistiques de timesheet d\'un employé sur une période. Un employé ne voit que ses propres statistiques.',
+            tags: ['Timesheets (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -391,7 +391,7 @@ export const pointagePaths = {
                     description: 'Statistiques calculées avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/PointageStatsResponse' }
+                            schema: { $ref: '#/components/schemas/TimesheetStatsResponse' }
                         }
                     }
                 },

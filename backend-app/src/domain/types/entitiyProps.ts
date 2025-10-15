@@ -13,18 +13,18 @@ export type UserProps = {
     lastLoginAt?: Date,
     deletedAt?: Date,
 
-    telephone?: string,
-    equipeId?: number,
-    plageHoraireId?: number,
+    phone?: string,
+    teamId?: number,
+    scheduleId?: number,
     id?: number,
 }
 
-export type EquipeProps = {
+export type TeamProps = {
     id?: number,
     lastName: string,
     description?: string,
     managerId: number,
-    plageHoraireId?: number,
+    scheduleId?: number,
     createdAt?: Date,
     updatedAt?: Date,
     deletedAt?: Date | null,

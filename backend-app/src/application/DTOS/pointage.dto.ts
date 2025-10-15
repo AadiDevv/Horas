@@ -1,28 +1,28 @@
-import { PointageStatus } from "@/domain/types";
+import { TimesheetStatus } from "@/domain/types";
 
 // #region Update DTO
 /**
- * DTO pour corriger un pointage (admin/manager uniquement)
+ * DTO pour corriger un timesheet (admin/manager uniquement)
  */
-export interface PointageUpdateDTO {
+export interface TimesheetUpdateDTO {
     date?: string;    // Format: "YYYY-MM-DD"
     heure?: string;   // Format: "HH:mm:ss" ou ISO DateTime
     clockin?: boolean;
-    status?: PointageStatus;
+    status?: TimesheetStatus;
 }
 // #endregion
 
 // #region Read DTO
 /**
- * DTO de retour pour un pointage
+ * DTO de retour pour un timesheet
  */
-export interface PointageReadDTO {
+export interface TimesheetReadDTO {
     id: number;
     employeId: number;
     date: string;      // Format: "YYYY-MM-DD"
     heure: string;     // Format ISO DateTime complet
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
     createdAt: string;
     updatedAt: string;
 
@@ -38,46 +38,46 @@ export interface PointageReadDTO {
 
 // #region List & Filter DTOs
 /**
- * DTO pour filtrer les pointages
- * Query params: GET /pointages?employeId=1&dateDebut=2025-01-01&dateFin=2025-01-31
+ * DTO pour filtrer les timesheets
+ * Query params: GET /timesheets?employeId=1&dateDebut=2025-01-01&dateFin=2025-01-31
  */
-export interface PointageFilterDTO {
+export interface TimesheetFilterDTO {
     employeId?: number;
     dateDebut?: string; // Format: "YYYY-MM-DD"
     dateFin?: string;   // Format: "YYYY-MM-DD"
-    status?: PointageStatus;
+    status?: TimesheetStatus;
     clockin?: boolean;
 }
 
 /**
- * DTO pour la liste des pointages (version simplifiée)
+ * DTO pour la liste des timesheets (version simplifiée)
  */
-export interface PointageListItemDTO {
+export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
     employelastName: string; // firstName + lastName
     date: string;
     heure: string;
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
 }
 // #endregion
 
 // #region Statistics DTO
 /**
- * DTO pour les statistiques de pointage d'un employé sur une période
- * Exemple: GET /pointages/stats?employeId=1&dateDebut=...&dateFin=...
+ * DTO pour les statistiques de timesheet d'un employé sur une période
+ * Exemple: GET /timesheets/stats?employeId=1&dateDebut=...&dateFin=...
  */
-export interface PointageStatsDTO {
+export interface TimesheetStatsDTO {
     employeId: number;
     periodeDebut: string;
     periodeFin: string;
-    totalPointages: number;
+    totalTimesheets: number;
     totalEntrees: number;
     totalSorties: number;
-    pointagesNormaux: number;
-    pointagesRetard: number;
-    pointagesIncomplete: number;
+    timesheetsNormaux: number;
+    timesheetsRetard: number;
+    timesheetsIncomplete: number;
     joursPointes: number; // lastNamebre de jours uniques
 }
 // #endregion

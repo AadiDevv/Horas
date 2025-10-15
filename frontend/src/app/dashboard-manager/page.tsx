@@ -22,14 +22,14 @@ export default function Page() {
   const formatDate = (date: Date) => {
     const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
     const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-    
+
     const dayName = days[date.getDay()];
     const day = date.getDate();
     const month = months[date.getMonth()];
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     return `${dayName} ${day}, ${month} ${year} | ${hours}:${minutes}`;
   };
 
@@ -92,7 +92,7 @@ export default function Page() {
   return (
     <RoleProtection allowedRoles={['manager', 'admin']}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Navbar/>
+        <Navbar />
         <div className="flex">
           {/* Sidebar */}
           {sidebarOpen && (
@@ -106,7 +106,7 @@ export default function Page() {
                 </div>
                 Tableau de bord
               </button>
-              
+
               <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
                 <Users size={20} strokeWidth={2} />
                 Agents
@@ -119,7 +119,7 @@ export default function Page() {
 
               <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
                 <FileText size={20} strokeWidth={2} />
-                Rapports
+                Reports
               </button>
 
               <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
@@ -189,9 +189,9 @@ export default function Page() {
                   <h3 className="text-xl font-semibold">Agents</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
                     </svg>
                   </button>
                 </div>
@@ -236,9 +236,9 @@ export default function Page() {
                   <h3 className="text-xl font-semibold">Heures par jours</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
                     </svg>
                   </button>
                 </div>
@@ -247,7 +247,7 @@ export default function Page() {
                   {weeklyHours.map((item, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-3">
                       <div className="w-full bg-gray-100 rounded-t-xl relative" style={{ height: '100%' }}>
-                        <div 
+                        <div
                           className="w-full bg-gradient-to-t from-gray-800 to-gray-700 rounded-t-xl absolute bottom-0 transition-all duration-500 hover:from-gray-700 hover:to-gray-600"
                           style={{ height: `${item.hours}%` }}
                         ></div>
@@ -273,9 +273,9 @@ export default function Page() {
                   <h3 className="text-xl font-semibold">Top retardataires</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
                     </svg>
                   </button>
                 </div>
@@ -316,9 +316,9 @@ export default function Page() {
                   <h3 className="text-xl font-semibold">Heures par agent</h3>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor"/>
+                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
                     </svg>
                   </button>
                 </div>
@@ -328,7 +328,7 @@ export default function Page() {
                     <div key={idx} className="flex items-center gap-4">
                       <span className="text-sm font-semibold text-gray-700 w-16">{agent.name}</span>
                       <div className="flex-1 h-8 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-gray-800 to-gray-700 rounded-full transition-all duration-500 hover:from-gray-700 hover:to-gray-600"
                           style={{ width: `${agent.hours}%` }}
                         ></div>

@@ -1,7 +1,7 @@
-// #region Equipe Schemas
-export const equipeSchemas = {
+// #region Team Schemas
+export const teamSchemas = {
     // #region Request DTOs
-    EquipeCreateDTO: {
+    TeamCreateDTO: {
         type: 'object',
         required: ['lastName', 'managerId'],
         properties: {
@@ -22,7 +22,7 @@ export const equipeSchemas = {
                 example: 5,
                 description: 'ID du manager responsable de l\'équipe'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
@@ -31,7 +31,7 @@ export const equipeSchemas = {
         }
     },
 
-    EquipeUpdateDTO: {
+    TeamUpdateDTO: {
         type: 'object',
         properties: {
             lastName: {
@@ -46,7 +46,7 @@ export const equipeSchemas = {
                 example: 'Description mise à jour',
                 description: 'Nouvelle description'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -58,7 +58,7 @@ export const equipeSchemas = {
     // #endregion
 
     // #region Response DTOs
-    EquipeReadDTO: {
+    TeamReadDTO: {
         type: 'object',
         properties: {
             id: {
@@ -82,7 +82,7 @@ export const equipeSchemas = {
                 example: 5,
                 description: 'ID du manager'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
@@ -143,10 +143,10 @@ export const equipeSchemas = {
         }
     },
 
-    EquipeWithMembresDTO: {
+    TeamWithMembresDTO: {
         allOf: [
             {
-                $ref: '#/components/schemas/EquipeReadDTO'
+                $ref: '#/components/schemas/TeamReadDTO'
             },
             {
                 type: 'object',
@@ -183,12 +183,12 @@ export const equipeSchemas = {
                                     type: 'boolean',
                                     example: true
                                 },
-                                telephone: {
+                                phone: {
                                     type: 'string',
                                     nullable: true,
                                     example: '+33 6 12 34 56 78'
                                 },
-                                plageHoraireId: {
+                                scheduleId: {
                                     type: 'integer',
                                     nullable: true,
                                     example: 1,
@@ -202,7 +202,7 @@ export const equipeSchemas = {
         ]
     },
 
-    EquipeListItemDTO: {
+    TeamListItemDTO: {
         type: 'object',
         properties: {
             id: {
@@ -222,7 +222,7 @@ export const equipeSchemas = {
                 type: 'integer',
                 example: 5
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
@@ -248,7 +248,7 @@ export const equipeSchemas = {
     // #endregion
 
     // #region Standard Responses
-    EquipeCreatedResponse: {
+    TeamCreatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -256,7 +256,7 @@ export const equipeSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/EquipeReadDTO'
+                $ref: '#/components/schemas/TeamReadDTO'
             },
             message: {
                 type: 'string',
@@ -269,7 +269,7 @@ export const equipeSchemas = {
         }
     },
 
-    EquipeListResponse: {
+    TeamListResponse: {
         type: 'object',
         properties: {
             success: {
@@ -279,7 +279,7 @@ export const equipeSchemas = {
             data: {
                 type: 'array',
                 items: {
-                    $ref: '#/components/schemas/EquipeListItemDTO'
+                    $ref: '#/components/schemas/TeamListItemDTO'
                 }
             },
             message: {

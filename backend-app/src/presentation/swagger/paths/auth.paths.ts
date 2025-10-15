@@ -38,7 +38,7 @@ export const authPaths = {
                                     lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    telephone: '+33 6 12 34 56 78'
+                                    phone: '+33 6 12 34 56 78'
                                 }
                             }
                         }
@@ -166,8 +166,8 @@ export const authPaths = {
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe',
-                                    telephone: '+33 6 12 34 56 78',
-                                    equipeId: 5
+                                    phone: '+33 6 12 34 56 78',
+                                    teamId: 5
                                 }
                             }
                         }
@@ -292,7 +292,7 @@ export const authPaths = {
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager',
-                                    telephone: '+33 6 98 76 54 32'
+                                    phone: '+33 6 98 76 54 32'
                                 }
                             }
                         }

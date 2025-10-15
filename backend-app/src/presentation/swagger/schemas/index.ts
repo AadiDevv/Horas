@@ -2,9 +2,9 @@ import { commonSchemas } from './common.schema';
 import { healthSchemas } from './health.schema';
 import { authSchemas } from './auth.schema';
 import { userSchemas } from './user.schema';
-import { equipeSchemas } from './equipe.schema';
+import { teamSchemas } from './team.schema';
 import { horaireSchemas } from './horaire.schema';
-import { pointageSchemas } from './pointage.schema';
+import { timesheetSchemas } from './timesheet.schema';
 
 // #region Export All Schemas
 export const schemas = {
@@ -12,9 +12,9 @@ export const schemas = {
     ...healthSchemas,
     ...authSchemas,
     ...userSchemas,
-    ...equipeSchemas,
+    ...teamSchemas,
     ...horaireSchemas,
-    ...pointageSchemas
+    ...timesheetSchemas
 };
 // #endregion
 

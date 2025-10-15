@@ -36,19 +36,19 @@ export const authSchemas = {
                 example: 'employe',
                 description: 'Rôle de l\'utilisateur (employe par défaut pour l\'auto-inscription)'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone (optionnel)'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe (optionnel)'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -113,19 +113,19 @@ export const authSchemas = {
                 example: false,
                 description: 'Indique si le compte est actif'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 nullable: true,
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe à laquelle appartient l\'utilisateur'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
