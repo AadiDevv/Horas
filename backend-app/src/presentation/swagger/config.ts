@@ -40,8 +40,8 @@ export const swaggerDefinition: SwaggerDefinition = {
             description: '🔮 Routes de gestion des utilisateurs (listing, modification, suppression)'
         },
         {
-            name: 'Équipes (À venir)',
-            description: '🔮 Routes de gestion des équipes de travail'
+            name: 'Équipes',
+            description: 'Gestion des équipes de travail (CRUD complet, permissions basées sur les rôles)'
         },
         {
             name: 'Horaires (À venir)',

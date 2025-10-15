@@ -1,1 +1,2 @@
-export {AuthUseCase} from './user.usecase';
+export { AuthUseCase } from './user.usecase';
+export { EquipeUseCase } from './equipe.usecase';
