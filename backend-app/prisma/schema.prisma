@@ -41,7 +41,7 @@ model User {
   phone              String    @db.VarChar(20) @default("")
   hashedPassword     String    @db.VarChar(255)
   role               Role      @default(employe)
-  isActive           Boolean   @default(false)
+  isActive           Boolean   @default(true)
   teamId             Int?
   scheduleId         Int?
   createdAt          DateTime  @default(now())

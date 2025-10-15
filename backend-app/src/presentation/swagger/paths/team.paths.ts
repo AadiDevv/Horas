@@ -50,7 +50,7 @@ export const teamPaths = {
                                         data: [
                                             {
                                                 id: 1,
-                                                lastName: 'Équipe Production',
+                                                name: 'Équipe Production',
                                                 description: 'Équipe du matin',
                                                 managerId: 5,
                                                 managerlastName: 'Marie Durand',
@@ -59,7 +59,7 @@ export const teamPaths = {
                                             },
                                             {
                                                 id: 2,
-                                                lastName: 'Équipe Logistique',
+                                                name: 'Équipe Logistique',
                                                 description: null,
                                                 managerId: 5,
                                                 managerlastName: 'Marie Durand',
@@ -129,7 +129,7 @@ export const teamPaths = {
                     'application/json': {
                         schema: { $ref: '#/components/schemas/TeamCreateDTO' },
                         example: {
-                            lastName: 'Équipe Production',
+                            name: 'Équipe Production',
                             description: 'Équipe responsable de la production du matin',
                             managerId: 5
                         }
@@ -222,7 +222,7 @@ export const teamPaths = {
 
         patch: {
             summary: 'Modifier une équipe',
-            description: 'Met à jour les informations d\'une équipe (lastName, description, scheduleId). Le managerId ne peut PAS être modifié. Admin uniquement.',
+            description: 'Met à jour les informations d\'une équipe (name, description, scheduleId). Le managerId ne peut PAS être modifié. Admin uniquement.',
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
             parameters: [

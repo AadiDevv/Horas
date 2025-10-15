@@ -2,15 +2,7 @@ import { IAuth } from "@/domain/interfaces/auth.interface";
 import { User } from "@/domain/entities/user";
 import { prisma } from "../prisma.service";
 import { NotFoundError, ValidationError } from "@/domain/error/AppError";
-
-// #region Helper - Convertit null en undefined pour Prisma
-const nullToUndefined = <T extends Record<string, any>>(obj: T): T => {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    acc[key as keyof T] = value === null ? undefined : value;
-    return acc;
-  }, {} as T);
-};
-// #endregion
+import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 
 export class UserRepository implements IAuth {
 
@@ -18,22 +10,22 @@ export class UserRepository implements IAuth {
   // #region Read
   async getAllUsers(): Promise<User[]> {
     const users = await prisma.user.findMany();
-    return users.map(user => new User({ ...user }));
+    return users.map(user => new User(nullToUndefined(user)));
   }
 
   async getUser_ById(id: number): Promise<User | null> {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) return null;
-      return new User({ ...user });
+      return new User(nullToUndefined(user));
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
   }
   async getUser_ByEmail(email: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({ where: { email } }) as User | null;
-    if (!user) return null
-    return new User({ ...user })
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return null;
+    return new User(nullToUndefined(user));
   }
 
 
@@ -53,7 +45,7 @@ export class UserRepository implements IAuth {
         updatedAt: new Date(Date.now())
       }
     })
-    return new User({ ...updatedUser })
+    return new User(nullToUndefined(updatedUser))
   }
 
   async updateUserLogin_byId(user: User): Promise<User> {
@@ -69,7 +61,7 @@ export class UserRepository implements IAuth {
         lastLoginAt: lastLoginAt
       }
     })
-    return new User({ ...updatedUser, lastLoginAt: updatedUser.lastLoginAt ?? undefined, deletedAt: updatedUser.deletedAt ?? undefined })
+    return new User(nullToUndefined(updatedUser))
   }
 
   // #endregion
@@ -77,9 +69,10 @@ export class UserRepository implements IAuth {
 
   async deleteUser_ById(user: User): Promise<User> {
     if (!user.id) throw new ValidationError('Cannot update user without ID')
-    return await prisma.user.delete({
+    const deletedUser = await prisma.user.delete({
       where: { id: user.id }
-    }) as User
+    })
+    return new User(nullToUndefined(deletedUser));
   }
   // #endregion
   // #region Auth
@@ -90,7 +83,7 @@ export class UserRepository implements IAuth {
       data: nullToUndefined(userData) as any,
     })
 
-    return new User({ ...createdUser });
+    return new User(nullToUndefined(createdUser));
   }
 
   // #endregion
