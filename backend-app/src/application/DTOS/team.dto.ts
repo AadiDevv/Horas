@@ -33,7 +33,7 @@ export interface TeamMembreDTO {
  * Le managerId est fourni dans le body ou extrait du JWT selon les permissions
  */
 export interface TeamCreateDTO {
-    lastName: string;
+    name: string;
     description?: string;
     managerId: number;
     scheduleId?: number;
@@ -46,7 +46,7 @@ export interface TeamCreateDTO {
  * Tous les champs sont optionnels pour permettre des updates partiels (PATCH)
  */
 export interface TeamUpdateDTO {
-    lastName?: string;
+    name?: string;
     description?: string;
     managerId?: number;
     scheduleId?: number;
@@ -60,7 +60,7 @@ export interface TeamUpdateDTO {
  */
 export interface TeamReadDTO {
     id: number;
-    lastName: string;
+    name: string;
     description?: string;
     managerId: number;
     scheduleId?: number;
@@ -89,7 +89,7 @@ export interface TeamWithMembersDTO extends TeamReadDTO {
  */
 export interface TeamListItemDTO {
     id: number;
-    lastName: string;
+    name: string;
     description?: string;
     managerId: number;
     scheduleId?: number;

@@ -5,7 +5,7 @@ import { ValidationError } from "../error/AppError";
 
 export class Team {
     public readonly id?: number;
-    public lastName: string;
+    public name: string;
     public description?: string;
     public managerId: number;
     public scheduleId?: number;
@@ -18,7 +18,7 @@ export class Team {
 
     constructor(props: TeamProps) {
         this.id = props.id;
-        this.lastName = props.lastName;
+        this.name = props.name;
         this.description = props.description;
         this.managerId = props.managerId;
         this.scheduleId = props.scheduleId;
@@ -38,7 +38,7 @@ export class Team {
      */
     static fromCreateDTO(dto: TeamCreateDTO): Team {
         return new Team({
-            lastName: dto.lastName,
+            name: dto.name,
             description: dto.description,
             managerId: dto.managerId,
             scheduleId: dto.scheduleId,
@@ -52,7 +52,7 @@ export class Team {
     static fromUpdateDTO(existingTeam: Team, dto: TeamUpdateDTO): Team {
         return new Team({
             ...existingTeam,
-            lastName: dto.lastName ?? existingTeam.lastName,
+            name: dto.name ?? existingTeam.name,
             description: dto.description ?? existingTeam.description,
             managerId: dto.managerId ?? existingTeam.managerId,
             scheduleId: dto.scheduleId ?? existingTeam.scheduleId,
@@ -83,7 +83,7 @@ export class Team {
 
         return {
             id: this.id,
-            lastName: this.lastName,
+            name: this.name,
             description: this.description,
             managerId: this.managerId,
             scheduleId: this.scheduleId,
@@ -102,7 +102,7 @@ export class Team {
 
         return {
             id: this.id,
-            lastName: this.lastName,
+            name: this.name,
             description: this.description,
             managerId: this.managerId,
             scheduleId: this.scheduleId,
@@ -133,7 +133,7 @@ export class Team {
      * Peut être appelée avant la sauvegarde
      */
     validate(): void {
-        if (!this.lastName || this.lastName.trim().length < 2) {
+        if (!this.name || this.name.trim().length < 2) {
             throw new ValidationError("Le lastName de l'équipe doit contenir au moins 2 caractères");
         }
         if (!this.managerId || this.managerId <= 0) {
@@ -147,7 +147,7 @@ export class Team {
      * Retourne le lastName d'affichage de l'équipe
      */
     getDisplayName(): string {
-        return this.lastName;
+        return this.name;
     }
     // #endregion
 }

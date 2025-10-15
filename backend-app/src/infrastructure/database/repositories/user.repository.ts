@@ -69,7 +69,7 @@ export class UserRepository implements IAuth {
         lastLoginAt: lastLoginAt
       }
     })
-    return new User({ ...updatedUser })
+    return new User({ ...updatedUser, lastLoginAt: updatedUser.lastLoginAt ?? undefined, deletedAt: updatedUser.deletedAt ?? undefined })
   }
 
   // #endregion
