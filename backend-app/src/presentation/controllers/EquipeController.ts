@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TeamUseCase } from '@/application/usecases';
-import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembresDTO } from '@/application/DTOS';
+import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
 
 /**
@@ -34,9 +34,9 @@ export class TeamController {
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
         const team = await this.UC_team.getTeam_ById(id);
-        const teamWithMembres: TeamWithMembresDTO = team?.toWithMembresDTO();
+        const teamWithMembers: TeamWithMembersDTO = team?.toWithMembersDTO();
 
-        res.success(teamWithMembres, "Équipe récupérée avec succès");
+        res.success(teamWithMembers, "Équipe récupérée avec succès");
     }
     // #endregion
 

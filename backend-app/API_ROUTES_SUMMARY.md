@@ -67,21 +67,21 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 | DELETE | `/api/teams/:id` | Supprimer une équipe | Admin | JWT |
 
 **Query Params (GET /teams/:id) :**
-- `include=membres` : Inclure la liste complète des membres
+- `include=members` : Inclure la liste complète des members
 
 ---
 
-### 5. Horaires
+### 5. Schedules
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| GET | `/api/horaires` | Liste des horaires | Tous | JWT |
-| GET | `/api/horaires/:id` | Détail d'un horaire | Tous | JWT |
-| POST | `/api/horaires` | Créer un horaire | Admin, Manager | JWT |
-| PATCH | `/api/horaires/:id` | Modifier un horaire | Admin, Manager | JWT |
-| DELETE | `/api/horaires/:id` | Supprimer un horaire | Admin | JWT |
+| GET | `/api/schedules` | Liste des schedules | Tous | JWT |
+| GET | `/api/schedules/:id` | Détail d'un schedule | Tous | JWT |
+| POST | `/api/schedules` | Créer un schedule | Admin, Manager | JWT |
+| PATCH | `/api/schedules/:id` | Modifier un schedule | Admin, Manager | JWT |
+| DELETE | `/api/schedules/:id` | Supprimer un schedule | Admin | JWT |
 
-**Query Params (GET /horaires/:id) :**
+**Query Params (GET /schedules/:id) :**
 - `include=utilisateurs` : Inclure la liste des utilisateurs assignés
 
 **Format des données :**
@@ -97,7 +97,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 **Pas de DTO de création côté client** — Tout est géré automatiquement :
 - ✅ `employeId` extrait du JWT
 - ✅ Date et heure au moment de la requête
-- ✅ Statut calculé automatiquement selon l'horaire de l'employé
+- ✅ Statut calculé automatiquement selon l'schedule de l'employé
 
 #### Routes
 
@@ -138,7 +138,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 |-----------|----------|------------|------|-------|--------|
 | **Users** | 👤👔👑 | 👤👔👑 | 👔👑 | 👤(soi)👔(équipe)👑 | 👑 |
 | **Équipes** | 👤👔👑 | 👤👔👑 | 👑 | 👑 | 👑 |
-| **Horaires** | 👤👔👑 | 👤👔👑 | 👔👑 | 👔👑 | 👑 |
+| **Schedules** | 👤👔👑 | 👤👔👑 | 👔👑 | 👔👑 | 👑 |
 | **Timesheets** | 👤(soi)👔(équipe)👑 | 👤(soi)👔(équipe)👑 | 👤👔👑 | 👔👑 | 👔👑 |
 
 ### Cas Particuliers
@@ -252,7 +252,7 @@ Authorization: Bearer {token}
 - [ ] Contrôleurs
 - [ ] Tests
 
-### Phase 3 - Gestion des Horaires
+### Phase 3 - Gestion des Schedules
 - [x] DTOs créés
 - [x] Schémas Swagger documentés
 - [ ] Entités métier

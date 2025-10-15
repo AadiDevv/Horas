@@ -3,7 +3,7 @@ import { healthSchemas } from './health.schema';
 import { authSchemas } from './auth.schema';
 import { userSchemas } from './user.schema';
 import { teamSchemas } from './team.schema';
-import { horaireSchemas } from './horaire.schema';
+import { scheduleSchemas } from './schedule.schema';
 import { timesheetSchemas } from './timesheet.schema';
 
 // #region Export All Schemas
@@ -13,7 +13,7 @@ export const schemas = {
     ...authSchemas,
     ...userSchemas,
     ...teamSchemas,
-    ...horaireSchemas,
+    ...scheduleSchemas,
     ...timesheetSchemas
 };
 // #endregion

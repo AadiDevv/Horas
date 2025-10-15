@@ -186,7 +186,7 @@ export class User {
 
   /**
    * Convertit l'utilisateur en TeamMembreDTO
-   * Utilisé dans les DTOs d'équipe pour afficher les infos des membres
+   * Utilisé dans les DTOs d'équipe pour afficher les infos des members
    */
   public toTeamMembreDTO(): TeamMembreDTO {
     if (!this.id) {

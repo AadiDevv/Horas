@@ -1,4 +1,4 @@
-import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembresDTO } from "@/application/DTOS";
+import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembersDTO } from "@/application/DTOS";
 import { Team } from "@/domain/entities/team";
 import { ITeam } from "@/domain/interfaces/team.interface";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
@@ -72,7 +72,7 @@ export class TeamUseCase {
 
     /**
      * Récupère une équipe par son ID
-     * Le repository charge automatiquement le manager et les membres via includes
+     * Le repository charge automatiquement le manager et les members via includes
      * 
      * @param id - ID de l'équipe
      * @returns L'équipe avec ses relations chargées
@@ -163,26 +163,26 @@ export class TeamUseCase {
      * Suppression logique (soft delete) d'une équipe
      * 
      * Règles métier :
-     * - Une équipe contenant des membres ne peut PAS être supprimée
-     * - Les membres doivent d'abord être déplacés vers une autre équipe
+     * - Une équipe contenant des members ne peut PAS être supprimée
+     * - Les members doivent d'abord être déplacés vers une autre équipe
      * 
      * @param id - ID de l'équipe à supprimer
      * @throws NotFoundError si l'équipe n'existe pas
-     * @throws ValidationError si l'équipe contient des membres
+     * @throws ValidationError si l'équipe contient des members
      */
     async deleteTeam(id: number, userId: number): Promise<void> {
-        // Récupération de l'équipe avec ses membres (chargés par le repository)
+        // Récupération de l'équipe avec ses members (chargés par le repository)
         const team = await this.getTeam_ById(id);
         if (team.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
 
-        // Vérification : l'équipe ne doit pas contenir de membres
-        const membresCount = team.membres?.length ?? 0;
-        if (membresCount > 0) {
+        // Vérification : l'équipe ne doit pas contenir de members
+        const membersCount = team.members?.length ?? 0;
+        if (membersCount > 0) {
             throw new ValidationError(
-                `L'équipe "${team.lastName}" contient ${membresCount} membre(s). ` +
-                `Veuillez d'abord déplacer ou retirer les membres avant de supprimer l'équipe.`
+                `L'équipe "${team.lastName}" contient ${membersCount} membre(s). ` +
+                `Veuillez d'abord déplacer ou retirer les members avant de supprimer l'équipe.`
             );
         }
 

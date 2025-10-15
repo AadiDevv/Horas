@@ -4,7 +4,7 @@ export const timesheetSchemas = {
     // Note: Pas de DTO de création car le timesheet est entièrement géré côté serveur
     // - employeId extrait du JWT
     // - date et heure automatiques au moment de la requête
-    // - status calculé automatiquement selon l'horaire de l'employé
+    // - status calculé automatiquement selon l'schedule de l'employé
 
     TimesheetUpdateDTO: {
         type: 'object',

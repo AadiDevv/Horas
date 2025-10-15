@@ -7,8 +7,8 @@ export * from './user.dto';
 export * from './team.dto';
 // #endregion
 
-// #region Horaire DTOs
-export * from './horaire.dto';
+// #region Schedule DTOs
+export * from './schedule.dto';
 // #endregion
 
 // #region Timesheet DTOs

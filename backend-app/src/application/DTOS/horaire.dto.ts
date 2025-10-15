@@ -1,10 +1,10 @@
 // #region Create DTO
 /**
- * DTO pour créer un horaire de travail
+ * DTO pour créer un schedule de travail
  * Les heures sont au format "HH:mm" (ex: "09:00", "17:30")
  * joursActifs est un tableau de lastNamebres représentant les jours (1=Lundi, 7=Dimanche)
  */
-export interface HoraireCreateDTO {
+export interface ScheduleCreateDTO {
     lastName: string;
     heureDebut: string; // Format: "HH:mm" ex: "09:00"
     heureFin: string;   // Format: "HH:mm" ex: "17:30"
@@ -14,10 +14,10 @@ export interface HoraireCreateDTO {
 
 // #region Update DTO
 /**
- * DTO pour mettre à jour un horaire
+ * DTO pour mettre à jour un schedule
  * Tous les champs sont optionnels (PATCH)
  */
-export interface HoraireUpdateDTO {
+export interface ScheduleUpdateDTO {
     lastName?: string;
     heureDebut?: string; // Format: "HH:mm"
     heureFin?: string;   // Format: "HH:mm"
@@ -27,10 +27,10 @@ export interface HoraireUpdateDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour un horaire
+ * DTO de retour pour un schedule
  * Les heures sont retournées au format ISO 8601 ou "HH:mm" selon vos préférences
  */
-export interface HoraireReadDTO {
+export interface ScheduleReadDTO {
     id: number;
     lastName: string;
     heureDebut: string; // Format: "HH:mm" ou ISO
@@ -40,14 +40,14 @@ export interface HoraireReadDTO {
     updatedAt: string;
 
     // Informations enrichies pour le frontend
-    utilisateursCount?: number; // lastNamebre d'utilisateurs avec cet horaire
+    utilisateursCount?: number; // lastNamebre d'utilisateurs avec cet schedule
 }
 
 /**
- * DTO pour un horaire avec la liste des utilisateurs assignés
- * Utilisé pour GET /horaires/:id?include=utilisateurs
+ * DTO pour un schedule avec la liste des utilisateurs assignés
+ * Utilisé pour GET /schedules/:id?include=utilisateurs
  */
-export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
+export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
     utilisateurs: {
         id: number;
         firstName: string;
@@ -60,9 +60,9 @@ export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
 
 // #region List DTO
 /**
- * DTO pour la liste des horaires (version simplifiée)
+ * DTO pour la liste des schedules (version simplifiée)
  */
-export interface HoraireListItemDTO {
+export interface ScheduleListItemDTO {
     id: number;
     lastName: string;
     heureDebut: string;
