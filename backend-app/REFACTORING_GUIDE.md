@@ -57,11 +57,11 @@ scheduleId?: number,
 // Par
 scheduleId?: number,
 
-membres?: User[],
+members?: User[],
 // Par
 members?: User[],
 
-membresCount?: number,
+membersCount?: number,
 // Par
 membersCount?: number,
 ```
@@ -100,7 +100,7 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 | `TeamUpdateDTO` | `TeamUpdateDTO` | All files |
 | `TeamReadDTO` | `TeamReadDTO` | All files |
 | `TeamListItemDTO` | `TeamListItemDTO` | All files |
-| `TeamWithMembresDTO` | `TeamWithMembersDTO` | All files |
+| `TeamWithMembersDTO` | `TeamWithMembersDTO` | All files |
 | `TeamManagerDTO` | `TeamManagerDTO` | All files |
 | `TeamMembreDTO` | `TeamMemberDTO` | All files |
 | `TeamFilterDTO` | `TeamFilterDTO` | All files |
@@ -135,11 +135,11 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 | `: scheduleId` | `: scheduleId` |
 | `scheduleId:` | `scheduleId:` |
 | `scheduleId,` | `scheduleId,` |
-| `\.membres` | `.members` |
-| `: membres` | `: members` |
-| `membres:` | `members:` |
-| `membres,` | `members,` |
-| `membresCount` | `membersCount` |
+| `\.members` | `.members` |
+| `: members` | `: members` |
+| `members:` | `members:` |
+| `members,` | `members,` |
+| `membersCount` | `membersCount` |
 | `managerlastName` | `managerName` |
 
 #### **4.4 - Propriétés User**
@@ -232,7 +232,7 @@ export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 | `"Équipe"` | `"Team"` |
 | `"équipe"` | `"team"` |
 | `"équipes"` | `teams"` |
-| `"membres"` | `"members"` |
+| `"members"` | `"members"` |
 
 ---
 

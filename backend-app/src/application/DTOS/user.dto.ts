@@ -77,7 +77,7 @@ export interface UserReadDTO {
         lastName: string;
     };
 
-    horaire?: {
+    schedule?: {
         id: number;
         lastName: string;
         heureDebut: string;

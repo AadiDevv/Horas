@@ -18,7 +18,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {
@@ -49,7 +49,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {
@@ -62,7 +62,7 @@ export class TeamRepository implements ITeam {
                         isActive: true,
                     }
                 },
-                membres: {
+                members: {
                     select: {
                         id: true,
                         firstName: true,
@@ -85,7 +85,7 @@ export class TeamRepository implements ITeam {
             ...team,
             scheduleId: team.scheduleId ?? undefined,
             manager: new User({ ...team.manager }),
-            membres: team.membres.map(membre => new User({ ...membre, scheduleId: membre.scheduleId ?? undefined }))
+            members: team.members.map(membre => new User({ ...membre, scheduleId: membre.scheduleId ?? undefined }))
         });
     }
 
@@ -97,7 +97,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {
@@ -131,7 +131,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {
@@ -172,7 +172,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {
@@ -206,7 +206,7 @@ export class TeamRepository implements ITeam {
             include: {
                 _count: {
                     select: {
-                        membres: true
+                        members: true
                     }
                 },
                 manager: {

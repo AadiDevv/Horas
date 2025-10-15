@@ -52,7 +52,7 @@ export const authSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'ID de la plage horaire (optionnel)'
+                description: 'ID de la plage schedule (optionnel)'
             }
         }
     },
@@ -129,7 +129,7 @@ export const authSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'ID de la plage horaire assignée à l\'utilisateur'
+                description: 'ID de la plage schedule assignée à l\'utilisateur'
             },
             createdAt: {
                 type: 'string',

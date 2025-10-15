@@ -44,8 +44,8 @@ export const swaggerDefinition: SwaggerDefinition = {
             description: 'Gestion des équipes de travail (CRUD complet, permissions basées sur les rôles)'
         },
         {
-            name: 'Horaires (À venir)',
-            description: '🔮 Routes de gestion des horaires de travail'
+            name: 'Schedules (À venir)',
+            description: '🔮 Routes de gestion des schedules de travail'
         },
         {
             name: 'Timesheets (À venir)',

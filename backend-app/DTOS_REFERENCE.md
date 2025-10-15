@@ -209,9 +209,9 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "id": 5,
       "lastName": "Équipe Production"
     },
-    "horaire": {
+    "schedule": {
       "id": 2,
-      "lastName": "Horaire de journée",
+      "lastName": "Schedule de journée",
       "heureDebut": "09:00",
       "heureFin": "17:30"
     }
@@ -270,7 +270,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-## 🏢 2. ÉQUIPES (EQUIPE)
+## 🏢 2. ÉQUIPES (TEAM)
 
 ### 2.1 Créer une équipe
 
@@ -306,7 +306,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 0
+    "membersCount": 0
   },
   "message": "Équipe créée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
@@ -330,7 +330,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "description": "Équipe responsable de la production",
       "managerId": 5,
       "managerlastName": "Marie Durand",
-      "membresCount": 12,
+      "membersCount": 12,
       "createdAt": "2025-10-01T10:00:00.000Z"
     },
     {
@@ -339,7 +339,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "description": null,
       "managerId": 6,
       "managerlastName": "Jean Martin",
-      "membresCount": 8,
+      "membersCount": 8,
       "createdAt": "2025-10-05T10:00:00.000Z"
     }
   ],
@@ -354,9 +354,9 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 **Endpoint:** `GET /api/teams/:id`  
 **Query Params (optionnels):**
-- `include=membres` : inclure la liste complète des membres
+- `include=members` : inclure la liste complète des members
 
-**Response (200) sans `include=membres`:**
+**Response (200) sans `include=members`:**
 ```json
 {
   "success": true,
@@ -375,14 +375,14 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 12
+    "membersCount": 12
   },
   "message": "Équipe récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
-**Response (200) avec `include=membres`:**
+**Response (200) avec `include=members`:**
 ```json
 {
   "success": true,
@@ -401,8 +401,8 @@ Cette API suit une architecture REST avec des réponses standardisées :
       "email": "marie.durand@example.com",
       "role": "manager"
     },
-    "membresCount": 2,
-    "membres": [
+    "membersCount": 2,
+    "members": [
       {
         "id": 10,
         "firstName": "Pierre",
@@ -466,18 +466,18 @@ Cette API suit une architecture REST avec des réponses standardisées :
 
 ---
 
-## ⏰ 3. HORAIRES (HORAIRE)
+## ⏰ 3. SCHEDULES (SCHEDULE)
 
-### 3.1 Créer un horaire
+### 3.1 Créer un schedule
 
-**Endpoint:** `POST /api/horaires`  
+**Endpoint:** `POST /api/schedules`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
 **Request Body:**
 ```json
 {
-  "lastName": "Horaire de journée",
+  "lastName": "Schedule de journée",
   "heureDebut": "09:00",
   "heureFin": "17:30",
   "joursActifs": [1, 2, 3, 4, 5]
@@ -494,7 +494,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "lastName": "Horaire de journée",
+    "lastName": "Schedule de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -502,16 +502,16 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "updatedAt": "2025-10-12T10:00:00.000Z",
     "utilisateursCount": 0
   },
-  "message": "Horaire créé avec succès",
+  "message": "Schedule créé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.2 Liste des horaires
+### 3.2 Liste des schedules
 
-**Endpoint:** `GET /api/horaires`
+**Endpoint:** `GET /api/schedules`
 
 **Response (200):**
 ```json
@@ -520,7 +520,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "data": [
     {
       "id": 1,
-      "lastName": "Horaire de journée",
+      "lastName": "Schedule de journée",
       "heureDebut": "09:00",
       "heureFin": "17:30",
       "joursActifs": [1, 2, 3, 4, 5],
@@ -528,23 +528,23 @@ Cette API suit une architecture REST avec des réponses standardisées :
     },
     {
       "id": 2,
-      "lastName": "Horaire de nuit",
+      "lastName": "Schedule de nuit",
       "heureDebut": "22:00",
       "heureFin": "06:00",
       "joursActifs": [1, 2, 3, 4, 5, 6, 7],
       "utilisateursCount": 8
     }
   ],
-  "message": "Liste des horaires récupérée avec succès",
+  "message": "Liste des schedules récupérée avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.3 Détail d'un horaire
+### 3.3 Détail d'un schedule
 
-**Endpoint:** `GET /api/horaires/:id`  
+**Endpoint:** `GET /api/schedules/:id`  
 **Query Params (optionnels):**
 - `include=utilisateurs` : inclure la liste des utilisateurs assignés
 
@@ -554,7 +554,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "lastName": "Horaire de journée",
+    "lastName": "Schedule de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -562,7 +562,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "updatedAt": "2025-10-12T10:00:00.000Z",
     "utilisateursCount": 25
   },
-  "message": "Horaire récupéré avec succès",
+  "message": "Schedule récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
@@ -573,7 +573,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
   "success": true,
   "data": {
     "id": 1,
-    "lastName": "Horaire de journée",
+    "lastName": "Schedule de journée",
     "heureDebut": "09:00",
     "heureFin": "17:30",
     "joursActifs": [1, 2, 3, 4, 5],
@@ -597,36 +597,36 @@ Cette API suit une architecture REST avec des réponses standardisées :
       }
     ]
   },
-  "message": "Horaire récupéré avec succès",
+  "message": "Schedule récupéré avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
 
 ---
 
-### 3.4 Mettre à jour un horaire
+### 3.4 Mettre à jour un schedule
 
-**Endpoint:** `PATCH /api/horaires/:id`  
+**Endpoint:** `PATCH /api/schedules/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin ou Manager
 
 **Request Body (tous les champs optionnels):**
 ```json
 {
-  "lastName": "Horaire de journée modifié",
+  "lastName": "Schedule de journée modifié",
   "heureDebut": "08:30",
   "heureFin": "18:00",
   "joursActifs": [1, 2, 3, 4, 5, 6]
 }
 ```
 
-**Response (200):** *(HoraireReadDTO complet)*
+**Response (200):** *(ScheduleReadDTO complet)*
 
 ---
 
-### 3.5 Supprimer un horaire
+### 3.5 Supprimer un schedule
 
-**Endpoint:** `DELETE /api/horaires/:id`  
+**Endpoint:** `DELETE /api/schedules/:id`  
 **Headers:** `Authorization: Bearer {token}`  
 **Permissions:** Admin
 
@@ -634,7 +634,7 @@ Cette API suit une architecture REST avec des réponses standardisées :
 ```json
 {
   "success": true,
-  "message": "Horaire supprimé avec succès",
+  "message": "Schedule supprimé avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"
 }
 ```
@@ -924,8 +924,8 @@ Le token JWT contient les informations suivantes (payload décodé) :
 | `PATCH /users/:id` | ✅ (soi-même) | ✅ (son équipe) | ✅ |
 | `POST /teams` | ❌ | ❌ | ✅ |
 | `PATCH /teams/:id` | ❌ | ❌ | ✅ |
-| `POST /horaires` | ❌ | ✅ | ✅ |
-| `PATCH /horaires/:id` | ❌ | ✅ | ✅ |
+| `POST /schedules` | ❌ | ✅ | ✅ |
+| `PATCH /schedules/:id` | ❌ | ✅ | ✅ |
 | `POST /timesheets/quick` | ✅ | ✅ | ✅ |
 | `POST /timesheets` | ❌ | ✅ | ✅ |
 | `PATCH /timesheets/:id` | ❌ | ✅ | ✅ |
@@ -986,7 +986,7 @@ export const handlers = [
             description: 'Équipe responsable de la production',
             managerId: 5,
             managerlastName: 'Marie Durand',
-            membresCount: 12,
+            membersCount: 12,
             createdAt: '2025-10-01T10:00:00.000Z'
           }
         ],

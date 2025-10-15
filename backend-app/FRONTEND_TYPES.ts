@@ -94,7 +94,7 @@ export interface UserReadDTO {
         id: number;
         lastName: string;
     };
-    horaire?: {
+    schedule?: {
         id: number;
         lastName: string;
         heureDebut: string;
@@ -163,11 +163,11 @@ export interface TeamReadDTO {
         email: string;
         role: Role;
     };
-    membresCount?: number;
+    membersCount?: number;
 }
 
-export interface TeamWithMembresDTO extends TeamReadDTO {
-    membres: {
+export interface TeamWithMembersDTO extends TeamReadDTO {
+    members: {
         id: number;
         firstName: string;
         lastName: string;
@@ -184,33 +184,33 @@ export interface TeamListItemDTO {
     description: string | null;
     managerId: number;
     managerlastName: string;
-    membresCount: number;
+    membersCount: number;
     createdAt: string;
 }
 
 // #endregion
 
 // =========================================
-// 3. HORAIRE
+// 3. SCHEDULE
 // =========================================
 
-// #region Horaire DTOs
+// #region Schedule DTOs
 
-export interface HoraireCreateDTO {
+export interface ScheduleCreateDTO {
     lastName: string;
     heureDebut: string; // Format: "HH:mm"
     heureFin: string;   // Format: "HH:mm"
     joursActifs: number[]; // 1=Lundi, 7=Dimanche
 }
 
-export interface HoraireUpdateDTO {
+export interface ScheduleUpdateDTO {
     lastName?: string;
     heureDebut?: string;
     heureFin?: string;
     joursActifs?: number[];
 }
 
-export interface HoraireReadDTO {
+export interface ScheduleReadDTO {
     id: number;
     lastName: string;
     heureDebut: string;
@@ -221,7 +221,7 @@ export interface HoraireReadDTO {
     utilisateursCount?: number;
 }
 
-export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
+export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
     utilisateurs: {
         id: number;
         firstName: string;
@@ -231,7 +231,7 @@ export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
     }[];
 }
 
-export interface HoraireListItemDTO {
+export interface ScheduleListItemDTO {
     id: number;
     lastName: string;
     heureDebut: string;
@@ -373,14 +373,14 @@ export function isApiError(response: ApiResponse<any>): response is ApiErrorResp
  * EXEMPLE AVEC REACT QUERY
  * 
  * import { useQuery } from '@tanstack/react-query';
- * import type { ApiSuccessResponse, HoraireListItemDTO } from '@/types/api';
+ * import type { ApiSuccessResponse, ScheduleListItemDTO } from '@/types/api';
  * 
- * function useHoraires() {
+ * function useSchedules() {
  *   return useQuery({
- *     queryKey: ['horaires'],
+ *     queryKey: ['schedules'],
  *     queryFn: async () => {
- *       const response = await fetch('/api/horaires');
- *       const json = await response.json() as ApiSuccessResponse<HoraireListItemDTO[]>;
+ *       const response = await fetch('/api/schedules');
+ *       const json = await response.json() as ApiSuccessResponse<ScheduleListItemDTO[]>;
  *       return json.data;
  *     }
  *   });

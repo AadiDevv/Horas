@@ -1,7 +1,7 @@
 // #region Nested DTOs (Types réutilisables)
 /**
  * Format d'un manager pour les DTOs d'équipe
- * Utilisé dans TeamReadDTO et TeamWithMembresDTO
+ * Utilisé dans TeamReadDTO et TeamWithMembersDTO
  */
 export interface TeamManagerDTO {
     id: number;
@@ -13,7 +13,7 @@ export interface TeamManagerDTO {
 
 /**
  * Format d'un membre (employé) pour les DTOs d'équipe
- * Utilisé dans TeamWithMembresDTO
+ * Utilisé dans TeamWithMembersDTO
  */
 export interface TeamMembreDTO {
     id: number;
@@ -56,7 +56,7 @@ export interface TeamUpdateDTO {
 // #region Read DTO
 /**
  * DTO de retour pour une équipe
- * Inclut les informations du manager et le lastNamebre de membres
+ * Inclut les informations du manager et le lastNamebre de members
  */
 export interface TeamReadDTO {
     id: number;
@@ -71,15 +71,15 @@ export interface TeamReadDTO {
     // Informations enrichies pour le frontend
     manager?: TeamManagerDTO;
 
-    membresCount?: number; // lastNamebre de membres dans l'équipe
+    membersCount?: number; // lastNamebre de members dans l'équipe
 }
 
 /**
- * DTO pour une équipe avec la liste complète des membres
- * Utilisé pour GET /teams/:id avec include=membres
+ * DTO pour une équipe avec la liste complète des members
+ * Utilisé pour GET /teams/:id avec include=members
  */
-export interface TeamWithMembresDTO extends TeamReadDTO {
-    membres: TeamMembreDTO[];
+export interface TeamWithMembersDTO extends TeamReadDTO {
+    members: TeamMembreDTO[];
 }
 // #endregion
 
@@ -94,7 +94,7 @@ export interface TeamListItemDTO {
     managerId: number;
     scheduleId?: number;
     managerlastName: string; // lastName complet du manager (firstName + lastName)
-    membresCount: number;
+    membersCount: number;
     createdAt: string;
 }
 

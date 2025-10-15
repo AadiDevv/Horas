@@ -26,7 +26,7 @@ export const teamSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire par défaut de l\'équipe (optionnel)'
+                description: 'ID de la plage schedule par défaut de l\'équipe (optionnel)'
             }
         }
     },
@@ -50,7 +50,7 @@ export const teamSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'Nouvelle plage horaire (optionnel). Note: le managerId ne peut PAS être modifié'
+                description: 'Nouvelle plage schedule (optionnel). Note: le managerId ne peut PAS être modifié'
             }
         },
         description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH). Le managerId ne peut PAS être modifié.'
@@ -86,7 +86,7 @@ export const teamSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire de l\'équipe'
+                description: 'ID de la plage schedule de l\'équipe'
             },
             createdAt: {
                 type: 'string',
@@ -135,15 +135,15 @@ export const teamSchemas = {
                 },
                 description: 'Informations du manager (optionnel selon le endpoint)'
             },
-            membresCount: {
+            membersCount: {
                 type: 'integer',
                 example: 12,
-                description: 'lastNamebre de membres dans l\'équipe'
+                description: 'lastNamebre de members dans l\'équipe'
             }
         }
     },
 
-    TeamWithMembresDTO: {
+    TeamWithMembersDTO: {
         allOf: [
             {
                 $ref: '#/components/schemas/TeamReadDTO'
@@ -151,9 +151,9 @@ export const teamSchemas = {
             {
                 type: 'object',
                 properties: {
-                    membres: {
+                    members: {
                         type: 'array',
-                        description: 'Liste complète des membres de l\'équipe',
+                        description: 'Liste complète des members de l\'équipe',
                         items: {
                             type: 'object',
                             properties: {
@@ -192,7 +192,7 @@ export const teamSchemas = {
                                     type: 'integer',
                                     nullable: true,
                                     example: 1,
-                                    description: 'ID de la plage horaire du membre'
+                                    description: 'ID de la plage schedule du membre'
                                 }
                             }
                         }
@@ -226,17 +226,17 @@ export const teamSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire de l\'équipe'
+                description: 'ID de la plage schedule de l\'équipe'
             },
             managerlastName: {
                 type: 'string',
                 example: 'Marie Durand',
                 description: 'lastName complet du manager (firstName + lastName)'
             },
-            membresCount: {
+            membersCount: {
                 type: 'integer',
                 example: 12,
-                description: 'lastNamebre de membres'
+                description: 'lastNamebre de members'
             },
             createdAt: {
                 type: 'string',

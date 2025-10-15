@@ -49,7 +49,7 @@ export const userSchemas = {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'ID de la plage horaire'
+                description: 'ID de la plage schedule'
             }
         },
         description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH)'

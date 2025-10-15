@@ -54,7 +54,7 @@ export const teamPaths = {
                                                 description: 'Équipe du matin',
                                                 managerId: 5,
                                                 managerlastName: 'Marie Durand',
-                                                membresCount: 12,
+                                                membersCount: 12,
                                                 createdAt: '2025-10-01T10:00:00.000Z'
                                             },
                                             {
@@ -63,7 +63,7 @@ export const teamPaths = {
                                                 description: null,
                                                 managerId: 5,
                                                 managerlastName: 'Marie Durand',
-                                                membresCount: 8,
+                                                membersCount: 8,
                                                 createdAt: '2025-10-05T10:00:00.000Z'
                                             }
                                         ],
@@ -179,7 +179,7 @@ export const teamPaths = {
     '/api/teams/{id}': {
         get: {
             summary: 'Détail d\'une équipe',
-            description: 'Récupère les informations détaillées d\'une équipe avec la liste complète des membres.',
+            description: 'Récupère les informations détaillées d\'une équipe avec la liste complète des members.',
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -194,14 +194,14 @@ export const teamPaths = {
             ],
             responses: {
                 200: {
-                    description: 'Équipe récupérée avec succès (avec liste complète des membres)',
+                    description: 'Équipe récupérée avec succès (avec liste complète des members)',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/TeamWithMembresDTO' },
+                                    data: { $ref: '#/components/schemas/TeamWithMembersDTO' },
                                     message: { type: 'string', example: 'Équipe récupérée avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
@@ -274,7 +274,7 @@ export const teamPaths = {
             summary: 'Supprimer une équipe',
             description: `Suppression logique (soft delete) d\'une équipe. Admin uniquement.
             
-**Règle métier :** Une équipe contenant des membres ne peut PAS être supprimée. Les membres doivent d'abord être déplacés ou retirés.`,
+**Règle métier :** Une équipe contenant des members ne peut PAS être supprimée. Les members doivent d'abord être déplacés ou retirés.`,
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -303,16 +303,16 @@ export const teamPaths = {
                     }
                 },
                 400: {
-                    description: 'Équipe contient des membres',
+                    description: 'Équipe contient des members',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
                             examples: {
                                 hasMembers: {
-                                    summary: 'Équipe contient des membres',
+                                    summary: 'Équipe contient des members',
                                     value: {
                                         success: false,
-                                        error: 'L\'équipe "Équipe Production" contient 5 membre(s). Veuillez d\'abord déplacer ou retirer les membres avant de supprimer l\'équipe.',
+                                        error: 'L\'équipe "Équipe Production" contient 5 membre(s). Veuillez d\'abord déplacer ou retirer les members avant de supprimer l\'équipe.',
                                         code: 'VALIDATION_ERROR',
                                         timestamp: '2025-10-15T10:00:00.000Z'
                                     }

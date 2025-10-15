@@ -1,6 +1,6 @@
 import { TeamProps } from "../types/entitiyProps";
 import { User } from "./user";
-import { TeamCreateDTO, TeamUpdateDTO, TeamReadDTO, TeamListItemDTO, TeamWithMembresDTO } from "@/application/DTOS";
+import { TeamCreateDTO, TeamUpdateDTO, TeamReadDTO, TeamListItemDTO, TeamWithMembersDTO } from "@/application/DTOS";
 import { ValidationError } from "../error/AppError";
 
 export class Team {
@@ -13,8 +13,8 @@ export class Team {
     public updatedAt?: Date;
     public deletedAt?: Date | null;
     public manager?: User;
-    public membres?: User[];
-    public membresCount?: number;
+    public members?: User[];
+    public membersCount?: number;
 
     constructor(props: TeamProps) {
         this.id = props.id;
@@ -26,8 +26,8 @@ export class Team {
         this.updatedAt = props.updatedAt;
         this.deletedAt = props.deletedAt || null;
         this.manager = props.manager;
-        this.membres = props.membres;
-        this.membresCount = props.membresCount;
+        this.members = props.members;
+        this.membersCount = props.membersCount;
         this.validate();
     }
 
@@ -89,7 +89,7 @@ export class Team {
             scheduleId: this.scheduleId,
             ...this.toDateStrings(),
             manager: this.manager?.toTeamManagerDTO(),
-            membresCount: this.membres?.length ?? this.membresCount ?? 0,
+            membersCount: this.members?.length ?? this.membersCount ?? 0,
         };
     }
 
@@ -107,22 +107,22 @@ export class Team {
             managerId: this.managerId,
             scheduleId: this.scheduleId,
             managerlastName: this.manager ? `${this.manager.firstName} ${this.manager.lastName}` : "Manager inconnu",
-            membresCount: this.membres?.length ?? this.membresCount ?? 0,
+            membersCount: this.members?.length ?? this.membersCount ?? 0,
             createdAt: this.createdAt.toISOString(),
         };
     }
 
     /**
-     * Convertit l'entité en TeamWithMembresDTO (avec liste des membres)
-     * Utilisé pour GET /teams/:id?include=membres
+     * Convertit l'entité en TeamWithMembersDTO (avec liste des members)
+     * Utilisé pour GET /teams/:id?include=members
      */
-    toWithMembresDTO(): TeamWithMembresDTO {
+    toWithMembersDTO(): TeamWithMembersDTO {
         if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
-        if (!this.membres) throw new ValidationError("Les membres doivent être chargés pour utiliser toWithMembresDTO()");
+        if (!this.members) throw new ValidationError("Les members doivent être chargés pour utiliser toWithMembersDTO()");
 
         return {
             ...this.toReadDTO(),
-            membres: this.membres.map(membre => membre.toTeamMembreDTO()),
+            members: this.members.map(membre => membre.toTeamMembreDTO()),
         };
     }
     // #endregion

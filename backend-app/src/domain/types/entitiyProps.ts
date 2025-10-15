@@ -29,6 +29,6 @@ export type TeamProps = {
     updatedAt?: Date,
     deletedAt?: Date | null,
     manager?: User,
-    membres?: User[],
-    membresCount?: number,
+    members?: User[],
+    membersCount?: number,
 }
