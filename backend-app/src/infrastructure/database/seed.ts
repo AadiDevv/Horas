@@ -8,7 +8,7 @@ async function main() {
   await prisma.post.deleteMany();
   await prisma.user.deleteMany();
 
-  // Création d'utilisateurs de test
+  // Création d'users de test
   const user1 = await prisma.user.create({
     data: {
       email: 'john.doe@example.com',
@@ -52,7 +52,7 @@ async function main() {
     }
   });
 
-  Logger.info(`✅ Utilisateurs créés: ${user1.name} et ${user2.name}`);
+  Logger.info(`✅ Users créés: ${user1.name} et ${user2.name}`);
   Logger.info(`📝 Posts créés: ${user1.posts.length + user2.posts.length}`);
   Logger.info('🌱 Seeding terminé !');
 }

@@ -1,14 +1,14 @@
 // #region Create DTO
 /**
  * DTO pour créer un schedule de travail
- * Les heures sont au format "HH:mm" (ex: "09:00", "17:30")
- * joursActifs est un tableau de lastNamebres représentant les jours (1=Lundi, 7=Dimanche)
+ * Les hours sont au format "HH:mm" (ex: "09:00", "17:30")
+ * activeDays est un tableau de lastNamebres représentant les jours (1=Lundi, 7=Dimanche)
  */
 export interface ScheduleCreateDTO {
     lastName: string;
-    heureDebut: string; // Format: "HH:mm" ex: "09:00"
-    heureFin: string;   // Format: "HH:mm" ex: "17:30"
-    joursActifs: number[]; // Tableau de 1 à 7 (1=Lundi, 7=Dimanche)
+    startHour: string; // Format: "HH:mm" ex: "09:00"
+    endHour: string;   // Format: "HH:mm" ex: "17:30"
+    activeDays: number[]; // Tableau de 1 à 7 (1=Lundi, 7=Dimanche)
 }
 // #endregion
 
@@ -19,36 +19,36 @@ export interface ScheduleCreateDTO {
  */
 export interface ScheduleUpdateDTO {
     lastName?: string;
-    heureDebut?: string; // Format: "HH:mm"
-    heureFin?: string;   // Format: "HH:mm"
-    joursActifs?: number[];
+    startHour?: string; // Format: "HH:mm"
+    endHour?: string;   // Format: "HH:mm"
+    activeDays?: number[];
 }
 // #endregion
 
 // #region Read DTO
 /**
  * DTO de retour pour un schedule
- * Les heures sont retournées au format ISO 8601 ou "HH:mm" selon vos préférences
+ * Les hours sont retournées au format ISO 8601 ou "HH:mm" selon vos préférences
  */
 export interface ScheduleReadDTO {
     id: number;
     lastName: string;
-    heureDebut: string; // Format: "HH:mm" ou ISO
-    heureFin: string;   // Format: "HH:mm" ou ISO
-    joursActifs: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
+    startHour: string; // Format: "HH:mm" ou ISO
+    endHour: string;   // Format: "HH:mm" ou ISO
+    activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
     createdAt: string;
     updatedAt: string;
 
     // Informations enrichies pour le frontend
-    utilisateursCount?: number; // lastNamebre d'utilisateurs avec cet schedule
+    usersCount?: number; // lastNamebre d'users avec cet schedule
 }
 
 /**
- * DTO pour un schedule avec la liste des utilisateurs assignés
- * Utilisé pour GET /schedules/:id?include=utilisateurs
+ * DTO pour un schedule avec la liste des users assignés
+ * Utilisé pour GET /schedules/:id?include=users
  */
-export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
-    utilisateurs: {
+export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
+    users: {
         id: number;
         firstName: string;
         lastName: string;
@@ -65,10 +65,10 @@ export interface ScheduleWithUtilisateursDTO extends ScheduleReadDTO {
 export interface ScheduleListItemDTO {
     id: number;
     lastName: string;
-    heureDebut: string;
-    heureFin: string;
-    joursActifs: number[];
-    utilisateursCount: number;
+    startHour: string;
+    endHour: string;
+    activeDays: number[];
+    usersCount: number;
 }
 // #endregion
 

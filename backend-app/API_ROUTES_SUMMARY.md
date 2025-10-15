@@ -42,7 +42,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| GET | `/api/users` | Liste des utilisateurs | Tous | JWT |
+| GET | `/api/users` | Liste des users | Tous | JWT |
 | GET | `/api/users/:id` | Détail d'un utilisateur | Tous | JWT |
 | PATCH | `/api/users/:id` | Modifier un utilisateur | Employé (soi-même), Manager (son équipe), Admin (tous) | JWT |
 | DELETE | `/api/users/:id` | Supprimer un utilisateur | Admin | JWT |
@@ -82,11 +82,11 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 | DELETE | `/api/schedules/:id` | Supprimer un schedule | Admin | JWT |
 
 **Query Params (GET /schedules/:id) :**
-- `include=utilisateurs` : Inclure la liste des utilisateurs assignés
+- `include=users` : Inclure la liste des users assignés
 
 **Format des données :**
-- `heureDebut` / `heureFin` : "HH:mm" (ex: "09:00")
-- `joursActifs` : Array de 1 à 7 (1=Lundi, 7=Dimanche)
+- `startHour` / `endHour` : "HH:mm" (ex: "09:00")
+- `activeDays` : Array de 1 à 7 (1=Lundi, 7=Dimanche)
 
 ---
 
@@ -96,7 +96,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 **Pas de DTO de création côté client** — Tout est géré automatiquement :
 - ✅ `employeId` extrait du JWT
-- ✅ Date et heure au moment de la requête
+- ✅ Date et hour au moment de la requête
 - ✅ Statut calculé automatiquement selon l'schedule de l'employé
 
 #### Routes
@@ -214,13 +214,13 @@ Authorization: Bearer {token}
 ### Exemple 2 : Correction de timesheet (Manager)
 
 ```bash
-# Le manager corrige l'heure d'arrivée d'un employé
+# Le manager corrige l'hour d'arrivée d'un employé
 PATCH /api/timesheets/42
 Authorization: Bearer {token_manager}
 Content-Type: application/json
 
 {
-  "heure": "09:00:00"
+  "hour": "09:00:00"
 }
 ```
 
@@ -236,7 +236,7 @@ Authorization: Bearer {token}
 
 ## 🚀 Prochaines Étapes
 
-### Phase 1 - Gestion des Utilisateurs ✅
+### Phase 1 - Gestion des Users ✅
 - [x] DTOs créés
 - [x] Schémas Swagger documentés
 - [ ] Implémentation des contrôleurs

@@ -49,7 +49,7 @@ Ils sont gérés via les variables d'enviroinnement dans le `.env`
 
 | Méthode | Route | Description |
 |----------|--------|-------------|
-| GET | `/users` | Liste les utilisateurs |
+| GET | `/users` | Liste les users |
 | POST | `/users` | Crée un utilisateur |
 | PUT | `/users/{id}` | Met à jour un utilisateur |
 | DELETE | `/users/{id}` | Supprime un utilisateur |
@@ -75,7 +75,7 @@ Ils sont gérés via les variables d'enviroinnement dans le `.env`
 ### Rôles
 
 Deux rôles :
-- **EMPLOYEE** : pointer, consulter ses heures, éditer son profil.
+- **employe** : pointer, consulter ses hours, éditer son profil.
 - **MANAGER** : gérer équipes, consulter reports et KPIs.
 
 ### Authentication JWT

@@ -3,7 +3,7 @@ export const timesheetSchemas = {
     // #region Request DTOs
     // Note: Pas de DTO de création car le timesheet est entièrement géré côté serveur
     // - employeId extrait du JWT
-    // - date et heure automatiques au moment de la requête
+    // - date et hour automatiques au moment de la requête
     // - status calculé automatiquement selon l'schedule de l'employé
 
     TimesheetUpdateDTO: {
@@ -15,11 +15,11 @@ export const timesheetSchemas = {
                 example: '2025-10-12',
                 description: 'Nouvelle date du timesheet'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 format: 'time',
                 example: '09:00:00',
-                description: 'Nouvelle heure du timesheet'
+                description: 'Nouvelle hour du timesheet'
             },
             clockin: {
                 type: 'boolean',
@@ -57,11 +57,11 @@ export const timesheetSchemas = {
                 example: '2025-10-12',
                 description: 'Date du timesheet'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 format: 'date-time',
                 example: '2025-10-12T09:05:30.000Z',
-                description: 'Heure du timesheet (ISO DateTime)'
+                description: 'Hour du timesheet (ISO DateTime)'
             },
             clockin: {
                 type: 'boolean',
@@ -133,7 +133,7 @@ export const timesheetSchemas = {
                 format: 'date',
                 example: '2025-10-12'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 example: '09:05:30'
             },
@@ -196,13 +196,13 @@ export const timesheetSchemas = {
                 example: 10,
                 description: 'ID de l\'employé'
             },
-            periodeDebut: {
+            periodStart: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-01',
                 description: 'Début de la période analysée'
             },
-            periodeFin: {
+            periodEnd: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-31',
@@ -226,7 +226,7 @@ export const timesheetSchemas = {
             timesheetsNormaux: {
                 type: 'integer',
                 example: 38,
-                description: 'lastNamebre de timesheets à l\'heure'
+                description: 'lastNamebre de timesheets à l\'hour'
             },
             timesheetsRetard: {
                 type: 'integer',

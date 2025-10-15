@@ -156,7 +156,7 @@ export const userSchemas = {
             },
             message: {
                 type: 'string',
-                example: 'Liste des utilisateurs récupérée avec succès'
+                example: 'Liste des users récupérée avec succès'
             },
             timestamp: {
                 type: 'string',
