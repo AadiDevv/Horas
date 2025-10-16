@@ -33,6 +33,25 @@ export interface EquipeFormData {
   description: string;
 }
 
+export interface Manager {
+  id: number;
+  prenom: string;
+  nom: string;
+  email: string;
+  role: string;
+  telephone?: string;
+}
+
+export interface ManagerFormData {
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;

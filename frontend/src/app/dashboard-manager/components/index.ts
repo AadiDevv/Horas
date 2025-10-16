@@ -4,3 +4,4 @@ export { default as AgentModal } from './AgentModal';
 export { default as EquipeModal } from './EquipeModal';
 export { default as AgentList } from './AgentList';
 export { default as EquipeList } from './EquipeList';
+export { default as SettingsModal } from './SettingsModal';

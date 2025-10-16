@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Agent, Equipe, AgentFormData, EquipeFormData, DashboardPage } from '../types';
+import { Agent, Equipe, AgentFormData, EquipeFormData, DashboardPage, Manager, ManagerFormData } from '../types';
 import * as api from '../services/apiService';
 
 export function useManagerDashboard() {

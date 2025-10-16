@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { Clock, AlertCircle } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
-import { StatCard, ClockButton, WeeklyCalendar, SettingsModal } from "./components";
-import { useUserData, useSettings, useTimeClock } from "./hooks/useAgentDashboard";
+import {
+  StatCard,
+  ClockButton,
+  WeeklyCalendar,
+  SettingsModal,
+} from "./components";
+import {
+  useUserData,
+  useSettings,
+  useTimeClock,
+} from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
 
 export default function Page() {
@@ -14,7 +23,8 @@ export default function Page() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Custom hooks
-  const { userData, setUserData, loading, formData, setFormData, loadUserData } = useUserData();
+  const { userData, setUserData, formData, setFormData, loadUserData } =
+    useUserData();
   const {
     settingsOpen,
     setSettingsOpen,
@@ -22,7 +32,7 @@ export default function Page() {
     successMessage: settingsSuccessMessage,
     errorMessage: settingsErrorMessage,
     handleOpenSettings,
-    handleSaveSettings
+    handleSaveSettings,
   } = useSettings(userData, formData);
   const {
     timeLogs,
@@ -34,7 +44,7 @@ export default function Page() {
     getDayKey,
     handleClockIn,
     handleClockOut,
-    checkTodayPointages
+    checkTodayPointages,
   } = useTimeClock();
 
   useEffect(() => {
@@ -52,17 +62,11 @@ export default function Page() {
     };
   }, []);
 
-  const handleLogout = () => {
-    console.log('🚪 Déconnexion...');
-    window.location.href = '/login';
-  };
-
   return (
-    <RoleProtection allowedRoles={['manager', 'admin', 'employe']}>
+    <RoleProtection allowedRoles={["manager", "admin", "employe"]}>
       <div className="min-h-screen bg-white">
         <Navbar
           onOpenSettings={handleOpenSettings}
-          onLogout={handleLogout}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
@@ -90,7 +94,9 @@ export default function Page() {
               <div>
                 <h2 className="text-4xl font-semibold mb-2">Aujourd'hui</h2>
                 <p className="text-gray-600">
-                  {mounted && currentTime ? formatDate(currentTime) : 'Chargement...'}
+                  {mounted && currentTime
+                    ? formatDate(currentTime)
+                    : "Chargement..."}
                 </p>
               </div>
               <ClockButton
@@ -115,11 +121,7 @@ export default function Page() {
                 value="40:00:05"
                 icon={Clock}
               />
-              <StatCard
-                title="Retards ce mois"
-                value="2"
-                icon={AlertCircle}
-              />
+              <StatCard title="Retards ce mois" value="2" icon={AlertCircle} />
             </div>
 
             {/* Weekly Calendar */}
