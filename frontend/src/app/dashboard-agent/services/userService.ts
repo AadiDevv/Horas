@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { User, ApiResponse } from '../types';
-=======
-import { User, ApiResponse } from './types';
->>>>>>> 7985cb3 (feat: Add TimeLogBar and WeeklyCalendar components for time tracking)
 
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = true;

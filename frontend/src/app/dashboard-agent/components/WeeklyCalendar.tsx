@@ -64,6 +64,8 @@ function DayTimeline({
   isClockingIn: boolean;
   currentDayLogs?: TimeLog;
 }) {
+  console.log(`📅 DayTimeline ${day}:`, { timeLogs, teamHoraire, isClockingIn, currentDayLogs });
+
   // Déterminer la plage horaire à afficher
   let minTime = 6 * 60; // 6:00
   let maxTime = 22 * 60; // 22:00
@@ -149,16 +151,27 @@ function DayTimeline({
               {/* Colonne droite: Pointages réels */}
               <div className="relative flex-1">
                 {timeLogs.map((log, idx) => {
-                  if (!log.end) return null;
+                  if (!log.end) {
+                    console.log(`⚠️ ${day} - Log ${idx} ignoré (pas de end):`, log);
+                    return null;
+                  }
                   const position = calculateBlockPosition(log.start, log.end, minTime, maxTime);
+                  console.log(`🎨 ${day} - Bloc ${idx}:`, {
+                    log,
+                    position,
+                    minTime,
+                    maxTime,
+                    style: `top: ${position.top}%, height: ${position.height}%`
+                  });
 
                   return (
                     <div
                       key={idx}
-                      className="absolute left-1 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md rounded-l-lg"
+                      className="absolute left-1 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md rounded-l-lg z-10"
                       style={{
                         top: `${position.top}%`,
-                        height: `${position.height}%`
+                        height: `${position.height}%`,
+                        minHeight: '40px'
                       }}
                     >
                       <div className="px-1.5 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
