@@ -35,16 +35,23 @@ const mockEquipes: Equipe[] = [
     nom: "Équipe Alpha",
     description: "Équipe principale de développement",
     managerId: 1,
-    agentCount: 5,
-    createdAt: "2025-01-01T12:00:00.000Z"
+    agentCount: 2,
+    createdAt: "2025-01-01T12:00:00.000Z",
+    agents: [mockAgents[0], mockAgents[1]],
+    horaires: [
+      { jour: 'Lundi', heureDebut: '09:00', heureFin: '17:00' },
+      { jour: 'Mardi', heureDebut: '09:00', heureFin: '17:00' }
+    ]
   },
   {
     id: 2,
     nom: "Équipe Beta",
     description: "Équipe support client",
     managerId: 2,
-    agentCount: 3,
-    createdAt: "2025-01-05T12:00:00.000Z"
+    agentCount: 0,
+    createdAt: "2025-01-05T12:00:00.000Z",
+    agents: [],
+    horaires: []
   }
 ];
 
@@ -117,13 +124,21 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
   return res.json();
 }
 
-export async function createEquipe(equipe: Partial<Equipe>): Promise<ApiResponse<Equipe>> {
+export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
+    // Convert agent IDs to agent objects
+    const agentObjects = equipe.agents
+      ? mockAgents.filter((a: Agent) => equipe.agents.includes(a.id))
+      : [];
+
     const newEquipe = {
       id: mockEquipes.length + 1,
-      ...equipe,
-      agentCount: 0,
+      nom: equipe.nom,
+      description: equipe.description,
+      agentCount: agentObjects.length,
+      agents: agentObjects,
+      horaires: equipe.horaires || [],
       createdAt: new Date().toISOString()
     } as Equipe;
     mockEquipes.push(newEquipe);
@@ -138,11 +153,25 @@ export async function createEquipe(equipe: Partial<Equipe>): Promise<ApiResponse
   return res.json();
 }
 
-export async function updateEquipe(id: number, updates: Partial<Equipe>): Promise<ApiResponse<Equipe>> {
+export async function updateEquipe(id: number, updates: any): Promise<ApiResponse<Equipe>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockEquipes.findIndex(e => e.id === id);
-    mockEquipes[index] = { ...mockEquipes[index], ...updates };
+
+    // Convert agent IDs to agent objects if agents are provided
+    const agentObjects = updates.agents
+      ? mockAgents.filter((a: Agent) => updates.agents.includes(a.id))
+      : mockEquipes[index].agents;
+
+    const updatedEquipe = {
+      ...mockEquipes[index],
+      nom: updates.nom !== undefined ? updates.nom : mockEquipes[index].nom,
+      description: updates.description !== undefined ? updates.description : mockEquipes[index].description,
+      agents: agentObjects,
+      horaires: updates.horaires !== undefined ? updates.horaires : mockEquipes[index].horaires,
+      agentCount: agentObjects?.length || 0
+    };
+    mockEquipes[index] = updatedEquipe;
     console.log('✅ Équipe modifiée:', mockEquipes[index]);
     return { success: true, data: mockEquipes[index] };
   }

@@ -164,7 +164,9 @@ export function useEquipeManager() {
   const [editingEquipe, setEditingEquipe] = useState<Equipe | null>(null);
   const [formData, setFormData] = useState<EquipeFormData>({
     nom: '',
-    description: ''
+    description: '',
+    agents: [],
+    horaires: []
   });
 
   const loadEquipes = async () => {
@@ -183,7 +185,9 @@ export function useEquipeManager() {
   const handleCreate = async () => {
     const newEquipe = {
       nom: formData.nom,
-      description: formData.description || undefined
+      description: formData.description || undefined,
+      agents: formData.agents,
+      horaires: formData.horaires
     };
     const result = await api.createEquipe(newEquipe);
     if (result.success) {
@@ -197,7 +201,9 @@ export function useEquipeManager() {
     if (!editingEquipe) return;
     const updates = {
       nom: formData.nom,
-      description: formData.description || undefined
+      description: formData.description || undefined,
+      agents: formData.agents,
+      horaires: formData.horaires
     };
     const result = await api.updateEquipe(editingEquipe.id, updates);
     if (result.success) {
@@ -220,7 +226,9 @@ export function useEquipeManager() {
     setEditingEquipe(equipe);
     setFormData({
       nom: equipe.nom,
-      description: equipe.description || ''
+      description: equipe.description || '',
+      agents: equipe.agents?.map(a => a.id) || [],
+      horaires: equipe.horaires || []
     });
     setShowModal(true);
   };
@@ -228,7 +236,9 @@ export function useEquipeManager() {
   const resetForm = () => {
     setFormData({
       nom: '',
-      description: ''
+      description: '',
+      agents: [],
+      horaires: []
     });
     setEditingEquipe(null);
   };

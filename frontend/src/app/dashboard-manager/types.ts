@@ -10,6 +10,12 @@ export interface Agent {
   createdAt: string;
 }
 
+export interface Horaire {
+  jour: string;
+  heureDebut: string;
+  heureFin: string;
+}
+
 export interface Equipe {
   id: number;
   nom: string;
@@ -17,6 +23,8 @@ export interface Equipe {
   managerId?: number;
   agentCount: number;
   createdAt: string;
+  agents?: Agent[];
+  horaires?: Horaire[];
 }
 
 export interface AgentFormData {
@@ -31,6 +39,8 @@ export interface AgentFormData {
 export interface EquipeFormData {
   nom: string;
   description: string;
+  agents: number[];
+  horaires: Horaire[];
 }
 
 export interface Manager {
