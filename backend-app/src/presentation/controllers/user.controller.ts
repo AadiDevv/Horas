@@ -77,10 +77,11 @@ export class UserController {
   /**
    * PATCH /api/users/:id
    * Met à jour un utilisateur
-   * - Admin : peut modifier n'importe quel utilisateur
-   * - Manager/Employee : peut uniquement modifier son propre profil
+   * - Admin : peut modifier n'importe quel utilisateur (tous les champs)
+   * - Manager : peut uniquement modifier son propre profil (firstName, lastName, email, phone)
+   * - Employé : peut uniquement modifier son propre profil (firstName, lastName, email, phone)
    * 
-   * Note : Les permissions sont vérifiées par le middleware adminOrSelf
+   * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
   async updateUser_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
@@ -91,7 +92,11 @@ export class UserController {
       throw new ValidationError("Aucune donnée à mettre à jour");
     }
 
-    const user = await this.UC_user.updateUser_ById(id, userDto);
+    // Récupération des informations de l'utilisateur connecté
+    const requestingUserId = req.user!.id;
+    const requestingUserRole = req.user!.role;
+
+    const user = await this.UC_user.updateUser_ById(id, userDto, requestingUserId, requestingUserRole);
     const userDTO = user.toReadDTO();
 
     res.success(userDTO, "Utilisateur modifié avec succès");

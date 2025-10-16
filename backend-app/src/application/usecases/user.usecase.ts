@@ -67,7 +67,7 @@ export class UserUseCase {
         }
 
         const employees = await this.R_user.getEmployees_ByManagerId(managerId);
-        return employees.map(employee => new User({...employee}));
+        return employees.map(employee => new User({ ...employee }));
     }
     // #endregion
 
@@ -78,19 +78,28 @@ export class UserUseCase {
      * Règles métier :
      * - L'email ne peut pas être changé s'il est déjà utilisé par un autre utilisateur
      * - Les données sont validées via l'entité
+     * - Restrictions basées sur le rôle de l'utilisateur connecté
      * 
      * @param id - ID de l'utilisateur à modifier
      * @param dto - Données de mise à jour
+     * @param requestingUserId - ID de l'utilisateur qui fait la requête
+     * @param requestingUserRole - Rôle de l'utilisateur connecté
      * @returns L'utilisateur mis à jour
      * @throws NotFoundError si l'utilisateur n'existe pas
-     * @throws ValidationError si les données sont invalides
+     * @throws ValidationError si les données sont invalides ou restrictions non respectées
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
      */
-    async updateUser_ById(id: number, dto: UserUpdateDTO): Promise<User> {
+    async updateUser_ById(
+        id: number,
+        dto: UserUpdateDTO,
+        requestingUserId: number,
+        requestingUserRole: string
+    ): Promise<User> {
         // Récupération de l'utilisateur existant
         const existingUser = await this.getUser_ById(id);
 
-        // Si l'email est modifié, vérifier qu'il n'est pas déjà utilisé
-        // TODO: À implémenter si nécessaire via IAuth.getUser_ByEmail()
+        // Validation des permissions et restrictions métier
+        this.validateUpdatePermissions(existingUser, dto, requestingUserId, requestingUserRole);
 
         // Mise à jour via la factory method
         const updatedUser = User.fromUpdateDTO(existingUser, dto);
@@ -101,6 +110,73 @@ export class UserUseCase {
         // Sauvegarde via le repository
         const userUpdated = await this.R_user.updateUser_ById(updatedUser);
         return new User(userUpdated);
+    }
+
+    /**
+     * Valide les permissions de mise à jour selon le rôle
+     * 
+     * Règles métier :
+     * - Admin : peut tout modifier
+     * - Manager : peut modifier son profil (firstName, lastName, email, phone uniquement)
+     * - Employé : peut modifier son profil (firstName, lastName, email, phone uniquement)
+     */
+    private validateUpdatePermissions(
+        targetUser: User,
+        dto: UserUpdateDTO,
+        requestingUserId: number,
+        requestingUserRole: string
+    ): void {
+        // Admin peut tout modifier
+        if (requestingUserRole === 'admin') {
+            return;
+        }
+
+        // Manager et Employé : restrictions strictes
+        if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
+            // Vérifier que c'est leur propre profil
+            if (targetUser.id !== requestingUserId) {
+                throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+            }
+
+            // Champs interdits pour manager/employé
+            const forbiddenFields: string[] = [];
+
+            if (dto.role !== undefined) {
+                forbiddenFields.push('role');
+            }
+
+            if (dto.isActive !== undefined) {
+                forbiddenFields.push('isActive');
+            }
+
+            if (dto.teamId !== undefined) {
+                forbiddenFields.push('teamId');
+            }
+
+            if (dto.scheduleId !== undefined) {
+                forbiddenFields.push('scheduleId');
+            }
+
+            // Employé : restrictions supplémentaires
+            if (requestingUserRole === 'employe') {
+                // Un employé ne peut pas changer son équipe
+                if (dto.teamId !== undefined) {
+                    throw new ForbiddenError("Les employés ne peuvent pas changer d'équipe. Contactez votre manager ou un administrateur.");
+                }
+
+                // Un employé ne peut pas changer son schedule
+                if (dto.scheduleId !== undefined) {
+                    throw new ForbiddenError("Les employés ne peuvent pas modifier leur planning. Contactez votre manager ou un administrateur.");
+                }
+            }
+
+            if (forbiddenFields.length > 0) {
+                throw new ForbiddenError(
+                    `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+                    `Seuls les administrateurs peuvent modifier ces informations.`
+                );
+            }
+        }
     }
     // #endregion
 

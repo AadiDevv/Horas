@@ -215,7 +215,24 @@ WHERE teams.managerId = :managerId
 
         patch: {
             summary: 'Modifier un utilisateur',
-            description: 'Met à jour les informations d\'un utilisateur. Un employé ne peut modifier que son propre profil.',
+            description: `Met à jour les informations d'un utilisateur avec restrictions basées sur le rôle.
+
+**Permissions :**
+
+**Admin :**
+- Peut modifier n'importe quel utilisateur
+- Peut modifier tous les champs (firstName, lastName, email, phone, role, isActive, teamId, scheduleId)
+
+**Manager :**
+- Peut uniquement modifier son propre profil
+- Champs autorisés : firstName, lastName, email, phone
+- Champs interdits : role, isActive, teamId, scheduleId
+
+**Employé :**
+- Peut uniquement modifier son propre profil  
+- Champs autorisés : firstName, lastName, email, phone
+- Champs interdits : role, isActive, teamId, scheduleId
+- Messages d'erreur spécifiques pour les restrictions d'équipe et de planning`,
             tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -253,10 +270,48 @@ WHERE teams.managerId = :managerId
                     }
                 },
                 403: {
-                    description: 'Non autorisé',
+                    description: 'Non autorisé ou restrictions métier',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/Error' }
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                forbiddenFields: {
+                                    summary: 'Champs interdits pour Manager/Employé',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous n\'avez pas le droit de modifier les champs suivants : role, isActive. Seuls les administrateurs peuvent modifier ces informations.',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                employeeTeamRestriction: {
+                                    summary: 'Employé ne peut pas changer d\'équipe',
+                                    value: {
+                                        success: false,
+                                        error: 'Les employés ne peuvent pas changer d\'équipe. Contactez votre manager ou un administrateur.',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                employeeScheduleRestriction: {
+                                    summary: 'Employé ne peut pas modifier son planning',
+                                    value: {
+                                        success: false,
+                                        error: 'Les employés ne peuvent pas modifier leur planning. Contactez votre manager ou un administrateur.',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                notOwnProfile: {
+                                    summary: 'Tentative de modification d\'un autre profil',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez modifier que votre propre profil',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
                         }
                     }
                 }
