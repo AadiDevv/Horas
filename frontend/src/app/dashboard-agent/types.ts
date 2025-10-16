@@ -31,6 +31,12 @@ export interface TimeLog {
 
 export type DayKey = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
+export interface Horaire {
+  jour: string;
+  heureDebut: string;
+  heureFin: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
