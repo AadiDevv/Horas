@@ -173,27 +173,25 @@ function ManagerDashboard() {
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <DashboardStatCard
-                    title="Employés totaux"
-                    value={agents.length.toString()}
+                    title="Taux de présence (%)"
+                    value={"98"}
                     icon={Users}
                   />
                   <DashboardStatCard
-                    title="Employés actifs"
+                    title="Taux de retard (%)"
                     icon={Users}
-                    value={agents.filter((a) => a.isActive).length.toString()}
+                    value={"4"}
                   />
                   <DashboardStatCard
-                    title="Équipes"
-                    value={equipes.length.toString()}
+                    title="Moyenne d'heures / jour (h)"
+                    value={"7.06"}
                     icon={Users}
                   />
                   <DashboardStatCard
-                    title="Total des membres"
+                    title="Heures supplémentaires (h)"
                     icon={Users}
-                    value={equipes
-                      .reduce((sum, e) => sum + e.agentCount, 0)
-                      .toString()}
-                  />
+                    value="10"
+                    />
                 </div>
 
                 {/* Quick Actions */}
@@ -209,7 +207,7 @@ function ManagerDashboard() {
                           className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                            <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
                               {agent.prenom[0]}
                               {agent.nom[0]}
                             </div>
@@ -247,7 +245,7 @@ function ManagerDashboard() {
                           className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold">
+                            <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-white font-semibold">
                               <Users size={20} />
                             </div>
                             <div>
