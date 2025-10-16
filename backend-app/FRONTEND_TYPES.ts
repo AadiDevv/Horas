@@ -13,7 +13,7 @@
 // =========================================
 
 export type Role = 'admin' | 'manager' | 'employe';
-export type TimesheetStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
+export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplet';
 
 // =========================================
 // RÉPONSES STANDARD
@@ -296,8 +296,8 @@ export interface TimesheetListItemDTO {
 
 export interface TimesheetFilterDTO {
     employeId?: number;
-    dateDebut?: string;
-    dateFin?: string;
+    startDate?: string;
+    endDate?: string;
     status?: TimesheetStatus;
     clockin?: boolean;
 }
@@ -307,12 +307,12 @@ export interface TimesheetStatsDTO {
     periodStart: string;
     periodEnd: string;
     totalTimesheets: number;
-    totalEntrees: number;
-    totalSorties: number;
-    timesheetsNormaux: number;
-    timesheetsRetard: number;
+    totalClockins: number;
+    totalClockouts: number;
+    timesheetsNormal: number;
+    timesheetsDelay: number;
     timesheetsIncomplete: number;
-    joursPointes: number;
+    clockedDays: number;
 }
 
 // #endregion

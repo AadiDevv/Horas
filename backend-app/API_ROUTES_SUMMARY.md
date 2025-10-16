@@ -113,15 +113,15 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 **Query Params (GET /timesheets) :**
 - `employeId` : number (Manager/Admin uniquement)
-- `dateDebut` : YYYY-MM-DD
-- `dateFin` : YYYY-MM-DD
+- `startDate` : YYYY-MM-DD
+- `endDate` : YYYY-MM-DD
 - `status` : 'normal' \| 'retard' \| 'absence' \| 'incomplet'
 - `clockin` : boolean (true=entrées, false=sorties)
 
 **Query Params (GET /timesheets/stats) :**
 - `employeId` : number (requis)
-- `dateDebut` : YYYY-MM-DD (requis)
-- `dateFin` : YYYY-MM-DD (requis)
+- `startDate` : YYYY-MM-DD (requis)
+- `endDate` : YYYY-MM-DD (requis)
 
 ---
 
@@ -228,7 +228,7 @@ Content-Type: application/json
 
 ```bash
 # Récupérer les stats d'un employé pour le mois d'octobre
-GET /api/timesheets/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31
+GET /api/timesheets/stats?employeId=10&startDate=2025-10-01&endDate=2025-10-31
 Authorization: Bearer {token}
 ```
 

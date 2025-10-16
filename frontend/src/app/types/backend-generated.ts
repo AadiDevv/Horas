@@ -296,8 +296,8 @@ export interface PointageListItemDTO {
 
 export interface PointageFilterDTO {
     employeId?: number;
-    dateDebut?: string;
-    dateFin?: string;
+    startDate?: string;
+    endDate?: string;
     status?: PointageStatus;
     clockin?: boolean;
 }
@@ -307,12 +307,12 @@ export interface PointageStatsDTO {
     periodeDebut: string;
     periodeFin: string;
     totalPointages: number;
-    totalEntrees: number;
-    totalSorties: number;
+    totalClockins: number;
+    totalClockouts: number;
     pointagesNormaux: number;
     pointagesRetard: number;
     pointagesIncomplete: number;
-    joursPointes: number;
+    clockedDays: number;
 }
 
 // #endregion

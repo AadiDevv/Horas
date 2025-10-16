@@ -17,7 +17,6 @@ initializeApp();
 
 const app = express();
 const PORT = 5000;
-const HOST_PORT = process.env.HOST_PORT;
 
 // Middlewares
 app.use(helmet());

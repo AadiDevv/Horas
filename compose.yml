@@ -12,6 +12,8 @@ services:
     build: ./backend-app
     ports:
       - "5000:5000"
+    environment:
+      - NGINX_PORT=${NGINX_PORT:-8080}
     volumes:
       - ./backend-app:/app
       - /app/src/generated

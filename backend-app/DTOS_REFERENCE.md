@@ -720,12 +720,12 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Endpoint:** `GET /api/timesheets`  
 **Query Params (optionnels):**
 - `employeId` : number
-- `dateDebut` : YYYY-MM-DD
-- `dateFin` : YYYY-MM-DD
+- `startDate` : YYYY-MM-DD
+- `endDate` : YYYY-MM-DD
 - `status` : 'normal' | 'retard' | 'absence' | 'incomplet'
 - `clockin` : boolean (true=entrées, false=sorties)
 
-**Example:** `GET /api/timesheets?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31&status=retard`
+**Example:** `GET /api/timesheets?employeId=10&startDate=2025-10-01&endDate=2025-10-31&status=retard`
 
 **Response (200):**
 ```json
@@ -831,10 +831,10 @@ Cette API suit une architecture REST avec des réponses standardisées :
 **Endpoint:** `GET /api/timesheets/stats`  
 **Query Params (requis):**
 - `employeId` : number
-- `dateDebut` : YYYY-MM-DD
-- `dateFin` : YYYY-MM-DD
+- `startDate` : YYYY-MM-DD
+- `endDate` : YYYY-MM-DD
 
-**Example:** `GET /api/timesheets/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31`
+**Example:** `GET /api/timesheets/stats?employeId=10&startDate=2025-10-01&endDate=2025-10-31`
 
 **Response (200):**
 ```json
@@ -845,12 +845,12 @@ Cette API suit une architecture REST avec des réponses standardisées :
     "periodStart": "2025-10-01",
     "periodEnd": "2025-10-31",
     "totalTimesheets": 42,
-    "totalEntrees": 21,
-    "totalSorties": 21,
-    "timesheetsNormaux": 38,
-    "timesheetsRetard": 3,
+    "totalClockins": 21,
+    "totalClockouts": 21,
+    "timesheetsNormal": 38,
+    "timesheetsDelay": 3,
     "timesheetsIncomplete": 1,
-    "joursPointes": 21
+    "clockedDays": 21
   },
   "message": "Statistiques des timesheets calculées avec succès",
   "timestamp": "2025-10-12T10:00:00.000Z"

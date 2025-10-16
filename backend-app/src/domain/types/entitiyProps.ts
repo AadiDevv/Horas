@@ -1,5 +1,7 @@
 import { Role } from "./valueType";
 import { User } from "../entities/user";
+import { TimesheetStatus } from "@/domain/types";
+
 export type UserProps = {
     email: string,
     hashedPassword?: string,
@@ -31,4 +33,16 @@ export type TeamProps = {
     manager?: User,
     members?: User[],
     membersCount?: number,
+}
+
+export interface TimesheetProps {
+    id?: number;
+    employeId: number;
+    date: Date;
+    hour: Date;
+    clockin: boolean;
+    status?: TimesheetStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
+    employe?: User;
 }

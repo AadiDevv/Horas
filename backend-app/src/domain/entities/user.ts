@@ -188,7 +188,7 @@ export class User {
    * Convertit l'utilisateur en TeamMembreDTO
    * Utilisé dans les DTOs d'équipe pour afficher les infos des members
    */
-  public toTeamMembreDTO(): TeamMembreDTO {
+  public toTeamMemberDTO(): TeamMembreDTO {
     if (!this.id) {
       throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamMembreDTO");
     }

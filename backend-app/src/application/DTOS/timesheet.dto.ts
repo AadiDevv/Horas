@@ -39,12 +39,12 @@ export interface TimesheetReadDTO {
 // #region List & Filter DTOs
 /**
  * DTO pour filtrer les timesheets
- * Query params: GET /timesheets?employeId=1&dateDebut=2025-01-01&dateFin=2025-01-31
+ * Query params: GET /timesheets?employeId=1&startDate=2025-01-01&endDate=2025-01-31
  */
 export interface TimesheetFilterDTO {
     employeId?: number;
-    dateDebut?: string; // Format: "YYYY-MM-DD"
-    dateFin?: string;   // Format: "YYYY-MM-DD"
+    startDate?: string; // Format: "YYYY-MM-DD"
+    endDate?: string;   // Format: "YYYY-MM-DD"
     status?: TimesheetStatus;
     clockin?: boolean;
 }
@@ -66,19 +66,19 @@ export interface TimesheetListItemDTO {
 // #region Statistics DTO
 /**
  * DTO pour les statistiques de timesheet d'un employé sur une période
- * Exemple: GET /timesheets/stats?employeId=1&dateDebut=...&dateFin=...
+ * Exemple: GET /timesheets/stats?employeId=1&startDate=...&endDate=...
  */
 export interface TimesheetStatsDTO {
     employeId: number;
     periodStart: string;
     periodEnd: string;
     totalTimesheets: number;
-    totalEntrees: number;
-    totalSorties: number;
-    timesheetsNormaux: number;
-    timesheetsRetard: number;
+    totalClockins: number;
+    totalClockouts: number;
+    timesheetsNormal: number;
+    timesheetsDelay: number;
     timesheetsIncomplete: number;
-    joursPointes: number; // lastNamebre de jours uniques
+    clockedDays: number; // lastNamebre de jours uniques
 }
 // #endregion
 

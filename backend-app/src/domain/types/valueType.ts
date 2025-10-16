@@ -1,5 +1,5 @@
 export type Role = 'admin' | 'manager' | 'employe';
-export type TimesheetStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
+export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 export type Status = 'normal' | 'retard';
 export type KpiType = 'total' | 'hours' | 'absences';
 export type ScheduleType = 'normal' | 'exceptionnel';

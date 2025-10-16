@@ -19,7 +19,7 @@ export const timesheetSchemas = {
                 type: 'string',
                 format: 'time',
                 example: '09:00:00',
-                description: 'Nouvelle hour du timesheet'
+                description: 'Nouvelle heure du timesheet'
             },
             clockin: {
                 type: 'boolean',
@@ -28,7 +28,7 @@ export const timesheetSchemas = {
             },
             status: {
                 type: 'string',
-                enum: ['normal', 'retard', 'absence', 'incomplet'],
+                enum: ['normal', 'delay', 'absence', 'incomplete'],
                 example: 'normal',
                 description: 'Nouveau statut'
             }
@@ -70,7 +70,7 @@ export const timesheetSchemas = {
             },
             status: {
                 type: 'string',
-                enum: ['normal', 'retard', 'absence', 'incomplet'],
+                enum: ['normal', 'delay', 'absence', 'incomplete'],
                 example: 'normal',
                 description: 'Statut du timesheet'
             },
@@ -143,7 +143,7 @@ export const timesheetSchemas = {
             },
             status: {
                 type: 'string',
-                enum: ['normal', 'retard', 'absence', 'incomplet'],
+                enum: ['normal', 'delay', 'absence', 'incomplete'],
                 example: 'normal'
             }
         }
@@ -159,13 +159,13 @@ export const timesheetSchemas = {
                 example: 10,
                 description: 'Filtrer par employé'
             },
-            dateDebut: {
+            startDate: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-01',
                 description: 'Date de début de la période (YYYY-MM-DD)'
             },
-            dateFin: {
+            endDate: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-31',
@@ -173,8 +173,8 @@ export const timesheetSchemas = {
             },
             status: {
                 type: 'string',
-                enum: ['normal', 'retard', 'absence', 'incomplet'],
-                example: 'retard',
+                enum: ['normal', 'delay', 'absence', 'incomplete'],
+                example: 'delay',
                 description: 'Filtrer par statut'
             },
             clockin: {
@@ -183,7 +183,7 @@ export const timesheetSchemas = {
                 description: 'Filtrer par type (true=entrées, false=sorties)'
             }
         },
-        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /timesheets?employeId=10&dateDebut=2025-10-01'
+        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /timesheets?employeId=10&startDate=2025-10-01'
     },
     // #endregion
 
@@ -213,22 +213,22 @@ export const timesheetSchemas = {
                 example: 42,
                 description: 'lastNamebre total de timesheets'
             },
-            totalEntrees: {
+            totalClockins: {
                 type: 'integer',
                 example: 21,
                 description: 'lastNamebre d\'entrées (clock-in)'
             },
-            totalSorties: {
+            totalClockouts: {
                 type: 'integer',
                 example: 21,
                 description: 'lastNamebre de sorties (clock-out)'
             },
-            timesheetsNormaux: {
+            timesheetsNormal: {
                 type: 'integer',
                 example: 38,
                 description: 'lastNamebre de timesheets à l\'hour'
             },
-            timesheetsRetard: {
+            timesheetsDelay: {
                 type: 'integer',
                 example: 3,
                 description: 'lastNamebre de retards'
@@ -238,7 +238,7 @@ export const timesheetSchemas = {
                 example: 1,
                 description: 'lastNamebre de timesheets incomplets (entrée sans sortie)'
             },
-            joursPointes: {
+            clockedDays: {
                 type: 'integer',
                 example: 21,
                 description: 'lastNamebre de jours uniques avec au moins un timesheet'

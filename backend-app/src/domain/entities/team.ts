@@ -122,7 +122,7 @@ export class Team {
 
         return {
             ...this.toReadDTO(),
-            members: this.members.map(membre => membre.toTeamMembreDTO()),
+            members: this.members.map(membre => membre.toTeamMemberDTO()),
         };
     }
     // #endregion

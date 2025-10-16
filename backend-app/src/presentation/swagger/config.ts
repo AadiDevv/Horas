@@ -48,8 +48,8 @@ export const swaggerDefinition: SwaggerDefinition = {
             description: '🔮 Routes de gestion des schedules de travail'
         },
         {
-            name: 'Timesheets (À venir)',
-            description: '🔮 Routes de gestion des timesheets (clock-in/clock-out, corrections, statistiques)'
+            name: 'Timesheets',
+            description: 'Routes de gestion des timesheets (clock-in/clock-out, corrections, statistiques)'
         }
     ]
 };

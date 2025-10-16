@@ -1,7 +1,7 @@
 // #region Timesheet Paths
 /**
  * Routes de gestion des timesheets
- * Tag: Timesheets (À venir)
+ * Tag: Timesheets
  * 
  * Architecture simplifiée :
  * - Pas de DTO de création côté client
@@ -23,7 +23,22 @@ export const timesheetPaths = {
         post: {
             summary: 'Pointer l\'entrée',
             description: 'Enregistre l\'hour d\'arrivée de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/TimesheetUpdateDTO'
+                        },
+                        example: {
+                            date: new Date(),
+                            hour: new Date(),
+                            status: 'normal'
+                        }
+                    }
+                }
+            },
             security: [{ bearerAuth: [] }],
             responses: {
                 201: {
@@ -90,7 +105,22 @@ export const timesheetPaths = {
         post: {
             summary: 'Pointer la sortie',
             description: 'Enregistre l\'hour de départ de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#/components/schemas/TimesheetUpdateDTO'
+                        },
+                        example: {
+                            date: new Date(),
+                            hour: new Date(),
+                            status: 'normal'
+                        }
+                    }
+                }
+            },
             security: [{ bearerAuth: [] }],
             responses: {
                 201: {
@@ -149,7 +179,7 @@ export const timesheetPaths = {
         get: {
             summary: 'Liste des timesheets',
             description: 'Récupère les timesheets avec filtres optionnels. Un employé ne voit que ses propres timesheets. Un manager voit ceux de son équipe. Un admin voit tous les timesheets.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -159,14 +189,14 @@ export const timesheetPaths = {
                     description: 'Filtrer par employé (Manager/Admin uniquement)'
                 },
                 {
-                    name: 'dateDebut',
+                    name: 'startDate',
                     in: 'query',
                     schema: { type: 'string', format: 'date' },
                     description: 'Date de début (YYYY-MM-DD)',
                     example: '2025-10-01'
                 },
                 {
-                    name: 'dateFin',
+                    name: 'endDate',
                     in: 'query',
                     schema: { type: 'string', format: 'date' },
                     description: 'Date de fin (YYYY-MM-DD)',
@@ -210,7 +240,7 @@ export const timesheetPaths = {
         get: {
             summary: 'Détail d\'un timesheet',
             description: 'Récupère les informations détaillées d\'un timesheet',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -252,7 +282,7 @@ export const timesheetPaths = {
         patch: {
             summary: 'Corriger un timesheet',
             description: 'Permet de corriger manuellement un timesheet. Manager ou Admin uniquement.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -316,7 +346,7 @@ export const timesheetPaths = {
         delete: {
             summary: 'Supprimer un timesheet',
             description: 'Supprime un timesheet erroné. Manager ou Admin uniquement.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -359,7 +389,7 @@ export const timesheetPaths = {
         get: {
             summary: 'Statistiques des timesheets',
             description: 'Calcule les statistiques de timesheet d\'un employé sur une période. Un employé ne voit que ses propres statistiques.',
-            tags: ['Timesheets (À venir)'],
+            tags: ['Timesheets'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -370,7 +400,7 @@ export const timesheetPaths = {
                     description: 'ID de l\'employé'
                 },
                 {
-                    name: 'dateDebut',
+                    name: 'startDate',
                     in: 'query',
                     required: true,
                     schema: { type: 'string', format: 'date' },
@@ -378,7 +408,7 @@ export const timesheetPaths = {
                     example: '2025-10-01'
                 },
                 {
-                    name: 'dateFin',
+                    name: 'endDate',
                     in: 'query',
                     required: true,
                     schema: { type: 'string', format: 'date' },
