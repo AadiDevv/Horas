@@ -17,3 +17,13 @@ export type UserProps = {
     plageHoraireId?: number | null,
     id?: number,
 }
+
+export type EquipeProps = {
+    id?: number,
+    nom: string,
+    description: string,
+    managerId: number,
+    createdAt?: Date,
+    updatedAt?: Date,
+    deletedAt?: Date | null,
+}
