@@ -1,35 +1,49 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { UserPlus, Users } from 'lucide-react';
-import Navbar from '../components/navbar';
-import RoleProtection from '../middleware/roleProtection';
-import { 
-  DashboardStatCard, 
-  Sidebar, 
-  AgentModal, 
-  EquipeModal, 
-  AgentList, 
-  EquipeList 
-} from './components';
-import { 
-  useManagerDashboard, 
-  useAgentManager, 
-  useEquipeManager 
-} from './hooks/useManagerDashboard';
+import { useEffect, useState } from "react";
+import { UserPlus, Users } from "lucide-react";
+import Navbar from "../components/navbar";
+import RoleProtection from "../middleware/roleProtection";
+import {
+  DashboardStatCard,
+  Sidebar,
+  AgentModal,
+  EquipeModal,
+  AgentList,
+  EquipeList,
+  SettingsModal,
+} from "./components";
+import {
+  useManagerDashboard,
+  useAgentManager,
+  useEquipeManager,
+} from "./hooks/useManagerDashboard";
+import { useManagerSettings } from "./hooks/useManagerSettings";
 
 // ==================== MAIN COMPONENT ====================
 function ManagerDashboard() {
   // Custom hooks for state management
   const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  
+
+  // Settings hook
+  const {
+    userData,
+    formData,
+    setFormData,
+    settingsOpen,
+    setSettingsOpen,
+    saving,
+    successMessage,
+    errorMessage,
+    handleOpenSettings,
+    handleSaveSettings,
+  } = useManagerSettings();
+
   const {
     agents,
     filteredAgents,
     loadingAgents,
-    searchTerm: agentSearchTerm,
-    setSearchTerm: setAgentSearchTerm,
     showModal: showAgentModal,
     setShowModal: setShowAgentModal,
     editingAgent,
@@ -40,7 +54,7 @@ function ManagerDashboard() {
     handleUpdate: handleUpdateAgent,
     handleDelete: handleDeleteAgent,
     openEditModal: openEditAgentModal,
-    resetForm: resetAgentForm
+    resetForm: resetAgentForm,
   } = useAgentManager();
 
   const {
@@ -56,7 +70,7 @@ function ManagerDashboard() {
     handleUpdate: handleUpdateEquipe,
     handleDelete: handleDeleteEquipe,
     openEditModal: openEditEquipeModal,
-    resetForm: resetEquipeForm
+    resetForm: resetEquipeForm,
   } = useEquipeManager();
 
   // ==================== EFFECTS ====================
@@ -94,18 +108,41 @@ function ManagerDashboard() {
 
   // ==================== RENDER ====================
   return (
-    <RoleProtection allowedRoles={['manager', 'admin']}>
+    <RoleProtection allowedRoles={["manager", "admin"]}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Navbar />
-        
+        <Navbar
+          onOpenSettings={handleOpenSettings}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+
+        {/* Settings Modal */}
+        {userData && (
+          <SettingsModal
+            isOpen={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            userData={userData}
+            formData={formData}
+            setFormData={setFormData}
+            onSave={handleSaveSettings}
+            saving={saving}
+            successMessage={successMessage}
+            errorMessage={errorMessage}
+          />
+        )}
+
         <div className="flex">
           {/* Sidebar */}
-          <Sidebar isOpen={sidebarOpen} currentPage={currentPage} onPageChange={setCurrentPage} />
+          <Sidebar
+            isOpen={sidebarOpen}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
 
           {/* Main Content */}
           <main className="flex-1 p-8">
             {/* DASHBOARD PAGE */}
-            {currentPage === 'dashboard' && (
+            {currentPage === "dashboard" && (
               <>
                 {/* Header */}
                 <div className="flex items-center justify-between mb-10">
@@ -116,14 +153,14 @@ function ManagerDashboard() {
                     <p className="text-gray-600 font-medium">{formattedDate}</p>
                   </div>
                   <div className="flex gap-4">
-                    <button 
+                    <button
                       onClick={openEquipeModal}
                       className="flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow"
                     >
                       <Users size={20} strokeWidth={2} />
                       Créer une équipe
                     </button>
-                    <button 
+                    <button
                       onClick={openAgentModal}
                       className="flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20"
                     >
@@ -136,14 +173,14 @@ function ManagerDashboard() {
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <DashboardStatCard
-                    title='Employés totaux'
+                    title="Employés totaux"
                     value={agents.length.toString()}
                     icon={Users}
                   />
                   <DashboardStatCard
                     title="Employés actifs"
                     icon={Users}
-                    value={agents.filter(a => a.isActive).length.toString()}
+                    value={agents.filter((a) => a.isActive).length.toString()}
                   />
                   <DashboardStatCard
                     title="Équipes"
@@ -153,32 +190,46 @@ function ManagerDashboard() {
                   <DashboardStatCard
                     title="Total des membres"
                     icon={Users}
-                    value={equipes.reduce((sum, e) => sum + e.agentCount, 0).toString()}
+                    value={equipes
+                      .reduce((sum, e) => sum + e.agentCount, 0)
+                      .toString()}
                   />
                 </div>
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap -6">
                   <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
-                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">Agents récents</h3>
+                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+                      Agents récents
+                    </h3>
                     <div className="space-y-3">
-                      {agents.slice(0, 5).map(agent => (
-                        <div key={agent.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      {agents.slice(0, 5).map((agent) => (
+                        <div
+                          key={agent.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                              {agent.prenom[0]}{agent.nom[0]}
+                              {agent.prenom[0]}
+                              {agent.nom[0]}
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">{agent.prenom} {agent.nom}</p>
-                              <p className="text-sm text-gray-600">{agent.email}</p>
+                              <p className="font-semibold text-gray-900">
+                                {agent.prenom} {agent.nom}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {agent.email}
+                              </p>
                             </div>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            agent.isActive 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {agent.isActive ? 'Actif' : 'Inactif'}
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              agent.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {agent.isActive ? "Actif" : "Inactif"}
                           </span>
                         </div>
                       ))}
@@ -186,17 +237,26 @@ function ManagerDashboard() {
                   </div>
 
                   <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
-                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">Équipes</h3>
+                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+                      Équipes
+                    </h3>
                     <div className="space-y-3">
-                      {equipes.slice(0, 5).map(equipe => (
-                        <div key={equipe.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      {equipes.slice(0, 5).map((equipe) => (
+                        <div
+                          key={equipe.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold">
                               <Users size={20} />
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">{equipe.nom}</p>
-                              <p className="text-sm text-gray-600">{equipe.description || 'Aucune description'}</p>
+                              <p className="font-semibold text-gray-900">
+                                {equipe.nom}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {equipe.description || "Aucune description"}
+                              </p>
                             </div>
                           </div>
                           <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
@@ -211,7 +271,7 @@ function ManagerDashboard() {
             )}
 
             {/* AGENTS PAGE */}
-            {currentPage === 'agents' && (
+            {currentPage === "agents" && (
               <AgentList
                 agents={filteredAgents}
                 onAddAgent={openAgentModal}
@@ -221,7 +281,7 @@ function ManagerDashboard() {
             )}
 
             {/* ÉQUIPES PAGE */}
-            {currentPage === 'equipes' && (
+            {currentPage === "equipes" && (
               <EquipeList
                 equipes={equipes}
                 onAddEquipe={openEquipeModal}
