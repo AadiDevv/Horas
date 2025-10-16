@@ -318,6 +318,7 @@ function ManagerDashboard() {
           setFormData={setEquipeFormData}
           equipe={editingEquipe}
           loading={loadingEquipes}
+          availableAgents={agents}
         />
       </div>
     </RoleProtection>

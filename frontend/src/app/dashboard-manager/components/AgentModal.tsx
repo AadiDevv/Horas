@@ -90,21 +90,27 @@ export default function AgentModal({
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2">Équipe</label>
-            <select
-              value={formData.equipeId}
-              onChange={(e) => setFormData({ ...formData, equipeId: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-            >
-              <option value="">Aucune équipe</option>
-              {equipes.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.nom}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Champ équipe visible uniquement lors de la modification */}
+          {agent && (
+            <div>
+              <label className="block text-sm font-semibold mb-2">Équipe</label>
+              <select
+                value={formData.equipeId}
+                onChange={(e) => setFormData({ ...formData, equipeId: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="">Aucune équipe</option>
+                {equipes.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.nom}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Changez l&apos;équipe de cet agent ou gérez les équipes depuis l&apos;onglet Équipes
+              </p>
+            </div>
+          )}
 
           <button
             onClick={onSave}
