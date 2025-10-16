@@ -1,346 +1,326 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Clock, Menu, Bell, Users, UserPlus, Folder, Settings, FileText, User } from 'lucide-react';
-import Navbar from '../components/navbar';
-import RoleProtection from '../middleware/roleProtection';
+import { useEffect, useState } from "react";
+import { UserPlus, Users } from "lucide-react";
+import Navbar from "../components/navbar";
+import RoleProtection from "../middleware/roleProtection";
+import {
+  DashboardStatCard,
+  Sidebar,
+  AgentModal,
+  EquipeModal,
+  AgentList,
+  EquipeList,
+  SettingsModal,
+} from "./components";
+import {
+  useManagerDashboard,
+  useAgentManager,
+  useEquipeManager,
+} from "./hooks/useManagerDashboard";
+import { useManagerSettings } from "./hooks/useManagerSettings";
 
-export default function Page() {
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
-  const [mounted, setMounted] = useState(false);
+// ==================== MAIN COMPONENT ====================
+function ManagerDashboard() {
+  // Custom hooks for state management
+  const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Settings hook
+  const {
+    userData,
+    formData,
+    setFormData,
+    settingsOpen,
+    setSettingsOpen,
+    saving,
+    successMessage,
+    errorMessage,
+    handleOpenSettings,
+    handleSaveSettings,
+  } = useManagerSettings();
+
+  const {
+    agents,
+    filteredAgents,
+    loadingAgents,
+    showModal: showAgentModal,
+    setShowModal: setShowAgentModal,
+    editingAgent,
+    formData: agentFormData,
+    setFormData: setAgentFormData,
+    loadAgents,
+    handleCreate: handleCreateAgent,
+    handleUpdate: handleUpdateAgent,
+    handleDelete: handleDeleteAgent,
+    openEditModal: openEditAgentModal,
+    resetForm: resetAgentForm,
+  } = useAgentManager();
+
+  const {
+    equipes,
+    loadingEquipes,
+    showModal: showEquipeModal,
+    setShowModal: setShowEquipeModal,
+    editingEquipe,
+    formData: equipeFormData,
+    setFormData: setEquipeFormData,
+    loadEquipes,
+    handleCreate: handleCreateEquipe,
+    handleUpdate: handleUpdateEquipe,
+    handleDelete: handleDeleteEquipe,
+    openEditModal: openEditEquipeModal,
+    resetForm: resetEquipeForm,
+  } = useEquipeManager();
+
+  // ==================== EFFECTS ====================
   useEffect(() => {
-    setMounted(true);
-    setCurrentTime(new Date());
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
+    loadAgents();
+    loadEquipes();
   }, []);
 
-  const formatDate = (date: Date) => {
-    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-
-    const dayName = days[date.getDay()];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${dayName} ${day}, ${month} ${year} | ${hours}:${minutes}`;
+  // ==================== HANDLERS ====================
+  const handleAgentSubmit = () => {
+    if (editingAgent) {
+      handleUpdateAgent();
+    } else {
+      handleCreateAgent();
+    }
   };
 
-  const agents = [
-    {
-      name: 'John Ekeler',
-      role: 'Food Dashboard Design',
-      subtitle: 'Creating UI and Research',
-      hours: '00:40:00',
-      delays: 2,
-      avatar: 'bg-gradient-to-br from-blue-400 to-cyan-500'
-    },
-    {
-      name: 'Rubik Sans',
-      role: 'Project Name',
-      subtitle: 'Creating UI and Research',
-      hours: '00:40:00',
-      delays: 0,
-      avatar: 'bg-gradient-to-br from-purple-400 to-pink-500'
+  const handleEquipeSubmit = () => {
+    if (editingEquipe) {
+      handleUpdateEquipe();
+    } else {
+      handleCreateEquipe();
     }
-  ];
+  };
 
-  const lateAgents = [
-    {
-      name: 'John Ekeler',
-      role: 'Food Dashboard Design',
-      subtitle: 'Creating UI and Research',
-      startTime: '00:40:00',
-      arrivedTime: '08:40:00',
-      avatar: 'bg-gradient-to-br from-blue-400 to-cyan-500'
-    },
-    {
-      name: 'Rubik Sans',
-      role: 'Project Name',
-      subtitle: 'Creating UI and Research',
-      startTime: '00:40:00',
-      arrivedTime: '08:40:00',
-      avatar: 'bg-gradient-to-br from-purple-400 to-pink-500'
-    }
-  ];
+  const openAgentModal = () => {
+    resetAgentForm();
+    setShowAgentModal(true);
+  };
 
-  const weeklyHours = [
-    { day: 'Lun', hours: 65 },
-    { day: 'Mar', hours: 75 },
-    { day: 'Mer', hours: 95 },
-    { day: 'Jeu', hours: 98 },
-    { day: 'Ven', hours: 85 },
-    { day: 'Sam', hours: 45 }
-  ];
+  const openEquipeModal = () => {
+    resetEquipeForm();
+    setShowEquipeModal(true);
+  };
 
-  const agentHours = [
-    { name: 'John', hours: 85 },
-    { name: 'Rubik', hours: 92 },
-    { name: 'Julie', hours: 95 },
-    { name: 'Maxime', hours: 98 },
-    { name: 'Elon', hours: 88 },
-    { name: 'Steve', hours: 65 }
-  ];
-
+  // ==================== RENDER ====================
   return (
-    <RoleProtection allowedRoles={['manager', 'admin']}>
+    <RoleProtection allowedRoles={["manager", "admin"]}>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Navbar />
+        <Navbar
+          onOpenSettings={handleOpenSettings}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+
+        {/* Settings Modal */}
+        {userData && (
+          <SettingsModal
+            isOpen={settingsOpen}
+            onClose={() => setSettingsOpen(false)}
+            userData={userData}
+            formData={formData}
+            setFormData={setFormData}
+            onSave={handleSaveSettings}
+            saving={saving}
+            successMessage={successMessage}
+            errorMessage={errorMessage}
+          />
+        )}
+
         <div className="flex">
           {/* Sidebar */}
-          {sidebarOpen && (
-            <aside className="w-64 p-6 space-y-2 bg-white/60 backdrop-blur-xl border-r border-gray-200/50">
-              <button className="w-full flex items-center gap-3 px-4 py-3.5 bg-black text-white rounded-xl font-medium transition-all duration-200 hover:bg-gray-900 shadow-lg shadow-black/10">
-                <div className="grid grid-cols-2 gap-0.5">
-                  <div className="w-2 h-2 bg-white rounded-sm"></div>
-                  <div className="w-2 h-2 bg-white rounded-sm"></div>
-                  <div className="w-2 h-2 bg-white rounded-sm"></div>
-                  <div className="w-2 h-2 bg-white rounded-sm"></div>
-                </div>
-                Tableau de bord
-              </button>
-
-              <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
-                <Users size={20} strokeWidth={2} />
-                Agents
-              </button>
-
-              <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
-                <Clock size={20} strokeWidth={2} />
-                Équipes
-              </button>
-
-              <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
-                <FileText size={20} strokeWidth={2} />
-                Reports
-              </button>
-
-              <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
-                <Settings size={20} strokeWidth={2} />
-                Paramètres
-              </button>
-            </aside>
-          )}
+          <Sidebar
+            isOpen={sidebarOpen}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
 
           {/* Main Content */}
           <main className="flex-1 p-8">
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Aujourd'hui</h2>
-                <p className="text-gray-600 font-medium">{mounted && currentTime ? formatDate(currentTime) : 'Chargement...'}</p>
-              </div>
-              <div className="flex gap-4">
-                <button className="flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow">
-                  <Users size={20} strokeWidth={2} />
-                  Créer une équipe
-                </button>
-                <button className="flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20">
-                  <UserPlus size={20} strokeWidth={2} />
-                  Ajouter un agent
-                </button>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
-                <h3 className="text-base font-semibold text-gray-800 mb-4">Hours Total Semaine</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-semibold">40:00:05</span>
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
-                    <Clock size={28} className="text-gray-700" strokeWidth={2} />
+            {/* DASHBOARD PAGE */}
+            {currentPage === "dashboard" && (
+              <>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-10">
+                  <div>
+                    <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                      Aujourd'hui
+                    </h2>
+                    <p className="text-gray-600 font-medium">{formattedDate}</p>
                   </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
-                <h3 className="text-base font-semibold text-gray-800 mb-4">Agent Actif</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-semibold">01</span>
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
-                    <User size={28} className="text-black-700" strokeWidth={2} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
-                <h3 className="text-base font-semibold text-gray-800 mb-4">Équipe</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-4xl font-semibold">08</span>
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
-                    <Folder size={28} className="text-black-700" strokeWidth={2} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              {/* Agents Table */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Agents</h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-1 mb-4">
-                  <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    <div className="col-span-5">Agent info</div>
-                    <div className="col-span-4 text-center">H travaillés</div>
-                    <div className="col-span-3 text-center">Retards</div>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={openEquipeModal}
+                      className="flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      <Users size={20} strokeWidth={2} />
+                      Créer une équipe
+                    </button>
+                    <button
+                      onClick={openAgentModal}
+                      className="flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20"
+                    >
+                      <UserPlus size={20} strokeWidth={2} />
+                      Ajouter un agent
+                    </button>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  {agents.map((agent, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-2xl hover:bg-gray-50 transition-all duration-200">
-                      <div className="col-span-5 flex items-center gap-3">
-                        <div className={`w-11 h-11 ${agent.avatar} rounded-full flex-shrink-0`}></div>
-                        <div>
-                          <p className="font-semibold text-sm">{agent.name}</p>
-                          <p className="text-xs text-gray-600">{agent.role}</p>
-                          <p className="text-xs text-gray-400">{agent.subtitle}</p>
-                        </div>
-                      </div>
-                      <div className="col-span-4 text-center">
-                        <span className="font-semibold text-sm">{agent.hours}</span>
-                      </div>
-                      <div className="col-span-3 text-center">
-                        <span className="font-semibold text-sm">{agent.delays}</span>
-                      </div>
-                    </div>
-                  ))}
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <DashboardStatCard
+                    title="Taux de présence (%)"
+                    value={"98"}
+                    icon={Users}
+                  />
+                  <DashboardStatCard
+                    title="Taux de retard (%)"
+                    icon={Users}
+                    value={"4"}
+                  />
+                  <DashboardStatCard
+                    title="Moyenne d'heures / jour (h)"
+                    value={"7.06"}
+                    icon={Users}
+                  />
+                  <DashboardStatCard
+                    title="Heures supplémentaires (h)"
+                    icon={Users}
+                    value="10"
+                    />
                 </div>
 
-                <button className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold text-sm hover:bg-gray-900 transition-all duration-200">
-                  View All
-                </button>
-              </div>
-
-              {/* Weekly Hours Chart */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Hours par jours</h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="h-64 flex items-end justify-between gap-4 px-2">
-                  {weeklyHours.map((item, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-3">
-                      <div className="w-full bg-gray-100 rounded-t-xl relative" style={{ height: '100%' }}>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap -6">
+                  <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
+                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+                      Agents récents
+                    </h3>
+                    <div className="space-y-3">
+                      {agents.slice(0, 5).map((agent) => (
                         <div
-                          className="w-full bg-gradient-to-t from-gray-800 to-gray-700 rounded-t-xl absolute bottom-0 transition-all duration-500 hover:from-gray-700 hover:to-gray-600"
-                          style={{ height: `${item.hours}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs font-semibold text-gray-600">{item.day}</span>
+                          key={agent.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
+                              {agent.prenom[0]}
+                              {agent.nom[0]}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {agent.prenom} {agent.nom}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {agent.email}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              agent.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {agent.isActive ? "Actif" : "Inactif"}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div className="mt-4 text-center">
-                  <span className="inline-flex items-center gap-2 text-xs font-medium text-gray-500">
-                    <div className="w-2 h-2 rounded-full bg-gray-800"></div>
-                    06/10 week
-                  </span>
-                </div>
-              </div>
-            </div>
+                  </div>
 
-            {/* Bottom Row */}
-            <div className="grid grid-cols-2 gap-6">
-              {/* Late Agents */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Top retardataires</h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-1 mb-4">
-                  <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    <div className="col-span-5">Agent info</div>
-                    <div className="col-span-3 text-center">Starting at</div>
-                    <div className="col-span-4 text-center">Comes at</div>
+                  <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
+                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+                      Équipes
+                    </h3>
+                    <div className="space-y-3">
+                      {equipes.slice(0, 5).map((equipe) => (
+                        <div
+                          key={equipe.id}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-white font-semibold">
+                              <Users size={20} />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {equipe.nom}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {equipe.description || "Aucune description"}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+                            {equipe.agentCount} membres
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              </>
+            )}
 
-                <div className="space-y-3">
-                  {lateAgents.map((agent, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-2xl hover:bg-gray-50 transition-all duration-200">
-                      <div className="col-span-5 flex items-center gap-3">
-                        <div className={`w-11 h-11 ${agent.avatar} rounded-full flex-shrink-0`}></div>
-                        <div>
-                          <p className="font-semibold text-sm">{agent.name}</p>
-                          <p className="text-xs text-gray-600">{agent.role}</p>
-                          <p className="text-xs text-gray-400">{agent.subtitle}</p>
-                        </div>
-                      </div>
-                      <div className="col-span-3 text-center">
-                        <span className="font-semibold text-sm">{agent.startTime}</span>
-                      </div>
-                      <div className="col-span-4 text-center">
-                        <span className="font-semibold text-sm">{agent.arrivedTime}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* AGENTS PAGE */}
+            {currentPage === "agents" && (
+              <AgentList
+                agents={filteredAgents}
+                onAddAgent={openAgentModal}
+                onEditAgent={openEditAgentModal}
+                onDeleteAgent={handleDeleteAgent}
+              />
+            )}
 
-              {/* Agent Hours Chart */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Hours par agent</h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <circle cx="10" cy="5" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                      <circle cx="10" cy="15" r="1.5" fill="currentColor" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {agentHours.map((agent, idx) => (
-                    <div key={idx} className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-gray-700 w-16">{agent.name}</span>
-                      <div className="flex-1 h-8 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-gray-800 to-gray-700 rounded-full transition-all duration-500 hover:from-gray-700 hover:to-gray-600"
-                          style={{ width: `${agent.hours}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {/* ÉQUIPES PAGE */}
+            {currentPage === "equipes" && (
+              <EquipeList
+                equipes={equipes}
+                onAddEquipe={openEquipeModal}
+                onEditEquipe={openEditEquipeModal}
+                onDeleteEquipe={handleDeleteEquipe}
+              />
+            )}
           </main>
         </div>
+
+        {/* MODALS */}
+        <AgentModal
+          isOpen={showAgentModal}
+          onClose={() => {
+            setShowAgentModal(false);
+            resetAgentForm();
+          }}
+          formData={agentFormData}
+          setFormData={setAgentFormData}
+          equipes={equipes}
+          agent={editingAgent}
+          onSave={handleAgentSubmit}
+          loading={loadingAgents}
+        />
+
+        <EquipeModal
+          isOpen={showEquipeModal}
+          onClose={() => {
+            setShowEquipeModal(false);
+            resetEquipeForm();
+          }}
+          onSave={handleEquipeSubmit}
+          formData={equipeFormData}
+          setFormData={setEquipeFormData}
+          equipe={editingEquipe}
+          loading={loadingEquipes}
+          availableAgents={agents}
+        />
       </div>
     </RoleProtection>
   );
 }
+
+export default ManagerDashboard;
