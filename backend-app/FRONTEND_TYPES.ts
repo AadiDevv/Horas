@@ -13,7 +13,7 @@
 // =========================================
 
 export type Role = 'admin' | 'manager' | 'employe';
-export type PointageStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
+export type TimesheetStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
 
 // =========================================
 // RÉPONSES STANDARD
@@ -42,14 +42,14 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 // #region User DTOs
 
 export interface UserCreateDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 
 export interface UserLoginDTO {
@@ -58,14 +58,14 @@ export interface UserLoginDTO {
 }
 
 export interface UserUpdateDTO {
-    prenom?: string;
-    nom?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
-    telephone?: string;
+    phone?: string;
     role?: Role;
     isActive?: boolean;
-    equipeId?: number | null;
-    plageHoraireId?: number | null;
+    teamId?: number | null;
+    scheduleId?: number | null;
 }
 
 export interface UserChangePasswordDTO {
@@ -79,43 +79,43 @@ export interface UserResetPasswordDTO {
 
 export interface UserReadDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
-    telephone: string | null;
-    equipeId: number | null;
-    plageHoraireId: number | null;
+    phone: string | null;
+    teamId: number | null;
+    scheduleId: number | null;
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
-    equipe?: {
+    team?: {
         id: number;
-        nom: string;
+        lastName: string;
     };
-    horaire?: {
+    schedule?: {
         id: number;
-        nom: string;
-        heureDebut: string;
-        heureFin: string;
+        lastName: string;
+        startHour: string;
+        endHour: string;
     };
 }
 
 export interface UserListItemDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
-    equipeId: number | null;
-    equipeNom: string | null;
+    teamId: number | null;
+    teamlastName: string | null;
 }
 
 export interface UserFilterDTO {
     role?: Role;
-    equipeId?: number;
+    teamId?: number;
     isActive?: boolean;
     search?: string;
 }
@@ -134,23 +134,23 @@ export interface TokenResponse {
 // 2. ÉQUIPE
 // =========================================
 
-// #region Equipe DTOs
+// #region Team DTOs
 
-export interface EquipeCreateDTO {
-    nom: string;
+export interface TeamCreateDTO {
+    lastName: string;
     description?: string;
     managerId: number;
 }
 
-export interface EquipeUpdateDTO {
-    nom?: string;
+export interface TeamUpdateDTO {
+    lastName?: string;
     description?: string;
     managerId?: number;
 }
 
-export interface EquipeReadDTO {
+export interface TeamReadDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description: string | null;
     managerId: number;
     createdAt: string;
@@ -158,160 +158,160 @@ export interface EquipeReadDTO {
     deletedAt: string | null;
     manager?: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: Role;
     };
-    membresCount?: number;
+    membersCount?: number;
 }
 
-export interface EquipeWithMembresDTO extends EquipeReadDTO {
-    membres: {
+export interface TeamWithMembersDTO extends TeamReadDTO {
+    members: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: Role;
         isActive: boolean;
-        telephone: string | null;
+        phone: string | null;
     }[];
 }
 
-export interface EquipeListItemDTO {
+export interface TeamListItemDTO {
     id: number;
-    nom: string;
+    lastName: string;
     description: string | null;
     managerId: number;
-    managerNom: string;
-    membresCount: number;
+    managerlastName: string;
+    membersCount: number;
     createdAt: string;
 }
 
 // #endregion
 
 // =========================================
-// 3. HORAIRE
+// 3. SCHEDULE
 // =========================================
 
-// #region Horaire DTOs
+// #region Schedule DTOs
 
-export interface HoraireCreateDTO {
-    nom: string;
-    heureDebut: string; // Format: "HH:mm"
-    heureFin: string;   // Format: "HH:mm"
-    joursActifs: number[]; // 1=Lundi, 7=Dimanche
+export interface ScheduleCreateDTO {
+    lastName: string;
+    startHour: string; // Format: "HH:mm"
+    endHour: string;   // Format: "HH:mm"
+    activeDays: number[]; // 1=Lundi, 7=Dimanche
 }
 
-export interface HoraireUpdateDTO {
-    nom?: string;
-    heureDebut?: string;
-    heureFin?: string;
-    joursActifs?: number[];
+export interface ScheduleUpdateDTO {
+    lastName?: string;
+    startHour?: string;
+    endHour?: string;
+    activeDays?: number[];
 }
 
-export interface HoraireReadDTO {
+export interface ScheduleReadDTO {
     id: number;
-    nom: string;
-    heureDebut: string;
-    heureFin: string;
-    joursActifs: number[];
+    lastName: string;
+    startHour: string;
+    endHour: string;
+    activeDays: number[];
     createdAt: string;
     updatedAt: string;
-    utilisateursCount?: number;
+    usersCount?: number;
 }
 
-export interface HoraireWithUtilisateursDTO extends HoraireReadDTO {
-    utilisateurs: {
+export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
+    users: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
         role: string;
     }[];
 }
 
-export interface HoraireListItemDTO {
+export interface ScheduleListItemDTO {
     id: number;
-    nom: string;
-    heureDebut: string;
-    heureFin: string;
-    joursActifs: number[];
-    utilisateursCount: number;
+    lastName: string;
+    startHour: string;
+    endHour: string;
+    activeDays: number[];
+    usersCount: number;
 }
 
 // #endregion
 
 // =========================================
-// 4. POINTAGE
+// 4. TIMESHEET
 // =========================================
 
-// #region Pointage DTOs
+// #region Timesheet DTOs
 
-export interface PointageCreateDTO {
+export interface TimesheetCreateDTO {
     employeId: number;
     date: string;      // Format: "YYYY-MM-DD"
-    heure: string;     // Format: "HH:mm:ss"
+    hour: string;     // Format: "HH:mm:ss"
     clockin: boolean;  // true = entrée, false = sortie
-    status?: PointageStatus;
+    status?: TimesheetStatus;
 }
 
-export interface PointageQuickDTO {
+export interface TimesheetQuickDTO {
     clockin: boolean;
 }
 
-export interface PointageUpdateDTO {
+export interface TimesheetUpdateDTO {
     date?: string;
-    heure?: string;
+    hour?: string;
     clockin?: boolean;
-    status?: PointageStatus;
+    status?: TimesheetStatus;
 }
 
-export interface PointageReadDTO {
+export interface TimesheetReadDTO {
     id: number;
     employeId: number;
     date: string;
-    heure: string;
+    hour: string;
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
     createdAt: string;
     updatedAt: string;
     employe?: {
         id: number;
-        prenom: string;
-        nom: string;
+        firstName: string;
+        lastName: string;
         email: string;
     };
 }
 
-export interface PointageListItemDTO {
+export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
-    employeNom: string;
+    employelastName: string;
     date: string;
-    heure: string;
+    hour: string;
     clockin: boolean;
-    status: PointageStatus;
+    status: TimesheetStatus;
 }
 
-export interface PointageFilterDTO {
+export interface TimesheetFilterDTO {
     employeId?: number;
     dateDebut?: string;
     dateFin?: string;
-    status?: PointageStatus;
+    status?: TimesheetStatus;
     clockin?: boolean;
 }
 
-export interface PointageStatsDTO {
+export interface TimesheetStatsDTO {
     employeId: number;
-    periodeDebut: string;
-    periodeFin: string;
-    totalPointages: number;
+    periodStart: string;
+    periodEnd: string;
+    totalTimesheets: number;
     totalEntrees: number;
     totalSorties: number;
-    pointagesNormaux: number;
-    pointagesRetard: number;
-    pointagesIncomplete: number;
+    timesheetsNormaux: number;
+    timesheetsRetard: number;
+    timesheetsIncomplete: number;
     joursPointes: number;
 }
 
@@ -360,11 +360,11 @@ export function isApiError(response: ApiResponse<any>): response is ApiErrorResp
 /**
  * EXEMPLE AVEC FETCH
  * 
- * import type { ApiSuccessResponse, EquipeListItemDTO } from '@/types/api';
+ * import type { ApiSuccessResponse, TeamListItemDTO } from '@/types/api';
  * 
- * async function getEquipes(): Promise<EquipeListItemDTO[]> {
- *   const response = await fetch('/api/equipes');
- *   const json = await response.json() as ApiSuccessResponse<EquipeListItemDTO[]>;
+ * async function getTeams(): Promise<TeamListItemDTO[]> {
+ *   const response = await fetch('/api/teams');
+ *   const json = await response.json() as ApiSuccessResponse<TeamListItemDTO[]>;
  *   return json.data;
  * }
  */
@@ -373,14 +373,14 @@ export function isApiError(response: ApiResponse<any>): response is ApiErrorResp
  * EXEMPLE AVEC REACT QUERY
  * 
  * import { useQuery } from '@tanstack/react-query';
- * import type { ApiSuccessResponse, HoraireListItemDTO } from '@/types/api';
+ * import type { ApiSuccessResponse, ScheduleListItemDTO } from '@/types/api';
  * 
- * function useHoraires() {
+ * function useSchedules() {
  *   return useQuery({
- *     queryKey: ['horaires'],
+ *     queryKey: ['schedules'],
  *     queryFn: async () => {
- *       const response = await fetch('/api/horaires');
- *       const json = await response.json() as ApiSuccessResponse<HoraireListItemDTO[]>;
+ *       const response = await fetch('/api/schedules');
+ *       const json = await response.json() as ApiSuccessResponse<ScheduleListItemDTO[]>;
  *       return json.data;
  *     }
  *   });

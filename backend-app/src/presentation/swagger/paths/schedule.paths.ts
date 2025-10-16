@@ -1,27 +1,27 @@
-// #region Horaire Paths
+// #region Schedule Paths
 /**
- * Routes de gestion des horaires de travail
- * Tag: Horaires (À venir)
+ * Routes de gestion des schedules de travail
+ * Tag: Schedules (À venir)
  * 
  * Permissions :
- * - GET /horaires : Tous les utilisateurs authentifiés
- * - POST /horaires : Admin ou Manager
- * - PATCH /horaires/:id : Admin ou Manager
- * - DELETE /horaires/:id : Admin uniquement
+ * - GET /schedules : Tous les users authentifiés
+ * - POST /schedules : Admin ou Manager
+ * - PATCH /schedules/:id : Admin ou Manager
+ * - DELETE /schedules/:id : Admin uniquement
  */
-export const horairePaths = {
-    '/api/horaires': {
+export const schedulePaths = {
+    '/api/schedules': {
         get: {
-            summary: 'Liste des horaires',
-            description: 'Récupère la liste de tous les horaires de travail configurés',
-            tags: ['Horaires (À venir)'],
+            summary: 'Liste des schedules',
+            description: 'Récupère la liste de tous les schedules de travail configurés',
+            tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             responses: {
                 200: {
-                    description: 'Liste des horaires récupérée avec succès',
+                    description: 'Liste des schedules récupérée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/HoraireListResponse' }
+                            schema: { $ref: '#/components/schemas/ScheduleListResponse' }
                         }
                     }
                 },
@@ -37,32 +37,32 @@ export const horairePaths = {
         },
 
         post: {
-            summary: 'Créer un horaire',
-            description: 'Crée un nouvel horaire de travail. Admin ou Manager.',
-            tags: ['Horaires (À venir)'],
+            summary: 'Créer un schedule',
+            description: 'Crée un nouvel schedule de travail. Admin ou Manager.',
+            tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/HoraireCreateDTO' },
+                        schema: { $ref: '#/components/schemas/ScheduleCreateDTO' },
                         examples: {
                             journee: {
-                                summary: 'Horaire de journée (Lun-Ven)',
+                                summary: 'Schedule de journée (Lun-Ven)',
                                 value: {
-                                    nom: 'Horaire de journée',
-                                    heureDebut: '09:00',
-                                    heureFin: '17:30',
-                                    joursActifs: [1, 2, 3, 4, 5]
+                                    lastName: 'Schedule de journée',
+                                    startHour: '09:00',
+                                    endHour: '17:30',
+                                    activeDays: [1, 2, 3, 4, 5]
                                 }
                             },
                             nuit: {
-                                summary: 'Horaire de nuit (tous les jours)',
+                                summary: 'Schedule de nuit (tous les jours)',
                                 value: {
-                                    nom: 'Horaire de nuit',
-                                    heureDebut: '22:00',
-                                    heureFin: '06:00',
-                                    joursActifs: [1, 2, 3, 4, 5, 6, 7]
+                                    lastName: 'Schedule de nuit',
+                                    startHour: '22:00',
+                                    endHour: '06:00',
+                                    activeDays: [1, 2, 3, 4, 5, 6, 7]
                                 }
                             }
                         }
@@ -71,25 +71,25 @@ export const horairePaths = {
             },
             responses: {
                 201: {
-                    description: 'Horaire créé avec succès',
+                    description: 'Schedule créé avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/HoraireCreatedResponse' }
+                            schema: { $ref: '#/components/schemas/ScheduleCreatedResponse' }
                         }
                     }
                 },
                 400: {
-                    description: 'Données invalides (heures au mauvais format, jours invalides)',
+                    description: 'Données invalides (hours au mauvais format, jours invalides)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' },
                             examples: {
                                 invalidTime: {
-                                    summary: 'Format d\'heure invalide',
+                                    summary: 'Format d\'hour invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Le format d\'heure doit être HH:mm',
+                                        message: 'Le format d\'hour doit être HH:mm',
                                         code: 'VALIDATION_ERROR',
                                         timestamp: '2025-10-12T10:00:00.000Z'
                                     }
@@ -110,11 +110,11 @@ export const horairePaths = {
         }
     },
 
-    '/api/horaires/{id}': {
+    '/api/schedules/{id}': {
         get: {
-            summary: 'Détail d\'un horaire',
-            description: 'Récupère les informations détaillées d\'un horaire. Utiliser ?include=utilisateurs pour obtenir la liste des utilisateurs assignés.',
-            tags: ['Horaires (À venir)'],
+            summary: 'Détail d\'un schedule',
+            description: 'Récupère les informations détaillées d\'un schedule. Utiliser ?include=users pour obtenir la liste des users assignés.',
+            tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -122,18 +122,18 @@ export const horairePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'horaire'
+                    description: 'ID de l\'schedule'
                 },
                 {
                     name: 'include',
                     in: 'query',
-                    schema: { type: 'string', enum: ['utilisateurs'] },
-                    description: 'Inclure la liste des utilisateurs assignés'
+                    schema: { type: 'string', enum: ['users'] },
+                    description: 'Inclure la liste des users assignés'
                 }
             ],
             responses: {
                 200: {
-                    description: 'Horaire récupéré avec succès',
+                    description: 'Schedule récupéré avec succès',
                     content: {
                         'application/json': {
                             schema: {
@@ -142,7 +142,7 @@ export const horairePaths = {
                                         type: 'object',
                                         properties: {
                                             success: { type: 'boolean', example: true },
-                                            data: { $ref: '#/components/schemas/HoraireReadDTO' },
+                                            data: { $ref: '#/components/schemas/ScheduleReadDTO' },
                                             message: { type: 'string' },
                                             timestamp: { type: 'string', format: 'date-time' }
                                         }
@@ -151,7 +151,7 @@ export const horairePaths = {
                                         type: 'object',
                                         properties: {
                                             success: { type: 'boolean', example: true },
-                                            data: { $ref: '#/components/schemas/HoraireWithUtilisateursDTO' },
+                                            data: { $ref: '#/components/schemas/ScheduleWithUsersDTO' },
                                             message: { type: 'string' },
                                             timestamp: { type: 'string', format: 'date-time' }
                                         }
@@ -162,7 +162,7 @@ export const horairePaths = {
                     }
                 },
                 404: {
-                    description: 'Horaire non trouvé',
+                    description: 'Schedule non trouvé',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -173,9 +173,9 @@ export const horairePaths = {
         },
 
         patch: {
-            summary: 'Modifier un horaire',
-            description: 'Met à jour les informations d\'un horaire. Admin ou Manager.',
-            tags: ['Horaires (À venir)'],
+            summary: 'Modifier un schedule',
+            description: 'Met à jour les informations d\'un schedule. Admin ou Manager.',
+            tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -183,28 +183,28 @@ export const horairePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'horaire'
+                    description: 'ID de l\'schedule'
                 }
             ],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/HoraireUpdateDTO' }
+                        schema: { $ref: '#/components/schemas/ScheduleUpdateDTO' }
                     }
                 }
             },
             responses: {
                 200: {
-                    description: 'Horaire modifié avec succès',
+                    description: 'Schedule modifié avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/HoraireReadDTO' },
-                                    message: { type: 'string', example: 'Horaire modifié avec succès' },
+                                    data: { $ref: '#/components/schemas/ScheduleReadDTO' },
+                                    message: { type: 'string', example: 'Schedule modifié avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -223,9 +223,9 @@ export const horairePaths = {
         },
 
         delete: {
-            summary: 'Supprimer un horaire',
-            description: 'Supprime un horaire. Admin uniquement. Attention : les utilisateurs assignés à cet horaire seront dissociés.',
-            tags: ['Horaires (À venir)'],
+            summary: 'Supprimer un schedule',
+            description: 'Supprime un schedule. Admin uniquement. Attention : les users assignés à cet schedule seront dissociés.',
+            tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -233,19 +233,19 @@ export const horairePaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'horaire'
+                    description: 'ID de l\'schedule'
                 }
             ],
             responses: {
                 200: {
-                    description: 'Horaire supprimé avec succès',
+                    description: 'Schedule supprimé avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    message: { type: 'string', example: 'Horaire supprimé avec succès' },
+                                    message: { type: 'string', example: 'Schedule supprimé avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }

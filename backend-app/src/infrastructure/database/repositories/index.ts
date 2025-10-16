@@ -1,2 +1,2 @@
 export { UserRepository } from './user.repository';
-export { EquipeRepository } from './equipe.repository';
+export { TeamRepository } from './team.repository';

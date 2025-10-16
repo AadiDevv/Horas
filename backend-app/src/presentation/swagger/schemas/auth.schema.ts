@@ -3,19 +3,19 @@ export const authSchemas = {
     // #region Request DTOs
     UserCreateDTO: {
         type: 'object',
-        required: ['prenom', 'nom', 'email', 'password', 'role'],
+        required: ['firstName', 'lastName', 'email', 'password', 'role'],
         properties: {
-            prenom: {
+            firstName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Jean',
-                description: 'Prénom de l\'utilisateur (minimum 2 caractères)'
+                description: 'PrélastName de l\'utilisateur (minimum 2 caractères)'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Dupont',
-                description: 'Nom de l\'utilisateur (minimum 2 caractères)'
+                description: 'lastName de l\'utilisateur (minimum 2 caractères)'
             },
             email: {
                 type: 'string',
@@ -36,23 +36,23 @@ export const authSchemas = {
                 example: 'employe',
                 description: 'Rôle de l\'utilisateur (employe par défaut pour l\'auto-inscription)'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone (optionnel)'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe (optionnel)'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'ID de la plage horaire (optionnel)'
+                description: 'ID de la plage schedule (optionnel)'
             }
         }
     },
@@ -86,15 +86,15 @@ export const authSchemas = {
                 example: 1,
                 description: 'Identifiant unique de l\'utilisateur'
             },
-            prenom: {
+            firstName: {
                 type: 'string',
                 example: 'Jean',
-                description: 'Prénom de l\'utilisateur'
+                description: 'PrélastName de l\'utilisateur'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Dupont',
-                description: 'Nom de l\'utilisateur'
+                description: 'lastName de l\'utilisateur'
             },
             email: {
                 type: 'string',
@@ -113,23 +113,23 @@ export const authSchemas = {
                 example: false,
                 description: 'Indique si le compte est actif'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 nullable: true,
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe à laquelle appartient l\'utilisateur'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'ID de la plage horaire assignée à l\'utilisateur'
+                description: 'ID de la plage schedule assignée à l\'utilisateur'
             },
             createdAt: {
                 type: 'string',

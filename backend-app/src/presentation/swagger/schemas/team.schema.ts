@@ -1,16 +1,16 @@
-// #region Equipe Schemas
-export const equipeSchemas = {
+// #region Team Schemas
+export const teamSchemas = {
     // #region Request DTOs
-    EquipeCreateDTO: {
+    TeamCreateDTO: {
         type: 'object',
-        required: ['nom', 'managerId'],
+        required: ['lastName', 'managerId'],
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             },
             description: {
                 type: 'string',
@@ -22,35 +22,35 @@ export const equipeSchemas = {
                 example: 5,
                 description: 'ID du manager responsable de l\'équipe'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire par défaut de l\'équipe (optionnel)'
+                description: 'ID de la plage schedule par défaut de l\'équipe (optionnel)'
             }
         }
     },
 
-    EquipeUpdateDTO: {
+    TeamUpdateDTO: {
         type: 'object',
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Équipe Production - Matin',
-                description: 'Nouveau nom de l\'équipe'
+                description: 'Nouveau lastName de l\'équipe'
             },
             description: {
                 type: 'string',
                 example: 'Description mise à jour',
                 description: 'Nouvelle description'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
-                description: 'Nouvelle plage horaire (optionnel). Note: le managerId ne peut PAS être modifié'
+                description: 'Nouvelle plage schedule (optionnel). Note: le managerId ne peut PAS être modifié'
             }
         },
         description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH). Le managerId ne peut PAS être modifié.'
@@ -58,7 +58,7 @@ export const equipeSchemas = {
     // #endregion
 
     // #region Response DTOs
-    EquipeReadDTO: {
+    TeamReadDTO: {
         type: 'object',
         properties: {
             id: {
@@ -66,10 +66,10 @@ export const equipeSchemas = {
                 example: 1,
                 description: 'ID de l\'équipe'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             },
             description: {
                 type: 'string',
@@ -82,11 +82,11 @@ export const equipeSchemas = {
                 example: 5,
                 description: 'ID du manager'
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire de l\'équipe'
+                description: 'ID de la plage schedule de l\'équipe'
             },
             createdAt: {
                 type: 'string',
@@ -114,11 +114,11 @@ export const equipeSchemas = {
                         type: 'integer',
                         example: 5
                     },
-                    prenom: {
+                    firstName: {
                         type: 'string',
                         example: 'Marie'
                     },
-                    nom: {
+                    lastName: {
                         type: 'string',
                         example: 'Durand'
                     },
@@ -135,25 +135,25 @@ export const equipeSchemas = {
                 },
                 description: 'Informations du manager (optionnel selon le endpoint)'
             },
-            membresCount: {
+            membersCount: {
                 type: 'integer',
                 example: 12,
-                description: 'Nombre de membres dans l\'équipe'
+                description: 'lastNamebre de members dans l\'équipe'
             }
         }
     },
 
-    EquipeWithMembresDTO: {
+    TeamWithMembersDTO: {
         allOf: [
             {
-                $ref: '#/components/schemas/EquipeReadDTO'
+                $ref: '#/components/schemas/TeamReadDTO'
             },
             {
                 type: 'object',
                 properties: {
-                    membres: {
+                    members: {
                         type: 'array',
-                        description: 'Liste complète des membres de l\'équipe',
+                        description: 'Liste complète des members de l\'équipe',
                         items: {
                             type: 'object',
                             properties: {
@@ -161,11 +161,11 @@ export const equipeSchemas = {
                                     type: 'integer',
                                     example: 10
                                 },
-                                prenom: {
+                                firstName: {
                                     type: 'string',
                                     example: 'Pierre'
                                 },
-                                nom: {
+                                lastName: {
                                     type: 'string',
                                     example: 'Martin'
                                 },
@@ -183,16 +183,16 @@ export const equipeSchemas = {
                                     type: 'boolean',
                                     example: true
                                 },
-                                telephone: {
+                                phone: {
                                     type: 'string',
                                     nullable: true,
                                     example: '+33 6 12 34 56 78'
                                 },
-                                plageHoraireId: {
+                                scheduleId: {
                                     type: 'integer',
                                     nullable: true,
                                     example: 1,
-                                    description: 'ID de la plage horaire du membre'
+                                    description: 'ID de la plage schedule du membre'
                                 }
                             }
                         }
@@ -202,14 +202,14 @@ export const equipeSchemas = {
         ]
     },
 
-    EquipeListItemDTO: {
+    TeamListItemDTO: {
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 example: 1
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Équipe Production'
             },
@@ -222,21 +222,21 @@ export const equipeSchemas = {
                 type: 'integer',
                 example: 5
             },
-            plageHoraireId: {
+            scheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 1,
-                description: 'ID de la plage horaire de l\'équipe'
+                description: 'ID de la plage schedule de l\'équipe'
             },
-            managerNom: {
+            managerlastName: {
                 type: 'string',
                 example: 'Marie Durand',
-                description: 'Nom complet du manager (prenom + nom)'
+                description: 'lastName complet du manager (firstName + lastName)'
             },
-            membresCount: {
+            membersCount: {
                 type: 'integer',
                 example: 12,
-                description: 'Nombre de membres'
+                description: 'lastNamebre de members'
             },
             createdAt: {
                 type: 'string',
@@ -248,7 +248,7 @@ export const equipeSchemas = {
     // #endregion
 
     // #region Standard Responses
-    EquipeCreatedResponse: {
+    TeamCreatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -256,7 +256,7 @@ export const equipeSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/EquipeReadDTO'
+                $ref: '#/components/schemas/TeamReadDTO'
             },
             message: {
                 type: 'string',
@@ -269,7 +269,7 @@ export const equipeSchemas = {
         }
     },
 
-    EquipeListResponse: {
+    TeamListResponse: {
         type: 'object',
         properties: {
             success: {
@@ -279,7 +279,7 @@ export const equipeSchemas = {
             data: {
                 type: 'array',
                 items: {
-                    $ref: '#/components/schemas/EquipeListItemDTO'
+                    $ref: '#/components/schemas/TeamListItemDTO'
                 }
             },
             message: {

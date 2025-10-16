@@ -64,8 +64,8 @@ export class JWTService {
     return {
       id: userId,
       email: payload.email,
-      prenom: payload.prenom,
-      nom: payload.nom,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       role: payload.role || 'employe',
       isActive: payload.isActive || false,
       lastLoginAt: payload.lastLoginAt

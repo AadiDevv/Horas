@@ -1,29 +1,29 @@
 // #region Nested DTOs (Types réutilisables)
 /**
  * Format d'un manager pour les DTOs d'équipe
- * Utilisé dans EquipeReadDTO et EquipeWithMembresDTO
+ * Utilisé dans TeamReadDTO et TeamWithMembersDTO
  */
-export interface EquipeManagerDTO {
+export interface TeamManagerDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: "admin" | "manager" | "employe";
 }
 
 /**
  * Format d'un membre (employé) pour les DTOs d'équipe
- * Utilisé dans EquipeWithMembresDTO
+ * Utilisé dans TeamWithMembersDTO
  */
-export interface EquipeMembreDTO {
+export interface TeamMembreDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: "admin" | "manager" | "employe";
     isActive: boolean;
-    telephone?: string;
-    plageHoraireId?: number;
+    phone?: string;
+    scheduleId?: number;
 }
 // #endregion
 
@@ -32,11 +32,11 @@ export interface EquipeMembreDTO {
  * DTO pour créer une équipe
  * Le managerId est fourni dans le body ou extrait du JWT selon les permissions
  */
-export interface EquipeCreateDTO {
-    nom: string;
+export interface TeamCreateDTO {
+    name: string;
     description?: string;
     managerId: number;
-    plageHoraireId?: number;
+    scheduleId?: number;
 }
 // #endregion
 
@@ -45,41 +45,41 @@ export interface EquipeCreateDTO {
  * DTO pour mettre à jour une équipe
  * Tous les champs sont optionnels pour permettre des updates partiels (PATCH)
  */
-export interface EquipeUpdateDTO {
-    nom?: string;
+export interface TeamUpdateDTO {
+    name?: string;
     description?: string;
     managerId?: number;
-    plageHoraireId?: number;
+    scheduleId?: number;
 }
 // #endregion
 
 // #region Read DTO
 /**
  * DTO de retour pour une équipe
- * Inclut les informations du manager et le nombre de membres
+ * Inclut les informations du manager et le lastNamebre de members
  */
-export interface EquipeReadDTO {
+export interface TeamReadDTO {
     id: number;
-    nom: string;
+    name: string;
     description?: string;
     managerId: number;
-    plageHoraireId?: number;
+    scheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     deletedAt?: string;
 
     // Informations enrichies pour le frontend
-    manager?: EquipeManagerDTO;
+    manager?: TeamManagerDTO;
 
-    membresCount?: number; // Nombre de membres dans l'équipe
+    membersCount?: number; // lastNamebre de members dans l'équipe
 }
 
 /**
- * DTO pour une équipe avec la liste complète des membres
- * Utilisé pour GET /equipes/:id avec include=membres
+ * DTO pour une équipe avec la liste complète des members
+ * Utilisé pour GET /teams/:id avec include=members
  */
-export interface EquipeWithMembresDTO extends EquipeReadDTO {
-    membres: EquipeMembreDTO[];
+export interface TeamWithMembersDTO extends TeamReadDTO {
+    members: TeamMembreDTO[];
 }
 // #endregion
 
@@ -87,27 +87,27 @@ export interface EquipeWithMembresDTO extends EquipeReadDTO {
 /**
  * DTO pour la liste des équipes (version simplifiée)
  */
-export interface EquipeListItemDTO {
+export interface TeamListItemDTO {
     id: number;
-    nom: string;
+    name: string;
     description?: string;
     managerId: number;
-    plageHoraireId?: number;
-    managerNom: string; // Nom complet du manager (prenom + nom)
-    membresCount: number;
+    scheduleId?: number;
+    managerlastName: string; // lastName complet du manager (firstName + lastName)
+    membersCount: number;
     createdAt: string;
 }
 
 /**
  * DTO pour filtrer les équipes (Query Params)
- * Utilisé dans GET /api/equipes?managerId=X
+ * Utilisé dans GET /api/teams?managerId=X
  * 
  * Logique métier :
  * - Manager : managerId optionnel (déduit du JWT si omis, vérifié si fourni)
  * - Admin : managerId optionnel (retourne toutes les équipes si omis)
  * - Employé : accès refusé
  */
-export interface EquipeFilterDTO {
+export interface TeamFilterDTO {
     managerId?: number; // ID du manager dont on veut voir les équipes
 }
 // #endregion
