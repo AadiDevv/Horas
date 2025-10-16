@@ -1,14 +1,127 @@
 // #region User Management Paths
 /**
  * Routes de gestion des users (après authentification)
- * Tag: Users (À venir)
+ * Tag: Users
  */
 export const userPaths = {
+    '/api/users/my-employees': {
+        get: {
+            summary: 'Mes employés',
+            description: `Récupère tous les employés gérés par le manager connecté.
+
+**Manager :**
+- Récupère automatiquement SES employés (de toutes ses équipes)
+- L'ID du manager est déduit du JWT
+
+**Admin :**
+- Peut spécifier un \`managerId\` en query param pour voir les employés d'un manager spécifique
+- Sans \`managerId\`, utilise son propre ID (mais un admin n'a généralement pas d'équipes)
+
+**JOIN SQL :**
+\`\`\`sql
+SELECT users.* FROM users
+INNER JOIN teams ON users.teamId = teams.id
+WHERE teams.managerId = :managerId
+\`\`\``,
+            tags: ['Users'],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'managerId',
+                    in: 'query',
+                    schema: { type: 'integer' },
+                    required: false,
+                    description: 'ID du manager (optionnel, uniquement pour Admin). Manager utilisera automatiquement son propre ID.',
+                    example: 5
+                }
+            ],
+            responses: {
+                200: {
+                    description: 'Liste des employés récupérée avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    data: {
+                                        type: 'array',
+                                        items: { $ref: '#/components/schemas/UserListItemDTO' }
+                                    },
+                                    message: { type: 'string', example: 'Liste des employés récupérée avec succès' },
+                                    timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            },
+                            examples: {
+                                managerEmployees: {
+                                    summary: 'Employés d\'un manager',
+                                    value: {
+                                        success: true,
+                                        data: [
+                                            {
+                                                id: 10,
+                                                firstName: 'Pierre',
+                                                lastName: 'Martin',
+                                                email: 'pierre.martin@example.com',
+                                                role: 'employe',
+                                                isActive: true,
+                                                teamId: 1,
+                                                teamlastName: 'Équipe Production'
+                                            },
+                                            {
+                                                id: 11,
+                                                firstName: 'Sophie',
+                                                lastName: 'Bernard',
+                                                email: 'sophie.bernard@example.com',
+                                                role: 'employe',
+                                                isActive: true,
+                                                teamId: 1,
+                                                teamlastName: 'Équipe Production'
+                                            },
+                                            {
+                                                id: 12,
+                                                firstName: 'Luc',
+                                                lastName: 'Petit',
+                                                email: 'luc.petit@example.com',
+                                                role: 'employe',
+                                                isActive: false,
+                                                teamId: 2,
+                                                teamlastName: 'Équipe Logistique'
+                                            }
+                                        ],
+                                        message: 'Liste des employés récupérée avec succès',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                401: {
+                    description: 'Non authentifié',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Accès refusé (Manager ou Admin uniquement)',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     '/api/users': {
         get: {
             summary: 'Liste des users',
             description: 'Récupère la liste de tous les users avec filtres optionnels',
-            tags: ['Users (À venir)'],
+            tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -61,7 +174,7 @@ export const userPaths = {
         get: {
             summary: 'Détail d\'un utilisateur',
             description: 'Récupère les informations détaillées d\'un utilisateur',
-            tags: ['Users (À venir)'],
+            tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -103,7 +216,7 @@ export const userPaths = {
         patch: {
             summary: 'Modifier un utilisateur',
             description: 'Met à jour les informations d\'un utilisateur. Un employé ne peut modifier que son propre profil.',
-            tags: ['Users (À venir)'],
+            tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -153,7 +266,7 @@ export const userPaths = {
         delete: {
             summary: 'Supprimer un utilisateur',
             description: 'Suppression logique (soft delete) d\'un utilisateur. Admin uniquement.',
-            tags: ['Users (À venir)'],
+            tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -196,7 +309,7 @@ export const userPaths = {
         patch: {
             summary: 'Changer le mot de passe',
             description: 'Permet à un utilisateur de changer son propre mot de passe',
-            tags: ['Users (À venir)'],
+            tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {

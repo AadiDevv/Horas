@@ -26,8 +26,16 @@ export class User {
   public deletedAt?: Date;
 
   public phone?: string;
-  public teamId?: number;
-  public scheduleId?: number;
+  public schedule?: {
+    id: number;
+    name?: string;
+    startHour?: Date;
+    endHour?: Date;
+  };
+  public team?: {
+    id: number;
+    name?: string;
+  };
 
   constructor(
     props: UserProps
@@ -41,8 +49,8 @@ export class User {
     this.role = props.role;
     this.isActive = props.isActive;
     this.phone = props.phone;
-    this.teamId = props.teamId;
-    this.scheduleId = props.scheduleId;
+    this.team = props.team;
+    this.schedule = props.schedule;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
     this.lastLoginAt = props.lastLoginAt;
@@ -161,8 +169,8 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      teamId: this.teamId,
-      scheduleId: this.scheduleId,
+      team: this.team,
+      schedule: this.schedule,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
@@ -207,7 +215,7 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      scheduleId: this.scheduleId,
+      schedule: this.schedule,
     };
   }
   // #endregion
@@ -257,8 +265,8 @@ export class User {
       phone: dto.phone ?? existingUser.phone,
       role: dto.role ?? existingUser.role,
       isActive: dto.isActive ?? existingUser.isActive,
-      teamId: dto.teamId !== undefined ? dto.teamId : existingUser.teamId,
-      scheduleId: dto.scheduleId !== undefined ? dto.scheduleId : existingUser.scheduleId,
+      team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
+      schedule: dto.scheduleId !== undefined ? { id: dto.scheduleId } : existingUser.schedule,
       updatedAt: new Date(Date.now()),
     });
   }
@@ -295,8 +303,8 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      teamId: this.teamId,
-      scheduleId: this.scheduleId,
+      team: this.team,
+      schedule: this.schedule,
       ...this.toDateStrings(),
     };
   }
@@ -317,7 +325,7 @@ export class User {
       email: this.email,
       role: this.role,
       isActive: this.isActive,
-      teamId: this.teamId,
+      teamId: this.team?.id,
     };
   }
 
@@ -338,8 +346,8 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      teamId: this.teamId,
-      scheduleId: this.scheduleId,
+      teamId: this.team?.id,
+      scheduleId: this.schedule?.id,
       ...this.toDateStrings(),
     };
   }

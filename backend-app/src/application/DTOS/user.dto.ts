@@ -64,8 +64,6 @@ export interface UserReadDTO {
     role: Role;
     isActive: boolean;
     phone?: string;
-    teamId?: number;
-    scheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;
@@ -74,14 +72,14 @@ export interface UserReadDTO {
     // Informations enrichies (optionnelles selon le endpoint)
     team?: {
         id: number;
-        lastName: string;
+        name?: string;
     };
 
     schedule?: {
         id: number;
-        lastName: string;
-        startHour: string;
-        endHour: string;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
     };
 }
 // #endregion

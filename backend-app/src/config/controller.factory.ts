@@ -1,8 +1,9 @@
-import { AuthController, TeamController } from "@/presentation/controllers";
+import { AuthController, UserController, TeamController } from "@/presentation/controllers";
 import { app } from "./usecase.factory";
 
 class ControllerFactory {
     private static authController: AuthController | null;
+    private static userController: UserController | null;
     private static teamController: TeamController | null;
 
     public static getAuthController(): AuthController {
@@ -11,6 +12,14 @@ class ControllerFactory {
             this.authController = new AuthController(usecase);
         }
         return this.authController
+    }
+
+    public static getUserController(): UserController {
+        if (!this.userController) {
+            const usecase = app.getUserUseCase();
+            this.userController = new UserController(usecase);
+        }
+        return this.userController
     }
 
     public static getTeamController(): TeamController {
@@ -23,6 +32,7 @@ class ControllerFactory {
 
     public static reset(): void {
         this.authController = null;
+        this.userController = null;
         this.teamController = null;
     }
 
@@ -30,6 +40,7 @@ class ControllerFactory {
 
 export const controllers = {
     AuthController: () => (ControllerFactory.getAuthController()),
+    UserController: () => (ControllerFactory.getUserController()),
     TeamController: () => (ControllerFactory.getTeamController()),
     reset: () => (ControllerFactory.reset())
 }
