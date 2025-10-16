@@ -1,7 +1,13 @@
 import { UserProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
-import { UserCreateDTO } from "@/application/DTOS";
+import {
+  UserCreateDTO,
+  UserUpdateDTO,
+  UserReadDTO,
+  UserListItemDTO
+} from "@/application/DTOS/user.dto";
+import { UserAuthDTO } from "@/application/DTOS/auth.dto";
 import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
 import { Role } from "../types";
 
@@ -225,14 +231,117 @@ export class User {
   }
   // #endregion
 
-  // #region UserFactory Methods
-  public static fromCreateDTOtoEntity(dto: UserCreateDTO, hashedPassword: string): User {
-    const userProps: UserProps = {
+  // #region Factory Methods (DTO → Entité)
+  /**
+   * Crée une entité User à partir d'un DTO de création
+   * Utilisé lors de la création d'un nouvel utilisateur
+   */
+  public static fromCreateDTO(dto: UserCreateDTO, hashedPassword: string): User {
+    return new User({
       ...dto,
       hashedPassword: hashedPassword,
       isActive: false,
+    });
+  }
+
+  /**
+   * Met à jour une entité User existante avec les données d'un DTO de mise à jour
+   * Retourne une nouvelle instance (immutabilité)
+   */
+  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
+    return new User({
+      ...existingUser,
+      firstName: dto.firstName ?? existingUser.firstName,
+      lastName: dto.lastName ?? existingUser.lastName,
+      email: dto.email ?? existingUser.email,
+      phone: dto.phone ?? existingUser.phone,
+      role: dto.role ?? existingUser.role,
+      isActive: dto.isActive ?? existingUser.isActive,
+      teamId: dto.teamId !== undefined ? dto.teamId : existingUser.teamId,
+      scheduleId: dto.scheduleId !== undefined ? dto.scheduleId : existingUser.scheduleId,
+      updatedAt: new Date(Date.now()),
+    });
+  }
+  // #endregion
+
+  // #region Transformation Methods (Entité → DTO)
+  /**
+   * Convertit les dates en ISO string
+   * Helper privé pour éviter la duplication
+   */
+  private toDateStrings() {
+    return {
+      createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt?.toISOString(),
+      lastLoginAt: this.lastLoginAt?.toISOString(),
+      deletedAt: this.deletedAt?.toISOString(),
+    };
+  }
+
+  /**
+   * Convertit l'entité en UserReadDTO (détail complet)
+   * Utilisé pour GET /users/:id
+   */
+  public toReadDTO(): UserReadDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserReadDTO");
     }
-    return new User(userProps)
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      phone: this.phone,
+      teamId: this.teamId,
+      scheduleId: this.scheduleId,
+      ...this.toDateStrings(),
+    };
+  }
+
+  /**
+   * Convertit l'entité en UserListItemDTO (liste simplifiée)
+   * Utilisé pour GET /users (liste)
+   */
+  public toListItemDTO(): UserListItemDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserListItemDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      teamId: this.teamId,
+    };
+  }
+
+  /**
+   * Convertit l'entité en UserAuthDTO
+   * Utilisé pour les réponses d'authentification (login, register)
+   */
+  public toAuthDTO(): UserAuthDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserAuthDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      phone: this.phone,
+      teamId: this.teamId,
+      scheduleId: this.scheduleId,
+      ...this.toDateStrings(),
+    };
   }
   // #endregion
 }

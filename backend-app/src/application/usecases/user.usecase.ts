@@ -13,7 +13,7 @@ export class AuthUseCase {
         User.validateDTO(dto) // Validation implicite : si email, mdp, username etc.. sont invalides, une erreur est levée
         const hashedPassword = JWTService.hashedPassword(dto.password)
 
-        const user = User.fromCreateDTOtoEntity(dto, hashedPassword)
+        const user = User.fromCreateDTO(dto, hashedPassword)
         const bdUser = await this.R_auth.getUser_ByEmail(user.email)
         if (bdUser != null) {
             throw new AlreadyExistsError("User already exists")
@@ -23,9 +23,9 @@ export class AuthUseCase {
 
         const createdUser = await this.R_auth.registerUser(user) // [Communication Bdd] Possibilité de lever une erreur ici
 
+        const userEntity = new User({ ...createdUser })
 
-
-        return createdUser
+        return userEntity;
     }
     
     async loginUser(userDTO: UserLoginDTO): Promise<[User, string]> {
