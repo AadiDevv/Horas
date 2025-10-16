@@ -51,7 +51,7 @@ router.get('/:id',
  */
 router.post('/',
     authMiddleware,
-    adminOnly,           // 3️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 3️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
             await equipeController.createEquipe(req, res);
