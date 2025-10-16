@@ -6,6 +6,12 @@ on:
       - dev
       - back-tests
 
+  pull_request:
+    types:
+      - closed
+    branches:
+      - dev
+
 jobs:
   test:
     runs-on: ubuntu-latest

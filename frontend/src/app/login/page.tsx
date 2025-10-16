@@ -16,8 +16,8 @@ export default function LoginPage() {
   interface User {
     id: number;
     email: string;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     role: string;
   }
 

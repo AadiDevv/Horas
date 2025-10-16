@@ -42,7 +42,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| GET | `/api/users` | Liste des utilisateurs | Tous | JWT |
+| GET | `/api/users` | Liste des users | Tous | JWT |
 | GET | `/api/users/:id` | Détail d'un utilisateur | Tous | JWT |
 | PATCH | `/api/users/:id` | Modifier un utilisateur | Employé (soi-même), Manager (son équipe), Admin (tous) | JWT |
 | DELETE | `/api/users/:id` | Supprimer un utilisateur | Admin | JWT |
@@ -50,9 +50,9 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 **Query Params (GET /users) :**
 - `role` : 'admin' \| 'manager' \| 'employe'
-- `equipeId` : number
+- `teamId` : number
 - `isActive` : boolean
-- `search` : string (nom/prénom/email)
+- `search` : string (lastName/prélastName/email)
 
 ---
 
@@ -60,65 +60,65 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| GET | `/api/equipes` | Liste des équipes | Tous | JWT |
-| GET | `/api/equipes/:id` | Détail d'une équipe | Tous | JWT |
-| POST | `/api/equipes` | Créer une équipe | Admin | JWT |
-| PATCH | `/api/equipes/:id` | Modifier une équipe | Admin | JWT |
-| DELETE | `/api/equipes/:id` | Supprimer une équipe | Admin | JWT |
+| GET | `/api/teams` | Liste des équipes | Tous | JWT |
+| GET | `/api/teams/:id` | Détail d'une équipe | Tous | JWT |
+| POST | `/api/teams` | Créer une équipe | Admin | JWT |
+| PATCH | `/api/teams/:id` | Modifier une équipe | Admin | JWT |
+| DELETE | `/api/teams/:id` | Supprimer une équipe | Admin | JWT |
 
-**Query Params (GET /equipes/:id) :**
-- `include=membres` : Inclure la liste complète des membres
+**Query Params (GET /teams/:id) :**
+- `include=members` : Inclure la liste complète des members
 
 ---
 
-### 5. Horaires
+### 5. Schedules
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| GET | `/api/horaires` | Liste des horaires | Tous | JWT |
-| GET | `/api/horaires/:id` | Détail d'un horaire | Tous | JWT |
-| POST | `/api/horaires` | Créer un horaire | Admin, Manager | JWT |
-| PATCH | `/api/horaires/:id` | Modifier un horaire | Admin, Manager | JWT |
-| DELETE | `/api/horaires/:id` | Supprimer un horaire | Admin | JWT |
+| GET | `/api/schedules` | Liste des schedules | Tous | JWT |
+| GET | `/api/schedules/:id` | Détail d'un schedule | Tous | JWT |
+| POST | `/api/schedules` | Créer un schedule | Admin, Manager | JWT |
+| PATCH | `/api/schedules/:id` | Modifier un schedule | Admin, Manager | JWT |
+| DELETE | `/api/schedules/:id` | Supprimer un schedule | Admin | JWT |
 
-**Query Params (GET /horaires/:id) :**
-- `include=utilisateurs` : Inclure la liste des utilisateurs assignés
+**Query Params (GET /schedules/:id) :**
+- `include=users` : Inclure la liste des users assignés
 
 **Format des données :**
-- `heureDebut` / `heureFin` : "HH:mm" (ex: "09:00")
-- `joursActifs` : Array de 1 à 7 (1=Lundi, 7=Dimanche)
+- `startHour` / `endHour` : "HH:mm" (ex: "09:00")
+- `activeDays` : Array de 1 à 7 (1=Lundi, 7=Dimanche)
 
 ---
 
-### 6. Pointages
+### 6. Timesheets
 
 #### 🔑 Architecture Simplifiée
 
 **Pas de DTO de création côté client** — Tout est géré automatiquement :
 - ✅ `employeId` extrait du JWT
-- ✅ Date et heure au moment de la requête
-- ✅ Statut calculé automatiquement selon l'horaire de l'employé
+- ✅ Date et hour au moment de la requête
+- ✅ Statut calculé automatiquement selon l'schedule de l'employé
 
 #### Routes
 
 | Méthode | Endpoint | Description | Permissions | Auth |
 |---------|----------|-------------|-------------|------|
-| POST | `/api/pointages/clockin` | Pointer l'entrée | Tous (employé pointe lui-même) | JWT |
-| POST | `/api/pointages/clockout` | Pointer la sortie | Tous (employé pointe lui-même) | JWT |
-| GET | `/api/pointages` | Liste des pointages | Employé (ses pointages), Manager (son équipe), Admin (tous) | JWT |
-| GET | `/api/pointages/:id` | Détail d'un pointage | Selon permissions | JWT |
-| GET | `/api/pointages/stats` | Statistiques de pointage | Employé (ses stats), Manager (son équipe), Admin (tous) | JWT |
-| PATCH | `/api/pointages/:id` | ⚠️ Corriger un pointage | **Manager, Admin** | JWT |
-| DELETE | `/api/pointages/:id` | ⚠️ Supprimer un pointage | **Manager, Admin** | JWT |
+| POST | `/api/timesheets/clockin` | Pointer l'entrée | Tous (employé pointe lui-même) | JWT |
+| POST | `/api/timesheets/clockout` | Pointer la sortie | Tous (employé pointe lui-même) | JWT |
+| GET | `/api/timesheets` | Liste des timesheets | Employé (ses timesheets), Manager (son équipe), Admin (tous) | JWT |
+| GET | `/api/timesheets/:id` | Détail d'un timesheet | Selon permissions | JWT |
+| GET | `/api/timesheets/stats` | Statistiques de timesheet | Employé (ses stats), Manager (son équipe), Admin (tous) | JWT |
+| PATCH | `/api/timesheets/:id` | ⚠️ Corriger un timesheet | **Manager, Admin** | JWT |
+| DELETE | `/api/timesheets/:id` | ⚠️ Supprimer un timesheet | **Manager, Admin** | JWT |
 
-**Query Params (GET /pointages) :**
+**Query Params (GET /timesheets) :**
 - `employeId` : number (Manager/Admin uniquement)
 - `dateDebut` : YYYY-MM-DD
 - `dateFin` : YYYY-MM-DD
 - `status` : 'normal' \| 'retard' \| 'absence' \| 'incomplet'
 - `clockin` : boolean (true=entrées, false=sorties)
 
-**Query Params (GET /pointages/stats) :**
+**Query Params (GET /timesheets/stats) :**
 - `employeId` : number (requis)
 - `dateDebut` : YYYY-MM-DD (requis)
 - `dateFin` : YYYY-MM-DD (requis)
@@ -138,17 +138,17 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 |-----------|----------|------------|------|-------|--------|
 | **Users** | 👤👔👑 | 👤👔👑 | 👔👑 | 👤(soi)👔(équipe)👑 | 👑 |
 | **Équipes** | 👤👔👑 | 👤👔👑 | 👑 | 👑 | 👑 |
-| **Horaires** | 👤👔👑 | 👤👔👑 | 👔👑 | 👔👑 | 👑 |
-| **Pointages** | 👤(soi)👔(équipe)👑 | 👤(soi)👔(équipe)👑 | 👤👔👑 | 👔👑 | 👔👑 |
+| **Schedules** | 👤👔👑 | 👤👔👑 | 👔👑 | 👔👑 | 👑 |
+| **Timesheets** | 👤(soi)👔(équipe)👑 | 👤(soi)👔(équipe)👑 | 👤👔👑 | 👔👑 | 👔👑 |
 
 ### Cas Particuliers
 
-**Pointages :**
+**Timesheets :**
 - **POST /clockin & /clockout** : Tous peuvent pointer pour eux-mêmes uniquement
 - **PATCH & DELETE** : Uniquement Manager et Admin (corrections manuelles)
 
 **Users :**
-- Un employé peut **modifier son propre profil** (nom, téléphone, etc.)
+- Un employé peut **modifier son propre profil** (lastName, téléphone, etc.)
 - Seul un Admin peut **changer le rôle** d'un utilisateur
 
 ---
@@ -163,7 +163,7 @@ Cette API est documentée dans **Swagger** accessible via `/api/docs`.
 | 401 | Non authentifié | Token manquant ou expiré |
 | 403 | Non autorisé | Permissions insuffisantes |
 | 404 | Non trouvé | Ressource inexistante |
-| 409 | Conflit | Email déjà utilisé, pointage en double |
+| 409 | Conflit | Email déjà utilisé, timesheet en double |
 | 500 | Erreur serveur | Erreur interne |
 
 ---
@@ -182,8 +182,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 {
   "sub": 10,
   "email": "pierre.martin@example.com",
-  "prenom": "Pierre",
-  "nom": "Martin",
+  "firstName": "Pierre",
+  "lastName": "Martin",
   "role": "employe",
   "isActive": true,
   "lastLoginAt": "2025-10-12T10:00:00.000Z",
@@ -200,27 +200,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## 📝 Exemples d'Utilisation
 
-### Exemple 1 : Pointage d'entrée
+### Exemple 1 : Timesheet d'entrée
 
 ```bash
 # L'employé pointe son arrivée
-POST /api/pointages/clockin
+POST /api/timesheets/clockin
 Authorization: Bearer {token}
 
 # Pas de body nécessaire !
 # Réponse automatique avec tous les détails
 ```
 
-### Exemple 2 : Correction de pointage (Manager)
+### Exemple 2 : Correction de timesheet (Manager)
 
 ```bash
-# Le manager corrige l'heure d'arrivée d'un employé
-PATCH /api/pointages/42
+# Le manager corrige l'hour d'arrivée d'un employé
+PATCH /api/timesheets/42
 Authorization: Bearer {token_manager}
 Content-Type: application/json
 
 {
-  "heure": "09:00:00"
+  "hour": "09:00:00"
 }
 ```
 
@@ -228,7 +228,7 @@ Content-Type: application/json
 
 ```bash
 # Récupérer les stats d'un employé pour le mois d'octobre
-GET /api/pointages/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31
+GET /api/timesheets/stats?employeId=10&dateDebut=2025-10-01&dateFin=2025-10-31
 Authorization: Bearer {token}
 ```
 
@@ -236,7 +236,7 @@ Authorization: Bearer {token}
 
 ## 🚀 Prochaines Étapes
 
-### Phase 1 - Gestion des Utilisateurs ✅
+### Phase 1 - Gestion des Users ✅
 - [x] DTOs créés
 - [x] Schémas Swagger documentés
 - [ ] Implémentation des contrôleurs
@@ -252,7 +252,7 @@ Authorization: Bearer {token}
 - [ ] Contrôleurs
 - [ ] Tests
 
-### Phase 3 - Gestion des Horaires
+### Phase 3 - Gestion des Schedules
 - [x] DTOs créés
 - [x] Schémas Swagger documentés
 - [ ] Entités métier
@@ -261,7 +261,7 @@ Authorization: Bearer {token}
 - [ ] Contrôleurs
 - [ ] Tests
 
-### Phase 4 - Gestion des Pointages
+### Phase 4 - Gestion des Timesheets
 - [x] DTOs créés
 - [x] Schémas Swagger documentés
 - [ ] Logique métier (calcul statut automatique)
@@ -291,11 +291,11 @@ Authorization: Bearer {token}
 ### Sécurité
 ✅ Toutes les routes sensibles protégées par JWT  
 ✅ Permissions par rôle bien documentées  
-✅ Correction de pointages réservée aux Managers/Admins  
+✅ Correction de timesheets réservée aux Managers/Admins  
 ✅ Validation des données entrantes via DTOs  
 
 ### Logique Métier
-✅ Pointages automatiques (pas de création manuelle côté client)  
+✅ Timesheets automatiques (pas de création manuelle côté client)  
 ✅ Statut calculé automatiquement côté serveur  
 ✅ Employé ne peut modifier que ses propres données  
 ✅ Manager peut gérer son équipe uniquement  

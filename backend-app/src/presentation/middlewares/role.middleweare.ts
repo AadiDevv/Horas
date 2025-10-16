@@ -14,4 +14,4 @@ export const requireRole = (allowedRoles: Role[]) => {
 // mes middlewares spécifiques, ici parametrer avec les roles, ensuite appeler dans les routes.
 export const adminOnly = requireRole(['admin']);
 export const managerOrAdmin = requireRole(['manager', 'admin']);
-export const employeeOrAbove = requireRole(['employe', 'manager', 'admin']);
+export const employeOrAbove = requireRole(['employe', 'manager', 'admin']);

@@ -1,25 +1,25 @@
-// #region Pointage Schemas
-export const pointageSchemas = {
+// #region Timesheet Schemas
+export const timesheetSchemas = {
     // #region Request DTOs
-    // Note: Pas de DTO de création car le pointage est entièrement géré côté serveur
+    // Note: Pas de DTO de création car le timesheet est entièrement géré côté serveur
     // - employeId extrait du JWT
-    // - date et heure automatiques au moment de la requête
-    // - status calculé automatiquement selon l'horaire de l'employé
+    // - date et hour automatiques au moment de la requête
+    // - status calculé automatiquement selon l'schedule de l'employé
 
-    PointageUpdateDTO: {
+    TimesheetUpdateDTO: {
         type: 'object',
         properties: {
             date: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-12',
-                description: 'Nouvelle date du pointage'
+                description: 'Nouvelle date du timesheet'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 format: 'time',
                 example: '09:00:00',
-                description: 'Nouvelle heure du pointage'
+                description: 'Nouvelle hour du timesheet'
             },
             clockin: {
                 type: 'boolean',
@@ -38,13 +38,13 @@ export const pointageSchemas = {
     // #endregion
 
     // #region Response DTOs
-    PointageReadDTO: {
+    TimesheetReadDTO: {
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 example: 1,
-                description: 'ID du pointage'
+                description: 'ID du timesheet'
             },
             employeId: {
                 type: 'integer',
@@ -55,13 +55,13 @@ export const pointageSchemas = {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-12',
-                description: 'Date du pointage'
+                description: 'Date du timesheet'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 format: 'date-time',
                 example: '2025-10-12T09:05:30.000Z',
-                description: 'Heure du pointage (ISO DateTime)'
+                description: 'Hour du timesheet (ISO DateTime)'
             },
             clockin: {
                 type: 'boolean',
@@ -72,7 +72,7 @@ export const pointageSchemas = {
                 type: 'string',
                 enum: ['normal', 'retard', 'absence', 'incomplet'],
                 example: 'normal',
-                description: 'Statut du pointage'
+                description: 'Statut du timesheet'
             },
             createdAt: {
                 type: 'string',
@@ -93,11 +93,11 @@ export const pointageSchemas = {
                         type: 'integer',
                         example: 10
                     },
-                    prenom: {
+                    firstName: {
                         type: 'string',
                         example: 'Pierre'
                     },
-                    nom: {
+                    lastName: {
                         type: 'string',
                         example: 'Martin'
                     },
@@ -112,7 +112,7 @@ export const pointageSchemas = {
         }
     },
 
-    PointageListItemDTO: {
+    TimesheetListItemDTO: {
         type: 'object',
         properties: {
             id: {
@@ -123,17 +123,17 @@ export const pointageSchemas = {
                 type: 'integer',
                 example: 10
             },
-            employeNom: {
+            employelastName: {
                 type: 'string',
                 example: 'Pierre Martin',
-                description: 'Nom complet de l\'employé (prenom + nom)'
+                description: 'lastName complet de l\'employé (firstName + lastName)'
             },
             date: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-12'
             },
-            heure: {
+            hour: {
                 type: 'string',
                 example: '09:05:30'
             },
@@ -151,7 +151,7 @@ export const pointageSchemas = {
     // #endregion
 
     // #region Filter DTOs (Query Params)
-    PointageFilterDTO: {
+    TimesheetFilterDTO: {
         type: 'object',
         properties: {
             employeId: {
@@ -183,12 +183,12 @@ export const pointageSchemas = {
                 description: 'Filtrer par type (true=entrées, false=sorties)'
             }
         },
-        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /pointages?employeId=10&dateDebut=2025-10-01'
+        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /timesheets?employeId=10&dateDebut=2025-10-01'
     },
     // #endregion
 
     // #region Statistics DTO
-    PointageStatsDTO: {
+    TimesheetStatsDTO: {
         type: 'object',
         properties: {
             employeId: {
@@ -196,59 +196,59 @@ export const pointageSchemas = {
                 example: 10,
                 description: 'ID de l\'employé'
             },
-            periodeDebut: {
+            periodStart: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-01',
                 description: 'Début de la période analysée'
             },
-            periodeFin: {
+            periodEnd: {
                 type: 'string',
                 format: 'date',
                 example: '2025-10-31',
                 description: 'Fin de la période analysée'
             },
-            totalPointages: {
+            totalTimesheets: {
                 type: 'integer',
                 example: 42,
-                description: 'Nombre total de pointages'
+                description: 'lastNamebre total de timesheets'
             },
             totalEntrees: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre d\'entrées (clock-in)'
+                description: 'lastNamebre d\'entrées (clock-in)'
             },
             totalSorties: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre de sorties (clock-out)'
+                description: 'lastNamebre de sorties (clock-out)'
             },
-            pointagesNormaux: {
+            timesheetsNormaux: {
                 type: 'integer',
                 example: 38,
-                description: 'Nombre de pointages à l\'heure'
+                description: 'lastNamebre de timesheets à l\'hour'
             },
-            pointagesRetard: {
+            timesheetsRetard: {
                 type: 'integer',
                 example: 3,
-                description: 'Nombre de retards'
+                description: 'lastNamebre de retards'
             },
-            pointagesIncomplete: {
+            timesheetsIncomplete: {
                 type: 'integer',
                 example: 1,
-                description: 'Nombre de pointages incomplets (entrée sans sortie)'
+                description: 'lastNamebre de timesheets incomplets (entrée sans sortie)'
             },
             joursPointes: {
                 type: 'integer',
                 example: 21,
-                description: 'Nombre de jours uniques avec au moins un pointage'
+                description: 'lastNamebre de jours uniques avec au moins un timesheet'
             }
         }
     },
     // #endregion
 
     // #region Standard Responses
-    PointageCreatedResponse: {
+    TimesheetCreatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -256,21 +256,21 @@ export const pointageSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/PointageReadDTO'
+                $ref: '#/components/schemas/TimesheetReadDTO'
             },
             message: {
                 type: 'string',
-                example: 'Pointage enregistré avec succès'
+                example: 'Timesheet enregistré avec succès'
             },
             timestamp: {
                 type: 'string',
                 format: 'date-time'
             }
         },
-        description: 'Réponse après un pointage automatique (POST /pointages/clockin ou /pointages/clockout)'
+        description: 'Réponse après un timesheet automatique (POST /timesheets/clockin ou /timesheets/clockout)'
     },
 
-    PointageListResponse: {
+    TimesheetListResponse: {
         type: 'object',
         properties: {
             success: {
@@ -280,12 +280,12 @@ export const pointageSchemas = {
             data: {
                 type: 'array',
                 items: {
-                    $ref: '#/components/schemas/PointageListItemDTO'
+                    $ref: '#/components/schemas/TimesheetListItemDTO'
                 }
             },
             message: {
                 type: 'string',
-                example: 'Liste des pointages récupérée avec succès'
+                example: 'Liste des timesheets récupérée avec succès'
             },
             timestamp: {
                 type: 'string',
@@ -294,7 +294,7 @@ export const pointageSchemas = {
         }
     },
 
-    PointageStatsResponse: {
+    TimesheetStatsResponse: {
         type: 'object',
         properties: {
             success: {
@@ -302,11 +302,11 @@ export const pointageSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/PointageStatsDTO'
+                $ref: '#/components/schemas/TimesheetStatsDTO'
             },
             message: {
                 type: 'string',
-                example: 'Statistiques des pointages calculées avec succès'
+                example: 'Statistiques des timesheets calculées avec succès'
             },
             timestamp: {
                 type: 'string',

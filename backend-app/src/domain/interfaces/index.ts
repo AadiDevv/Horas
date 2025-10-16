@@ -1,1 +1,2 @@
-export {IAuth} from "./auth.interface"
+export { IAuth } from "./auth.interface"
+export { ITeam } from "./team.interface"

@@ -164,37 +164,105 @@ export function useTimeClock() {
   });
   const [isClockingIn, setIsClockingIn] = useState(false);
   const [currentDayLogs, setCurrentDayLogs] = useState<TimeLog>({ start: '' });
+  const [pointageLoading, setPointageLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [lastClockIn, setLastClockIn] = useState<any | null>(null);
 
   const getDayKey = (): DayKey => {
     const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return days[new Date().getDay()];
   };
 
-  const handleClockIn = () => {
-    setIsClockingIn(true);
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    setCurrentDayLogs({ start: time });
+  /**
+   * Vérifie les pointages du jour au chargement pour restaurer l'état
+   */
+  const checkTodayPointages = async () => {
+    try {
+      const { getTodayPointages } = await import('../services/pointageService');
+      const todayPointages = await getTodayPointages();
+
+      // Trouver le dernier pointage d'entrée sans sortie
+      const activeClockIn = todayPointages.find(p => p.clockin === true);
+
+      if (activeClockIn) {
+        setLastClockIn(activeClockIn);
+        setIsClockingIn(true);
+        // Reconstruire les logs pour le jour actuel
+        const time = activeClockIn.heure.substring(0, 5); // "14:30"
+        setCurrentDayLogs({ start: time });
+      }
+    } catch (error) {
+      console.error('❌ Erreur vérification pointages:', error);
+    }
   };
 
-  const handleClockOut = () => {
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const dayKey = getDayKey();
-    setTimeLogs(prev => ({
-      ...prev,
-      [dayKey]: [...prev[dayKey], { ...currentDayLogs, end: time }]
-    }));
-    setIsClockingIn(false);
-    setCurrentDayLogs({ start: '' });
+  /**
+   * Gère à la fois Clock In et Clock Out avec la même fonction
+   * L'API backend détermine automatiquement s'il faut faire un clock in ou un clock out
+   */
+  const handleClockIn = async () => {
+    try {
+      setPointageLoading(true);
+      setErrorMessage('');
+      setSuccessMessage('');
+
+      const { clockIn } = await import('../services/pointageService');
+      const response = await clockIn();  // Appelle toujours la même route
+
+      if (response.success && response.data) {
+        const time = response.data.heure.substring(0, 5);
+        const dayKey = getDayKey();
+
+        // Si clockin === true → C'est une entrée
+        if (response.data.clockin === true) {
+          setLastClockIn(response.data);
+          setIsClockingIn(true);
+          setCurrentDayLogs({ start: time });
+          setSuccessMessage('✅ Pointage d\'entrée enregistré avec succès !');
+        }
+        // Si clockin === false → C'est une sortie
+        else {
+          setTimeLogs(prev => ({
+            ...prev,
+            [dayKey]: [...prev[dayKey], { ...currentDayLogs, end: time }]
+          }));
+
+          // Petit délai pour que le loader reste visible
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          setIsClockingIn(false);
+          setCurrentDayLogs({ start: '' });
+          setLastClockIn(null);
+          setSuccessMessage('✅ Pointage de sortie enregistré avec succès !');
+        }
+
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage(response.error || '❌ Erreur lors du pointage');
+      }
+    } catch (error) {
+      console.error('❌ Erreur pointage:', error);
+      setErrorMessage('❌ Erreur lors du pointage : ' + (error as Error).message);
+    } finally {
+      setPointageLoading(false);
+    }
   };
+
+  // handleClockOut n'est plus utilisé car tout passe par handleClockIn
+  const handleClockOut = handleClockIn;
 
   return {
     timeLogs,
     isClockingIn,
     currentDayLogs,
+    pointageLoading,
+    successMessage,
+    errorMessage,
+    lastClockIn,
     getDayKey,
     handleClockIn,
-    handleClockOut
+    handleClockOut,
+    checkTodayPointages
   };
 }

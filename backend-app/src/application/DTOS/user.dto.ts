@@ -1,19 +1,19 @@
 import { Role } from "@/domain/types";
 
-// #region Create DTO (déjà existant dans auth.dto.ts)
+// #region Create DTO
 /**
- * DTO pour créer un utilisateur
- * Utilisé lors de l'inscription ou de la création par un admin/manager
+ * DTO pour créer un utilisateur (via admin/manager)
+ * Différent de UserRegisterDTO (auth.dto.ts) qui est pour l'auto-inscription
  */
 export interface UserCreateDTO {
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     role: Role;
-    equipeId?: number;
-    plageHoraireId?: number;
-    telephone?: string;
+    teamId?: number;
+    scheduleId?: number;
+    phone?: string;
 }
 // #endregion
 
@@ -24,14 +24,14 @@ export interface UserCreateDTO {
  * Le mot de passe n'est pas inclus ici (route séparée pour changer le mot de passe)
  */
 export interface UserUpdateDTO {
-    prenom?: string;
-    nom?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
-    telephone?: string;
+    phone?: string;
     role?: Role;
     isActive?: boolean;
-    equipeId?: number | null;
-    plageHoraireId?: number | null;
+    teamId?: number;
+    scheduleId?: number;
 }
 
 /**
@@ -51,79 +51,65 @@ export interface UserResetPasswordDTO {
 }
 // #endregion
 
-// #region Read DTO (déjà existant dans auth.dto.ts)
+// #region Read DTO
 /**
- * DTO de retour pour un utilisateur
+ * DTO de retour pour un utilisateur (complet)
  * Le mot de passe haché n'est jamais retourné
  */
 export interface UserReadDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
-    telephone: string | null;
-    equipeId: number | null;
-    plageHoraireId: number | null;
+    phone?: string;
+    teamId?: number;
+    scheduleId?: number;
     createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
+    updatedAt?: string;
+    lastLoginAt?: string;
+    deletedAt?: string;
 
     // Informations enrichies (optionnelles selon le endpoint)
-    equipe?: {
+    team?: {
         id: number;
-        nom: string;
+        lastName: string;
     };
 
-    horaire?: {
+    schedule?: {
         id: number;
-        nom: string;
-        heureDebut: string;
-        heureFin: string;
+        lastName: string;
+        startHour: string;
+        endHour: string;
     };
 }
 // #endregion
 
 // #region List DTO
 /**
- * DTO pour la liste des utilisateurs (version simplifiée)
+ * DTO pour la liste des users (version simplifiée)
  */
 export interface UserListItemDTO {
     id: number;
-    prenom: string;
-    nom: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     isActive: boolean;
-    equipeId: number | null;
-    equipeNom: string | null;
+    teamId?: number;
+    teamlastName?: string;
 }
 
 /**
- * DTO pour filtrer les utilisateurs
- * Query params: GET /users?role=employe&equipeId=1&isActive=true
+ * DTO pour filtrer les users
+ * Query params: GET /users?role=employe&teamId=1&isActive=true
  */
 export interface UserFilterDTO {
     role?: Role;
-    equipeId?: number;
+    teamId?: number;
     isActive?: boolean;
-    search?: string; // Recherche par nom, prénom ou email
-}
-// #endregion
-
-// #region Login DTO (déjà existant dans auth.dto.ts)
-export interface UserLoginDTO {
-    email: string;
-    password: string;
-}
-
-export interface TokenResponse {
-    accessToken: string;
-    tokenType: string;
-    expiresIn: number;
-    user: UserReadDTO;
-    role: string;
+    search?: string; // Recherche par lastName, prélastName ou email
 }
 // #endregion
 

@@ -1,13 +1,13 @@
 // #region User Management Paths
 /**
- * Routes de gestion des utilisateurs (après authentification)
+ * Routes de gestion des users (après authentification)
  * Tag: Users (À venir)
  */
 export const userPaths = {
     '/api/users': {
         get: {
-            summary: 'Liste des utilisateurs',
-            description: 'Récupère la liste de tous les utilisateurs avec filtres optionnels',
+            summary: 'Liste des users',
+            description: 'Récupère la liste de tous les users avec filtres optionnels',
             tags: ['Users (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -18,7 +18,7 @@ export const userPaths = {
                     description: 'Filtrer par rôle'
                 },
                 {
-                    name: 'equipeId',
+                    name: 'teamId',
                     in: 'query',
                     schema: { type: 'integer' },
                     description: 'Filtrer par équipe'
@@ -33,12 +33,12 @@ export const userPaths = {
                     name: 'search',
                     in: 'query',
                     schema: { type: 'string' },
-                    description: 'Recherche par nom, prénom ou email'
+                    description: 'Recherche par lastName, prélastName ou email'
                 }
             ],
             responses: {
                 200: {
-                    description: 'Liste des utilisateurs récupérée avec succès',
+                    description: 'Liste des users récupérée avec succès',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/UserListResponse' }
