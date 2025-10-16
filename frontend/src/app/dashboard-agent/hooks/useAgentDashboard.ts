@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { DayKey, TimeLog, User, UserFormData } from '../types';
+import { DayKey, TimeLog, User, UserFormData, Horaire } from '../types';
 import { getUser, updateUser, changePassword } from '../services/userService';
+import { getEquipeHoraires } from '../services/equipeService';
 
 export function useUserData() {
   const [userData, setUserData] = useState<User | null>(null);
@@ -152,6 +153,43 @@ export function useSettings(userData: User | null, formData: UserFormData) {
   };
 }
 
+export function useTeamSchedule(userData: User | null) {
+  const [teamSchedule, setTeamSchedule] = useState<Horaire[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadTeamSchedule = async () => {
+    if (!userData?.equipeId) {
+      console.log('⚠️ Aucune équipe associée à l\'utilisateur');
+      setTeamSchedule([]);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await getEquipeHoraires(userData.equipeId);
+
+      if (response.success && response.data) {
+        setTeamSchedule(response.data);
+        console.log('✅ Horaires de l\'équipe chargés:', response.data);
+      } else {
+        console.error('❌ Erreur chargement horaires:', response.message);
+        setTeamSchedule([]);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement horaires équipe:', error);
+      setTeamSchedule([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    teamSchedule,
+    loading,
+    loadTeamSchedule
+  };
+}
+
 export function useTimeClock() {
   const [timeLogs, setTimeLogs] = useState<Record<DayKey, TimeLog[]>>({
     Mon: [],
@@ -175,22 +213,128 @@ export function useTimeClock() {
   };
 
   /**
+   * Convertit une date ISO en DayKey
+   */
+  const dateToDayKey = (dateStr: string): DayKey => {
+    const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const date = new Date(dateStr + 'T00:00:00');
+    return days[date.getDay()];
+  };
+
+  /**
+   * Charge les pointages de la semaine et les transforme en TimeLog
+   */
+  const loadWeekPointages = async () => {
+    try {
+      const { getWeekPointages } = await import('../services/pointageService');
+      const weekPointages = await getWeekPointages();
+
+      // Réinitialiser les timeLogs
+      const newTimeLogs: Record<DayKey, TimeLog[]> = {
+        Mon: [],
+        Tue: [],
+        Wed: [],
+        Thu: [],
+        Fri: [],
+        Sat: [],
+        Sun: []
+      };
+
+      // Grouper les pointages par date
+      const pointagesByDate: Record<string, typeof weekPointages> = {};
+      weekPointages.forEach(p => {
+        if (!pointagesByDate[p.date]) {
+          pointagesByDate[p.date] = [];
+        }
+        pointagesByDate[p.date].push(p);
+      });
+
+      console.log('📊 Pointages groupés par date:', pointagesByDate);
+
+      // Transformer chaque jour
+      Object.entries(pointagesByDate).forEach(([date, pointages]) => {
+        const dayKey = dateToDayKey(date);
+        const dayLogs: TimeLog[] = [];
+
+        // Trier par heure
+        const sortedPointages = [...pointages].sort((a, b) =>
+          a.heure.localeCompare(b.heure)
+        );
+
+        console.log(`🔍 Traitement du ${date} (${dayKey}):`, sortedPointages);
+
+        // Créer des paires entrée/sortie
+        for (let i = 0; i < sortedPointages.length; i++) {
+          const pointage = sortedPointages[i];
+
+          if (pointage.clockin === true) {
+            // C'est une entrée, chercher la sortie correspondante
+            const nextPointage = sortedPointages[i + 1];
+            const start = pointage.heure.substring(0, 5); // "14:30:00" -> "14:30"
+
+            console.log(`  ➡️ Entrée trouvée à ${start}`);
+
+            if (nextPointage && nextPointage.clockin === false) {
+              // Paire complète
+              const end = nextPointage.heure.substring(0, 5);
+              dayLogs.push({ start, end });
+              console.log(`  ✅ Paire complète: ${start} - ${end}`);
+              i++; // Sauter le prochain pointage car déjà traité
+            } else {
+              // Entrée sans sortie (pointage en cours ou incomplet)
+              console.log(`  ⏳ Entrée sans sortie (en cours ou incomplet)`);
+            }
+          }
+        }
+
+        console.log(`📝 Logs pour ${dayKey}:`, dayLogs);
+        newTimeLogs[dayKey] = dayLogs;
+      });
+
+      setTimeLogs(newTimeLogs);
+      console.log('✅ Pointages de la semaine chargés:', newTimeLogs);
+    } catch (error) {
+      console.error('❌ Erreur chargement pointages semaine:', error);
+    }
+  };
+
+  /**
    * Vérifie les pointages du jour au chargement pour restaurer l'état
    */
   const checkTodayPointages = async () => {
     try {
+      // Charger tous les pointages de la semaine
+      await loadWeekPointages();
+
+      // Vérifier le statut du jour actuel
       const { getTodayPointages } = await import('../services/pointageService');
       const todayPointages = await getTodayPointages();
 
-      // Trouver le dernier pointage d'entrée sans sortie
-      const activeClockIn = todayPointages.find(p => p.clockin === true);
+      // Trouver le DERNIER pointage pour déterminer l'état actuel
+      if (todayPointages.length > 0) {
+        // Trier par heure pour avoir le dernier pointage
+        const sortedPointages = [...todayPointages].sort((a, b) =>
+          a.heure.localeCompare(b.heure)
+        );
+        const lastPointage = sortedPointages[sortedPointages.length - 1];
 
-      if (activeClockIn) {
-        setLastClockIn(activeClockIn);
-        setIsClockingIn(true);
-        // Reconstruire les logs pour le jour actuel
-        const time = activeClockIn.heure.substring(0, 5); // "14:30"
-        setCurrentDayLogs({ start: time });
+        // Si le dernier pointage est une entrée (clockin === true), on est en train de pointer
+        if (lastPointage.clockin === true) {
+          setLastClockIn(lastPointage);
+          setIsClockingIn(true);
+          const time = lastPointage.heure.substring(0, 5); // "14:30"
+          setCurrentDayLogs({ start: time });
+        } else {
+          // Le dernier pointage est une sortie, on n'est pas en train de pointer
+          setLastClockIn(null);
+          setIsClockingIn(false);
+          setCurrentDayLogs({ start: '' });
+        }
+      } else {
+        // Aucun pointage aujourd'hui
+        setLastClockIn(null);
+        setIsClockingIn(false);
+        setCurrentDayLogs({ start: '' });
       }
     } catch (error) {
       console.error('❌ Erreur vérification pointages:', error);
@@ -212,7 +356,6 @@ export function useTimeClock() {
 
       if (response.success && response.data) {
         const time = response.data.heure.substring(0, 5);
-        const dayKey = getDayKey();
 
         // Si clockin === true → C'est une entrée
         if (response.data.clockin === true) {
@@ -223,10 +366,8 @@ export function useTimeClock() {
         }
         // Si clockin === false → C'est une sortie
         else {
-          setTimeLogs(prev => ({
-            ...prev,
-            [dayKey]: [...prev[dayKey], { ...currentDayLogs, end: time }]
-          }));
+          // Recharger tous les pointages de la semaine pour être sûr d'avoir les données à jour
+          await loadWeekPointages();
 
           // Petit délai pour que le loader reste visible
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -263,6 +404,7 @@ export function useTimeClock() {
     getDayKey,
     handleClockIn,
     handleClockOut,
-    checkTodayPointages
+    checkTodayPointages,
+    loadWeekPointages
   };
 }

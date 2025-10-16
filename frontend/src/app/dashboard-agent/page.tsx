@@ -14,6 +14,7 @@ import {
   useUserData,
   useSettings,
   useTimeClock,
+  useTeamSchedule,
 } from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
 
@@ -45,7 +46,9 @@ export default function Page() {
     handleClockIn,
     handleClockOut,
     checkTodayPointages,
+    loadWeekPointages,
   } = useTimeClock();
+  const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
   useEffect(() => {
     setMounted(true);
@@ -61,6 +64,18 @@ export default function Page() {
       clearInterval(timer);
     };
   }, []);
+
+  // Charger les horaires de l'équipe quand userData est disponible
+  useEffect(() => {
+    if (userData) {
+      loadTeamSchedule();
+    }
+  }, [userData]);
+
+  const handleLogout = () => {
+    console.log('🚪 Déconnexion...');
+    window.location.href = '/login';
+  };
 
   return (
     <RoleProtection allowedRoles={["manager", "admin", "employe"]}>
@@ -130,7 +145,12 @@ export default function Page() {
               isClockingIn={isClockingIn}
               currentDayLogs={currentDayLogs}
               currentDayKey={getDayKey()}
-              onRefresh={() => setCurrentTime(new Date())}
+              onRefresh={() => {
+                setCurrentTime(new Date());
+                loadTeamSchedule();
+                loadWeekPointages();
+              }}
+              teamSchedule={teamSchedule}
             />
           </main>
         </div>
