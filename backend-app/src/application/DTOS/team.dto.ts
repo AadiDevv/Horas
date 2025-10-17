@@ -23,7 +23,12 @@ export interface TeamMembreDTO {
     role: "admin" | "manager" | "employe";
     isActive: boolean;
     phone?: string;
-    scheduleId?: number;
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
 }
 // #endregion
 

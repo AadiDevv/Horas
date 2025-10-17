@@ -1,103 +1,121 @@
 import { Request, Response } from 'express';
-import { AuthUseCase } from '@/application/usecases';
-import { UserCreateDTO, UserLoginDTO, UserReadDTO, TokenResponse } from '@/application/DTOS';
+import { UserUseCase } from '@/application/usecases';
+import { UserUpdateDTO, UserFilterDTO } from '@/application/DTOS/user.dto';
 import { ValidationError } from '@/domain/error/AppError';
-import { JWTService } from '@/application/services';
 
-export class AuthController {
-  constructor(private UC_auth: AuthUseCase) { }
+/**
+ * Contrôleur pour la gestion des utilisateurs (CRUD)
+ * Gère les requêtes HTTP et appelle les use cases appropriés
+ * 
+ * Note: Les transformations Entité ↔ DTO sont gérées par l'entité User elle-même
+ */
+export class UserController {
+  constructor(private UC_user: UserUseCase) { }
 
-  // Helper pour convertir les dates en ISO string
-  private toDateStrings(user: { createdAt?: Date; updatedAt?: Date; lastLoginAt?: Date | null; deletedAt?: Date | null }) {
-    return {
-      createdAt: user.createdAt!.toISOString(),
-      updatedAt: user.updatedAt ? user.updatedAt.toISOString() : null,
-      lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
-      deletedAt: user.deletedAt ? user.deletedAt.toISOString() : null
-    };
-  }
-
-  private async _registerUser(dto: UserCreateDTO): Promise<UserReadDTO> {
-    const user = await this.UC_auth.registerUser(dto);
-
-    if (!user.id) throw new ValidationError("No user id")
-    const { hashedPassword, ...rest } = user
-    const userResponse: UserReadDTO = {
-      ...rest,
-      id: user.id,
-      ...this.toDateStrings(user)
-    };
-    return userResponse;
-  }
-
-  async registerEmploye(req: Request, res: Response): Promise<void> {
-    // #region - Validation
-    const userRegisterDto: UserCreateDTO = req.body;
-    if (userRegisterDto.role !== 'employe') throw new ValidationError("User role is not valid");
-    // #endregion
-
-    const userResponse = await this._registerUser(userRegisterDto);
-    res.success(userResponse, "Utilisateur inscrit avec succès");
-  }
-  async registerManager(req: Request, res: Response): Promise<void> {
-    // #region - Validation
-    const userRegisterDto: UserCreateDTO = req.body;
-    if (userRegisterDto.role !== 'manager') throw new ValidationError("User role is not valid");
-    // #endregion
-
-    const userResponse = await this._registerUser(userRegisterDto);
-    res.success(userResponse, "Utilisateur inscrit avec succès");
-  }
-  async register(req: Request, res: Response): Promise<void> {
-
-    const userRegisterDto: UserCreateDTO = req.body;
-    const user = await this.UC_auth.registerUser(userRegisterDto);
-
-    if (!user.id) throw new ValidationError("No user id")
-
-    // Générer le token pour l'auto-inscription
-    const jwtService = new JWTService();
-    const accessToken = jwtService.createAccessToken(user);
-
-    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
-    const userResponse: UserReadDTO = {
-      ...rest,
-      id: user.id,
-      ...this.toDateStrings(user)
+  // #region Read
+  /**
+   * GET /api/users?role=X&teamId=Y&isActive=true&search=...
+   * Récupère la liste de tous les utilisateurs avec filtres optionnels
+   * Admin uniquement
+   */
+  async getAllUsers(req: Request, res: Response): Promise<void> {
+    const filter: UserFilterDTO = {
+      role: req.query.role as any,
+      teamId: req.query.teamId ? Number(req.query.teamId) : undefined,
+      isActive: req.query.isActive ? req.query.isActive === 'true' : undefined,
+      search: req.query.search as string
     };
 
-    const tokenResponse: TokenResponse = {
-      accessToken,
-      tokenType: "bearer",
-      expiresIn: 1800,
-      user: userResponse,
-      role: user.role
-    };
+    const users = await this.UC_user.getAllUsers(filter);
+    const usersDTO = users.map(user => user.toListItemDTO());
 
-    res.success(tokenResponse, "Utilisateur inscrit avec succès");
+    res.success(usersDTO, "Liste des utilisateurs récupérée avec succès");
   }
 
-  async login(req: Request, res: Response): Promise<void> {
-    const userLoginDto: UserLoginDTO = req.body;
-    const [user, accessToken] = await this.UC_auth.loginUser(userLoginDto);
+  /**
+   * GET /api/users/:id
+   * Récupère un utilisateur par son ID
+   */
+  async getUser_ById(req: Request, res: Response): Promise<void> {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    if (!user.id) throw new ValidationError("User id is missing");
+    const user = await this.UC_user.getUser_ById(id);
+    const userDTO = user.toReadDTO();
 
-    const { createdAt, updatedAt, lastLoginAt, deletedAt, hashedPassword, ...rest } = user
-    const userResponse: UserReadDTO = {
-      ...rest,
-      id: user.id,
-      ...this.toDateStrings(user)
-    };
-
-    const tokenResponse: TokenResponse = {
-      accessToken,
-      tokenType: "bearer",
-      expiresIn: 1800,
-      user: userResponse,
-      role: user.role
-    };
-
-    res.success(tokenResponse, "Connexion réussie");
+    res.success(userDTO, "Utilisateur récupéré avec succès");
   }
+
+  /**
+   * GET /api/users/my-employees
+   * Récupère tous les employés du manager connecté
+   * Manager + Admin
+   */
+  async getMyEmployees(req: Request, res: Response): Promise<void> {
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    // Pour les managers : managerId = leur propre ID
+    // Pour les admins : managerId peut être spécifié en query param
+    let managerId = userId;
+
+    if (userRole === "admin" && req.query.managerId) {
+      managerId = Number(req.query.managerId);
+      if (isNaN(managerId)) {
+        throw new ValidationError("managerId invalide");
+      }
+    }
+
+    const employees = await this.UC_user.getMyEmployees(managerId, userId, userRole);
+    const employeesDTO = employees.map(employee => employee.toListItemDTO());
+
+    res.success(employeesDTO, "Liste des employés récupérée avec succès");
+  }
+  // #endregion
+
+  // #region Update
+  /**
+   * PATCH /api/users/:id
+   * Met à jour un utilisateur
+   * - Admin : peut modifier n'importe quel utilisateur (tous les champs)
+   * - Manager : peut uniquement modifier son propre profil (firstName, lastName, email, phone)
+   * - Employé : peut uniquement modifier son propre profil (firstName, lastName, email, phone)
+   * 
+   * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
+   */
+  async updateUser_ById(req: Request, res: Response): Promise<void> {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new ValidationError("ID invalide");
+
+    const userDto: UserUpdateDTO = req.body;
+    if (!userDto || Object.keys(userDto).length === 0) {
+      throw new ValidationError("Aucune donnée à mettre à jour");
+    }
+
+    // Récupération des informations de l'utilisateur connecté
+    const requestingUserId = req.user!.id;
+    const requestingUserRole = req.user!.role;
+
+    const user = await this.UC_user.updateUser_ById(id, userDto, requestingUserId, requestingUserRole);
+    const userDTO = user.toReadDTO();
+
+    res.success(userDTO, "Utilisateur modifié avec succès");
+  }
+  // #endregion
+
+  // #region Delete
+  /**
+   * DELETE /api/users/:id
+   * Supprime logiquement un utilisateur (soft delete)
+   * Admin uniquement
+   */
+  async deleteUser_ById(req: Request, res: Response): Promise<void> {
+    const id = Number(req.params.id);
+    if (isNaN(id)) throw new ValidationError("ID invalide");
+
+    await this.UC_user.deleteUser_ById(id);
+
+    res.success(null, "Utilisateur supprimé avec succès");
+  }
+  // #endregion
 }

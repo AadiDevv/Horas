@@ -1,15 +1,53 @@
 import { IAuth } from "@/domain/interfaces/auth.interface";
+import { IUser } from "@/domain/interfaces/user.interface";
 import { User } from "@/domain/entities/user";
 import { prisma } from "../prisma.service";
-import { NotFoundError, ValidationError } from "@/domain/error/AppError";
+import { NotFoundError } from "@/domain/error/AppError";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
+import { UserFilterDTO } from "@/application/DTOS/user.dto";
 
-export class UserRepository implements IAuth {
+/**
+ * Repository pour les opérations User et Auth
+ * Implémente IAuth (register/login) et IUser (CRUD)
+ */
+export class UserRepository implements IAuth, IUser {
 
 
-  // #region Read
-  async getAllUsers(): Promise<User[]> {
-    const users = await prisma.user.findMany();
+  // #region Read (IUser + IAuth)
+  /**
+   * Récupère tous les utilisateurs avec filtres optionnels
+   * Utilisé par Admin pour lister/filtrer les users
+   */
+  async getAllUsers(filter?: UserFilterDTO): Promise<User[]> {
+    const { role, teamId, isActive, search } = filter || {};
+
+    const users = await prisma.user.findMany({
+      where: {
+        ...(role && { role }),
+        ...(teamId !== undefined && { teamId }),
+        ...(isActive !== undefined && { isActive }),
+        ...(search && {
+          OR: [
+            { firstName: { contains: search, mode: 'insensitive' } },
+            { lastName: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } }
+          ]
+        }),
+        deletedAt: null // N'afficher que les users non supprimés
+      },
+      include: {
+        team: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
     return users.map(user => new User(nullToUndefined(user)));
   }
 
@@ -28,20 +66,59 @@ export class UserRepository implements IAuth {
     return new User(nullToUndefined(user));
   }
 
+  /**
+   * Récupère tous les employés d'un manager spécifique
+   * JOIN : User (manager) → Team (managerId) → User (members via teamId)
+   * 
+   * @param managerId - ID du manager
+   * @returns Liste des employés appartenant aux équipes du manager
+   */
+  async getEmployees_ByManagerId(managerId: number): Promise<User[]> {
+    // Récupérer tous les users qui ont un teamId correspondant aux équipes du manager
+    const employees = await prisma.user.findMany({
+      where: {
+        team: {
+          managerId: managerId
+        },
+        deletedAt: null // Exclure les users supprimés
+      },
+      include: {
+        team: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        schedule: {
+          select: {
+            id: true,
+            name: true,
+            startHour: true,
+            endHour: true
+          }
+        }
+      },
+      orderBy: [
+        { team: { name: 'asc' } }, // Trier par équipe
+        { firstName: 'asc' }         // Puis par prénom
+      ]
+    });
 
+    return employees.map(employee => new User(nullToUndefined({ ...employee, team: employee.team ?? undefined, schedule: employee.schedule ?? undefined })));
+  }
   // #endregion
-  // #region Update
-  async updateUser_byId(user: User): Promise<User> {
+  // #region Update (IAuth + IUser)
+  async updateUser_ById(user: User): Promise<User> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
 
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, ...updateData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt,team, schedule, ...updateData } = user
 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        ...nullToUndefined(updateData) as any,
+        ...nullToUndefined(updateData),
         updatedAt: new Date(Date.now())
       }
     })
@@ -66,12 +143,21 @@ export class UserRepository implements IAuth {
 
   // #endregion
   // #region Delete
+  /**
+   * Suppression logique (soft delete) d'un utilisateur
+   * Met à jour le champ deletedAt au lieu de supprimer physiquement
+   * 
+   * @param id - ID de l'utilisateur à supprimer
+   * @returns L'utilisateur avec deletedAt défini
+   */
+  async deleteUser_ById(id: number): Promise<User> {
+    const deletedUser = await prisma.user.update({
+      where: { id },
+      data: {
+        deletedAt: new Date()
+      }
+    });
 
-  async deleteUser_ById(user: User): Promise<User> {
-    if (!user.id) throw new ValidationError('Cannot update user without ID')
-    const deletedUser = await prisma.user.delete({
-      where: { id: user.id }
-    })
     return new User(nullToUndefined(deletedUser));
   }
   // #endregion
