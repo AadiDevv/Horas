@@ -55,17 +55,24 @@ export function useAgentManager() {
   }, [searchTerm, agents]);
 
   const loadAgents = async () => {
+    console.log('📋 Début du chargement des agents...');
     setLoadingAgents(true);
     try {
       const result = await api.getAgents();
+      console.log('📋 Résultat getAgents:', result);
       if (result.success && result.data) {
+        console.log('📋 Nombre d\'agents reçus:', result.data.length);
+        console.log('📋 Agents:', result.data);
         setAgents(result.data);
         setFilteredAgents(result.data);
+      } else {
+        console.warn('⚠️ Pas de données d\'agents ou échec');
       }
     } catch (error) {
-      console.error('Erreur chargement agents:', error);
+      console.error('❌ Erreur chargement agents:', error);
     }
     setLoadingAgents(false);
+    console.log('📋 Fin du chargement des agents');
   };
 
   const handleCreate = async () => {
@@ -75,7 +82,8 @@ export function useAgentManager() {
       email: formData.email,
       role: formData.role,
       telephone: formData.telephone || undefined,
-      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined
+      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined,
+      password: formData.password // Ajout du mot de passe
     };
     const result = await api.createAgent(newAgent);
     if (result.success) {

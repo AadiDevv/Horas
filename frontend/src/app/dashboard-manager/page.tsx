@@ -274,6 +274,7 @@ function ManagerDashboard() {
             {currentPage === "agents" && (
               <AgentList
                 agents={filteredAgents}
+                equipes={equipes}
                 onAddAgent={openAgentModal}
                 onEditAgent={openEditAgentModal}
                 onDeleteAgent={handleDeleteAgent}

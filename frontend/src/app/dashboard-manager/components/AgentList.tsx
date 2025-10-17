@@ -1,14 +1,20 @@
-import { UserPlus, Edit2, Trash2 } from 'lucide-react';
-import { Agent } from '../types';
+import { UserPlus, Edit2, Trash2, Users } from 'lucide-react';
+import { Agent, Equipe } from '../types';
 
 interface AgentListProps {
   agents: Agent[];
+  equipes: Equipe[];
   onAddAgent: () => void;
   onEditAgent: (agent: Agent) => void;
   onDeleteAgent: (id: number) => void;
 }
 
-export default function AgentList({ agents, onAddAgent, onEditAgent, onDeleteAgent }: AgentListProps) {
+export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, onDeleteAgent }: AgentListProps) {
+  const getEquipeName = (equipeId?: number) => {
+    if (!equipeId) return null;
+    const equipe = equipes.find(e => e.id === equipeId);
+    return equipe?.nom || 'Équipe inconnue';
+  };
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -40,16 +46,33 @@ export default function AgentList({ agents, onAddAgent, onEditAgent, onDeleteAge
                 key={agent.id}
                 className="flex items-center justify-between p-6 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                     {agent.prenom.charAt(0)}{agent.nom.charAt(0)}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold text-lg">
                       {agent.prenom} {agent.nom}
                     </p>
                     <p className="text-sm text-gray-600">{agent.email}</p>
-                    <p className="text-xs text-gray-500 capitalize">{agent.role}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <p className="text-xs text-gray-500 capitalize">{agent.role}</p>
+                      {agent.equipeId && (
+                        <>
+                          <span className="text-gray-300">•</span>
+                          <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">
+                            <Users size={12} />
+                            <span>{getEquipeName(agent.equipeId)}</span>
+                          </div>
+                        </>
+                      )}
+                      {!agent.equipeId && (
+                        <>
+                          <span className="text-gray-300">•</span>
+                          <span className="text-xs text-gray-400 italic">Aucune équipe</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
