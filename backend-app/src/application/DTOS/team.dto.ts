@@ -100,6 +100,7 @@ export interface TeamListItemDTO {
     managerlastName: string; // lastName complet du manager (firstName + lastName)
     membersCount: number;
     createdAt: string;
+    deletedAt?: string;
 }
 
 /**

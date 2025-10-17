@@ -30,10 +30,10 @@ const transformAgentFromBackend = (data: any): Agent => ({
   nom: data.lastName,
   email: data.email,
   role: data.role,
-  telephone: data.phone,
-  equipeId: data.teamId,
-  isActive: data.isActive,
-  createdAt: data.createdAt
+  telephone: data.phone || '', // phone peut être absent dans UserListItemDTO
+  equipeId: data.teamId, // teamId est déjà au bon format
+  isActive: data.isActive ?? true, // Par défaut true si absent
+  createdAt: data.createdAt || new Date().toISOString() // Par défaut maintenant si absent
 });
 
 // Helper pour récupérer le managerId du user connecté
@@ -63,6 +63,7 @@ const transformEquipeFromBackend = (data: any): Equipe => ({
   managerId: data.managerId,
   agentCount: data.membersCount || 0,
   createdAt: data.createdAt,
+  deletedAt: data.deletedAt,
   agents: [], // Les agents ne sont pas retournés lors de la création
   horaires: [] // Les horaires ne sont pas retournés lors de la création
 });
@@ -126,10 +127,31 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
     return { success: true, data: mockAgents };
   }
 
-  // ⚠️ ATTENTION: Cette route n'est pas encore implémentée dans le backend
-  // Les routes CRUD pour les users sont marquées "À venir" dans le Swagger
-  console.warn('⚠️ GET /api/users n\'est pas encore implémenté dans le backend');
-  throw new Error('La route GET /api/users n\'est pas encore disponible. Utilisez USE_MOCK=true');
+  console.log('🚀 Envoi de la requête GET /api/users/my-employees');
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/my-employees`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Réponse du serveur:', response);
+
+  // Transformer chaque agent de backend → frontend
+  return {
+    success: response.success,
+    data: response.data.map(transformAgentFromBackend),
+    message: response.message
+  };
 }
 
 export async function createAgent(agent: Partial<Agent> & { password?: string }): Promise<ApiResponse<Agent>> {
@@ -149,11 +171,11 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
   // Transformer les données frontend -> backend
   const backendData = transformAgentToBackend(agent);
 
-  console.log('🚀 Envoi de la requête POST /api/users/register/employe');
+  console.log('🚀 Envoi de la requête POST /api/auth/register/employe');
   console.log('📦 Données envoyées:', backendData);
   console.log('🔑 Headers:', getAuthHeaders());
 
-  const res = await fetch(`${API_BASE_URL}/api/users/register/employe`, {
+  const res = await fetch(`${API_BASE_URL}/api/auth/register/employe`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(backendData)
@@ -237,10 +259,15 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
-  // Transformer chaque équipe de backend -> frontend
+  // Transformer chaque équipe de backend -> frontend et filtrer les supprimées
+  const allEquipes = response.data.map(transformEquipeFromBackend);
+  const activeEquipes = allEquipes.filter((equipe: Equipe) => !equipe.deletedAt);
+
+  console.log('📊 Équipes totales:', allEquipes.length, '| Actives:', activeEquipes.length);
+
   return {
     success: response.success,
-    data: response.data.map(transformEquipeFromBackend),
+    data: activeEquipes,
     message: response.message
   };
 }

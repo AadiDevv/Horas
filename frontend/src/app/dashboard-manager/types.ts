@@ -23,6 +23,7 @@ export interface Equipe {
   managerId?: number;
   agentCount: number;
   createdAt: string;
+  deletedAt?: string;
   agents?: Agent[];
   horaires?: Horaire[];
 }
