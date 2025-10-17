@@ -113,12 +113,12 @@ export class UserRepository implements IAuth, IUser {
       throw new Error('Cannot update user without ID');
     }
 
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, ...updateData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt,team, schedule, ...updateData } = user
 
     const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        ...nullToUndefined(updateData) as any,
+        ...nullToUndefined(updateData),
         updatedAt: new Date(Date.now())
       }
     })

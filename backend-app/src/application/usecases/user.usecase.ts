@@ -116,9 +116,11 @@ export class UserUseCase {
      * Valide les permissions de mise à jour selon le rôle
      * 
      * Règles métier :
-     * - Admin : peut tout modifier
+     * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive)
      * - Manager : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * - Employé : peut modifier son profil (firstName, lastName, email, phone uniquement)
+     * 
+     * Note : teamId et scheduleId ne sont plus dans le DTO, donc plus de vérifications nécessaires
      */
     private validateUpdatePermissions(
         targetUser: User,
@@ -147,27 +149,6 @@ export class UserUseCase {
 
             if (dto.isActive !== undefined) {
                 forbiddenFields.push('isActive');
-            }
-
-            if (dto.teamId !== undefined) {
-                forbiddenFields.push('teamId');
-            }
-
-            if (dto.scheduleId !== undefined) {
-                forbiddenFields.push('scheduleId');
-            }
-
-            // Employé : restrictions supplémentaires
-            if (requestingUserRole === 'employe') {
-                // Un employé ne peut pas changer son équipe
-                if (dto.teamId !== undefined) {
-                    throw new ForbiddenError("Les employés ne peuvent pas changer d'équipe. Contactez votre manager ou un administrateur.");
-                }
-
-                // Un employé ne peut pas changer son schedule
-                if (dto.scheduleId !== undefined) {
-                    throw new ForbiddenError("Les employés ne peuvent pas modifier leur planning. Contactez votre manager ou un administrateur.");
-                }
             }
 
             if (forbiddenFields.length > 0) {

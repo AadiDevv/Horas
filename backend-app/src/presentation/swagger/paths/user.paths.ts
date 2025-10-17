@@ -221,18 +221,20 @@ WHERE teams.managerId = :managerId
 
 **Admin :**
 - Peut modifier n'importe quel utilisateur
-- Peut modifier tous les champs (firstName, lastName, email, phone, role, isActive, teamId, scheduleId)
+- Peut modifier tous les champs : firstName, lastName, email, phone, role, isActive
 
 **Manager :**
 - Peut uniquement modifier son propre profil
 - Champs autorisés : firstName, lastName, email, phone
-- Champs interdits : role, isActive, teamId, scheduleId
+- Champs interdits : role, isActive
 
 **Employé :**
 - Peut uniquement modifier son propre profil  
 - Champs autorisés : firstName, lastName, email, phone
-- Champs interdits : role, isActive, teamId, scheduleId
-- Messages d'erreur spécifiques pour les restrictions d'équipe et de planning`,
+- Champs interdits : role, isActive
+
+**Note :** teamId et scheduleId ne sont plus modifiables via cette route. 
+Ces attributs seront gérés par des routes admin dédiées dans une version future.`,
             tags: ['Users'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -280,24 +282,6 @@ WHERE teams.managerId = :managerId
                                     value: {
                                         success: false,
                                         error: 'Vous n\'avez pas le droit de modifier les champs suivants : role, isActive. Seuls les administrateurs peuvent modifier ces informations.',
-                                        code: 'FORBIDDEN',
-                                        timestamp: '2025-10-16T12:00:00.000Z'
-                                    }
-                                },
-                                employeeTeamRestriction: {
-                                    summary: 'Employé ne peut pas changer d\'équipe',
-                                    value: {
-                                        success: false,
-                                        error: 'Les employés ne peuvent pas changer d\'équipe. Contactez votre manager ou un administrateur.',
-                                        code: 'FORBIDDEN',
-                                        timestamp: '2025-10-16T12:00:00.000Z'
-                                    }
-                                },
-                                employeeScheduleRestriction: {
-                                    summary: 'Employé ne peut pas modifier son planning',
-                                    value: {
-                                        success: false,
-                                        error: 'Les employés ne peuvent pas modifier leur planning. Contactez votre manager ou un administrateur.',
                                         code: 'FORBIDDEN',
                                         timestamp: '2025-10-16T12:00:00.000Z'
                                     }

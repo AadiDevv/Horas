@@ -181,7 +181,7 @@ export class TeamUseCase {
         const membersCount = team.members?.length ?? 0;
         if (membersCount > 0) {
             throw new ValidationError(
-                `L'équipe "${team.lastName}" contient ${membersCount} membre(s). ` +
+                `L'équipe "${team.name}" contient ${membersCount} membre(s). ` +
                 `Veuillez d'abord déplacer ou retirer les members avant de supprimer l'équipe.`
             );
         }

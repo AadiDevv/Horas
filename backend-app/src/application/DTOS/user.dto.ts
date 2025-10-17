@@ -21,7 +21,13 @@ export interface UserCreateDTO {
 /**
  * DTO pour mettre à jour un utilisateur
  * Tous les champs sont optionnels (PATCH)
- * Le mot de passe n'est pas inclus ici (route séparée pour changer le mot de passe)
+ * 
+ * Restrictions métier :
+ * - teamId et scheduleId ne sont pas modifiables via ce DTO
+ * - Seuls les champs de profil personnel sont autorisés
+ * - Le mot de passe n'est pas inclus ici (route séparée pour changer le mot de passe)
+ * 
+ * Note : Pour modifier l'assignation d'équipe/planning, utiliser une route admin dédiée
  */
 export interface UserUpdateDTO {
     firstName?: string;
@@ -30,8 +36,6 @@ export interface UserUpdateDTO {
     phone?: string;
     role?: Role;
     isActive?: boolean;
-    teamId?: number;
-    scheduleId?: number;
 }
 
 /**

@@ -255,6 +255,9 @@ export class User {
   /**
    * Met à jour une entité User existante avec les données d'un DTO de mise à jour
    * Retourne une nouvelle instance (immutabilité)
+   * 
+   * Note : teamId et scheduleId ne sont plus gérés ici car retirés du UserUpdateDTO
+   * Ces attributs seront modifiés via des routes admin dédiées
    */
   public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
     return new User({
@@ -265,8 +268,7 @@ export class User {
       phone: dto.phone ?? existingUser.phone,
       role: dto.role ?? existingUser.role,
       isActive: dto.isActive ?? existingUser.isActive,
-      team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
-      schedule: dto.scheduleId !== undefined ? { id: dto.scheduleId } : existingUser.schedule,
+      // team et schedule conservent leurs valeurs existantes (pas modifiables via ce DTO)
       updatedAt: new Date(Date.now()),
     });
   }
