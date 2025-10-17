@@ -48,7 +48,6 @@ export interface TeamCreateDTO {
 export interface TeamUpdateDTO {
     name?: string;
     description?: string;
-    managerId?: number;
     scheduleId?: number;
 }
 // #endregion

@@ -132,18 +132,17 @@ export class TeamUseCase {
      */
     async updateTeam(id: number, dto: TeamUpdateDTO, userId: number): Promise<Team> {
         // Vérification : interdiction de changer le manager
-        if (dto.managerId !== undefined) {
-            throw new ValidationError(
-                "Le managerId d'une équipe ne peut pas être modifié. " +
-                "Pour réassigner une équipe, veuillez la supprimer et en créer une nouvelle."
-            );
-        }
-        if (dto.managerId !== userId) {
-            throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
-        }
 
         // Récupération de l'équipe existante
         const existingTeam = await this.getTeam_ById(id);
+
+        const teamManagerId = existingTeam?.managerId;
+
+        if (teamManagerId !== userId) {
+            console.log("dto.managerId : ", teamManagerId);
+            console.log("userId : ", userId);
+            throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
+        }
 
         // Mise à jour via la factory method
         const updatedTeam = Team.fromUpdateDTO(existingTeam, dto);
@@ -181,7 +180,7 @@ export class TeamUseCase {
         const membersCount = team.members?.length ?? 0;
         if (membersCount > 0) {
             throw new ValidationError(
-                `L'équipe "${team.lastName}" contient ${membersCount} membre(s). ` +
+                `L'équipe "${team.name}" contient ${membersCount} membre(s). ` +
                 `Veuillez d'abord déplacer ou retirer les members avant de supprimer l'équipe.`
             );
         }

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { UserCreateDTO, UserLoginDTO, UserReadDTO, TokenResponse } from '../../application/DTOS/auth.dto';
+import { UserCreateDTO, UserLoginDTO, UserReadDTO, TokenResponse } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
 import { JWTService } from '@/application/services';
 
