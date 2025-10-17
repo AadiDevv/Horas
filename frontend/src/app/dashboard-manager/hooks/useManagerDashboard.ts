@@ -75,7 +75,8 @@ export function useAgentManager() {
       email: formData.email,
       role: formData.role,
       telephone: formData.telephone || undefined,
-      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined
+      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined,
+      password: formData.password // Ajout du mot de passe
     };
     const result = await api.createAgent(newAgent);
     if (result.success) {

@@ -34,6 +34,7 @@ export interface AgentFormData {
   telephone: string;
   role: string;
   equipeId: string;
+  password?: string; // Requis uniquement lors de la création
 }
 
 export interface EquipeFormData {
