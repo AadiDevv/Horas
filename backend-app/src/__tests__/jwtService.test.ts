@@ -1,5 +1,5 @@
-import { JWTService } from '../application/services/';
-import { User } from '../domain/entities/user';
+import { JWTService } from '@/application/services/';
+import { User } from '@/domain/entities/user';
 
 describe('JWTService', () => {
   const jwtService = new JWTService();
@@ -19,7 +19,7 @@ describe('JWTService', () => {
     scheduleId: undefined,
   };
 
-  const user = User.fromCreateDTOtoEntity(fakeDTO, hashedPassword);
+  const user = User.fromCreateDTO(fakeDTO, hashedPassword);
   Object.assign(user, { id: 123 });
   user.isActive = true;
   user.lastLoginAt = new Date();

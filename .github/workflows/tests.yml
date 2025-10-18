@@ -3,13 +3,15 @@ name: Horas tests
 on:
   push:
     branches:
+      - main
       - dev
-      - back-tests
+      - back-jest
 
   pull_request:
     types:
       - closed
     branches:
+      - main
       - dev
 
 jobs:
