@@ -36,10 +36,6 @@ export const swaggerDefinition: SwaggerDefinition = {
             description: 'Endpoints pour l\'authentification et la gestion des users'
         },
         {
-            name: 'Users (À venir)',
-            description: '🔮 Routes de gestion des users (listing, modification, suppression)'
-        },
-        {
             name: 'Équipes',
             description: 'Gestion des équipes de travail (CRUD complet, permissions basées sur les rôles)'
         },

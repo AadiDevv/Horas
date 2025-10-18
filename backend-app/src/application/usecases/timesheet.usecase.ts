@@ -28,14 +28,9 @@ export class TimesheetUseCase {
     async getTimesheets(userRole: string, userId: number, filter?: TimesheetFilterDTO): Promise<Timesheet[]> {
         let effectiveFilter: TimesheetFilterDTO = { ...filter };
 
-        if (userRole === "employee") {
+        if (userRole !== "admin" && userRole !== "manager") {
             // L'employé ne peut voir que ses propres timesheets
             effectiveFilter.employeId = userId;
-        }
-
-        if (userRole === "admin" || userRole === "manager") {
-            // Admins et managers peuvent utiliser les filtres tels quels
-            // (Attention : à sécuriser côté contrôleur si besoin)
         }
 
         const timesheets = await this.R_timesheet.getAllTimesheets(effectiveFilter);
@@ -45,15 +40,15 @@ export class TimesheetUseCase {
     /**
      * Récupère un timesheet par son ID
      */
-    async getTimesheet_ById(id: number, userRole: string, userId: number): Promise<Timesheet> {
-        const timesheet = await this.R_timesheet.getTimesheet_ById(id);
+    async getTimesheetById(id: number, userRole: string, userId: number): Promise<Timesheet> {
+        const timesheet = await this.R_timesheet.getTimesheetById(id);
 
         if (!timesheet) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
 
         // Si employé, il ne peut consulter que ses propres timesheets
-        if (userRole === "employee" && timesheet.employeId !== userId) {
+        if (userRole === "employe" && timesheet.employeId !== userId) {
             throw new ForbiddenError("Accès interdit à ce timesheet");
         }
 
@@ -64,7 +59,7 @@ export class TimesheetUseCase {
      * Récupère les statistiques de timesheets d'un employé
      */
     async getTimesheetStats(employeId: number, startDate: string, endDate: string, userRole: string, userId: number): Promise<TimesheetStatsDTO> {
-        if (userRole === "employee" && employeId !== userId) {
+        if (userRole === "employe" && employeId !== userId) {
             throw new ForbiddenError("Vous ne pouvez consulter que vos propres statistiques");
         }
 
@@ -94,7 +89,7 @@ export class TimesheetUseCase {
      * - Admin/manager uniquement
      */
     async updateTimesheet(id: number, dto: TimesheetUpdateDTO): Promise<Timesheet> {
-        const existing = await this.R_timesheet.getTimesheet_ById(id);
+        const existing = await this.R_timesheet.getTimesheetById(id);
         if (!existing) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
@@ -113,7 +108,7 @@ export class TimesheetUseCase {
      * Supprime un timesheet (admin/manager uniquement)
      */
     async deleteTimesheet(id: number): Promise<void> {
-        const timesheet = await this.R_timesheet.getTimesheet_ById(id);
+        const timesheet = await this.R_timesheet.getTimesheetById(id);
         if (!timesheet) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }

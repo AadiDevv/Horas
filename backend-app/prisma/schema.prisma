@@ -101,7 +101,7 @@ model Timesheet {
   id           Int             @id @default(autoincrement())
   employeId   Int
   date         DateTime         @db.Date
-  hour         DateTime
+  hour         DateTime         @db.Time
   clockin      Boolean
   status       TimesheetStatus  @default(normal)
   createdAt    DateTime         @default(now())

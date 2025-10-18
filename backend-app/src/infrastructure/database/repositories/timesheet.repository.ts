@@ -13,11 +13,14 @@ export class TimesheetRepository implements ITimesheet {
     async getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet[]> {
         const { employeId, startDate, endDate, status, clockin } = filter || {};
 
+        const dateFilter: any = {};
+        if (startDate) dateFilter.gte = new Date(startDate);
+        if (endDate) dateFilter.lte = new Date(endDate);
+
         const timesheets = await prisma.timesheet.findMany({
             where: {
                 ...(employeId && { employeId }),
-                ...(startDate && { date: { gte: new Date(startDate) } }),
-                ...(endDate && { date: { lte: new Date(endDate) } }),
+                ...(Object.keys(dateFilter).length && { date: dateFilter }),
                 ...(status && { status }),
                 ...(clockin !== undefined && { clockin }),
             },
@@ -42,7 +45,7 @@ export class TimesheetRepository implements ITimesheet {
         }));
     }
 
-    async getTimesheet_ById(id: number): Promise<Timesheet | null> {
+    async getTimesheetById(id: number): Promise<Timesheet | null> {
         const timesheet = await prisma.timesheet.findUnique({
             where: { id },
             include: {

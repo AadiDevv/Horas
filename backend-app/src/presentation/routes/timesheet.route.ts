@@ -25,6 +25,21 @@ router.get('/',
 );
 
 /**
+ * GET /api/timesheets/stats/
+ * Stats d'un employé
+ */
+router.get('/stats',
+    authMiddleware,
+    async (req, res, next) => {
+        try {
+            await timesheetController.getStats(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
  * GET /api/timesheets/:id
  * Détail d’un timesheet par ID
  */
@@ -32,7 +47,7 @@ router.get('/:id',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await timesheetController.getTimesheet_ById(req, res);
+            await timesheetController.getTimesheetById(req, res);
         } catch (error) {
             next(error);
         }

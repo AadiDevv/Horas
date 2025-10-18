@@ -1,5 +1,5 @@
 import { Timesheet } from "@/domain/entities/timesheet";
-import { TimesheetFilterDTO } from "@/application/DTOS";
+import { TimesheetFilterDTO, TimesheetStatsDTO } from "@/application/DTOS";
 
 /**
  * Interface du repository Timesheet
@@ -17,7 +17,7 @@ export interface ITimesheet {
     /**
      * Récupère un timesheet par son ID
      */
-    getTimesheet_ById(id: number): Promise<Timesheet | null>;
+    getTimesheetById(id: number): Promise<Timesheet | null>;
 
     /**
      * Récupère tous les timesheets d'un employé
@@ -59,7 +59,7 @@ export interface ITimesheet {
     /**
      * Récupère les statistiques de présence pour un employé donné sur une période
      */
-    getTimesheetStats(employeId: number, startDate: string, endDate: string): Promise<import("@/application/DTOS").TimesheetStatsDTO>;
+    getTimesheetStats(employeId: number, startDate: string, endDate: string): Promise<TimesheetStatsDTO>;
 
     // #endregion
 }

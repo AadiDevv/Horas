@@ -24,8 +24,10 @@ export class TimesheetController {
             status: req.query.status as any,
             clockin: req.query.clockin ? req.query.clockin === 'true' : undefined,
         };
-
-        const timesheets = await this.UC_timesheet.getTimesheets(filter);
+        
+        const userId = req.user!.id;
+        const userRole = req.user.role;
+        const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
         const dto: TimesheetListItemDTO[] = timesheets.map(t => t.toListItemDTO());
 
         res.success(dto, "Pointages récupérés avec succès");
@@ -35,11 +37,13 @@ export class TimesheetController {
      * GET /api/timesheets/:id
      * Récupère un timesheet par ID
      */
-    async getTimesheet_ById(req: Request, res: Response): Promise<void> {
+    async getTimesheetById(req: Request, res: Response): Promise<void> {
         const id = Number(req.params.id);
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        const timesheet = await this.UC_timesheet.getTimesheet_ById(id);
+        const userId = req.user!.id;
+        const userRole = req.user.role;
+        const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
         const dto: TimesheetReadDTO = timesheet.toReadDTO();
 
         res.success(dto, "Pointage récupéré avec succès");
@@ -53,12 +57,14 @@ export class TimesheetController {
         const employeId = Number(req.query.employeId);
         const startDate = req.query.startDate as string;
         const endDate = req.query.endDate as string;
+        const userId = req.user!.id;
+        const userRole = req.user.role;
 
         if (isNaN(employeId) || !startDate || !endDate) {
             throw new ValidationError("employeId, startDate et endDate sont requis");
         }
 
-        const stats: TimesheetStatsDTO = await this.UC_timesheet.getStats(employeId, startDate, endDate);
+        const stats: TimesheetStatsDTO = await this.UC_timesheet.getTimesheetStats(employeId, startDate, endDate, userRole, userId);
         res.success(stats, "Statistiques récupérées avec succès");
     }
 
@@ -109,6 +115,7 @@ export class TimesheetController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
+        dto.hour = new Date(`1970-01-01T${dto.hour}`);
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
         const updatedDTO = updated.toReadDTO();
 
@@ -125,10 +132,9 @@ export class TimesheetController {
      */
     async deleteTimesheet(req: Request, res: Response): Promise<void> {
         const id = Number(req.params.id);
-        const userRole = req.user.role;
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        await this.UC_timesheet.deleteTimesheet(id, userRole);
+        await this.UC_timesheet.deleteTimesheet(id);
 
         res.success(null, "Pointage supprimé avec succès");
     }

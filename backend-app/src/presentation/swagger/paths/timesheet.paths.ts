@@ -205,7 +205,7 @@ export const timesheetPaths = {
                 {
                     name: 'status',
                     in: 'query',
-                    schema: { type: 'string', enum: ['normal', 'retard', 'absence', 'incomplet'] },
+                    schema: { type: 'string', enum: ['normal', 'delay', 'absence', 'incomplete'] },
                     description: 'Filtrer par statut'
                 },
                 {
