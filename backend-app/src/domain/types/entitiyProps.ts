@@ -16,9 +16,18 @@ export type UserProps = {
     deletedAt?: Date,
 
     phone?: string,
-    teamId?: number,
-    scheduleId?: number,
     id?: number,
+    team?: {
+        id: number;
+        name?: string;
+    };
+
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
 }
 
 export type TeamProps = {

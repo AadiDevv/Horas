@@ -1,15 +1,15 @@
 // #region Authentication Paths
 /**
- * Routes d'authentification et de gestion des users
+ * Routes d'authentification
  * 
  * Architecture de sécurité :
- * - /register : Public - Auto-inscription (employe uniquement)
- * - /register/employe : Protégé - Création d'employé (manager/admin)
- * - /register/manager : Protégé - Création de manager (admin uniquement)
- * - /login : Public - Connexion
+ * - POST /api/auth/register : Public - Auto-inscription (employe uniquement)
+ * - POST /api/auth/register/employe : Protégé - Création d'employé (manager/admin)
+ * - POST /api/auth/register/manager : Protégé - Création de manager (admin uniquement)
+ * - POST /api/auth/login : Public - Connexion
  */
 export const authPaths = {
-    '/api/users/register': {
+    '/api/auth/register': {
         post: {
             summary: 'Inscription d\'un nouvel utilisateur',
             description: 'Crée un nouveau compte utilisateur et retourne un token JWT',
@@ -134,7 +134,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/register/employe': {
+    '/api/auth/register/employe': {
         post: {
             summary: 'Création d\'un employé (Manager/Admin)',
             description: 'Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.',
@@ -260,7 +260,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/register/manager': {
+    '/api/auth/register/manager': {
         post: {
             summary: 'Création d\'un manager (Admin uniquement)',
             description: 'Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.',
@@ -385,7 +385,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/login': {
+    '/api/auth/login': {
         post: {
             summary: 'Connexion d\'un utilisateur',
             description: 'Authentifie un utilisateur et retourne un token JWT',

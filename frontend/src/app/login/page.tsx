@@ -33,7 +33,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post<LoginResponse>("/api/users/login", {
+      const response = await axios.post<LoginResponse>("/api/auth/login", {
         email,
         password,
       });
@@ -268,7 +268,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+        {/*<p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
           Vous n'avez pas de compte ?{" "}
           <button
             className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200"
@@ -276,7 +276,7 @@ export default function LoginPage() {
           >
             Créer un compte
           </button>
-        </p>
+        </p>*/}
       </div>
     </div>
   );
