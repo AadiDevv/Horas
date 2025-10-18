@@ -1,19 +1,57 @@
 import { Role } from "./valueType";
+import { User } from "../entities/user";
+import { TimesheetStatus } from "@/domain/types";
+
 export type UserProps = {
     email: string,
-    hashedPassword: string,
-    prenom: string,
-    nom: string,
+    hashedPassword?: string,
+    firstName: string,
+    lastName: string,
     role: Role,
     isActive: boolean,
 
     createdAt?: Date,
     updatedAt?: Date,
-    lastLoginAt?: Date | null,
-    deletedAt?: Date | null,
+    lastLoginAt?: Date,
+    deletedAt?: Date,
 
-    telephone?: string | null,
-    equipeId?: number | null,
-    plageHoraireId?: number | null,
+    phone?: string,
     id?: number,
+    team?: {
+        id: number;
+        name?: string;
+    };
+
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
+}
+
+export type TeamProps = {
+    id?: number,
+    name: string,
+    description?: string,
+    managerId: number,
+    scheduleId?: number,
+    createdAt?: Date,
+    updatedAt?: Date,
+    deletedAt?: Date | null,
+    manager?: User,
+    members?: User[],
+    membersCount?: number,
+}
+
+export interface TimesheetProps {
+    id?: number;
+    employeId: number;
+    date: Date;
+    hour: Date;
+    clockin: boolean;
+    status?: TimesheetStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
+    employe?: User;
 }

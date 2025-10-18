@@ -4,13 +4,13 @@ export const userSchemas = {
     UserUpdateDTO: {
         type: 'object',
         properties: {
-            prenom: {
+            firstName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Jean',
                 description: 'Prénom de l\'utilisateur'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Dupont',
@@ -22,7 +22,7 @@ export const userSchemas = {
                 example: 'jean.dupont@example.com',
                 description: 'Adresse email'
             },
-            telephone: {
+            phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
                 example: '+33 6 12 34 56 78',
@@ -38,21 +38,14 @@ export const userSchemas = {
                 type: 'boolean',
                 example: true,
                 description: 'Statut actif/inactif'
-            },
-            equipeId: {
-                type: 'integer',
-                nullable: true,
-                example: 5,
-                description: 'ID de l\'équipe'
-            },
-            plageHoraireId: {
-                type: 'integer',
-                nullable: true,
-                example: 2,
-                description: 'ID de la plage horaire'
             }
         },
-        description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH)'
+        description: `Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH).
+
+Restrictions métier :
+- teamId et scheduleId ne sont pas modifiables via ce DTO
+- Seuls les champs de profil personnel sont autorisés
+- Pour modifier l'assignation d'équipe/planning, utiliser une route admin dédiée`
     },
 
     UserChangePasswordDTO: {
@@ -99,15 +92,15 @@ export const userSchemas = {
                 example: 1,
                 description: 'ID de l\'utilisateur'
             },
-            prenom: {
+            firstName: {
                 type: 'string',
                 example: 'Jean',
-                description: 'Prénom'
+                description: 'PrélastName'
             },
-            nom: {
+            lastName: {
                 type: 'string',
                 example: 'Dupont',
-                description: 'Nom'
+                description: 'lastName'
             },
             email: {
                 type: 'string',
@@ -126,17 +119,17 @@ export const userSchemas = {
                 example: true,
                 description: 'Statut actif'
             },
-            equipeId: {
+            teamId: {
                 type: 'integer',
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe'
             },
-            equipeNom: {
+            teamlastName: {
                 type: 'string',
                 nullable: true,
                 example: 'Équipe Production',
-                description: 'Nom de l\'équipe'
+                description: 'lastName de l\'équipe'
             }
         }
     },
@@ -156,7 +149,7 @@ export const userSchemas = {
             },
             message: {
                 type: 'string',
-                example: 'Liste des utilisateurs récupérée avec succès'
+                example: 'Liste des users récupérée avec succès'
             },
             timestamp: {
                 type: 'string',

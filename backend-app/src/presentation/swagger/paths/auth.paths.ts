@@ -1,15 +1,15 @@
 // #region Authentication Paths
 /**
- * Routes d'authentification et de gestion des utilisateurs
+ * Routes d'authentification
  * 
  * Architecture de sécurité :
- * - /register : Public - Auto-inscription (employe uniquement)
- * - /register/employe : Protégé - Création d'employé (manager/admin)
- * - /register/manager : Protégé - Création de manager (admin uniquement)
- * - /login : Public - Connexion
+ * - POST /api/auth/register : Public - Auto-inscription (employe uniquement)
+ * - POST /api/auth/register/employe : Protégé - Création d'employé (manager/admin)
+ * - POST /api/auth/register/manager : Protégé - Création de manager (admin uniquement)
+ * - POST /api/auth/login : Public - Connexion
  */
 export const authPaths = {
-    '/api/users/register': {
+    '/api/auth/register': {
         post: {
             summary: 'Inscription d\'un nouvel utilisateur',
             description: 'Crée un nouveau compte utilisateur et retourne un token JWT',
@@ -25,8 +25,8 @@ export const authPaths = {
                             basic: {
                                 summary: 'Inscription basique',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123'
                                 }
@@ -34,11 +34,11 @@ export const authPaths = {
                             complete: {
                                 summary: 'Inscription complète',
                                 value: {
-                                    prenom: 'Jean',
-                                    nom: 'Dupont',
+                                    firstName: 'Jean',
+                                    lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    telephone: '+33 6 12 34 56 78'
+                                    phone: '+33 6 12 34 56 78'
                                 }
                             }
                         }
@@ -82,21 +82,21 @@ export const authPaths = {
                                         statusCode: 400
                                     }
                                 },
-                                invalidNom: {
-                                    summary: 'Nom invalide',
+                                invalidlastName: {
+                                    summary: 'lastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Nom invalide (minimum 2 caractères)',
+                                        message: 'lastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 },
-                                invalidPrenom: {
-                                    summary: 'Prénom invalide',
+                                invalidfirstName: {
+                                    summary: 'PrélastName invalide',
                                     value: {
                                         success: false,
                                         error: 'ValidationError',
-                                        message: 'Prénom invalide (minimum 2 caractères)',
+                                        message: 'PrélastName invalide (minimum 2 caractères)',
                                         statusCode: 400
                                     }
                                 }
@@ -134,7 +134,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/register/employe': {
+    '/api/auth/register/employe': {
         post: {
             summary: 'Création d\'un employé (Manager/Admin)',
             description: 'Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.',
@@ -148,26 +148,26 @@ export const authPaths = {
                             $ref: '#/components/schemas/UserCreateDTO'
                         },
                         examples: {
-                            employeeBasic: {
+                            employeBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe'
                                 }
                             },
-                            employeeComplete: {
+                            employeComplete: {
                                 summary: 'Création complète avec équipe',
                                 value: {
-                                    prenom: 'Marie',
-                                    nom: 'Martin',
+                                    firstName: 'Marie',
+                                    lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'employe',
-                                    telephone: '+33 6 12 34 56 78',
-                                    equipeId: 5
+                                    phone: '+33 6 12 34 56 78',
+                                    teamId: 5
                                 }
                             }
                         }
@@ -260,7 +260,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/register/manager': {
+    '/api/auth/register/manager': {
         post: {
             summary: 'Création d\'un manager (Admin uniquement)',
             description: 'Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.',
@@ -277,8 +277,8 @@ export const authPaths = {
                             managerBasic: {
                                 summary: 'Création basique',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager'
@@ -287,12 +287,12 @@ export const authPaths = {
                             managerComplete: {
                                 summary: 'Création complète',
                                 value: {
-                                    prenom: 'Paul',
-                                    nom: 'Bernard',
+                                    firstName: 'Paul',
+                                    lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
                                     role: 'manager',
-                                    telephone: '+33 6 98 76 54 32'
+                                    phone: '+33 6 98 76 54 32'
                                 }
                             }
                         }
@@ -385,7 +385,7 @@ export const authPaths = {
         }
     },
 
-    '/api/users/login': {
+    '/api/auth/login': {
         post: {
             summary: 'Connexion d\'un utilisateur',
             description: 'Authentifie un utilisateur et retourne un token JWT',

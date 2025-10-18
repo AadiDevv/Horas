@@ -1,30 +1,30 @@
-// #region Horaire Schemas
-export const horaireSchemas = {
+// #region Schedule Schemas
+export const scheduleSchemas = {
     // #region Request DTOs
-    HoraireCreateDTO: {
+    ScheduleCreateDTO: {
         type: 'object',
-        required: ['nom', 'heureDebut', 'heureFin', 'joursActifs'],
+        required: ['lastName', 'startHour', 'endHour', 'activeDays'],
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
-                example: 'Horaire de journée',
-                description: 'Nom de l\'horaire'
+                example: 'Schedule de journée',
+                description: 'lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '09:00',
-                description: 'Heure de début au format HH:mm (ex: 09:00)'
+                description: 'Hour de début au format HH:mm (ex: 09:00)'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '17:30',
-                description: 'Heure de fin au format HH:mm (ex: 17:30)'
+                description: 'Hour de fin au format HH:mm (ex: 17:30)'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer',
@@ -38,29 +38,29 @@ export const horaireSchemas = {
         }
     },
 
-    HoraireUpdateDTO: {
+    ScheduleUpdateDTO: {
         type: 'object',
         properties: {
-            nom: {
+            lastName: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
-                example: 'Horaire de journée modifié',
-                description: 'Nouveau nom de l\'horaire'
+                example: 'Schedule de journée modifié',
+                description: 'Nouveau lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '08:30',
-                description: 'Nouvelle heure de début'
+                description: 'Nouvelle hour de début'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$',
                 example: '18:00',
-                description: 'Nouvelle heure de fin'
+                description: 'Nouvelle hour de fin'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer',
@@ -76,30 +76,30 @@ export const horaireSchemas = {
     // #endregion
 
     // #region Response DTOs
-    HoraireReadDTO: {
+    ScheduleReadDTO: {
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 example: 1,
-                description: 'ID de l\'horaire'
+                description: 'ID de l\'schedule'
             },
-            nom: {
+            lastName: {
                 type: 'string',
-                example: 'Horaire de journée',
-                description: 'Nom de l\'horaire'
+                example: 'Schedule de journée',
+                description: 'lastName de l\'schedule'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 example: '09:00',
-                description: 'Heure de début au format HH:mm'
+                description: 'Hour de début au format HH:mm'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 example: '17:30',
-                description: 'Heure de fin au format HH:mm'
+                description: 'Hour de fin au format HH:mm'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer'
@@ -119,25 +119,25 @@ export const horaireSchemas = {
                 example: '2025-01-15T14:30:00.000Z',
                 description: 'Date de dernière modification'
             },
-            utilisateursCount: {
+            usersCount: {
                 type: 'integer',
                 example: 25,
-                description: 'Nombre d\'utilisateurs assignés à cet horaire'
+                description: 'lastNamebre d\'users assignés à cet schedule'
             }
         }
     },
 
-    HoraireWithUtilisateursDTO: {
+    ScheduleWithUsersDTO: {
         allOf: [
             {
-                $ref: '#/components/schemas/HoraireReadDTO'
+                $ref: '#/components/schemas/ScheduleReadDTO'
             },
             {
                 type: 'object',
                 properties: {
-                    utilisateurs: {
+                    users: {
                         type: 'array',
-                        description: 'Liste des utilisateurs assignés à cet horaire',
+                        description: 'Liste des users assignés à cet schedule',
                         items: {
                             type: 'object',
                             properties: {
@@ -145,11 +145,11 @@ export const horaireSchemas = {
                                     type: 'integer',
                                     example: 10
                                 },
-                                prenom: {
+                                firstName: {
                                     type: 'string',
                                     example: 'Pierre'
                                 },
-                                nom: {
+                                lastName: {
                                     type: 'string',
                                     example: 'Martin'
                                 },
@@ -170,33 +170,33 @@ export const horaireSchemas = {
         ]
     },
 
-    HoraireListItemDTO: {
+    ScheduleListItemDTO: {
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 example: 1
             },
-            nom: {
+            lastName: {
                 type: 'string',
-                example: 'Horaire de journée'
+                example: 'Schedule de journée'
             },
-            heureDebut: {
+            startHour: {
                 type: 'string',
                 example: '09:00'
             },
-            heureFin: {
+            endHour: {
                 type: 'string',
                 example: '17:30'
             },
-            joursActifs: {
+            activeDays: {
                 type: 'array',
                 items: {
                     type: 'integer'
                 },
                 example: [1, 2, 3, 4, 5]
             },
-            utilisateursCount: {
+            usersCount: {
                 type: 'integer',
                 example: 25
             }
@@ -205,7 +205,7 @@ export const horaireSchemas = {
     // #endregion
 
     // #region Standard Responses
-    HoraireCreatedResponse: {
+    ScheduleCreatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -213,11 +213,11 @@ export const horaireSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/HoraireReadDTO'
+                $ref: '#/components/schemas/ScheduleReadDTO'
             },
             message: {
                 type: 'string',
-                example: 'Horaire créé avec succès'
+                example: 'Schedule créé avec succès'
             },
             timestamp: {
                 type: 'string',
@@ -226,7 +226,7 @@ export const horaireSchemas = {
         }
     },
 
-    HoraireListResponse: {
+    ScheduleListResponse: {
         type: 'object',
         properties: {
             success: {
@@ -236,12 +236,12 @@ export const horaireSchemas = {
             data: {
                 type: 'array',
                 items: {
-                    $ref: '#/components/schemas/HoraireListItemDTO'
+                    $ref: '#/components/schemas/ScheduleListItemDTO'
                 }
             },
             message: {
                 type: 'string',
-                example: 'Liste des horaires récupérée avec succès'
+                example: 'Liste des schedules récupérée avec succès'
             },
             timestamp: {
                 type: 'string',

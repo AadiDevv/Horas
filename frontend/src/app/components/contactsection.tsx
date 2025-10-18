@@ -13,7 +13,7 @@ export default function ContactSection() {
         <p className="text-[#333333]/80 mb-8">
           Contactez-nous via ce formulaire de contact — c'est toujours un plaisir d'aider !
         </p>
-        <p className="text-sm text-[#333333]/60">Nous répondons généralement en 24 heures.</p>
+        <p className="text-sm text-[#333333]/60">Nous répondons généralement en 24 hours.</p>
       </div>
 
       {/* Formulaire à droite */}
@@ -23,7 +23,7 @@ export default function ContactSection() {
       >
         <div className="mb-5">
           <label htmlFor="name" className="block text-sm font-medium text-[#333333] mb-2">
-            Nom
+            lastName
           </label>
           <input
             type="text"

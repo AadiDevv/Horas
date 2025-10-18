@@ -1,6 +1,4 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
+"use client";
 
 type ButtonProps = {
   children: React.ReactNode;
@@ -9,15 +7,14 @@ type ButtonProps = {
 };
 
 export default function Button({ children, onClick, className }: ButtonProps) {
-  const router = useRouter();
   return (
     <button
-      onClick={() => router.push('/login')}
+      onClick={onClick}
       className={`
         bg-[#333333] text-white px-6 py-3 rounded-lg
         hover:bg-[#444444] transition duration-200 shadow
         font-semibold
-        ${className || ''}
+        ${className || ""}
       `}
     >
       {children}

@@ -6,7 +6,7 @@ import featureImage from '../assets/dashbaord-agent.png';
 export default function Features() {
   const features = [
     {
-      title: 'Suivez vos heures simplement',
+      title: 'Suivez vos hours simplement',
       description:
         'Enregistrez vos arrivées, départs et pauses en un clic. Fini les feuilles de présence manuelles.',
       icon: '⏱️',
@@ -14,7 +14,7 @@ export default function Features() {
     {
       title: 'Gérez vos équipes en temps réel',
       description:
-        'Visualisez la présence de vos agents, leurs heures travaillées et les absences depuis un tableau clair et centralisé.',
+        'Visualisez la présence de vos agents, leurs hours travaillées et les absences depuis un tableau clair et centralisé.',
       icon: '👥',
     },
     {
@@ -42,7 +42,7 @@ export default function Features() {
 
       {/* TITRE + AVANTAGES */}
       <div className="mt-20 max-w-5xl mx-auto text-center">
-        
+
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {features.map((f, index) => (
