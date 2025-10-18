@@ -8,13 +8,13 @@ export const userSchemas = {
                 type: 'string',
                 minLength: 2,
                 example: 'Jean',
-                description: 'PrélastName de l\'utilisateur'
+                description: 'Prénom de l\'utilisateur'
             },
             lastName: {
                 type: 'string',
                 minLength: 2,
                 example: 'Dupont',
-                description: 'lastName de l\'utilisateur'
+                description: 'Nom de l\'utilisateur'
             },
             email: {
                 type: 'string',
@@ -38,21 +38,14 @@ export const userSchemas = {
                 type: 'boolean',
                 example: true,
                 description: 'Statut actif/inactif'
-            },
-            teamId: {
-                type: 'integer',
-                nullable: true,
-                example: 5,
-                description: 'ID de l\'équipe'
-            },
-            scheduleId: {
-                type: 'integer',
-                nullable: true,
-                example: 2,
-                description: 'ID de la plage schedule'
             }
         },
-        description: 'Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH)'
+        description: `Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH).
+
+Restrictions métier :
+- teamId et scheduleId ne sont pas modifiables via ce DTO
+- Seuls les champs de profil personnel sont autorisés
+- Pour modifier l'assignation d'équipe/planning, utiliser une route admin dédiée`
     },
 
     UserChangePasswordDTO: {

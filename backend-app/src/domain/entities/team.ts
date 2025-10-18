@@ -109,6 +109,7 @@ export class Team {
             managerlastName: this.manager ? `${this.manager.firstName} ${this.manager.lastName}` : "Manager inconnu",
             membersCount: this.members?.length ?? this.membersCount ?? 0,
             createdAt: this.createdAt.toISOString(),
+            deletedAt: this.deletedAt?.toISOString(),
         };
     }
 

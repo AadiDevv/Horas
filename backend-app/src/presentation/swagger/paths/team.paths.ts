@@ -205,6 +205,66 @@ export const teamPaths = {
                                     message: { type: 'string', example: 'Équipe récupérée avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
+                            },
+                            examples: {
+                                teamWithMembers: {
+                                    summary: 'Équipe avec liste des membres',
+                                    value: {
+                                        success: true,
+                                        data: {
+                                            id: 1,
+                                            name: 'Équipe Production',
+                                            description: 'Équipe responsable de la production du matin',
+                                            managerId: 5,
+                                            scheduleId: 1,
+                                            createdAt: '2025-10-01T10:00:00.000Z',
+                                            updatedAt: '2025-10-05T14:30:00.000Z',
+                                            deletedAt: null,
+                                            manager: {
+                                                id: 5,
+                                                firstName: 'Marie',
+                                                lastName: 'Durand',
+                                                email: 'marie.durand@example.com',
+                                                role: 'manager'
+                                            },
+                                            membersCount: 3,
+                                            members: [
+                                                {
+                                                    id: 10,
+                                                    firstName: 'Pierre',
+                                                    lastName: 'Martin',
+                                                    email: 'pierre.martin@example.com',
+                                                    role: 'employe',
+                                                    isActive: true,
+                                                    phone: '+33 6 12 34 56 78',
+                                                    scheduleId: 1
+                                                },
+                                                {
+                                                    id: 11,
+                                                    firstName: 'Sophie',
+                                                    lastName: 'Bernard',
+                                                    email: 'sophie.bernard@example.com',
+                                                    role: 'employe',
+                                                    isActive: true,
+                                                    phone: '+33 6 23 45 67 89',
+                                                    scheduleId: 1
+                                                },
+                                                {
+                                                    id: 12,
+                                                    firstName: 'Luc',
+                                                    lastName: 'Petit',
+                                                    email: 'luc.petit@example.com',
+                                                    role: 'employe',
+                                                    isActive: false,
+                                                    phone: null,
+                                                    scheduleId: null
+                                                }
+                                            ]
+                                        },
+                                        message: 'Équipe récupérée avec succès',
+                                        timestamp: '2025-10-16T10:00:00.000Z'
+                                    }
+                                }
                             }
                         }
                     }

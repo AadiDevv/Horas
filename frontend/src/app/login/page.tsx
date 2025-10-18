@@ -33,7 +33,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post<LoginResponse>("/api/users/login", {
+      const response = await axios.post<LoginResponse>("/api/auth/login", {
         email,
         password,
       });

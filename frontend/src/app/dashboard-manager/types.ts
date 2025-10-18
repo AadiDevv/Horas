@@ -23,6 +23,7 @@ export interface Equipe {
   managerId?: number;
   agentCount: number;
   createdAt: string;
+  deletedAt?: string;
   agents?: Agent[];
   horaires?: Horaire[];
 }
@@ -34,6 +35,7 @@ export interface AgentFormData {
   telephone: string;
   role: string;
   equipeId: string;
+  password?: string; // Requis uniquement lors de la création
 }
 
 export interface EquipeFormData {

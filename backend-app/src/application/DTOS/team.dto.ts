@@ -23,7 +23,12 @@ export interface TeamMembreDTO {
     role: "admin" | "manager" | "employe";
     isActive: boolean;
     phone?: string;
-    scheduleId?: number;
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
 }
 // #endregion
 
@@ -48,7 +53,6 @@ export interface TeamCreateDTO {
 export interface TeamUpdateDTO {
     name?: string;
     description?: string;
-    managerId?: number;
     scheduleId?: number;
 }
 // #endregion
@@ -96,6 +100,7 @@ export interface TeamListItemDTO {
     managerlastName: string; // lastName complet du manager (firstName + lastName)
     membersCount: number;
     createdAt: string;
+    deletedAt?: string;
 }
 
 /**

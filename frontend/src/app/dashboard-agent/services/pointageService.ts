@@ -81,3 +81,50 @@ export async function getTodayPointages(): Promise<PointageReadDTO[]> {
   const response = await res.json();
   return response.data || [];
 }
+
+/**
+ * Récupère les pointages de la semaine en cours
+ */
+export async function getWeekPointages(): Promise<PointageReadDTO[]> {
+  if (USE_MOCK) {
+    // Calculer le lundi de la semaine en cours
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, etc.
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si dimanche, -6, sinon 1 - jour
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+
+    // Calculer le dimanche de la semaine en cours
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const mondayStr = monday.toISOString().split('T')[0];
+    const sundayStr = sunday.toISOString().split('T')[0];
+
+    console.log(`🔍 Récupération des pointages de ${mondayStr} à ${sundayStr}`);
+
+    const weekPointages = mockPointages.filter(p => p.date >= mondayStr && p.date <= sundayStr);
+    console.log(`✅ ${weekPointages.length} pointages trouvés pour la semaine`);
+
+    return weekPointages;
+  }
+
+  // Calculer les dates de début et fin de semaine
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diff);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const dateDebut = monday.toISOString().split('T')[0];
+  const dateFin = sunday.toISOString().split('T')[0];
+
+  const res = await fetch(`${API_BASE_URL}/api/pointages?dateDebut=${dateDebut}&dateFin=${dateFin}`);
+  const response = await res.json();
+  return response.data || [];
+}
