@@ -44,7 +44,7 @@ model User {
   isActive           Boolean   @default(true)
   teamId             Int?
   scheduleId         Int?
-  managerId          Int
+  managerId          Int?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @default(now())
   deletedAt          DateTime?
@@ -55,7 +55,7 @@ model User {
   team               Team?     @relation("TeamMembers",fields: [teamId], references: [id], onDelete: SetNull)
   schedule           Schedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
   manager            User?     @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
-  subordinates       User[]    @relation("UserManager")
+  employes           User[]    @relation("UserManager")
   managedTeams       Team[]    @relation("ManagerTeams")
   timesheets         Timesheet[]
   reports            Report[]  @relation("ReportManager")

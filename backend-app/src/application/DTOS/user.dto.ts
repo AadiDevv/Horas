@@ -15,6 +15,25 @@ export interface UserCreateDTO {
     scheduleId?: number;
     phone?: string;
 }
+
+export interface BaseUserCreateDTO {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    phone?: string;
+}
+
+export interface UserCreateEmployeeDTO extends BaseUserCreateDTO {
+    role: Extract<Role, "employe">;
+    teamId?: number;
+    scheduleId?: number;
+    managerId: number;
+}
+
+export interface UserCreateManagerDTO extends BaseUserCreateDTO {
+    role: Extract<Role, "manager">;
+}
 // #endregion
 
 // #region Update DTO
@@ -86,6 +105,51 @@ export interface UserReadDTO {
         endHour?: Date;
     };
 }
+export interface BaseUserReadDTO {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: Role;
+    isActive: boolean;
+    phone?: string;
+    createdAt: string;
+    updatedAt?: string;
+    lastLoginAt?: string;
+    deletedAt?: string;
+
+    
+
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
+}
+
+export interface UserReadEmployeeDTO extends BaseUserReadDTO {
+    role: Extract<Role, "employe">;
+    manager?: {
+        id: number;
+        firstName?: string;
+        lastName?: string;
+    };
+    team?: {
+        id: number;
+        name?: string;
+    };
+}
+
+export interface UserReadManagerDTO extends BaseUserReadDTO {
+    role: Extract<Role, "manager">;
+    employes?: {
+        id: number;
+        firstName?: string;
+        lastName?: string;
+    }[];
+}
+
 // #endregion
 
 // #region List DTO

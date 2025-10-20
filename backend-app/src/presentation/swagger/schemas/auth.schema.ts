@@ -1,6 +1,7 @@
 // #region Authentication Schemas
 export const authSchemas = {
     // #region Request DTOs
+    // #region Auto-inscription (Public)
     UserCreateDTO: {
         type: 'object',
         required: ['firstName', 'lastName', 'email', 'password', 'role'],
@@ -32,9 +33,9 @@ export const authSchemas = {
             },
             role: {
                 type: 'string',
-                enum: ['admin', 'manager', 'employe'],
+                enum: ['employe'],
                 example: 'employe',
-                description: 'Rôle de l\'utilisateur (employe par défaut pour l\'auto-inscription)'
+                description: 'Rôle de l\'utilisateur (employe uniquement pour l\'auto-inscription)'
             },
             phone: {
                 type: 'string',
@@ -53,6 +54,101 @@ export const authSchemas = {
                 nullable: true,
                 example: 2,
                 description: 'ID de la plage schedule (optionnel)'
+            }
+        }
+    },
+
+    // #region Création d'employé (Manager/Admin)
+    UserCreateEmployeeDTO: {
+        type: 'object',
+        required: ['firstName', 'lastName', 'email', 'password', 'managerId'],
+        properties: {
+            firstName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Marie',
+                description: 'PrélastName de l\'employé (minimum 2 caractères)'
+            },
+            lastName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Dubois',
+                description: 'lastName de l\'employé (minimum 2 caractères)'
+            },
+            email: {
+                type: 'string',
+                format: 'email',
+                example: 'marie.dubois@example.com',
+                description: 'Adresse email valide'
+            },
+            password: {
+                type: 'string',
+                minLength: 6,
+                format: 'password',
+                example: 'SecureP@ss123',
+                description: 'Mot de passe (minimum 6 caractères)'
+            },
+            managerId: {
+                type: 'integer',
+                example: 3,
+                description: 'ID du manager responsable (obligatoire)'
+            },
+            phone: {
+                type: 'string',
+                pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
+                example: '+33 6 12 34 56 78',
+                description: 'Numéro de téléphone (optionnel)'
+            },
+            teamId: {
+                type: 'integer',
+                nullable: true,
+                example: 5,
+                description: 'ID de l\'équipe (optionnel)'
+            },
+            scheduleId: {
+                type: 'integer',
+                nullable: true,
+                example: 2,
+                description: 'ID de la plage schedule (optionnel)'
+            }
+        }
+    },
+
+    // #region Création de manager (Admin uniquement)
+    UserCreateManagerDTO: {
+        type: 'object',
+        required: ['firstName', 'lastName', 'email', 'password'],
+        properties: {
+            firstName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Pierre',
+                description: 'PrélastName du manager (minimum 2 caractères)'
+            },
+            lastName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Martin',
+                description: 'lastName du manager (minimum 2 caractères)'
+            },
+            email: {
+                type: 'string',
+                format: 'email',
+                example: 'pierre.martin@example.com',
+                description: 'Adresse email valide'
+            },
+            password: {
+                type: 'string',
+                minLength: 6,
+                format: 'password',
+                example: 'SecureP@ss123',
+                description: 'Mot de passe (minimum 6 caractères)'
+            },
+            phone: {
+                type: 'string',
+                pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
+                example: '+33 6 12 34 56 78',
+                description: 'Numéro de téléphone (optionnel)'
             }
         }
     },
@@ -130,6 +226,12 @@ export const authSchemas = {
                 nullable: true,
                 example: 2,
                 description: 'ID de la plage schedule assignée à l\'utilisateur'
+            },
+            managerId: {
+                type: 'integer',
+                nullable: true,
+                example: 3,
+                description: 'ID du manager responsable (pour les employés)'
             },
             createdAt: {
                 type: 'string',

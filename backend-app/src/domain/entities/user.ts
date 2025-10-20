@@ -5,11 +5,17 @@ import {
   UserCreateDTO,
   UserUpdateDTO,
   UserReadDTO,
-  UserListItemDTO
-} from "@/application/DTOS/user.dto";
+  UserListItemDTO,
+  UserReadEmployeeDTO,
+  UserReadManagerDTO,
+  BaseUserReadDTO,
+  UserCreateEmployeeDTO,
+  UserCreateManagerDTO
+} from "@/application/DTOS/";
 import { UserAuthDTO } from "@/application/DTOS/auth.dto";
 import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
 import { Role } from "../types";
+import { Team } from "./team";
 
 export class User {
   public readonly id?: number;
@@ -19,6 +25,7 @@ export class User {
   public lastName: string;
   public role: Role;
   public isActive: boolean;
+
 
   public createdAt: Date;
   public updatedAt?: Date;
@@ -32,11 +39,20 @@ export class User {
     startHour?: Date;
     endHour?: Date;
   };
-  public team?: {
+  public team?: Team | {
     id: number;
     name?: string;
   };
-
+  public manager?: User | {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  }
+  public employes?: User[] | {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  }[];
   constructor(
     props: UserProps
   ) {
@@ -51,6 +67,7 @@ export class User {
     this.phone = props.phone;
     this.team = props.team;
     this.schedule = props.schedule;
+    this.manager = props.manager;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
     this.lastLoginAt = props.lastLoginAt;
@@ -61,6 +78,28 @@ export class User {
   }
 
   // #region UserValidation Methods
+  public validateEmployee(): void {
+   this.validateMe();
+   if(this.role !== "employe") {
+    throw new ValidationError('Role invalide');
+   }
+   if(!this.manager?.id) {
+    throw new ValidationError('Manager ID invalide');
+   }
+   
+  }
+  public validateManager(): void {
+    this.validateMe();
+    if(this.role !== "manager") {
+     throw new ValidationError('Role invalide');
+    }
+    if(this.team?.id) {
+      throw new ValidationError('Manager cannot have a team');
+    }
+    if(this.manager?.id) {
+      throw new ValidationError('Manager cannot have a manager');
+    }
+  }
   public validateMe(): void {
     if (!User.validateEmail(this.email)) {
       throw new ValidationError('Format d\'email invalide');
@@ -248,7 +287,22 @@ export class User {
     return new User({
       ...dto,
       hashedPassword: hashedPassword,
-      isActive: false,
+      isActive: true,
+    });
+  }
+
+  public static fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): User {
+    
+    const schedule = dto.scheduleId? {id: dto.scheduleId} : undefined;
+    const team = dto.teamId? {id: dto.teamId} : undefined;
+    
+    return new User({
+      ...dto,
+      manager: {id: dto.managerId,},
+      schedule: schedule,
+      team: team,
+      hashedPassword: hashedPassword,
+      isActive: true,
     });
   }
 
@@ -292,24 +346,41 @@ export class User {
    * Convertit l'entité en UserReadDTO (détail complet)
    * Utilisé pour GET /users/:id
    */
-  public toReadDTO(): UserReadDTO {
+  public toReadDTO(): UserReadEmployeeDTO | UserReadManagerDTO | BaseUserReadDTO{
     if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserReadDTO");
+        throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserReadDTO");
     }
 
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      role: this.role,
-      isActive: this.isActive,
-      phone: this.phone,
-      team: this.team,
-      schedule: this.schedule,
-      ...this.toDateStrings(),
+    const base = {
+        id: this.id,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        role: this.role,
+        isActive: this.isActive,
+        phone: this.phone,
+        team: this.team,
+        schedule: this.schedule,
+        ...this.toDateStrings(),
     };
-  }
+
+    if (this.role === "employe") {
+        return {
+            ...base,
+            manager: this.manager ? { id: this.manager.id, firstName: this.manager.firstName, lastName: this.manager.lastName } : undefined,
+        } as UserReadEmployeeDTO;
+    }
+
+    if (this.role === "manager") {
+        return {
+            ...base,
+            employees: this.employes?.map(e => ({ id: e.id, firstName: e.firstName, lastName: e.lastName })),
+        } as UserReadManagerDTO;
+    }
+
+    return base; // fallback pour d'autres rôles
+}
+
 
   /**
    * Convertit l'entité en UserListItemDTO (liste simplifiée)

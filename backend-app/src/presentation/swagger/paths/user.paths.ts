@@ -66,7 +66,8 @@ WHERE teams.managerId = :managerId
                                                 role: 'employe',
                                                 isActive: true,
                                                 teamId: 1,
-                                                teamlastName: 'Équipe Production'
+                                                teamlastName: 'Équipe Production',
+                                                managerId: 3
                                             },
                                             {
                                                 id: 11,
@@ -76,7 +77,8 @@ WHERE teams.managerId = :managerId
                                                 role: 'employe',
                                                 isActive: true,
                                                 teamId: 1,
-                                                teamlastName: 'Équipe Production'
+                                                teamlastName: 'Équipe Production',
+                                                managerId: 3
                                             },
                                             {
                                                 id: 12,
@@ -86,7 +88,8 @@ WHERE teams.managerId = :managerId
                                                 role: 'employe',
                                                 isActive: false,
                                                 teamId: 2,
-                                                teamlastName: 'Équipe Logistique'
+                                                teamlastName: 'Équipe Logistique',
+                                                managerId: 3
                                             }
                                         ],
                                         message: 'Liste des employés récupérée avec succès',
@@ -194,9 +197,91 @@ WHERE teams.managerId = :managerId
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/UserReadDTO' },
+                                    data: {
+                                        oneOf: [
+                                            { $ref: '#/components/schemas/UserReadEmployeeDTO' },
+                                            { $ref: '#/components/schemas/UserReadManagerDTO' },
+                                            { $ref: '#/components/schemas/UserReadDTO' }
+                                        ]
+                                    },
                                     message: { type: 'string' },
                                     timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            },
+                            examples: {
+                                employee: {
+                                    summary: 'Détail d\'un employé',
+                                    value: {
+                                        success: true,
+                                        data: {
+                                            id: 1,
+                                            firstName: 'Marie',
+                                            lastName: 'Dubois',
+                                            email: 'marie.dubois@example.com',
+                                            role: 'employe',
+                                            isActive: true,
+                                            phone: '+33 6 12 34 56 78',
+                                            teamId: 5,
+                                            scheduleId: 2,
+                                            managerId: 3,
+                                            manager: {
+                                                id: 3,
+                                                firstName: 'Pierre',
+                                                lastName: 'Martin'
+                                            },
+                                            team: {
+                                                id: 5,
+                                                name: 'Équipe Production'
+                                            },
+                                            schedule: {
+                                                id: 2,
+                                                name: 'Horaires Standard',
+                                                startHour: '2025-01-01T08:00:00.000Z',
+                                                endHour: '2025-01-01T17:00:00.000Z'
+                                            },
+                                            createdAt: '2025-01-01T12:00:00.000Z',
+                                            updatedAt: '2025-01-15T14:30:00.000Z',
+                                            lastLoginAt: '2025-10-07T10:30:00.000Z',
+                                            deletedAt: null
+                                        },
+                                        message: 'Utilisateur récupéré avec succès',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                manager: {
+                                    summary: 'Détail d\'un manager',
+                                    value: {
+                                        success: true,
+                                        data: {
+                                            id: 3,
+                                            firstName: 'Pierre',
+                                            lastName: 'Martin',
+                                            email: 'pierre.martin@example.com',
+                                            role: 'manager',
+                                            isActive: true,
+                                            phone: '+33 6 12 34 56 78',
+                                            teamId: 5,
+                                            scheduleId: 2,
+                                            employes: [
+                                                {
+                                                    id: 1,
+                                                    firstName: 'Marie',
+                                                    lastName: 'Dubois'
+                                                },
+                                                {
+                                                    id: 2,
+                                                    firstName: 'Jean',
+                                                    lastName: 'Dupont'
+                                                }
+                                            ],
+                                            createdAt: '2025-01-01T12:00:00.000Z',
+                                            updatedAt: '2025-01-15T14:30:00.000Z',
+                                            lastLoginAt: '2025-10-07T10:30:00.000Z',
+                                            deletedAt: null
+                                        },
+                                        message: 'Utilisateur récupéré avec succès',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
                                 }
                             }
                         }

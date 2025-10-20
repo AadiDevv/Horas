@@ -1,4 +1,4 @@
-import { UserCreateDTO, UserLoginDTO } from "@/application/DTOS/";
+import { UserCreateDTO, UserCreateEmployeeDTO, UserCreateManagerDTO, UserLoginDTO } from "@/application/DTOS/";
 import { User } from "@/domain/entities/user";
 import { IAuth } from "@/domain/interfaces/auth.interface";
 import { AlreadyExistsError, InvalidCredentialsError } from "@/domain/error/AppError";
@@ -19,6 +19,8 @@ export class AuthUseCase {
         const hashedPassword = JWTService.hashedPassword(dto.password)
 
         const user = User.fromCreateDTO(dto, hashedPassword)
+        user.validateEmployee();
+
         const bdUser = await this.R_auth.getUser_ByEmail(user.email)
         if (bdUser != null) {
             throw new AlreadyExistsError("User already exists")
@@ -27,6 +29,48 @@ export class AuthUseCase {
         // #endregion
 
         const createdUser = await this.R_auth.registerUser(user) // [Communication Bdd] Possibilité de lever une erreur ici
+
+        const userEntity = new User({ ...createdUser })
+
+        return userEntity;
+    }
+    async registerManager(dto: UserCreateManagerDTO): Promise<User> {
+        // #region - Verification
+        User.validateDTO(dto) // Validation implicite : si email, mdp, username etc.. sont invalides, une erreur est levée
+        const hashedPassword = JWTService.hashedPassword(dto.password)
+
+        const user = User.fromCreateDTO(dto, hashedPassword)
+        user.validateManager();
+        
+        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
+        if (bdUser != null) {
+            throw new AlreadyExistsError("User already exists")
+
+        }
+        // #endregion
+
+        const createdUser = await this.R_auth.registerManager(user) // [Communication Bdd] Possibilité de lever une erreur ici
+
+        const userEntity = new User({ ...createdUser })
+
+        return userEntity;
+    }
+    async registerEmployee(dto: UserCreateEmployeeDTO): Promise<User> {
+        // #region - Verification
+        User.validateDTO(dto) // Validation implicite : si email, mdp, username etc.. sont invalides, une erreur est levée
+        const hashedPassword = JWTService.hashedPassword(dto.password)
+
+        const user = User.fromCreateEmployeeDTO(dto, hashedPassword)
+        user.validateEmployee();
+        
+        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
+        if (bdUser != null) {
+            throw new AlreadyExistsError("User already exists")
+
+        }
+        // #endregion
+
+        const createdUser = await this.R_auth.registerEmployee(user) // [Communication Bdd] Possibilité de lever une erreur ici
 
         const userEntity = new User({ ...createdUser })
 

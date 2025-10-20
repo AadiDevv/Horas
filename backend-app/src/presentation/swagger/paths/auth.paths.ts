@@ -137,7 +137,16 @@ export const authPaths = {
     '/api/auth/register/employe': {
         post: {
             summary: 'Création d\'un employé (Manager/Admin)',
-            description: 'Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.',
+            description: `Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.
+
+**Permissions :**
+- **Manager** : Peut créer des employés dans ses équipes
+- **Admin** : Peut créer des employés pour n'importe quel manager
+
+**Relations automatiques :**
+- Le \`managerId\` est obligatoire et définit le manager responsable
+- L'employé sera automatiquement lié à ce manager
+- Les \`teamId\` et \`scheduleId\` sont optionnels et peuvent être assignés plus tard`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -145,7 +154,7 @@ export const authPaths = {
                 content: {
                     'application/json': {
                         schema: {
-                            $ref: '#/components/schemas/UserCreateDTO'
+                            $ref: '#/components/schemas/UserCreateEmployeeDTO'
                         },
                         examples: {
                             employeBasic: {
@@ -155,7 +164,7 @@ export const authPaths = {
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
-                                    role: 'employe'
+                                    managerId: 3
                                 }
                             },
                             employeComplete: {
@@ -165,9 +174,10 @@ export const authPaths = {
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
-                                    role: 'employe',
+                                    managerId: 3,
                                     phone: '+33 6 12 34 56 78',
-                                    teamId: 5
+                                    teamId: 5,
+                                    scheduleId: 2
                                 }
                             }
                         }
@@ -263,7 +273,15 @@ export const authPaths = {
     '/api/auth/register/manager': {
         post: {
             summary: 'Création d\'un manager (Admin uniquement)',
-            description: 'Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.',
+            description: `Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.
+
+**Permissions :**
+- **Admin uniquement** : Seuls les administrateurs peuvent créer des managers
+
+**Caractéristiques :**
+- Le manager n'a pas de \`managerId\` (il est autonome)
+- Il pourra gérer ses propres équipes une fois créé
+- Les \`teamId\` et \`scheduleId\` ne sont pas applicables lors de la création`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -271,7 +289,7 @@ export const authPaths = {
                 content: {
                     'application/json': {
                         schema: {
-                            $ref: '#/components/schemas/UserCreateDTO'
+                            $ref: '#/components/schemas/UserCreateManagerDTO'
                         },
                         examples: {
                             managerBasic: {
@@ -280,8 +298,7 @@ export const authPaths = {
                                     firstName: 'Paul',
                                     lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
-                                    password: 'SecureP@ss123',
-                                    role: 'manager'
+                                    password: 'SecureP@ss123'
                                 }
                             },
                             managerComplete: {
@@ -291,7 +308,6 @@ export const authPaths = {
                                     lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
-                                    role: 'manager',
                                     phone: '+33 6 98 76 54 32'
                                 }
                             }
