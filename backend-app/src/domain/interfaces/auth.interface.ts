@@ -17,5 +17,7 @@ export interface IAuth {
 
   // #region Auth
   registerUser(user: User): Promise<User>;
+  registerEmployee(user: User): Promise<User>;
+  registerManager(user: User): Promise<User>;
   // #endregion
 }   

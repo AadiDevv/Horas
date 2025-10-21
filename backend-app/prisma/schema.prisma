@@ -44,14 +44,18 @@ model User {
   isActive           Boolean   @default(true)
   teamId             Int?
   scheduleId         Int?
+  managerId          Int?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @default(now())
   deletedAt          DateTime?
   lastLoginAt        DateTime? @default(now())
 
+
   // Relations
-  team               Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team               Team?     @relation("TeamMembers",fields: [teamId], references: [id], onDelete: SetNull)
   schedule           Schedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  manager            User?     @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  employes           User[]    @relation("UserManager")
   managedTeams       Team[]    @relation("ManagerTeams")
   timesheets         Timesheet[]
   reports            Report[]  @relation("ReportManager")
@@ -76,7 +80,7 @@ model Team {
   // Relations
   manager        User      @relation("ManagerTeams", fields: [managerId], references: [id], onDelete: Restrict)
   schedule       Schedule? @relation("TeamSchedule", fields: [scheduleId], references: [id], onDelete: SetNull)
-  members        User[]
+  members        User[]     @relation("TeamMembers")
   reports        Report[]
 
   @@index([managerId])

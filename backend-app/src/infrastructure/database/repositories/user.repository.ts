@@ -113,7 +113,7 @@ export class UserRepository implements IAuth, IUser {
       throw new Error('Cannot update user without ID');
     }
 
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt,team, schedule, ...updateData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, employes, team, schedule, ...updateData } = user
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -163,15 +163,63 @@ export class UserRepository implements IAuth, IUser {
   // #endregion
   // #region Auth
   async registerUser(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, ...userData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
+
+    if (!userData.hashedPassword) {
+      throw new Error('Le mot de passe hashé est requis pour créer un utilisateur');
+    }
 
     const createdUser = await prisma.user.create({
-      data: nullToUndefined(userData) as any,
+      data: {
+        ...userData,
+        managerId: manager?.id!,
+        scheduleId: schedule?.id,
+        teamId: team?.id,
+        hashedPassword: userData.hashedPassword,
+      },
     })
 
     return new User(nullToUndefined(createdUser));
   }
+  async registerManager(user: User): Promise<User> {
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
 
+    if (!userData.hashedPassword) {
+      throw new Error('Le mot de passe hashé est requis pour créer un manager');
+    }
+
+    const createdUser = await prisma.user.create({
+      data: {
+        ...userData,
+        hashedPassword: userData.hashedPassword,
+      },
+    })
+
+    return new User(nullToUndefined(createdUser));
+  }
+  async registerEmployee(user: User): Promise<User> {
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
+
+    if (!userData.hashedPassword) {
+      throw new Error('Le mot de passe hashé est requis pour créer un employé');
+    }
+    if (!manager?.id) {
+      throw new Error('Le manager ID est requis pour créer un employé');
+    }
+
+    // A faire = faire un get team et recuperer le scheadule de la team assigner a lemployé
+    const createdUser = await prisma.user.create({
+      data: {
+        ...userData,
+        managerId: manager.id,
+        scheduleId: schedule?.id,
+        teamId: team?.id,
+        hashedPassword: userData.hashedPassword,
+      },
+    })
+
+    return new User(nullToUndefined(createdUser));
+  }
   // #endregion
 }
 

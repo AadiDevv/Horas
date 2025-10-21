@@ -1,7 +1,6 @@
 import { Role } from "./valueType";
 import { User } from "../entities/user";
-import { TimesheetStatus } from "@/domain/types";
-
+import { Team } from "../entities/team";
 export type UserProps = {
     email: string,
     hashedPassword?: string,
@@ -17,11 +16,15 @@ export type UserProps = {
 
     phone?: string,
     id?: number,
-    team?: {
+    team?: Team | {
         id: number;
         name?: string;
     };
-
+    manager?: User | {
+        id: number;
+        firstName?: string;
+        lastName?: string;
+    };
     schedule?: {
         id: number;
         name?: string;
@@ -43,6 +46,8 @@ export type TeamProps = {
     members?: User[],
     membersCount?: number,
 }
+
+export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 
 export interface TimesheetProps {
     id?: number;

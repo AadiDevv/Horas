@@ -11,8 +11,13 @@
 export const authPaths = {
     '/api/auth/register': {
         post: {
-            summary: 'Inscription d\'un nouvel utilisateur',
-            description: 'Crée un nouveau compte utilisateur et retourne un token JWT',
+            summary: 'Auto-inscription d\'un employé',
+            description: `Crée un nouveau compte employé et retourne un token JWT.
+
+**Caractéristiques :**
+- **Public** : Aucune authentification requise
+- **Rôle automatique** : L'utilisateur est automatiquement créé avec le rôle "employe"
+- **Auto-assignation** : Le managerId sera défini lors de l'assignation à une équipe`,
             tags: ['Authentication'],
             requestBody: {
                 required: true,
@@ -38,7 +43,9 @@ export const authPaths = {
                                     lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    phone: '+33 6 12 34 56 78'
+                                    phone: '+33 6 12 34 56 78',
+                                    teamId: 5,
+                                    scheduleId: 2
                                 }
                             }
                         }
@@ -137,7 +144,19 @@ export const authPaths = {
     '/api/auth/register/employe': {
         post: {
             summary: 'Création d\'un employé (Manager/Admin)',
-            description: 'Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.',
+            description: `Permet à un manager ou admin de créer un nouveau compte employé. Requiert une authentification JWT.
+
+**Permissions :**
+- **Manager** : Peut créer des employés dans ses équipes
+- **Admin** : Peut créer des employés pour n'importe quel manager
+
+**Assignations automatiques :**
+- **Rôle** : Automatiquement défini sur "employe"
+- **ManagerId** : Automatiquement assigné à l'utilisateur connecté
+- **Relations** : L'employé sera automatiquement lié au manager connecté
+
+**Champs optionnels :**
+- \`teamId\` et \`scheduleId\` peuvent être assignés plus tard`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -145,7 +164,7 @@ export const authPaths = {
                 content: {
                     'application/json': {
                         schema: {
-                            $ref: '#/components/schemas/UserCreateDTO'
+                            $ref: '#/components/schemas/UserCreateEmployeeDTO'
                         },
                         examples: {
                             employeBasic: {
@@ -154,8 +173,7 @@ export const authPaths = {
                                     firstName: 'Marie',
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
-                                    password: 'SecureP@ss123',
-                                    role: 'employe'
+                                    password: 'SecureP@ss123'
                                 }
                             },
                             employeComplete: {
@@ -165,9 +183,9 @@ export const authPaths = {
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
-                                    role: 'employe',
                                     phone: '+33 6 12 34 56 78',
-                                    teamId: 5
+                                    teamId: 5,
+                                    scheduleId: 2
                                 }
                             }
                         }
@@ -263,7 +281,18 @@ export const authPaths = {
     '/api/auth/register/manager': {
         post: {
             summary: 'Création d\'un manager (Admin uniquement)',
-            description: 'Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.',
+            description: `Permet à un administrateur de créer un nouveau compte manager. Requiert une authentification JWT avec rôle admin.
+
+**Permissions :**
+- **Admin uniquement** : Seuls les administrateurs peuvent créer des managers
+
+**Assignations automatiques :**
+- **Rôle** : Automatiquement défini sur "manager"
+- **Autonomie** : Le manager n'a pas de \`managerId\` (il est autonome)
+- **Gestion** : Il pourra gérer ses propres équipes une fois créé
+
+**Champs non applicables :**
+- \`teamId\` et \`scheduleId\` ne sont pas utilisés lors de la création`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -271,7 +300,7 @@ export const authPaths = {
                 content: {
                     'application/json': {
                         schema: {
-                            $ref: '#/components/schemas/UserCreateDTO'
+                            $ref: '#/components/schemas/UserCreateManagerDTO'
                         },
                         examples: {
                             managerBasic: {
@@ -280,8 +309,7 @@ export const authPaths = {
                                     firstName: 'Paul',
                                     lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
-                                    password: 'SecureP@ss123',
-                                    role: 'manager'
+                                    password: 'SecureP@ss123'
                                 }
                             },
                             managerComplete: {
@@ -291,7 +319,6 @@ export const authPaths = {
                                     lastName: 'Bernard',
                                     email: 'paul.bernard@example.com',
                                     password: 'SecureP@ss123',
-                                    role: 'manager',
                                     phone: '+33 6 98 76 54 32'
                                 }
                             }

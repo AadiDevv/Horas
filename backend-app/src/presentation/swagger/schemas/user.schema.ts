@@ -1,5 +1,177 @@
 // #region User Schemas (extensions des schémas auth)
 export const userSchemas = {
+    // #region Create DTOs (Admin/Manager)
+    UserCreateEmployeeDTO: {
+        type: 'object',
+        required: ['firstName', 'lastName', 'email', 'password'],
+        properties: {
+            firstName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Marie',
+                description: 'PrélastName de l\'employé (minimum 2 caractères)'
+            },
+            lastName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Dubois',
+                description: 'lastName de l\'employé (minimum 2 caractères)'
+            },
+            email: {
+                type: 'string',
+                format: 'email',
+                example: 'marie.dubois@example.com',
+                description: 'Adresse email valide'
+            },
+            password: {
+                type: 'string',
+                minLength: 6,
+                format: 'password',
+                example: 'SecureP@ss123',
+                description: 'Mot de passe (minimum 6 caractères)'
+            },
+            phone: {
+                type: 'string',
+                pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
+                example: '+33 6 12 34 56 78',
+                description: 'Numéro de téléphone (optionnel)'
+            },
+            teamId: {
+                type: 'integer',
+                nullable: true,
+                example: 5,
+                description: 'ID de l\'équipe (optionnel)'
+            },
+            scheduleId: {
+                type: 'integer',
+                nullable: true,
+                example: 2,
+                description: 'ID de la plage schedule (optionnel)'
+            }
+        },
+        description: 'DTO pour la création d\'employé. Le rôle est automatiquement défini sur "employe" et le managerId est automatiquement assigné à l\'utilisateur connecté.'
+    },
+
+    UserCreateManagerDTO: {
+        type: 'object',
+        required: ['firstName', 'lastName', 'email', 'password'],
+        properties: {
+            firstName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Pierre',
+                description: 'PrélastName du manager (minimum 2 caractères)'
+            },
+            lastName: {
+                type: 'string',
+                minLength: 2,
+                example: 'Martin',
+                description: 'lastName du manager (minimum 2 caractères)'
+            },
+            email: {
+                type: 'string',
+                format: 'email',
+                example: 'pierre.martin@example.com',
+                description: 'Adresse email valide'
+            },
+            password: {
+                type: 'string',
+                minLength: 6,
+                format: 'password',
+                example: 'SecureP@ss123',
+                description: 'Mot de passe (minimum 6 caractères)'
+            },
+            phone: {
+                type: 'string',
+                pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
+                example: '+33 6 12 34 56 78',
+                description: 'Numéro de téléphone (optionnel)'
+            }
+        },
+        description: 'DTO pour la création de manager. Le rôle est automatiquement défini sur "manager".'
+    },
+    // #endregion
+
+    // #region Read DTOs avec relations
+    UserReadEmployeeDTO: {
+        type: 'object',
+        properties: {
+            id: { type: 'integer', example: 1 },
+            firstName: { type: 'string', example: 'Marie' },
+            lastName: { type: 'string', example: 'Dubois' },
+            email: { type: 'string', format: 'email', example: 'marie.dubois@example.com' },
+            role: { type: 'string', enum: ['employe'], example: 'employe' },
+            isActive: { type: 'boolean', example: true },
+            phone: { type: 'string', nullable: true, example: '+33 6 12 34 56 78' },
+            teamId: { type: 'integer', nullable: true, example: 5 },
+            scheduleId: { type: 'integer', nullable: true, example: 2 },
+            managerId: { type: 'integer', nullable: true, example: 3 },
+            manager: {
+                type: 'object',
+                nullable: true,
+                properties: {
+                    id: { type: 'integer', example: 3 },
+                    firstName: { type: 'string', example: 'Pierre' },
+                    lastName: { type: 'string', example: 'Martin' }
+                }
+            },
+            team: {
+                type: 'object',
+                nullable: true,
+                properties: {
+                    id: { type: 'integer', example: 5 },
+                    name: { type: 'string', example: 'Équipe Production' }
+                }
+            },
+            schedule: {
+                type: 'object',
+                nullable: true,
+                properties: {
+                    id: { type: 'integer', example: 2 },
+                    name: { type: 'string', example: 'Horaires Standard' },
+                    startHour: { type: 'string', format: 'date-time', example: '2025-01-01T08:00:00.000Z' },
+                    endHour: { type: 'string', format: 'date-time', example: '2025-01-01T17:00:00.000Z' }
+                }
+            },
+            createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T12:00:00.000Z' },
+            updatedAt: { type: 'string', format: 'date-time', nullable: true, example: '2025-01-15T14:30:00.000Z' },
+            lastLoginAt: { type: 'string', format: 'date-time', nullable: true, example: '2025-10-07T10:30:00.000Z' },
+            deletedAt: { type: 'string', format: 'date-time', nullable: true, example: null }
+        }
+    },
+
+    UserReadManagerDTO: {
+        type: 'object',
+        properties: {
+            id: { type: 'integer', example: 3 },
+            firstName: { type: 'string', example: 'Pierre' },
+            lastName: { type: 'string', example: 'Martin' },
+            email: { type: 'string', format: 'email', example: 'pierre.martin@example.com' },
+            role: { type: 'string', enum: ['manager'], example: 'manager' },
+            isActive: { type: 'boolean', example: true },
+            phone: { type: 'string', nullable: true, example: '+33 6 12 34 56 78' },
+            teamId: { type: 'integer', nullable: true, example: 5 },
+            scheduleId: { type: 'integer', nullable: true, example: 2 },
+            employes: {
+                type: 'array',
+                nullable: true,
+                items: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer', example: 1 },
+                        firstName: { type: 'string', example: 'Marie' },
+                        lastName: { type: 'string', example: 'Dubois' }
+                    }
+                }
+            },
+            createdAt: { type: 'string', format: 'date-time', example: '2025-01-01T12:00:00.000Z' },
+            updatedAt: { type: 'string', format: 'date-time', nullable: true, example: '2025-01-15T14:30:00.000Z' },
+            lastLoginAt: { type: 'string', format: 'date-time', nullable: true, example: '2025-10-07T10:30:00.000Z' },
+            deletedAt: { type: 'string', format: 'date-time', nullable: true, example: null }
+        }
+    },
+    // #endregion
+
     // #region Update DTOs
     UserUpdateDTO: {
         type: 'object',
