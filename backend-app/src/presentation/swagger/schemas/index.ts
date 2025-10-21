@@ -1,12 +1,20 @@
 import { commonSchemas } from './common.schema';
 import { healthSchemas } from './health.schema';
 import { authSchemas } from './auth.schema';
+import { userSchemas } from './user.schema';
+import { teamSchemas } from './team.schema';
+import { scheduleSchemas } from './schedule.schema';
+import { timesheetSchemas } from './timesheet.schema';
 
 // #region Export All Schemas
 export const schemas = {
     ...commonSchemas,
     ...healthSchemas,
-    ...authSchemas
+    ...authSchemas,
+    ...userSchemas,
+    ...teamSchemas,
+    ...scheduleSchemas,
+    ...timesheetSchemas
 };
 // #endregion
 

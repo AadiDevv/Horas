@@ -1,63 +1,125 @@
 import { UserProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
-import { UserCreateDTO } from "@/application/DTOS";
+import {
+  UserCreateDTO,
+  UserUpdateDTO,
+  UserListItemDTO,
+  UserReadEmployeeDTO,
+  UserReadManagerDTO,
+  BaseUserReadDTO,
+  UserCreateEmployeeDTO,
+} from "@/application/DTOS/";
+import { UserAuthDTO } from "@/application/DTOS/auth.dto";
+import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
+import { Role } from "../types";
+import { Team } from "./team";
 
 export class User {
-  public readonly id?: string;
+  public readonly id?: number;
   public email: string;
-  public hashedPassword: string;
-  public username: string;
+  public hashedPassword?: string;
+  public firstName: string;
+  public lastName: string;
+  public role: Role;
   public isActive: boolean;
-  public isAdmin: boolean;
+
 
   public createdAt: Date;
   public updatedAt?: Date;
   public lastLoginAt?: Date;
+  public deletedAt?: Date;
 
   public phone?: string;
-  public address?: string;
-
+  public schedule?: {
+    id: number;
+    name?: string;
+    startHour?: Date;
+    endHour?: Date;
+  };
+  public team?: Team | {
+    id: number;
+    name?: string;
+  };
+  public manager?: User | {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  }
+  public employes?: User[] | {
+    id: number;
+    firstName?: string;
+    lastName?: string;
+  }[];
   constructor(
     props: UserProps
   ) {
-    // Attribution des valeurs
+    // Attribution des values
     this.id = props.id;
     this.email = props.email;
     this.hashedPassword = props.hashedPassword;
-    this.username = props.username;
+    this.firstName = props.firstName;
+    this.lastName = props.lastName;
+    this.role = props.role;
     this.isActive = props.isActive;
-    this.isAdmin = props.isAdmin;
     this.phone = props.phone;
-    this.address = props.address;
+    this.team = props.team;
+    this.schedule = props.schedule;
+    this.manager = props.manager;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
     this.lastLoginAt = props.lastLoginAt;
+    this.deletedAt = props.deletedAt;
 
     // Validation après attribution
     this.validateMe();
   }
 
   // #region UserValidation Methods
+  public validateEmployee(): void {
+   this.validateMe();
+   if(this.role !== "employe") {
+    throw new ValidationError('Role invalide');
+   }
+   if(!this.manager?.id) {
+    throw new ValidationError('Manager ID invalide');
+   }
+   
+  }
+  public validateManager(): void {
+    this.validateMe();
+    if(this.role !== "manager") {
+     throw new ValidationError('Role invalide');
+    }
+    if(this.team?.id) {
+      throw new ValidationError('Manager cannot have a team');
+    }
+    if(this.manager?.id) {
+      throw new ValidationError('Manager cannot have a manager');
+    }
+  }
   public validateMe(): void {
     if (!User.validateEmail(this.email)) {
       throw new ValidationError('Format d\'email invalide');
     }
 
-    if (!User.validatePassword(this.hashedPassword)) {
+    if (this.hashedPassword && !User.validatePassword(this.hashedPassword)) {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
-    if (!User.validateUsername(this.username)) {
-      throw new ValidationError('Nom d\'utilisateur invalide (minimum 3 caractères, alphanumérique + underscore)');
+    if (!User.validatelastName(this.lastName)) {
+      throw new ValidationError('lastName invalide (minimum 2 caractères)');
+    }
+
+    if (!User.validatefirstName(this.firstName)) {
+      throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
     }
 
     if (this.phone && this.phone.trim() !== '' && !User.validatePhone(this.phone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
-
-
   }
+
   public static validateDTO(dto: UserCreateDTO): void {
     if (!User.validateEmail(dto.email)) {
       throw new ValidationError('Format d\'email invalide');
@@ -67,14 +129,19 @@ export class User {
       throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
     }
 
-    if (!this.validateUsername(dto.username)) {
-      throw new ValidationError('Nom d\'utilisateur invalide (minimum 3 caractères, alphanumérique + underscore)');
+    if (!this.validatelastName(dto.lastName)) {
+      throw new ValidationError('lastName invalide (minimum 2 caractères)');
+    }
+
+    if (!this.validatefirstName(dto.firstName)) {
+      throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
     }
 
     if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
       throw new ValidationError('Format de téléphone invalide');
     }
   }
+
   public static validatePhone(phone: string): boolean {
     const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
     return phoneRegex.test(phone!);
@@ -85,8 +152,12 @@ export class User {
     return emailRegex.test(email);
   }
 
-  public static validateUsername(username: string): boolean {
-    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  public static validatelastName(lastName: string): boolean {
+    return lastName.length >= 2;
+  }
+
+  public static validatefirstName(firstName: string): boolean {
+    return firstName.length >= 2;
   }
 
   public static validatePassword(password: string): boolean {
@@ -97,8 +168,9 @@ export class User {
   // #region UserAuthentication Methods
 
   public async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, this.hashedPassword);
+    return await bcrypt.compare(plainPassword, this.hashedPassword || '');
   }
+
   public toJwtPayload(): Record<string, any> {
     if (!this.id) {
       throw new Error('Impossible de générer JWT pour un utilisateur sans ID');
@@ -107,8 +179,10 @@ export class User {
     return {
       sub: this.id,
       email: this.email,
-      username: this.username,
-      isAdmin: this.isAdmin,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      role: this.role,
+      isActive: this.isActive,
       lastLoginAt: this.lastLoginAt
     };
   }
@@ -120,47 +194,233 @@ export class User {
 
   // #region UserDisplay Methods
   public getDisplayName(): string {
-    return this.username.charAt(0).toUpperCase() + this.username.slice(1);
+    return `${this.firstName} ${this.lastName}`;
   }
 
   public toJSON(): Record<string, any> {
     return {
       id: this.id,
       email: this.email,
-      username: this.username,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      role: this.role,
       isActive: this.isActive,
-      isAdmin: this.isAdmin,
       phone: this.phone,
-      address: this.address,
+      team: this.team,
+      schedule: this.schedule,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
-      lastLoginAt: this.lastLoginAt?.toISOString()
+      lastLoginAt: this.lastLoginAt?.toISOString(),
+      deletedAt: this.deletedAt?.toISOString()
+    };
+  }
+  // #endregion
+
+  // #region Transformation Methods (pour Team)
+  /**
+   * Convertit l'utilisateur en TeamManagerDTO
+   * Utilisé dans les DTOs d'équipe pour afficher les infos du manager
+   */
+  public toTeamManagerDTO(): TeamManagerDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamManagerDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+    };
+  }
+
+  /**
+   * Convertit l'utilisateur en TeamMembreDTO
+   * Utilisé dans les DTOs d'équipe pour afficher les infos des members
+   */
+  public toTeamMemberDTO(): TeamMembreDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamMembreDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      phone: this.phone,
+      schedule: this.schedule,
     };
   }
   // #endregion
 
   // #region Change UserState Methods
 
+  public activate(): void {
+    this.isActive = true;
+  }
 
   public deactivate(): void {
     this.isActive = false;
   }
 
-  public activate(): void {
-    this.isActive = true;
+  public softDelete(): void {
+    this.deletedAt = new Date();
+  }
+
+  public restore(): void {
+    this.deletedAt = undefined;
   }
   // #endregion
 
-  // #region UserFactory Methods
-  public static fromCreateDTOtoEntity(dto: UserCreateDTO, hashedPassword: string): User {
-    const userProps: UserProps = {
+  // #region Factory Methods (DTO → Entité)
+  /**
+   * Crée une entité User à partir d'un DTO de création
+   * Utilisé lors de la création d'un nouvel utilisateur
+   */
+  public static fromCreateDTO(dto: UserCreateDTO, hashedPassword: string): User {
+    return new User({
       ...dto,
-      hashedPassword,
-      isActive: false,
-      isAdmin: false,
+      hashedPassword: hashedPassword,
+      isActive: true,
+    });
+  }
+
+  public static fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): User {
+    
+    const schedule = dto.scheduleId? {id: dto.scheduleId} : undefined;
+    const team = dto.teamId? {id: dto.teamId} : undefined;
+    
+    return new User({
+      ...dto,
+      manager: {id: dto.managerId,},
+      schedule: schedule,
+      team: team,
+      hashedPassword: hashedPassword,
+      isActive: true,
+    });
+  }
+
+  /**
+   * Met à jour une entité User existante avec les données d'un DTO de mise à jour
+   * Retourne une nouvelle instance (immutabilité)
+   * 
+   * Note : teamId et scheduleId ne sont plus gérés ici car retirés du UserUpdateDTO
+   * Ces attributs seront modifiés via des routes admin dédiées
+   */
+  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
+    return new User({
+      ...existingUser,
+      firstName: dto.firstName ?? existingUser.firstName,
+      lastName: dto.lastName ?? existingUser.lastName,
+      email: dto.email ?? existingUser.email,
+      phone: dto.phone ?? existingUser.phone,
+      role: dto.role ?? existingUser.role,
+      isActive: dto.isActive ?? existingUser.isActive,
+      // team et schedule conservent leurs valeurs existantes (pas modifiables via ce DTO)
+      updatedAt: new Date(Date.now()),
+    });
+  }
+  // #endregion
+
+  // #region Transformation Methods (Entité → DTO)
+  /**
+   * Convertit les dates en ISO string
+   * Helper privé pour éviter la duplication
+   */
+  private toDateStrings() {
+    return {
+      createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt?.toISOString(),
+      lastLoginAt: this.lastLoginAt?.toISOString(),
+      deletedAt: this.deletedAt?.toISOString(),
+    };
+  }
+
+  /**
+   * Convertit l'entité en UserReadDTO (détail complet)
+   * Utilisé pour GET /users/:id
+   */
+  public toReadDTO(): UserReadEmployeeDTO | UserReadManagerDTO | BaseUserReadDTO{
+    if (!this.id) {
+        throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserReadDTO");
     }
-    return new User(
-      userProps)
+
+    const base = {
+        id: this.id,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        role: this.role,
+        isActive: this.isActive,
+        phone: this.phone,
+        team: this.team,
+        schedule: this.schedule,
+        ...this.toDateStrings(),
+    };
+
+    if (this.role === "employe") {
+        return {
+            ...base,
+            manager: this.manager ? { id: this.manager.id, firstName: this.manager.firstName, lastName: this.manager.lastName } : undefined,
+        } as UserReadEmployeeDTO;
+    }
+
+    if (this.role === "manager") {
+        return {
+            ...base,
+            employees: this.employes?.map(e => ({ id: e.id, firstName: e.firstName, lastName: e.lastName })),
+        } as UserReadManagerDTO;
+    }
+
+    return base; // fallback pour d'autres rôles
+}
+
+
+  /**
+   * Convertit l'entité en UserListItemDTO (liste simplifiée)
+   * Utilisé pour GET /users (liste)
+   */
+  public toListItemDTO(): UserListItemDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserListItemDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      teamId: this.team?.id,
+    };
+  }
+
+  /**
+   * Convertit l'entité en UserAuthDTO
+   * Utilisé pour les réponses d'authentification (login, register)
+   */
+  public toAuthDTO(): UserAuthDTO {
+    if (!this.id) {
+      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserAuthDTO");
+    }
+
+    return {
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      role: this.role,
+      isActive: this.isActive,
+      phone: this.phone,
+      teamId: this.team?.id,
+      scheduleId: this.schedule?.id,
+      ...this.toDateStrings(),
+    };
   }
   // #endregion
 }

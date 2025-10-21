@@ -1,0 +1,120 @@
+// #region Nested DTOs (Types réutilisables)
+/**
+ * Format d'un manager pour les DTOs d'équipe
+ * Utilisé dans TeamReadDTO et TeamWithMembersDTO
+ */
+export interface TeamManagerDTO {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "admin" | "manager" | "employe";
+}
+
+/**
+ * Format d'un membre (employé) pour les DTOs d'équipe
+ * Utilisé dans TeamWithMembersDTO
+ */
+export interface TeamMembreDTO {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "admin" | "manager" | "employe";
+    isActive: boolean;
+    phone?: string;
+    schedule?: {
+        id: number;
+        name?: string;
+        startHour?: Date;
+        endHour?: Date;
+    };
+}
+// #endregion
+
+// #region Create DTO
+/**
+ * DTO pour créer une équipe
+ * Le managerId est fourni dans le body ou extrait du JWT selon les permissions
+ */
+export interface TeamCreateDTO {
+    name: string;
+    description?: string;
+    managerId: number;
+    scheduleId?: number;
+}
+// #endregion
+
+// #region Update DTO
+/**
+ * DTO pour mettre à jour une équipe
+ * Tous les champs sont optionnels pour permettre des updates partiels (PATCH)
+ */
+export interface TeamUpdateDTO {
+    name?: string;
+    description?: string;
+    scheduleId?: number;
+    managerId?: number;
+}
+// #endregion
+
+// #region Read DTO
+/**
+ * DTO de retour pour une équipe
+ * Inclut les informations du manager et le lastNamebre de members
+ */
+export interface TeamReadDTO {
+    id: number;
+    name: string;
+    description?: string;
+    managerId: number;
+    scheduleId?: number;
+    createdAt: string;
+    updatedAt?: string;
+    deletedAt?: string;
+
+    // Informations enrichies pour le frontend
+    manager?: TeamManagerDTO;
+
+    membersCount?: number; // lastNamebre de members dans l'équipe
+}
+
+/**
+ * DTO pour une équipe avec la liste complète des members
+ * Utilisé pour GET /teams/:id avec include=members
+ */
+export interface TeamWithMembersDTO extends TeamReadDTO {
+    members: TeamMembreDTO[];
+}
+// #endregion
+
+// #region List DTO
+/**
+ * DTO pour la liste des équipes (version simplifiée)
+ */
+export interface TeamListItemDTO {
+    id: number;
+    name: string;
+    description?: string;
+    managerId: number;
+    scheduleId?: number;
+    managerlastName: string; // lastName complet du manager (firstName + lastName)
+    membersCount: number;
+    createdAt: string;
+    deletedAt?: string;
+}
+
+/**
+ * DTO pour filtrer les équipes (Query Params)
+ * Utilisé dans GET /api/teams?managerId=X
+ * 
+ * Logique métier :
+ * - Manager : managerId optionnel (déduit du JWT si omis, vérifié si fourni)
+ * - Admin : managerId optionnel (retourne toutes les équipes si omis)
+ * - Employé : accès refusé
+ */
+export interface TeamFilterDTO {
+    managerId?: number; // ID du manager dont on veut voir les équipes
+}
+// #endregion
+

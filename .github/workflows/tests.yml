@@ -1,0 +1,39 @@
+name: Horas tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - back-jest
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker (Compose v2 is included)
+        run: docker compose version
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Run tests inside backend container
+        run: docker compose exec backend npm run test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend-app/coverage/lcov-report
+
+      - name: Tear down containers
+        run: docker compose down

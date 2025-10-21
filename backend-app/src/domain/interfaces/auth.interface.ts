@@ -1,19 +1,23 @@
 import { User } from "@/domain/entities/user";
 
+/**
+ * Interface pour les opérations d'authentification
+ * Contient uniquement les méthodes nécessaires pour register/login
+ * 
+ * Note : Les opérations CRUD sur les utilisateurs sont dans IUser
+ */
 export interface IAuth {
-  // #region Read
-  getAllUsers(): Promise<User[]>;
-  getUser_ById(id: string): Promise<User | null>;
+  // #region Read (pour authentification uniquement)
   getUser_ByEmail(email: string): Promise<User | null>;
   // #endregion
-  // #region Update
-  updateUser_byId(user: User): Promise<User>;
+
+  // #region Update (pour auth)
   updateUserLogin_byId(user: User): Promise<User>;
   // #endregion
-  // #region Delete
-  deleteUser_ById(user: User): Promise<User>;
-  // #endregion
+
   // #region Auth
   registerUser(user: User): Promise<User>;
+  registerEmployee(user: User): Promise<User>;
+  registerManager(user: User): Promise<User>;
   // #endregion
 }   

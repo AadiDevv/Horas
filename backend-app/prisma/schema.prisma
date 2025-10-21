@@ -1,27 +1,158 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-}
-
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // change if you use MySQL
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  hashedPassword  String
-  username  String
-  isActive  Boolean  @default(true)
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  lastLoginAt DateTime
-  phone     String  @default("")
-  address   String  @default("")
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
+// =========================================
+// ENUMS
+// =========================================
+
+enum Role {
+  admin
+  manager
+  employe
+}
+
+enum TimesheetStatus {
+  normal
+  delay
+  absence
+  incomplete
+}
+
+// =========================================
+// MODELS
+// =========================================
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  firstName          String    @db.VarChar(100)
+  lastName           String    @db.VarChar(100)
+  email              String    @unique @db.VarChar(255)
+  phone              String    @db.VarChar(20) @default("")
+  hashedPassword     String    @db.VarChar(255)
+  role               Role      @default(employe)
+  isActive           Boolean   @default(true)
+  teamId             Int?
+  scheduleId         Int?
+  managerId          Int?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now())
+  deletedAt          DateTime?
+  lastLoginAt        DateTime? @default(now())
+
+
+  // Relations
+  team               Team?     @relation("TeamMembers",fields: [teamId], references: [id], onDelete: SetNull)
+  schedule           Schedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  manager            User?     @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  employes           User[]    @relation("UserManager")
+  managedTeams       Team[]    @relation("ManagerTeams")
+  timesheets         Timesheet[]
+  reports            Report[]  @relation("ReportManager")
+  exceptionalSchedules ExceptionalSchedule[]
+
+  @@index([email])
+  @@index([role])
+  @@index([teamId])
+  @@index([scheduleId])
+}
+
+model Team {
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(100)
+  description    String    @default("")
+  managerId      Int
+  scheduleId     Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  // Relations
+  manager        User      @relation("ManagerTeams", fields: [managerId], references: [id], onDelete: Restrict)
+  schedule       Schedule? @relation("TeamSchedule", fields: [scheduleId], references: [id], onDelete: SetNull)
+  members        User[]     @relation("TeamMembers")
+  reports        Report[]
+
+  @@index([managerId])
+  @@index([scheduleId])
+}
+
+model Schedule {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(100)
+  startHour    DateTime  @db.Time
+  endHour      DateTime  @db.Time
+  activeDays   Json
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+
+  users        User[]
+  teams        Team[]    @relation("TeamSchedule")
+  exceptions   ExceptionalSchedule[]
+}
+
+model Timesheet {
+  id           Int             @id @default(autoincrement())
+  employeId   Int
+  date         DateTime         @db.Date
+  hour         DateTime         @db.Time
+  clockin      Boolean
+  status       TimesheetStatus  @default(normal)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now())
+
+  // Relations
+  employe     User             @relation(fields: [employeId], references: [id], onDelete: Cascade)
+
+  @@index([employeId])
+  @@index([date])
+  @@index([status])
+  @@index([employeId, date])
+}
+
+model Report {
+  id           Int       @id @default(autoincrement())
+  managerId    Int?
+  teamId       Int?
+  periodStart  DateTime  @db.Date
+  periodEnd    DateTime  @db.Date
+  kpiType      String    @db.VarChar(50)
+  value        Float
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+
+  // Relations
+  manager      User?     @relation("ReportManager", fields: [managerId], references: [id], onDelete: SetNull)
+  team         Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@index([managerId])
+  @@index([teamId])
+  @@index([kpiType])
+  @@index([periodStart, periodEnd])
+}
+
+model ExceptionalSchedule {
+  id             Int       @id @default(autoincrement())
+  employeId     Int
+  date           DateTime  @db.Date
+  scheduleId     Int
+  createdAt      DateTime  @default(now())
+
+  // Relations
+  employe       User      @relation(fields: [employeId], references: [id], onDelete: Cascade)
+  schedule       Schedule  @relation(fields: [scheduleId], references: [id])
+
+  @@index([employeId])
+  @@index([date])
+  @@index([scheduleId])
+}
