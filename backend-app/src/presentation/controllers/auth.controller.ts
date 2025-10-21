@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { BaseUserReadDTO, UserCreateDTO, UserCreateEmployeeDTO, UserCreateManagerDTO, UserReadDTO, UserReadEmployeeDTO, UserReadManagerDTO } from '@/application/DTOS/user.dto';
+import { BaseUserReadDTO, UserCreateDTO, UserCreateEmployeeDTO, UserReadDTO, UserReadEmployeeDTO, UserReadManagerDTO, UserCreateManagerDTO } from '@/application/DTOS/user.dto';
 import { UserLoginDTO, TokenResponse } from '@/application/DTOS/auth.dto';
 import { ValidationError } from '@/domain/error/AppError';
 
@@ -24,12 +24,11 @@ export class AuthController {
      * Inscription d'un employé (par manager ou admin)
      */
     async registerEmploye(req: Request, res: Response): Promise<void> {
+        req.body.role = 'employe';
+        req.body.managerId = req.user?.id;
         const userRegisterDto: UserCreateEmployeeDTO = req.body;
-        if (userRegisterDto.role !== 'employe') {
-            throw new ValidationError("User role is not valid");
-        }
 
-        const userResponse = await this._registerUser(userRegisterDto);
+        const userResponse = await this.UC_auth.registerEmployee(userRegisterDto);
         res.success(userResponse, "Utilisateur inscrit avec succès");
     }
 
@@ -38,12 +37,9 @@ export class AuthController {
      * Inscription d'un manager (admin uniquement)
      */
     async registerManager(req: Request, res: Response): Promise<void> {
+        req.body.role =  'manager';
         const userRegisterDto: UserCreateManagerDTO = req.body;
-        if (userRegisterDto.role !== 'manager') {
-            throw new ValidationError("User role is not valid");
-        }
-
-        const userResponse = await this._registerUser(userRegisterDto);
+        const userResponse = await this.UC_auth.registerManager(userRegisterDto);
         res.success(userResponse, "Utilisateur inscrit avec succès");
     }
 

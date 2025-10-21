@@ -11,8 +11,13 @@
 export const authPaths = {
     '/api/auth/register': {
         post: {
-            summary: 'Inscription d\'un nouvel utilisateur',
-            description: 'Crée un nouveau compte utilisateur et retourne un token JWT',
+            summary: 'Auto-inscription d\'un employé',
+            description: `Crée un nouveau compte employé et retourne un token JWT.
+
+**Caractéristiques :**
+- **Public** : Aucune authentification requise
+- **Rôle automatique** : L'utilisateur est automatiquement créé avec le rôle "employe"
+- **Auto-assignation** : Le managerId sera défini lors de l'assignation à une équipe`,
             tags: ['Authentication'],
             requestBody: {
                 required: true,
@@ -38,7 +43,9 @@ export const authPaths = {
                                     lastName: 'Dupont',
                                     email: 'jean.dupont@example.com',
                                     password: 'SecureP@ss123',
-                                    phone: '+33 6 12 34 56 78'
+                                    phone: '+33 6 12 34 56 78',
+                                    teamId: 5,
+                                    scheduleId: 2
                                 }
                             }
                         }
@@ -143,10 +150,13 @@ export const authPaths = {
 - **Manager** : Peut créer des employés dans ses équipes
 - **Admin** : Peut créer des employés pour n'importe quel manager
 
-**Relations automatiques :**
-- Le \`managerId\` est obligatoire et définit le manager responsable
-- L'employé sera automatiquement lié à ce manager
-- Les \`teamId\` et \`scheduleId\` sont optionnels et peuvent être assignés plus tard`,
+**Assignations automatiques :**
+- **Rôle** : Automatiquement défini sur "employe"
+- **ManagerId** : Automatiquement assigné à l'utilisateur connecté
+- **Relations** : L'employé sera automatiquement lié au manager connecté
+
+**Champs optionnels :**
+- \`teamId\` et \`scheduleId\` peuvent être assignés plus tard`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -163,8 +173,7 @@ export const authPaths = {
                                     firstName: 'Marie',
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
-                                    password: 'SecureP@ss123',
-                                    managerId: 3
+                                    password: 'SecureP@ss123'
                                 }
                             },
                             employeComplete: {
@@ -174,7 +183,6 @@ export const authPaths = {
                                     lastName: 'Martin',
                                     email: 'marie.martin@example.com',
                                     password: 'SecureP@ss123',
-                                    managerId: 3,
                                     phone: '+33 6 12 34 56 78',
                                     teamId: 5,
                                     scheduleId: 2
@@ -278,10 +286,13 @@ export const authPaths = {
 **Permissions :**
 - **Admin uniquement** : Seuls les administrateurs peuvent créer des managers
 
-**Caractéristiques :**
-- Le manager n'a pas de \`managerId\` (il est autonome)
-- Il pourra gérer ses propres équipes une fois créé
-- Les \`teamId\` et \`scheduleId\` ne sont pas applicables lors de la création`,
+**Assignations automatiques :**
+- **Rôle** : Automatiquement défini sur "manager"
+- **Autonomie** : Le manager n'a pas de \`managerId\` (il est autonome)
+- **Gestion** : Il pourra gérer ses propres équipes une fois créé
+
+**Champs non applicables :**
+- \`teamId\` et \`scheduleId\` ne sont pas utilisés lors de la création`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {

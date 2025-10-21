@@ -19,7 +19,7 @@ export class AuthUseCase {
         const hashedPassword = JWTService.hashedPassword(dto.password)
 
         const user = User.fromCreateDTO(dto, hashedPassword)
-        user.validateEmployee();
+        user.validateMe();
 
         const bdUser = await this.R_auth.getUser_ByEmail(user.email)
         if (bdUser != null) {
@@ -41,7 +41,7 @@ export class AuthUseCase {
 
         const user = User.fromCreateDTO(dto, hashedPassword)
         user.validateManager();
-        
+
         const bdUser = await this.R_auth.getUser_ByEmail(user.email)
         if (bdUser != null) {
             throw new AlreadyExistsError("User already exists")
@@ -62,11 +62,11 @@ export class AuthUseCase {
 
         const user = User.fromCreateEmployeeDTO(dto, hashedPassword)
         user.validateEmployee();
-        
-        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
-        if (bdUser != null) {
-            throw new AlreadyExistsError("User already exists")
 
+        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
+        
+        if (bdUser != null) {
+            throw new AlreadyExistsError("User with this email already exists")
         }
         // #endregion
 

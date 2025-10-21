@@ -4,7 +4,7 @@ export const authSchemas = {
     // #region Auto-inscription (Public)
     UserCreateDTO: {
         type: 'object',
-        required: ['firstName', 'lastName', 'email', 'password', 'role'],
+        required: ['firstName', 'lastName', 'email', 'password'],
         properties: {
             firstName: {
                 type: 'string',
@@ -31,12 +31,6 @@ export const authSchemas = {
                 example: 'SecureP@ss123',
                 description: 'Mot de passe (minimum 6 caractères)'
             },
-            role: {
-                type: 'string',
-                enum: ['employe'],
-                example: 'employe',
-                description: 'Rôle de l\'utilisateur (employe uniquement pour l\'auto-inscription)'
-            },
             phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
@@ -55,13 +49,14 @@ export const authSchemas = {
                 example: 2,
                 description: 'ID de la plage schedule (optionnel)'
             }
-        }
+        },
+        description: 'DTO pour l\'auto-inscription publique. Le rôle est automatiquement défini sur "employe".'
     },
 
     // #region Création d'employé (Manager/Admin)
     UserCreateEmployeeDTO: {
         type: 'object',
-        required: ['firstName', 'lastName', 'email', 'password', 'managerId'],
+        required: ['firstName', 'lastName', 'email', 'password'],
         properties: {
             firstName: {
                 type: 'string',
@@ -88,11 +83,6 @@ export const authSchemas = {
                 example: 'SecureP@ss123',
                 description: 'Mot de passe (minimum 6 caractères)'
             },
-            managerId: {
-                type: 'integer',
-                example: 3,
-                description: 'ID du manager responsable (obligatoire)'
-            },
             phone: {
                 type: 'string',
                 pattern: '^[\\+]?[0-9\\s\\-\\(\\)]{10,}$',
@@ -111,7 +101,8 @@ export const authSchemas = {
                 example: 2,
                 description: 'ID de la plage schedule (optionnel)'
             }
-        }
+        },
+        description: 'DTO pour la création d\'employé. Le rôle est automatiquement défini sur "employe" et le managerId est automatiquement assigné à l\'utilisateur connecté.'
     },
 
     // #region Création de manager (Admin uniquement)
@@ -150,7 +141,8 @@ export const authSchemas = {
                 example: '+33 6 12 34 56 78',
                 description: 'Numéro de téléphone (optionnel)'
             }
-        }
+        },
+        description: 'DTO pour la création de manager. Le rôle est automatiquement défini sur "manager".'
     },
 
     UserLoginDTO: {
