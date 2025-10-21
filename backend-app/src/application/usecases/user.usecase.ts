@@ -2,7 +2,7 @@ import { UserUpdateDTO, UserFilterDTO } from "@/application/DTOS/user.dto";
 import { User } from "@/domain/entities/user";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
-
+import { ITeam } from "@/domain/interfaces/team.interface";
 /**
  * Use Case pour la gestion des utilisateurs (CRUD)
  * Contient la logique métier et les règles de gestion
@@ -11,7 +11,7 @@ import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
  */
 export class UserUseCase {
 
-    constructor(private readonly R_user: IUser) { }
+    constructor(private readonly R_user: IUser, private readonly R_team: ITeam) { }
 
     // #region Read
     /**
@@ -81,9 +81,11 @@ export class UserUseCase {
      * - Restrictions basées sur le rôle de l'utilisateur connecté
      * 
      * @param id - ID de l'utilisateur à modifier
-     * @param dto - Données de mise à jour
+     * @param dtoUserProfile - Données de mise à jour
      * @param requestingUserId - ID de l'utilisateur qui fait la requête
      * @param requestingUserRole - Rôle de l'utilisateur connecté
+     * @param teamId - ID de l'équipe (optionnel, pour assignation)
+     * @param scheduleId - ID du planning (optionnel, pour assignation)
      * @returns L'utilisateur mis à jour
      * @throws NotFoundError si l'utilisateur n'existe pas
      * @throws ValidationError si les données sont invalides ou restrictions non respectées
@@ -91,18 +93,24 @@ export class UserUseCase {
      */
     async updateUser_ById(
         id: number,
-        dto: UserUpdateDTO,
         requestingUserId: number,
-        requestingUserRole: string
+        requestingUserRole: string,
+        options: { dtoUserProfile?: UserUpdateDTO; teamId?: number; scheduleId?: number }
     ): Promise<User> {
-        // Récupération de l'utilisateur existant
-        const existingUser = await this.getUser_ById(id);
+        // #region Validate
+            // Récupération de l'utilisateur existant
+            const existingUser = await this.getUser_ById(id);
+            if(!existingUser) throw new NotFoundError(`Utilisateur avec l'ID ${id} introuvable`);
 
-        // Validation des permissions et restrictions métier
-        this.validateUpdatePermissions(existingUser, dto, requestingUserId, requestingUserRole);
+            if ()
+            // Cas Modifications User profile / il y a des données dans le UserUpdateDTO
+            if (options.dtoUserProfile) User.validateUpdateProfilePermissions(existingUser, options.dtoUserProfile, requestingUserId, requestingUserRole);
 
+
+        
+        // #endregion
         // Mise à jour via la factory method
-        const updatedUser = User.fromUpdateDTO(existingUser, dto);
+        const updatedUser = User.fromUpdateDTO(existingUser, extendedDto);
 
         // Validation métier
         updatedUser.validateMe();
@@ -116,17 +124,17 @@ export class UserUseCase {
      * Valide les permissions de mise à jour selon le rôle
      * 
      * Règles métier :
-     * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive)
+     * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive, teamId, scheduleId)
      * - Manager : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * - Employé : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * 
-     * Note : teamId et scheduleId ne sont plus dans le DTO, donc plus de vérifications nécessaires
+     * Note : teamId et scheduleId sont autorisés pour les admins via les routes dédiées
      */
-    private validateUpdatePermissions(
+    private validateUpdateProfilePermissions(
         targetUser: User,
         dto: UserUpdateDTO,
         requestingUserId: number,
-        requestingUserRole: string
+        requestingUserRole: string,
     ): void {
         // Admin peut tout modifier
         if (requestingUserRole === 'admin') {
@@ -158,6 +166,41 @@ export class UserUseCase {
                 );
             }
         }
+    }
+
+    /**
+     * Assigne un utilisateur à une équipe
+     * 
+     * Règles métier :
+     * - Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
+     * - Manager : peut uniquement assigner ses propres employés à ses équipes
+     * 
+     * @param userId - ID de l'utilisateur à assigner
+     * @param teamId - ID de l'équipe de destination
+     * @param requestingUserId - ID de l'utilisateur qui fait la requête
+     * @param requestingUserRole - Rôle de l'utilisateur connecté
+     * @returns L'utilisateur mis à jour
+     * @throws NotFoundError si l'utilisateur n'existe pas
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
+     */
+    async asignTeamToUser(
+        userId: number,
+        teamId: number,
+        requestingUserId: number,
+        requestingUserRole: string
+    ): Promise<User> {
+        
+        const targetTeam = await this.R_team.getTeam_ById(teamId)
+        if( !targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
+        
+        if( !await this.R_user.getUser_ById(userId)) throw new NotFoundError(`L'utilisateur avec l'ID ${userId} introuvable`);
+
+        if(requestingUserRole !== 'admin' && requestingUserId != targetTeam.managerId ) {
+            throw new ForbiddenError(`L'Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
+        }
+
+
+    
     }
     // #endregion
 

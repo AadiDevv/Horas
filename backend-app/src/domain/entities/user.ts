@@ -1,5 +1,5 @@
 import { UserProps } from "../types/entitiyProps";
-import { ValidationError } from "../error/AppError";
+import { ForbiddenError, ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import {
   UserCreateDTO,
@@ -163,6 +163,45 @@ export class User {
   public static validatePassword(password: string): boolean {
     return password.length >= 6;
   }
+  // Avec parametres  externe
+  private static validateUpdateProfilePermissions(
+    targetUser: User,
+    dto: UserUpdateDTO,
+    requestingUserId: number,
+    requestingUserRole: string,
+  ): void {
+    // Admin peut tout modifier
+    if (requestingUserRole === 'admin') {
+      return;
+    }
+
+    // Manager et Employé : restrictions strictes
+    if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
+      // Vérifier que c'est leur propre profil
+      if (targetUser.id !== requestingUserId) {
+        throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+      }
+
+      // Champs interdits pour manager/employé
+      const forbiddenFields: string[] = [];
+
+      if (dto.role !== undefined) {
+        forbiddenFields.push('role');
+      }
+
+      if (dto.isActive !== undefined) {
+        forbiddenFields.push('isActive');
+      }
+
+      if (forbiddenFields.length > 0) {
+        throw new ForbiddenError(
+          `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+          `Seuls les administrateurs peuvent modifier ces informations.`
+        );
+      }
+    }
+  }
+
   // #endregion
 
   // #region UserAuthentication Methods
@@ -308,10 +347,9 @@ export class User {
    * Met à jour une entité User existante avec les données d'un DTO de mise à jour
    * Retourne une nouvelle instance (immutabilité)
    * 
-   * Note : teamId et scheduleId ne sont plus gérés ici car retirés du UserUpdateDTO
-   * Ces attributs seront modifiés via des routes admin dédiées
+   * Note : teamId et scheduleId sont gérés pour les routes admin dédiées
    */
-  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
+  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO & { teamId?: number; scheduleId?: number }): User {
     return new User({
       ...existingUser,
       firstName: dto.firstName ?? existingUser.firstName,
@@ -320,7 +358,8 @@ export class User {
       phone: dto.phone ?? existingUser.phone,
       role: dto.role ?? existingUser.role,
       isActive: dto.isActive ?? existingUser.isActive,
-      // team et schedule conservent leurs valeurs existantes (pas modifiables via ce DTO)
+      team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
+      schedule: dto.scheduleId !== undefined ? { id: dto.scheduleId } : existingUser.schedule,
       updatedAt: new Date(Date.now()),
     });
   }
