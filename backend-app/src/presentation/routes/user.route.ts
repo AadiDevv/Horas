@@ -105,7 +105,7 @@ router.patch('/assign/team/:id',
  */
 router.delete('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
             await userController.deleteUser_ById(req, res);

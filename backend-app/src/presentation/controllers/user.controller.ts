@@ -136,9 +136,11 @@ export class UserController {
    */
   async deleteUser_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
+    const requestingUserId = req.user!.id;
+    const requestingUserRole = req.user!.role;
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    await this.UC_user.deleteUser_ById(id);
+    await this.UC_user.deleteUser_ById(id, requestingUserId, requestingUserRole);
 
     res.success(null, "Utilisateur supprimé avec succès");
   }

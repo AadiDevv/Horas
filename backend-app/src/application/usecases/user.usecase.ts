@@ -227,9 +227,19 @@ export class UserUseCase {
      * @param id - ID de l'utilisateur à supprimer
      * @throws NotFoundError si l'utilisateur n'existe pas
      */
-    async deleteUser_ById(id: number): Promise<void> {
+    async deleteUser_ById(id: number, requestingUserId: number, requestingUserRole: string): Promise<void> {
         // Vérifier que l'utilisateur existe
-        await this.getUser_ById(id);
+        const user = await this.getUser_ById(id);
+        if (!user) throw new NotFoundError(`L'utilisateur avec l'ID ${id} introuvable`);
+        if(requestingUserRole === 'manager'){
+            if(user.id !== requestingUserId){
+                if(user.role !== 'employe') throw new ForbiddenError("Vous ne pouvez supprimer que des employés");
+            }
+            if(user.manager?.id !== requestingUserId) throw new ForbiddenError("Vous ne pouvez supprimer que vos propres employés");
+
+        }else if(requestingUserRole === 'admin'){
+            if(user.role === 'admin') throw new ForbiddenError("Vous ne pouvez pas supprimer un administrateur");
+        }
 
         // TODO: Règles métier additionnelles ?
         // - Interdire la suppression d'un manager qui a des équipes actives ?
