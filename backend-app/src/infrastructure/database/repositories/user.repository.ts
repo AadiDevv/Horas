@@ -56,7 +56,7 @@ export class UserRepository implements IAuth, IUser {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) return null;
-      return new User(nullToUndefined({...user, manager: user.managerId ? {id: user.managerId} : undefined, team: user.teamId ? {id: user.teamId} : undefined, schedule: user.scheduleId ? {id: user.scheduleId} : undefined}));
+      return new User(nullToUndefined({ ...user, manager: user.managerId ? { id: user.managerId } : undefined, team: user.teamId ? { id: user.teamId } : undefined, schedule: user.scheduleId ? { id: user.scheduleId } : undefined }));
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
@@ -78,8 +78,8 @@ export class UserRepository implements IAuth, IUser {
     // Récupérer tous les users qui ont un teamId correspondant aux équipes du manager
     const employees = await prisma.user.findMany({
       where: {
-        team: {
-          managerId: managerId
+        manager: {
+          id: managerId
         },
         deletedAt: null // Exclure les users supprimés
       },
