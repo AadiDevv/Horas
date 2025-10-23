@@ -5,6 +5,7 @@ import { prisma } from "../prisma.service";
 import { NotFoundError } from "@/domain/error/AppError";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 import { UserFilterDTO } from "@/application/DTOS/user.dto";
+import { connect } from "http2";
 
 /**
  * Repository pour les opérations User et Auth
@@ -55,7 +56,7 @@ export class UserRepository implements IAuth, IUser {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) return null;
-      return new User(nullToUndefined(user));
+      return new User(nullToUndefined({...user, manager: user.managerId ? {id: user.managerId} : undefined, team: user.teamId ? {id: user.teamId} : undefined, schedule: user.scheduleId ? {id: user.scheduleId} : undefined}));
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
@@ -108,7 +109,7 @@ export class UserRepository implements IAuth, IUser {
   }
   // #endregion
   // #region Update (IAuth + IUser)
-  async updateUser_ById(user: User): Promise<User> {
+  async updateUserProfile_ById(user: User): Promise<User> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
@@ -125,6 +126,20 @@ export class UserRepository implements IAuth, IUser {
     return new User(nullToUndefined(updatedUser))
   }
 
+  async updateUserTeam_ById(userId: number, teamIdParam: number): Promise<User> {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        team: {
+          connect: { id: teamIdParam }
+        },
+        updatedAt: new Date(Date.now())
+      }
+    })
+    const { teamId, ...userData } = updatedUser
+
+    return new User(nullToUndefined({ ...userData, team: teamId ? { id: teamId } : undefined }))
+  }
   async updateUserLogin_byId(user: User): Promise<User> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');

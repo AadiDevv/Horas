@@ -83,7 +83,7 @@ export class UserController {
    * 
    * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
-  async updateUser_ById(req: Request, res: Response): Promise<void> {
+  async updateUserProfile_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
@@ -96,7 +96,7 @@ export class UserController {
     const requestingUserId = req.user!.id;
     const requestingUserRole = req.user!.role;
 
-    const user = await this.UC_user.updateUser_ById(id, userDto, requestingUserId, requestingUserRole);
+    const user = await this.UC_user.updateUserProfile_ById(id, requestingUserId, requestingUserRole, userDto);
     const userDTO = user.toReadDTO();
 
     res.success(userDTO, "Utilisateur modifié avec succès");
@@ -110,7 +110,7 @@ export class UserController {
    * 
    * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
-  async asignTeamToUser(req: Request, res: Response): Promise<void> {
+  async updateUserTeam_ById(req: Request, res: Response): Promise<void> {
     const userId = Number(req.params.id);
     if (isNaN(userId)) throw new ValidationError("ID utilisateur invalide");
 
@@ -121,7 +121,7 @@ export class UserController {
     const requestingUserId = req.user!.id;
     const requestingUserRole = req.user!.role;
 
-    const user = await this.UC_user.asignTeamToUser(userId, dto.teamId, requestingUserId, requestingUserRole);
+    const user = await this.UC_user.updateUserTeam_ById(userId, dto.teamId, requestingUserId, requestingUserRole);
     const userDTO = user.toReadDTO();
 
     res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");

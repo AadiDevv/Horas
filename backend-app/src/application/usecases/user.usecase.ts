@@ -91,32 +91,31 @@ export class UserUseCase {
      * @throws ValidationError si les données sont invalides ou restrictions non respectées
      * @throws ForbiddenError si l'utilisateur n'a pas les droits
      */
-    async updateUser_ById(
+    async updateUserProfile_ById(
         id: number,
         requestingUserId: number,
         requestingUserRole: string,
-        options: { dtoUserProfile?: UserUpdateDTO; teamId?: number; scheduleId?: number }
+        dtoUserProfile: UserUpdateDTO
     ): Promise<User> {
         // #region Validate
-            // Récupération de l'utilisateur existant
-            const existingUser = await this.getUser_ById(id);
-            if(!existingUser) throw new NotFoundError(`Utilisateur avec l'ID ${id} introuvable`);
+        // Récupération de l'utilisateur existant
+        const existingUser = await this.getUser_ById(id);
+        if (!existingUser) throw new NotFoundError(`Utilisateur avec l'ID ${id} introuvable`);
 
-            if ()
-            // Cas Modifications User profile / il y a des données dans le UserUpdateDTO
-            if (options.dtoUserProfile) User.validateUpdateProfilePermissions(existingUser, options.dtoUserProfile, requestingUserId, requestingUserRole);
-
-
-        
+        if (existingUser.manager?.id !== requestingUserId) {
+            throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+        }
+        // Cas Modifications User profile / il y a des données dans le UserUpdateDTO
+        User.validateUpdateProfilePermissions(existingUser, dtoUserProfile, requestingUserId, requestingUserRole);
         // #endregion
         // Mise à jour via la factory method
-        const updatedUser = User.fromUpdateDTO(existingUser, extendedDto);
+        const updatedUser = User.fromUpdateDTO(existingUser, dtoUserProfile);
 
         // Validation métier
         updatedUser.validateMe();
 
         // Sauvegarde via le repository
-        const userUpdated = await this.R_user.updateUser_ById(updatedUser);
+        const userUpdated = await this.R_user.updateUserProfile_ById(updatedUser);
         return new User(userUpdated);
     }
 
@@ -183,24 +182,36 @@ export class UserUseCase {
      * @throws NotFoundError si l'utilisateur n'existe pas
      * @throws ForbiddenError si l'utilisateur n'a pas les droits
      */
-    async asignTeamToUser(
+    async updateUserTeam_ById(
         userId: number,
         teamId: number,
         requestingUserId: number,
         requestingUserRole: string
     ): Promise<User> {
-        
+        console.log(`user id : ${userId}`);
+        console.log(`team id : ${teamId}`);
+        console.log(`requesting user id : ${requestingUserId}`);
+        console.log(`requesting user role : ${requestingUserRole}`);
+        // #region Validation
         const targetTeam = await this.R_team.getTeam_ById(teamId)
-        if( !targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
-        
-        if( !await this.R_user.getUser_ById(userId)) throw new NotFoundError(`L'utilisateur avec l'ID ${userId} introuvable`);
-
-        if(requestingUserRole !== 'admin' && requestingUserId != targetTeam.managerId ) {
-            throw new ForbiddenError(`L'Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
+        const targetUser = await this.R_user.getUser_ById(userId)
+        // Vérification que l'équipe et l'utilisateur existent
+        if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
+        if (!targetUser) throw new NotFoundError(`L'utilisateur avec l'ID ${userId} introuvable`);
+        if (targetUser.role === 'admin' || targetUser.role === 'manager') throw new ForbiddenError("Vous ne pouvez assigner que des employés");
+        if (targetUser.team?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+        // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
+        if (targetUser.manager?.id !== requestingUserId) {
+            console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
+            console.log(`requestingUserId : ${requestingUserId}`);
+            throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${requestingUserId}`);
         }
-
-
-    
+        if (requestingUserRole !== 'admin' && requestingUserId != targetTeam.managerId) {
+            throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
+        }
+        //#endregion
+        const user = await this.R_user.updateUserTeam_ById(userId, teamId);
+        return user;
     }
     // #endregion
 

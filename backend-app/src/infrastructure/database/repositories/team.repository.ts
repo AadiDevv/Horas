@@ -85,7 +85,7 @@ export class TeamRepository implements ITeam {
             ...team,
             scheduleId: team.scheduleId ?? undefined,
             manager: new User({ ...team.manager }),
-            members: team.members.map(membre => new User({ ...membre, scheduleId: membre.scheduleId ?? undefined }))
+            members: team.members.map(membre => new User({ ...membre, schedule: membre.scheduleId ? {id : membre.scheduleId} : undefined }))
         });
     }
 

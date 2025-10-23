@@ -164,7 +164,7 @@ export class User {
     return password.length >= 6;
   }
   // Avec parametres  externe
-  private static validateUpdateProfilePermissions(
+  public static validateUpdateProfilePermissions(
     targetUser: User,
     dto: UserUpdateDTO,
     requestingUserId: number,
