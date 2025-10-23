@@ -243,7 +243,7 @@ describe('UserController', () => {
   // ----------------------------------------
   describe('updateUser_ById', () => {
     test('should update user and return DTO', async () => {
-      useCaseMock.updateUser_ById.mockResolvedValue(mockUser6);
+      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockUser6);
 
       const req = mockRequest({
         params: { id: '6' },
@@ -252,9 +252,9 @@ describe('UserController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.updateUser_ById(req, res);
+      await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateUser_ById).toHaveBeenCalledWith(6, { firstName: 'Eve' }, 6, 'employe');
+      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, { firstName: 'Eve' }, 6, 'employe');
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,
@@ -273,14 +273,14 @@ describe('UserController', () => {
       const req = mockRequest({ params: { id: 'bad' }, body: {} }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateUser_ById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateUserProfile_ById(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError if body is empty', async () => {
       const req = mockRequest({ params: { id: '1' }, body: {} }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateUser_ById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateUserProfile_ById(req, res)).rejects.toThrow(ValidationError);
     });
   });
 

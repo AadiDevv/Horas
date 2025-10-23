@@ -18,7 +18,8 @@ class ApplicationFactory {
     public static getUserUseCase(): UserUseCase {
         if (!this.userUseCase) {
             const userRepo = infra.getUserRepoAsIUser();
-            this.userUseCase = new UserUseCase(userRepo);
+            const teamRepo = infra.getTeamRepo();
+            this.userUseCase = new UserUseCase(userRepo, teamRepo);
         }
         return this.userUseCase;
     }

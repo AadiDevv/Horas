@@ -101,12 +101,7 @@ export class TeamUseCase {
      * @returns L'équipe créée
      * @throws ValidationError si les données sont invalides
      */
-    async createTeam(dto: TeamCreateDTO, userId: number): Promise<Team> {
-        console.log("managerId from dto : ", dto.managerId);
-        console.log("userId from jwt : ", userId);
-        if (dto.managerId !== userId) {
-            throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
-        }
+    async createTeam(dto: TeamCreateDTO,): Promise<Team> {
         // Création de l'entité depuis le DTO
         const team = Team.fromCreateDTO(dto);
         // Sauvegarde dans le repository

@@ -131,7 +131,6 @@ export const teamPaths = {
                         example: {
                             name: 'Équipe Production',
                             description: 'Équipe responsable de la production du matin',
-                            managerId: 5
                         }
                     }
                 }

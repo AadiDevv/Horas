@@ -71,7 +71,25 @@ router.patch('/:id',
     adminOrSelf,         // 2️⃣ Vérifie que c'est admin OU que c'est son propre profil
     async (req, res, next) => {
         try {
-            await userController.updateUser_ById(req, res);
+            await userController.updateUserProfile_ById(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
+ * PATCH /api/users/assign/team/:id
+ * Assigner un utilisateur à une équipe
+ * - Admin : peut assigner n'importe quel utilisateur
+ * - Manager : peut uniquement assigner ses propres employés
+ */
+router.patch('/assign/team/:id',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    managerOrAdmin,         // 2️⃣ Vérifie que c'est admin OU que c'est son propre profil
+    async (req, res, next) => {
+        try {
+            await userController.updateUserTeam_ById(req, res);
         } catch (error) {
             next(error);
         }

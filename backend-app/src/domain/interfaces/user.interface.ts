@@ -32,7 +32,14 @@ export interface IUser {
      * Met à jour un utilisateur
      * @param user - L'entité utilisateur mise à jour (avec son ID)
      */
-    updateUser_ById(user: User): Promise<User>;
+    updateUserProfile_ById(user: User): Promise<User>;
+    /**
+     * Met à jour un utilisateur
+     * @param userId - ID de l'utilisateur à mettre à jour
+     * @param teamId - ID de l'équipe à assigner
+     */
+    updateUserTeam_ById(userId: number, teamId: number): Promise<User>;
+
     // #endregion
 
     // #region Delete

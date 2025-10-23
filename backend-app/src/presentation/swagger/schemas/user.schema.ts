@@ -173,6 +173,18 @@ export const userSchemas = {
     // #endregion
 
     // #region Update DTOs
+    UserAsignTeamDTO: {
+        type: 'object',
+        required: ['teamId'],
+        properties: {
+            teamId: {
+                type: 'integer',
+                example: 5,
+                description: 'ID de l\'équipe à assigner'
+            }
+        },
+        description: 'DTO pour assigner un utilisateur à une équipe'
+    },
     UserUpdateDTO: {
         type: 'object',
         properties: {
