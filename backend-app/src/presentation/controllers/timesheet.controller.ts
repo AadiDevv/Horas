@@ -26,7 +26,7 @@ export class TimesheetController {
         };
         
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
         const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
         const dto: TimesheetListItemDTO[] = timesheets.map(t => t.toListItemDTO());
 
@@ -42,7 +42,7 @@ export class TimesheetController {
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
         const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
         const dto: TimesheetReadDTO = timesheet.toReadDTO();
 
@@ -58,7 +58,7 @@ export class TimesheetController {
         const startDate = req.query.startDate as string;
         const endDate = req.query.endDate as string;
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
 
         if (isNaN(employeId) || !startDate || !endDate) {
             throw new ValidationError("employeId, startDate et endDate sont requis");
