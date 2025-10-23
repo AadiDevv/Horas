@@ -76,8 +76,24 @@ function ManagerDashboard() {
   // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
-    loadEquipes();
   }, []);
+
+  // Recharger les équipes quand les agents changent (pour mettre à jour agentCount)
+  useEffect(() => {
+    if (agents.length >= 0) {
+      loadEquipes();
+    }
+  }, [agents]);
+
+  // Enrichir les équipes avec le vrai nombre d'agents
+  const enrichedEquipes = equipes.map(equipe => {
+    const agentsInTeam = agents.filter(agent => agent.equipeId === equipe.id);
+    return {
+      ...equipe,
+      agentCount: agentsInTeam.length,
+      agents: agentsInTeam
+    };
+  });
 
   // ==================== HANDLERS ====================
   const handleAgentSubmit = () => {
@@ -184,13 +200,13 @@ function ManagerDashboard() {
                   />
                   <DashboardStatCard
                     title="Équipes"
-                    value={equipes.length.toString()}
+                    value={enrichedEquipes.length.toString()}
                     icon={Users}
                   />
                   <DashboardStatCard
                     title="Total des membres"
                     icon={Users}
-                    value={equipes
+                    value={enrichedEquipes
                       .reduce((sum, e) => sum + e.agentCount, 0)
                       .toString()}
                   />
@@ -241,7 +257,7 @@ function ManagerDashboard() {
                       Équipes
                     </h3>
                     <div className="space-y-3">
-                      {equipes.slice(0, 5).map((equipe) => (
+                      {enrichedEquipes.slice(0, 5).map((equipe) => (
                         <div
                           key={equipe.id}
                           className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
@@ -274,7 +290,7 @@ function ManagerDashboard() {
             {currentPage === "agents" && (
               <AgentList
                 agents={filteredAgents}
-                equipes={equipes}
+                equipes={enrichedEquipes}
                 onAddAgent={openAgentModal}
                 onEditAgent={openEditAgentModal}
                 onDeleteAgent={handleDeleteAgent}
@@ -284,7 +300,7 @@ function ManagerDashboard() {
             {/* ÉQUIPES PAGE */}
             {currentPage === "equipes" && (
               <EquipeList
-                equipes={equipes}
+                equipes={enrichedEquipes}
                 onAddEquipe={openEquipeModal}
                 onEditEquipe={openEditEquipeModal}
                 onDeleteEquipe={handleDeleteEquipe}
@@ -302,7 +318,7 @@ function ManagerDashboard() {
           }}
           formData={agentFormData}
           setFormData={setAgentFormData}
-          equipes={equipes}
+          equipes={enrichedEquipes}
           agent={editingAgent}
           onSave={handleAgentSubmit}
           loading={loadingAgents}
