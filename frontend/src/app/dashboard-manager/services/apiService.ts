@@ -12,7 +12,8 @@ const getAuthHeaders = () => {
   };
 };
 
-// Helper pour transformer les données frontend -> backend
+// Helper pour transformer les données frontend -> backend (CREATE)
+// Note: managerId n'est pas envoyé, il sera automatiquement assigné par le backend depuis le JWT
 const transformAgentToBackend = (agent: Partial<Agent> & { password?: string }) => ({
   firstName: agent.prenom,
   lastName: agent.nom,
@@ -23,6 +24,21 @@ const transformAgentToBackend = (agent: Partial<Agent> & { password?: string }) 
   teamId: agent.equipeId
 });
 
+// Helper pour transformer les données frontend -> backend (UPDATE)
+// Note: teamId et scheduleId ne sont plus modifiables via PATCH /api/users/{id}
+// Ils doivent être modifiés via des routes dédiées
+const transformAgentUpdateToBackend = (updates: Partial<Agent>) => {
+  const backendData: any = {};
+  if (updates.prenom !== undefined) backendData.firstName = updates.prenom;
+  if (updates.nom !== undefined) backendData.lastName = updates.nom;
+  if (updates.email !== undefined) backendData.email = updates.email;
+  if (updates.telephone !== undefined) backendData.phone = updates.telephone;
+  if (updates.role !== undefined) backendData.role = updates.role;
+  if (updates.isActive !== undefined) backendData.isActive = updates.isActive;
+  // teamId et scheduleId ne sont pas envoyés (gérés par routes dédiées)
+  return backendData;
+};
+
 // Helper pour transformer les données backend -> frontend
 const transformAgentFromBackend = (data: any): Agent => ({
   id: data.id,
@@ -30,10 +46,32 @@ const transformAgentFromBackend = (data: any): Agent => ({
   nom: data.lastName,
   email: data.email,
   role: data.role,
-  telephone: data.phone || '', // phone peut être absent dans UserListItemDTO
-  equipeId: data.teamId, // teamId est déjà au bon format
-  isActive: data.isActive ?? true, // Par défaut true si absent
-  createdAt: data.createdAt || new Date().toISOString() // Par défaut maintenant si absent
+  telephone: data.phone || '',
+  equipeId: data.teamId,
+  managerId: data.managerId,
+  scheduleId: data.scheduleId,
+  isActive: data.isActive ?? true,
+  createdAt: data.createdAt || new Date().toISOString(),
+  updatedAt: data.updatedAt,
+  lastLoginAt: data.lastLoginAt,
+  deletedAt: data.deletedAt,
+  // Champs de relations (pour GET /api/users/{id} ou my-employees)
+  equipeNom: data.teamName || data.teamlastName, // teamlastName dans my-employees, teamName dans users/{id}
+  manager: data.manager ? {
+    id: data.manager.id,
+    prenom: data.manager.firstName,
+    nom: data.manager.lastName
+  } : undefined,
+  team: data.team ? {
+    id: data.team.id,
+    nom: data.team.name
+  } : undefined,
+  schedule: data.schedule ? {
+    id: data.schedule.id,
+    nom: data.schedule.name,
+    heureDebut: data.schedule.startHour,
+    heureFin: data.schedule.endHour
+  } : undefined
 });
 
 // Helper pour récupérer le managerId du user connecté
@@ -145,11 +183,19 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
 
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
+  console.log('📊 Nombre d\'employés dans response.data:', response.data?.length || 0);
+
+  if (response.data && response.data.length > 0) {
+    console.log('🔍 Premier employé brut:', response.data[0]);
+  }
 
   // Transformer chaque agent de backend → frontend
+  const transformedData = response.data.map(transformAgentFromBackend);
+  console.log('🔄 Données transformées:', transformedData);
+
   return {
     success: response.success,
-    data: response.data.map(transformAgentFromBackend),
+    data: transformedData,
     message: response.message
   };
 }
@@ -215,9 +261,42 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
     return { success: true, data: mockAgents[index] };
   }
 
-  // ⚠️ ATTENTION: Cette route n'est pas encore implémentée dans le backend
-  console.warn('⚠️ PATCH /api/users/:id n\'est pas encore implémenté dans le backend');
-  throw new Error('La route PATCH /api/users/:id n\'est pas encore disponible. Utilisez USE_MOCK=true');
+  // Transformer les données frontend -> backend
+  const backendData = transformAgentUpdateToBackend(updates);
+
+  console.log('🚀 Envoi de la requête PATCH /api/users/' + id);
+  console.log('📦 Données envoyées:', backendData);
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(backendData)
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
+    } catch (e) {
+      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+    }
+  }
+
+  const response = await res.json();
+  console.log('✅ Réponse du serveur:', response);
+
+  // Transformer la réponse backend -> frontend
+  return {
+    success: response.success,
+    data: transformAgentFromBackend(response.data),
+    message: response.message
+  };
 }
 
 export async function deleteAgent(id: number): Promise<ApiResponse<void>> {
@@ -229,9 +308,156 @@ export async function deleteAgent(id: number): Promise<ApiResponse<void>> {
     return { success: true };
   }
 
-  // ⚠️ ATTENTION: Cette route n'est pas encore implémentée dans le backend
-  console.warn('⚠️ DELETE /api/users/:id n\'est pas encore implémenté dans le backend');
-  throw new Error('La route DELETE /api/users/:id n\'est pas encore disponible. Utilisez USE_MOCK=true');
+  console.log('🚀 Envoi de la requête DELETE /api/users/' + id);
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
+    } catch (e) {
+      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+    }
+  }
+
+  const response = await res.json();
+  console.log('✅ Agent supprimé:', response);
+
+  return {
+    success: response.success,
+    message: response.message
+  };
+}
+
+export async function getUserById(id: number): Promise<ApiResponse<Agent>> {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const agent = mockAgents.find(a => a.id === id);
+    if (!agent) {
+      throw new Error('Agent non trouvé');
+    }
+    return { success: true, data: agent };
+  }
+
+  console.log('🚀 Envoi de la requête GET /api/users/' + id);
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Réponse du serveur:', response);
+
+  return {
+    success: response.success,
+    data: transformAgentFromBackend(response.data),
+    message: response.message
+  };
+}
+
+export async function assignUserToTeam(userId: number, teamId: number): Promise<ApiResponse<Agent>> {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = mockAgents.findIndex(a => a.id === userId);
+    if (index === -1) {
+      throw new Error('Agent non trouvé');
+    }
+    mockAgents[index].equipeId = teamId;
+    console.log('✅ Agent assigné à l\'équipe:', mockAgents[index]);
+    return { success: true, data: mockAgents[index] };
+  }
+
+  console.log('🚀 Envoi de la requête PATCH /api/users/assign/team/' + userId);
+  console.log('📦 Données envoyées:', { teamId });
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/assign/team/${userId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ teamId })
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
+    } catch (e) {
+      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+    }
+  }
+
+  const response = await res.json();
+  console.log('✅ Réponse du serveur:', response);
+
+  return {
+    success: response.success,
+    data: transformAgentFromBackend(response.data),
+    message: response.message
+  };
+}
+
+export async function changeUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<ApiResponse<void>> {
+  if (USE_MOCK) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log('✅ Mot de passe modifié (mock)');
+    return { success: true, message: 'Mot de passe modifié avec succès' };
+  }
+
+  console.log('🚀 Envoi de la requête PATCH /api/users/' + userId + '/password');
+  console.log('🔑 Headers:', getAuthHeaders());
+
+  const res = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ oldPassword, newPassword })
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+
+    try {
+      const error = JSON.parse(errorText);
+      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
+    } catch (e) {
+      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+    }
+  }
+
+  const response = await res.json();
+  console.log('✅ Mot de passe modifié:', response);
+
+  return {
+    success: response.success,
+    message: response.message
+  };
 }
 
 // ÉQUIPES
@@ -259,8 +485,13 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
+  if (response.data && response.data.length > 0) {
+    console.log('🔍 Première équipe brute du backend:', response.data[0]);
+  }
+
   // Transformer chaque équipe de backend -> frontend et filtrer les supprimées
   const allEquipes = response.data.map(transformEquipeFromBackend);
+  console.log('🔄 Première équipe transformée:', allEquipes[0]);
   const activeEquipes = allEquipes.filter((equipe: Equipe) => !equipe.deletedAt);
 
   console.log('📊 Équipes totales:', allEquipes.length, '| Actives:', activeEquipes.length);

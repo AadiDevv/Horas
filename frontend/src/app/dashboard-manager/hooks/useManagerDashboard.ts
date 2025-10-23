@@ -90,6 +90,7 @@ export function useAgentManager() {
       await loadAgents();
       setShowModal(false);
       resetForm();
+      // Note: Les équipes seront rechargées automatiquement via useEffect quand agents change
     }
   };
 
@@ -199,6 +200,19 @@ export function useEquipeManager() {
     };
     const result = await api.createEquipe(newEquipe);
     if (result.success) {
+      // Assigner chaque agent à l'équipe via PATCH /api/users/assign/team/{id}
+      if (formData.agents.length > 0 && result.data) {
+        console.log('🔄 Assignation des agents à l\'équipe', result.data.id);
+        for (const agentId of formData.agents) {
+          try {
+            await api.assignUserToTeam(agentId, result.data.id);
+            console.log('✅ Agent', agentId, 'assigné à l\'équipe', result.data.id);
+          } catch (error) {
+            console.error('❌ Erreur lors de l\'assignation de l\'agent', agentId, ':', error);
+          }
+        }
+      }
+
       await loadEquipes();
       setShowModal(false);
       resetForm();
@@ -215,6 +229,28 @@ export function useEquipeManager() {
     };
     const result = await api.updateEquipe(editingEquipe.id, updates);
     if (result.success) {
+      // Identifier les nouveaux agents (ceux qui ne sont pas dans l'équipe actuellement)
+      const currentAgentIds = editingEquipe.agents?.map(a => a.id) || [];
+      const newAgentIds = formData.agents.filter(id => !currentAgentIds.includes(id));
+
+      // Assigner uniquement les nouveaux agents à l'équipe
+      if (newAgentIds.length > 0) {
+        console.log('🔄 Assignation des nouveaux agents à l\'équipe', editingEquipe.id);
+        console.log('📋 Agents déjà dans l\'équipe:', currentAgentIds);
+        console.log('➕ Nouveaux agents à assigner:', newAgentIds);
+
+        for (const agentId of newAgentIds) {
+          try {
+            await api.assignUserToTeam(agentId, editingEquipe.id);
+            console.log('✅ Agent', agentId, 'assigné à l\'équipe', editingEquipe.id);
+          } catch (error) {
+            console.error('❌ Erreur lors de l\'assignation de l\'agent', agentId, ':', error);
+          }
+        }
+      } else {
+        console.log('ℹ️ Aucun nouvel agent à assigner');
+      }
+
       await loadEquipes();
       setShowModal(false);
       setEditingEquipe(null);
