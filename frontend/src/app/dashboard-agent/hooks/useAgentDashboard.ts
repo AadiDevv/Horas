@@ -20,7 +20,7 @@ export function useUserData() {
       setLoading(true);
       const userId = 1; // TODO: Get from auth context
       const response = await getUser(userId);
-      
+
       if (response.success && response.data) {
         setUserData(response.data);
         setFormData({
