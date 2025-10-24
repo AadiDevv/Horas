@@ -124,57 +124,76 @@ function DayTimeline({
               })}
             </div>
 
-            {/* Container pour les blocs côte à côte */}
-            <div className="absolute inset-0 flex">
-              {/* Colonne gauche: Horaire de l'équipe */}
-              <div className="relative flex-1">
-                {teamHoraire && (
-                  <div
-                    className="absolute left-0 right-1 bg-blue-400 text-white shadow-sm rounded-r-lg"
-                    style={{
-                      top: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).top}%`,
-                      height: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).height}%`
-                    }}
-                  >
-                    <div className="px-1.5 py-1 text-xs font-semibold flex flex-col items-center justify-center h-full">
-                      <Clock size={14} className="mb-1" />
-                      <div className="text-center leading-tight">
-                        <div>{teamHoraire.heureDebut}</div>
-                        <div className="opacity-75 text-[10px]">-</div>
-                        <div>{teamHoraire.heureFin}</div>
-                      </div>
+            {/* Container pour les blocs superposés (style Google Calendar) */}
+            <div className="absolute inset-0">
+              {/* Horaire de l'équipe en arrière-plan (pleine largeur) */}
+              {teamHoraire && (
+                <div
+                  className="absolute left-0 right-0 rounded-lg border-2"
+                  style={{
+                    backgroundColor: 'rgba(51, 51, 51, 0.3)',
+                    borderColor: '#333333',
+                    top: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).top}%`,
+                    height: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).height}%`
+                  }}
+                >
+                  <div className="px-2 py-1 text-xs font-semibold flex flex-col items-center justify-center h-full text-gray-700">
+                    <Clock size={14} className="mb-1" />
+                    <div className="text-center leading-tight">
+                      <div>{teamHoraire.heureDebut}</div>
+                      <div className="opacity-75 text-[10px]">-</div>
+                      <div>{teamHoraire.heureFin}</div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Colonne droite: Pointages réels */}
-              <div className="relative flex-1">
-                {timeLogs.map((log, idx) => {
-                  if (!log.end) {
-                    console.log(`⚠️ ${day} - Log ${idx} ignoré (pas de end):`, log);
-                    return null;
-                  }
-                  const position = calculateBlockPosition(log.start, log.end, minTime, maxTime);
-                  console.log(`🎨 ${day} - Bloc ${idx}:`, {
-                    log,
-                    position,
-                    minTime,
-                    maxTime,
-                    style: `top: ${position.top}%, height: ${position.height}%`
-                  });
+              {/* Pointages réels superposés (petit espace à gauche pour apercevoir le fond) */}
+              {timeLogs.map((log, idx) => {
+                if (!log.end) {
+                  console.log(`⚠️ ${day} - Log ${idx} ignoré (pas de end):`, log);
+                  return null;
+                }
+                const position = calculateBlockPosition(log.start, log.end, minTime, maxTime);
 
-                  return (
-                    <div
-                      key={idx}
-                      className="absolute left-1 right-0 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md rounded-l-lg z-10"
-                      style={{
-                        top: `${position.top}%`,
-                        height: `${position.height}%`,
-                        minHeight: '40px'
-                      }}
-                    >
-                      <div className="px-1.5 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
+                // Calculer la durée en minutes
+                const startMin = timeToMinutes(log.start);
+                const endMin = timeToMinutes(log.end);
+                const durationMinutes = endMin - startMin;
+                const isShortBlock = durationMinutes < 15;
+
+                console.log(`🎨 ${day} - Bloc ${idx}:`, {
+                  log,
+                  position,
+                  durationMinutes,
+                  isShortBlock,
+                  minTime,
+                  maxTime,
+                  style: `top: ${position.top}%, height: ${position.height}%`
+                });
+
+                return (
+                  <div
+                    key={idx}
+                    className="absolute text-white shadow-lg rounded-lg z-10 border-2"
+                    style={{
+                      backgroundColor: '#333333',
+                      borderColor: '#1a1a1a',
+                      left: '12px',
+                      right: '4px',
+                      top: `${position.top}%`,
+                      height: `${position.height}%`,
+                      minHeight: isShortBlock ? '24px' : '40px'
+                    }}
+                  >
+                    {isShortBlock ? (
+                      // Affichage compact pour blocs < 15 min
+                      <div className="px-2 py-0.5 text-[10px] font-semibold flex items-center justify-center h-full whitespace-nowrap overflow-hidden">
+                        {log.start} → {log.end}
+                      </div>
+                    ) : (
+                      // Affichage normal pour blocs >= 15 min
+                      <div className="px-2 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
                         <User size={14} className="mb-1" />
                         <div className="text-center leading-tight">
                           <div>{log.start}</div>
@@ -182,30 +201,59 @@ function DayTimeline({
                           <div>{log.end}</div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    )}
+                  </div>
+                );
+              })}
 
-                {/* Pointage en cours */}
-                {isClockingIn && currentDayLogs && (
+              {/* Pointage en cours avec croissance dynamique et effet skeleton */}
+              {isClockingIn && currentDayLogs && (() => {
+                const now = new Date();
+                const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                const position = calculateBlockPosition(currentDayLogs.start, currentTime, minTime, maxTime);
+
+                // Calculer la durée actuelle en minutes
+                const startMin = timeToMinutes(currentDayLogs.start);
+                const currentMin = timeToMinutes(currentTime);
+                const currentDuration = currentMin - startMin;
+                const isShortBlock = currentDuration < 15;
+
+                return (
                   <div
-                    className="absolute left-1 right-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg rounded-l-lg animate-pulse"
+                    className="absolute text-white shadow-xl rounded-lg z-20 border-2 transition-all duration-1000"
                     style={{
-                      top: `${calculateBlockPosition(currentDayLogs.start, '23:59', minTime, maxTime).top}%`,
-                      height: `${calculateBlockPosition(currentDayLogs.start, '23:59', minTime, maxTime).height}%`
+                      backgroundColor: '#333333',
+                      borderColor: '#1a1a1a',
+                      left: '12px',
+                      right: '4px',
+                      top: `${position.top}%`,
+                      height: `${Math.max(position.height, 5)}%`,
+                      minHeight: isShortBlock ? '24px' : '40px',
+                      backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)',
+                      backgroundSize: '20px 20px',
+                      animation: 'shimmer 2s linear infinite'
                     }}
                   >
-                    <div className="px-1.5 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
-                      <User size={14} className="mb-1" />
-                      <div className="text-center leading-tight">
-                        <div>{currentDayLogs.start}</div>
-                        <div className="opacity-75 text-[10px] my-1">↓</div>
-                        <div className="text-[10px]">En cours</div>
+                    {isShortBlock ? (
+                      // Affichage compact sur une ligne pour bloc court
+                      <div className="px-2 py-0.5 text-[10px] font-semibold flex items-center justify-center h-full whitespace-nowrap overflow-hidden">
+                        <User size={12} className="mr-1 animate-pulse" />
+                        {currentDayLogs.start} → En cours...
                       </div>
-                    </div>
+                    ) : (
+                      // Affichage normal pour bloc plus long
+                      <div className="px-2 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
+                        <User size={14} className="mb-1 animate-pulse" />
+                        <div className="text-center leading-tight">
+                          <div>{currentDayLogs.start}</div>
+                          <div className="opacity-75 text-[10px] my-1">↓</div>
+                          <div className="text-[10px] animate-pulse">En cours</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -235,34 +283,31 @@ export default function WeeklyCalendar({
 
   return (
     <div className="bg-gray-50 rounded-3xl p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-xl font-bold">Planning Hebdomadaire</h3>
-          <div className="flex items-center gap-4 mt-2 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-400 rounded flex items-center justify-center">
-                <Clock size={10} className="text-white" />
-              </div>
-              <span className="text-gray-600">Horaire équipe (gauche)</span>
+      <div className="mb-6">
+        <h3 className="text-xl font-bold">Planning Hebdomadaire</h3>
+        <div className="flex items-center gap-4 mt-2 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded flex items-center justify-center border-2" style={{ backgroundColor: '#333333', opacity: 0.3, borderColor: 'rgba(51, 51, 51, 0.4)' }}>
+              <Clock size={10} className="text-gray-800" />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
-                <User size={10} className="text-white" />
-              </div>
-              <span className="text-gray-600">Vos pointages (droite)</span>
+            <span className="text-gray-600">Horaire équipe (fond)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded flex items-center justify-center border-2" style={{ backgroundColor: '#333333', borderColor: '#1a1a1a' }}>
+              <User size={10} className="text-white" />
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-500 rounded animate-pulse"></div>
-              <span className="text-gray-600">En cours</span>
+            <span className="text-gray-600">Vos pointages (superposés)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded border-2 relative overflow-hidden" style={{ backgroundColor: '#333333', borderColor: '#1a1a1a' }}>
+              <div className="absolute inset-0 animate-pulse" style={{
+                backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)',
+                backgroundSize: '8px 8px'
+              }}></div>
             </div>
+            <span className="text-gray-600">En cours</span>
           </div>
         </div>
-        <button
-          onClick={onRefresh}
-          className="px-4 py-2 bg-white hover:bg-gray-100 rounded-xl font-medium text-sm border border-gray-200 transition"
-        >
-          Actualiser
-        </button>
       </div>
 
       <div className="grid grid-cols-7 gap-4 pl-12">

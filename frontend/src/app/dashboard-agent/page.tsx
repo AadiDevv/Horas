@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, Calendar } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
 import {
@@ -134,7 +134,7 @@ export default function Page() {
               <StatCard
                 title="Travaillé cette semaine"
                 value="40:00:05"
-                icon={Clock}
+                icon={Calendar}
               />
               <StatCard title="Retards ce mois" value="2" icon={AlertCircle} />
             </div>

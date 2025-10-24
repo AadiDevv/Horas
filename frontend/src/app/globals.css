@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Poppins, Arial, sans-serif;
 }
+
+/* Animation shimmer pour le bloc de pointage en cours */
+@keyframes shimmer {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
