@@ -89,6 +89,7 @@ describe('TimesheetController', () => {
       createTimesheet: jest.fn(),
       updateTimesheet: jest.fn(),
       deleteTimesheet: jest.fn(),
+      getLastTimesheetByEmployee: jest.fn(),
     } as unknown as jest.Mocked<TimesheetUseCase>;
 
     controller = new TimesheetController(useCaseMock);
@@ -193,12 +194,12 @@ describe('TimesheetController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.createTimesheet(req, res, true);
+      await controller.createTimesheet(req, res);
 
       expect(useCaseMock.createTimesheet).toHaveBeenCalled();
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ clockin: true, employeId: 5 }),
-        'Pointage enregistré avec succès'
+        'Pointage entrée enregistré avec succès'
       );
     });
 
@@ -208,7 +209,7 @@ describe('TimesheetController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.createTimesheet(req, res, true)).rejects.toThrow(ValidationError);
+      await expect(controller.createTimesheet(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
