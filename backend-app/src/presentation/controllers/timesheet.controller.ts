@@ -74,16 +74,32 @@ export class TimesheetController {
 
     /**
      * POST /api/timesheets
-     * Crée un nouveau pointage (clockin ou clockout)
+     * Crée un nouveau pointage (clockin ou clockout automatique)
      */
-    async createTimesheet(req: Request, res: Response, clockin: boolean): Promise<void> {
+    async createTimesheet(req: Request, res: Response): Promise<void> {
         const employeId = req.user!.id;
         const { date, hour, status } = req.body;
 
+        // Validation basique des champs date / hour
         if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
             throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
         }
 
+        // Récupérer le dernier timesheet de l'employé
+        const lastTimesheet = await this.UC_timesheet.getLastTimesheetByEmployee(employeId);
+
+        // Déterminer automatiquement le sens du pointage
+        let clockin: boolean;
+
+        if (!lastTimesheet) {
+            // Premier pointage
+            clockin = true;
+        } else {
+            // Si le dernier était un clockin => maintenant clockout, sinon inversement
+            clockin = !lastTimesheet.clockin;
+        }
+
+        // Créer l'entité Timesheet
         const timesheet = new Timesheet({
             date: new Date(date),
             hour: new Date(hour),
@@ -95,7 +111,7 @@ export class TimesheetController {
         const savedTimesheet = await this.UC_timesheet.createTimesheet(timesheet);
         const dto = savedTimesheet.toReadDTO();
 
-        res.success(dto, "Pointage enregistré avec succès");
+        res.success(dto, `Pointage ${clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
     }
 
     // #endregion

@@ -55,6 +55,12 @@ export class TimesheetUseCase {
         return timesheet;
     }
 
+    async getLastTimesheetByEmployee(employeId: number): Promise<Timesheet | null> {
+        const timesheet = await this.R_timesheet.getLastByEmployee(employeId);
+
+       return timesheet;
+    }
+
     /**
      * Récupère les statistiques de timesheets d'un employé
      */

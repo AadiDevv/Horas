@@ -92,6 +92,33 @@ export class TimesheetRepository implements ITimesheet {
         }));
     }
 
+    async getLastByEmployee(employeId: number): Promise<Timesheet | null> {
+        const timesheet = await prisma.timesheet.findFirst({
+            where: { employeId },
+            include: {
+                employe: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    }
+                }
+            },
+            orderBy: [
+                { date: 'desc' },
+                { hour: 'desc' },
+            ],
+        });
+
+        if (!timesheet) return null;
+
+        return new Timesheet({
+            ...timesheet,
+            employe: new User({ ...timesheet.employe }),
+        });
+    }
+
     async getTimesheetStats(employeId: number, startDate: string, endDate: string) {
         const periodStart = new Date(startDate);
         const periodEnd = new Date(endDate);
