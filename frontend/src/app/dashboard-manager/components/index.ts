@@ -5,3 +5,8 @@ export { default as EquipeModal } from './EquipeModal';
 export { default as AgentList } from './AgentList';
 export { default as EquipeList } from './EquipeList';
 export { default as SettingsModal } from './SettingsModal';
+export { default as KpiCard } from './KpiCard';
+export { default as RetardsCard } from './RetardsCard';
+export { default as HeuresChart } from './HeuresChart';
+export { default as RetardsWeekChart } from './RetardsWeekChart';
+export { default as PonctualiteScore } from './PonctualiteScore';
