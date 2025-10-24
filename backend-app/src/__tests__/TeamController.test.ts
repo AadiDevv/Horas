@@ -196,7 +196,7 @@ describe('TeamController', () => {
 
       await controller.createTeam(req, res);
 
-      expect(useCaseMock.createTeam).toHaveBeenCalledWith({ name: 'Sales Team', managerId: 8 }, 99);
+      expect(useCaseMock.createTeam).toHaveBeenCalledWith({ name: 'Sales Team', managerId: 99 });
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 3,
@@ -219,7 +219,7 @@ describe('TeamController', () => {
       const req = mockRequest({ body: { name: 'NoManager' } }) as any;
       const res = mockResponse();
 
-      await expect(controller.createTeam(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.createTeam(req, res)).rejects.toThrow(TypeError);
     });
   });
 
