@@ -112,6 +112,7 @@ describe('UserController', () => {
       getUser_ById: jest.fn(),
       getMyEmployees: jest.fn(),
       updateUser_ById: jest.fn(),
+      updateUserProfile_ById: jest.fn(),
       deleteUser_ById: jest.fn(),
     } as unknown as jest.Mocked<UserUseCase>;
 
@@ -254,7 +255,7 @@ describe('UserController', () => {
 
       await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, { firstName: 'Eve' }, 6, 'employe');
+      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,
@@ -292,7 +293,7 @@ describe('UserController', () => {
 
       await controller.deleteUser_ById(req, res);
 
-      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7);
+      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7, 1, 'admin');
       expect(res.success).toHaveBeenCalledWith(null, 'Utilisateur supprimé avec succès');
     });
 
