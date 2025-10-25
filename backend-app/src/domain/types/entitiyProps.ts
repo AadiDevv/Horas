@@ -49,6 +49,18 @@ export type TeamProps = {
 
 export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 
+export type ScheduleProps = {
+    id?: number;
+    name: string;
+    startHour: Date;
+    endHour: Date;
+    activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
+    createdAt?: Date;
+    updatedAt?: Date;
+    users?: User[];
+    usersCount?: number;
+}
+
 export interface TimesheetProps {
     id?: number;
     employeId: number;

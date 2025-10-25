@@ -5,7 +5,7 @@
  * activeDays est un tableau de lastNamebres représentant les jours (1=Lundi, 7=Dimanche)
  */
 export interface ScheduleCreateDTO {
-    lastName: string;
+    name: string;
     startHour: string; // Format: "HH:mm" ex: "09:00"
     endHour: string;   // Format: "HH:mm" ex: "17:30"
     activeDays: number[]; // Tableau de 1 à 7 (1=Lundi, 7=Dimanche)
@@ -18,7 +18,7 @@ export interface ScheduleCreateDTO {
  * Tous les champs sont optionnels (PATCH)
  */
 export interface ScheduleUpdateDTO {
-    lastName?: string;
+    name?: string;
     startHour?: string; // Format: "HH:mm"
     endHour?: string;   // Format: "HH:mm"
     activeDays?: number[];
@@ -32,7 +32,7 @@ export interface ScheduleUpdateDTO {
  */
 export interface ScheduleReadDTO {
     id: number;
-    lastName: string;
+    name: string;
     startHour: string; // Format: "HH:mm" ou ISO
     endHour: string;   // Format: "HH:mm" ou ISO
     activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
@@ -40,7 +40,7 @@ export interface ScheduleReadDTO {
     updatedAt: string;
 
     // Informations enrichies pour le frontend
-    usersCount?: number; // lastNamebre d'users avec cet schedule
+    usersCount?: number; // nombre d'users avec cet schedule
 }
 
 /**
@@ -64,11 +64,21 @@ export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
  */
 export interface ScheduleListItemDTO {
     id: number;
-    lastName: string;
+    name: string;
     startHour: string;
     endHour: string;
     activeDays: number[];
     usersCount: number;
+}
+// #endregion
+
+// #region Filter DTO
+/**
+ * DTO pour filtrer les schedules
+ */
+export interface ScheduleFilterDTO {
+    name?: string;
+    activeDays?: number[];
 }
 // #endregion
 
