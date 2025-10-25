@@ -45,7 +45,7 @@ export const authPaths = {
                                     password: 'SecureP@ss123',
                                     phone: '+33 6 12 34 56 78',
                                     teamId: 5,
-                                    scheduleId: 2
+                                    customScheduleId: 2
                                 }
                             }
                         }
@@ -156,7 +156,7 @@ export const authPaths = {
 - **Relations** : L'employé sera automatiquement lié au manager connecté
 
 **Champs optionnels :**
-- \`teamId\` et \`scheduleId\` peuvent être assignés plus tard`,
+- \`teamId\` et \`customScheduleId\` peuvent être assignés plus tard`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {
@@ -185,7 +185,7 @@ export const authPaths = {
                                     password: 'SecureP@ss123',
                                     phone: '+33 6 12 34 56 78',
                                     teamId: 5,
-                                    scheduleId: 2
+                                    customScheduleId: 2
                                 }
                             }
                         }
@@ -292,7 +292,7 @@ export const authPaths = {
 - **Gestion** : Il pourra gérer ses propres équipes une fois créé
 
 **Champs non applicables :**
-- \`teamId\` et \`scheduleId\` ne sont pas utilisés lors de la création`,
+- \`teamId\` et \`customScheduleId\` ne sont pas utilisés lors de la création`,
             tags: ['Authentication'],
             security: [{ bearerAuth: [] }],
             requestBody: {

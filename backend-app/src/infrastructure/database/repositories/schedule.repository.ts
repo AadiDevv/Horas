@@ -230,23 +230,18 @@ export class ScheduleRepository implements ISchedule {
      * Vérifie si un schedule est utilisé par des utilisateurs ou équipes
      */
     async isScheduleInUse(id: number): Promise<boolean> {
-        const [userCount, teamCount] = await Promise.all([
-            this.prisma.user.count({
-                where: { scheduleId: id }
-            }),
-            this.prisma.team.count({
-                where: { scheduleId: id }
-            })
-        ]);
+        const teamCount = await this.prisma.team.count({
+            where: { scheduleId: id }
+        });
 
-        return userCount > 0 || teamCount > 0;
+        return teamCount > 0;
     }
 
     /**
      * Récupère le nombre d'utilisateurs utilisant un schedule
      */
     async getScheduleUsersCount(id: number): Promise<number> {
-        return await this.prisma.user.count({
+        return await this.prisma.team.count({
             where: { scheduleId: id }
         });
     }
