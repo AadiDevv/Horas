@@ -85,7 +85,7 @@ export class UserUseCase {
      * @param requestingUserId - ID de l'utilisateur qui fait la requête
      * @param requestingUserRole - Rôle de l'utilisateur connecté
      * @param teamId - ID de l'équipe (optionnel, pour assignation)
-     * @param scheduleId - ID du planning (optionnel, pour assignation)
+     * @param customScheduleId - ID du planning (optionnel, pour assignation)
      * @returns L'utilisateur mis à jour
      * @throws NotFoundError si l'utilisateur n'existe pas
      * @throws ValidationError si les données sont invalides ou restrictions non respectées
@@ -123,11 +123,11 @@ export class UserUseCase {
      * Valide les permissions de mise à jour selon le rôle
      * 
      * Règles métier :
-     * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive, teamId, scheduleId)
+     * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive, teamId, customScheduleId)
      * - Manager : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * - Employé : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * 
-     * Note : teamId et scheduleId sont autorisés pour les admins via les routes dédiées
+     * Note : teamId et customScheduleId sont autorisés pour les admins via les routes dédiées
      */
     private validateUpdateProfilePermissions(
         targetUser: User,

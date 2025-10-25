@@ -16,7 +16,7 @@ describe('JWTService', () => {
     role: 'employe' as const, // Requis depuis la mise à jour de l'auth
     phone: undefined,
     teamId: undefined,
-    scheduleId: undefined,
+    customScheduleId: undefined,
   };
 
   const user = User.fromCreateDTO(fakeDTO, hashedPassword);

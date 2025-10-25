@@ -4,6 +4,7 @@ import { prisma } from "../prisma.service";
 import { User } from "@/domain/entities/user";
 import { ValidationError } from "@/domain/error/AppError";
 import { TeamFilterDTO } from "@/application/DTOS";
+import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 
 export class TeamRepository implements ITeam {
 
@@ -71,7 +72,7 @@ export class TeamRepository implements ITeam {
                         role: true,
                         isActive: true,
                         phone: true,
-                        scheduleId: true,
+                        customScheduleId: true,
                     }
                 }
             }
@@ -82,10 +83,9 @@ export class TeamRepository implements ITeam {
         }
 
         return new Team({
-            ...team,
-            scheduleId: team.scheduleId ?? undefined,
+            ...nullToUndefined(team),
             manager: new User({ ...team.manager }),
-            members: team.members.map(membre => new User({ ...membre, schedule: membre.scheduleId ? {id : membre.scheduleId} : undefined }))
+            members: team.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined }))
         });
     }
 
@@ -112,8 +112,7 @@ export class TeamRepository implements ITeam {
             }
         })
         return teams.map(team => new Team({
-            ...team,
-            scheduleId: team.scheduleId ?? undefined,
+            ...nullToUndefined(team),
             manager: new User({ ...team.manager })
         }));
     }
@@ -147,9 +146,7 @@ export class TeamRepository implements ITeam {
             }
         });
 
-        return new Team({
-            ...teamCreated,
-            scheduleId: teamCreated.scheduleId ?? undefined,
+        return new Team({...nullToUndefined(teamCreated),
             manager: new User({ ...teamCreated.manager })
         });
     }
@@ -189,8 +186,7 @@ export class TeamRepository implements ITeam {
         });
 
         return new Team({
-            ...teamUpdated,
-            scheduleId: teamUpdated.scheduleId ?? undefined,
+            ...nullToUndefined(teamUpdated),
             manager: new User({ ...teamUpdated.manager })
         });
     }
@@ -223,8 +219,7 @@ export class TeamRepository implements ITeam {
         });
 
         return new Team({
-            ...teamDeleted,
-            scheduleId: teamDeleted.scheduleId ?? undefined,
+            ...nullToUndefined(teamDeleted),
             manager: new User({ ...teamDeleted.manager })
         });
     }

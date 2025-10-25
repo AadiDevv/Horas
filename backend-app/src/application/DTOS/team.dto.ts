@@ -23,7 +23,7 @@ export interface TeamMembreDTO {
     role: "admin" | "manager" | "employe";
     isActive: boolean;
     phone?: string;
-    schedule?: {
+    customSchedule?: {
         id: number;
         name?: string;
         startHour?: Date;

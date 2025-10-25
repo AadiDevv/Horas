@@ -25,7 +25,7 @@ export type UserProps = {
         firstName?: string;
         lastName?: string;
     };
-    schedule?: {
+    customSchedule?: {
         id: number;
         name?: string;
         startHour?: Date;

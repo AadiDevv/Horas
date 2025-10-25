@@ -31,7 +31,7 @@ export class User {
   public deletedAt?: Date;
 
   public phone?: string;
-  public schedule?: {
+  public customSchedule?: {
     id: number;
     name?: string;
     startHour?: Date;
@@ -64,7 +64,7 @@ export class User {
     this.isActive = props.isActive;
     this.phone = props.phone;
     this.team = props.team;
-    this.schedule = props.schedule;
+    this.customSchedule = props.customSchedule;
     this.manager = props.manager;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
@@ -246,7 +246,7 @@ export class User {
       isActive: this.isActive,
       phone: this.phone,
       team: this.team,
-      schedule: this.schedule,
+      customSchedule: this.customSchedule,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
@@ -291,7 +291,7 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      schedule: this.schedule,
+      customSchedule: this.customSchedule,
     };
   }
   // #endregion
@@ -330,13 +330,13 @@ export class User {
 
   public static fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): User {
     
-    const schedule = dto.scheduleId? {id: dto.scheduleId} : undefined;
+    const customSchedule = dto.customScheduleId? {id: dto.customScheduleId} : undefined;
     const team = dto.teamId? {id: dto.teamId} : undefined;
     
     return new User({
       ...dto,
       manager: {id: dto.managerId,},
-      schedule: schedule,
+      customSchedule: customSchedule,
       team: team,
       hashedPassword: hashedPassword,
       isActive: true,
@@ -347,9 +347,9 @@ export class User {
    * Met à jour une entité User existante avec les données d'un DTO de mise à jour
    * Retourne une nouvelle instance (immutabilité)
    * 
-   * Note : teamId et scheduleId sont gérés pour les routes admin dédiées
+   * Note : teamId et customScheduleId sont gérés pour les routes admin dédiées
    */
-  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO & { teamId?: number; scheduleId?: number }): User {
+  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO & { teamId?: number; customScheduleId?: number }): User {
     return new User({
       ...existingUser,
       firstName: dto.firstName ?? existingUser.firstName,
@@ -359,7 +359,7 @@ export class User {
       role: dto.role ?? existingUser.role,
       isActive: dto.isActive ?? existingUser.isActive,
       team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
-      schedule: dto.scheduleId !== undefined ? { id: dto.scheduleId } : existingUser.schedule,
+      customSchedule: dto.customScheduleId !== undefined ? { id: dto.customScheduleId } : existingUser.customSchedule,
       updatedAt: new Date(Date.now()),
     });
   }
@@ -397,7 +397,7 @@ export class User {
         isActive: this.isActive,
         phone: this.phone,
         team: this.team,
-        schedule: this.schedule,
+        customSchedule: this.customSchedule,
         ...this.toDateStrings(),
     };
 
@@ -457,7 +457,7 @@ export class User {
       isActive: this.isActive,
       phone: this.phone,
       teamId: this.team?.id,
-      scheduleId: this.schedule?.id,
+      customScheduleId: this.customSchedule?.id,
       ...this.toDateStrings(),
     };
   }
