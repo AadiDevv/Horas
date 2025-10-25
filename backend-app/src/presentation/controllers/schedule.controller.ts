@@ -212,29 +212,10 @@ export class ScheduleController {
      * Admin uniquement
      */
     async createSchedule(req: Request, res: Response): Promise<void> {
-        try {
             const dto: ScheduleCreateDTO = req.body;
-
-            const schedule = await this.scheduleUseCase.createSchedule(dto);
-
-            res.status(201).json({
-                success: true,
-                data: schedule,
-                message: 'Schedule créé avec succès'
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            const schedule = await this.scheduleUseCase.createSchedule(dto,req.user!);
+            const scheduleDTO = schedule.toReadDTO();
+            res.success(scheduleDTO, "Schedule créé avec succès");
     }
     // #endregion
 

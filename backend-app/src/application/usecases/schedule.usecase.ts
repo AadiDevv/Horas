@@ -6,7 +6,8 @@ import {
     ScheduleReadDTO,
     ScheduleListItemDTO,
     ScheduleWithUsersDTO,
-    ScheduleFilterDTO
+    ScheduleFilterDTO,
+    UserReadDTO
 } from "@/application/DTOS";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
 
@@ -71,7 +72,7 @@ export class ScheduleUseCase {
      * Crée un nouveau schedule
      * Accessible par Admin uniquement
      */
-    async createSchedule(dto: ScheduleCreateDTO): Promise<ScheduleReadDTO> {
+    async createSchedule(dto: ScheduleCreateDTO, user: UserReadDTO): Promise<Schedule> {
         // Validation des données
         this.validateScheduleData(dto);
 
@@ -80,6 +81,7 @@ export class ScheduleUseCase {
         if (existingSchedules.length > 0) {
             throw new ValidationError(`Un schedule avec le nom "${dto.name}" existe déjà`);
         }
+        if
 
         // Créer l'entité
         const schedule = Schedule.fromCreateDTO(dto);
@@ -87,7 +89,7 @@ export class ScheduleUseCase {
         // Sauvegarder
         const createdSchedule = await this.scheduleRepository.createSchedule(schedule);
 
-        return createdSchedule.toReadDTO();
+        return createdSchedule
     }
     // #endregion
 
