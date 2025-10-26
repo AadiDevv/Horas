@@ -122,3 +122,4 @@ secrets/
 .turbo/
 .vercel/
 .netlify/
+.claude/
