@@ -1,4 +1,4 @@
-import { AuthUseCase, UserUseCase, TeamUseCase, TimesheetUseCase } from "@/application/usecases";
+import { AuthUseCase, UserUseCase, TeamUseCase, TimesheetUseCase, ScheduleUseCase } from "@/application/usecases";
 import { infra } from "./repository.factory";
 
 class ApplicationFactory {
@@ -6,6 +6,7 @@ class ApplicationFactory {
     private static userUseCase: UserUseCase | null;
     private static teamUseCase: TeamUseCase | null;
     private static timesheetUseCase: TimesheetUseCase | null;
+    private static scheduleUseCase: ScheduleUseCase | null;
 
     public static getAuthUseCase(): AuthUseCase {
         if (!this.authUseCase) {
@@ -18,7 +19,8 @@ class ApplicationFactory {
     public static getUserUseCase(): UserUseCase {
         if (!this.userUseCase) {
             const userRepo = infra.getUserRepoAsIUser();
-            this.userUseCase = new UserUseCase(userRepo);
+            const teamRepo = infra.getTeamRepo();
+            this.userUseCase = new UserUseCase(userRepo, teamRepo);
         }
         return this.userUseCase;
     }
@@ -39,11 +41,20 @@ class ApplicationFactory {
         return this.timesheetUseCase;
     }
 
+    public static getScheduleUseCase(): ScheduleUseCase {
+        if (!this.scheduleUseCase) {
+            const scheduleRepo = infra.getScheduleRepo();
+            this.scheduleUseCase = new ScheduleUseCase(scheduleRepo);
+        }
+        return this.scheduleUseCase;
+    }
+
     public static reset(): void {
         this.authUseCase = null;
         this.userUseCase = null;
         this.teamUseCase = null;
         this.timesheetUseCase = null;
+        this.scheduleUseCase = null;
     }
 }
 export const app = {
@@ -51,5 +62,6 @@ export const app = {
     getUserUseCase: () => ApplicationFactory.getUserUseCase(),
     getTeamUseCase: () => ApplicationFactory.getTeamUseCase(),
     getTimesheetUseCase: () => ApplicationFactory.getTimesheetUseCase(),
+    getScheduleUseCase: () => ApplicationFactory.getScheduleUseCase(),
     reset: () => ApplicationFactory.reset()
 };

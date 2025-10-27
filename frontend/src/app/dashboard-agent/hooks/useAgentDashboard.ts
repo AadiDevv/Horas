@@ -3,6 +3,9 @@ import { DayKey, TimeLog, User, UserFormData, Horaire } from '../types';
 import { getUser, updateUser, changePassword } from '../services/userService';
 import { getEquipeHoraires } from '../services/equipeService';
 
+// Export du nouveau hook timesheet
+export { useTimesheet } from './useTimesheet';
+
 export function useUserData() {
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,7 @@ export function useUserData() {
       setLoading(true);
       const userId = 1; // TODO: Get from auth context
       const response = await getUser(userId);
-      
+
       if (response.success && response.data) {
         setUserData(response.data);
         setFormData({

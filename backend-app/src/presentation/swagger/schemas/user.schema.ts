@@ -42,7 +42,7 @@ export const userSchemas = {
                 example: 5,
                 description: 'ID de l\'équipe (optionnel)'
             },
-            scheduleId: {
+            customScheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -104,7 +104,7 @@ export const userSchemas = {
             isActive: { type: 'boolean', example: true },
             phone: { type: 'string', nullable: true, example: '+33 6 12 34 56 78' },
             teamId: { type: 'integer', nullable: true, example: 5 },
-            scheduleId: { type: 'integer', nullable: true, example: 2 },
+            customScheduleId: { type: 'integer', nullable: true, example: 2 },
             managerId: { type: 'integer', nullable: true, example: 3 },
             manager: {
                 type: 'object',
@@ -151,7 +151,7 @@ export const userSchemas = {
             isActive: { type: 'boolean', example: true },
             phone: { type: 'string', nullable: true, example: '+33 6 12 34 56 78' },
             teamId: { type: 'integer', nullable: true, example: 5 },
-            scheduleId: { type: 'integer', nullable: true, example: 2 },
+            customScheduleId: { type: 'integer', nullable: true, example: 2 },
             employes: {
                 type: 'array',
                 nullable: true,
@@ -173,6 +173,18 @@ export const userSchemas = {
     // #endregion
 
     // #region Update DTOs
+    UserAsignTeamDTO: {
+        type: 'object',
+        required: ['teamId'],
+        properties: {
+            teamId: {
+                type: 'integer',
+                example: 5,
+                description: 'ID de l\'équipe à assigner'
+            }
+        },
+        description: 'DTO pour assigner un utilisateur à une équipe'
+    },
     UserUpdateDTO: {
         type: 'object',
         properties: {
@@ -215,7 +227,7 @@ export const userSchemas = {
         description: `Tous les champs sont optionnels pour permettre des mises à jour partielles (PATCH).
 
 Restrictions métier :
-- teamId et scheduleId ne sont pas modifiables via ce DTO
+- teamId et customScheduleId ne sont pas modifiables via ce DTO
 - Seuls les champs de profil personnel sont autorisés
 - Pour modifier l'assignation d'équipe/planning, utiliser une route admin dédiée`
     },

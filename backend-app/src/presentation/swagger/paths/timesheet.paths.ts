@@ -19,162 +19,116 @@
  * - DELETE /timesheets/:id : Manager ou Admin uniquement (suppression)
  */
 export const timesheetPaths = {
-    '/api/timesheets/clockin': {
-        post: {
-            summary: 'Pointer l\'entrée',
-            description: 'Enregistre l\'hour d\'arrivée de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
+    '/api/timesheets/': {
+    post: {
+        summary: 'Pointer automatiquement (entrée ou sortie)',
+        description: 'Crée un nouveau pointage pour l\'employé connecté.',
             tags: ['Timesheets'],
             requestBody: {
-                required: true,
-                content: {
-                    'application/json': {
-                        schema: {
-                            $ref: '#/components/schemas/TimesheetUpdateDTO'
-                        },
-                        example: {
-                            date: new Date(),
-                            hour: new Date(),
-                            status: 'normal'
-                        }
+            required: false,
+            content: {
+                'application/json': {
+                schema: {
+                    type: 'object',
+                    properties: {
+                    date: { type: 'string', format: 'date-time', example: '2025-10-24' },
+                    hour: { type: 'string', format: 'date-time', example: '2025-10-24T08:30:00.000Z' },
+                    status: { type: 'string', enum: ['normal', 'delay', 'incomplete'], example: 'normal' }
                     }
                 }
+                }
+            }
             },
             security: [{ bearerAuth: [] }],
             responses: {
-                201: {
-                    description: 'Timesheet d\'entrée enregistré avec succès',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/TimesheetCreatedResponse' },
-                            example: {
-                                success: true,
-                                data: {
-                                    id: 1,
-                                    employeId: 10,
-                                    date: '2025-10-12',
-                                    hour: '2025-10-12T09:05:30.000Z',
-                                    clockin: true,
-                                    status: 'normal',
-                                    createdAt: '2025-10-12T09:05:35.000Z',
-                                    updatedAt: '2025-10-12T09:05:35.000Z',
-                                    employe: {
-                                        id: 10,
-                                        firstName: 'Pierre',
-                                        lastName: 'Martin',
-                                        email: 'pierre.martin@example.com'
-                                    }
-                                },
-                                message: 'Timesheet d\'entrée enregistré avec succès',
-                                timestamp: '2025-10-12T09:05:35.000Z'
+            201: {
+                description: 'Pointage (entrée ou sortie) enregistré avec succès',
+                content: {
+                'application/json': {
+                    schema: { $ref: '#/components/schemas/TimesheetCreatedResponse' },
+                    examples: {
+                    clockin: {
+                        summary: 'Pointage d’entrée automatique',
+                        value: {
+                        success: true,
+                        data: {
+                            id: 1,
+                            employeId: 10,
+                            date: '2025-10-24',
+                            hour: '2025-10-24T08:30:00.000Z',
+                            clockin: true,
+                            status: 'normal',
+                            createdAt: '2025-10-24T08:30:05.000Z',
+                            updatedAt: '2025-10-24T08:30:05.000Z',
+                            employe: {
+                            id: 10,
+                            firstName: 'Pierre',
+                            lastName: 'Martin',
+                            email: 'pierre.martin@example.com'
                             }
+                        },
+                        message: 'Pointage d’entrée enregistré avec succès',
+                        timestamp: '2025-10-24T08:30:05.000Z'
+                        }
+                    },
+                    clockout: {
+                        summary: 'Pointage de sortie automatique',
+                        value: {
+                        success: true,
+                        data: {
+                            id: 2,
+                            employeId: 10,
+                            date: '2025-10-24',
+                            hour: '2025-10-24T17:02:10.000Z',
+                            clockin: false,
+                            status: 'normal',
+                            createdAt: '2025-10-24T17:02:12.000Z',
+                            updatedAt: '2025-10-24T17:02:12.000Z',
+                            employe: {
+                            id: 10,
+                            firstName: 'Pierre',
+                            lastName: 'Martin',
+                            email: 'pierre.martin@example.com'
+                            }
+                        },
+                        message: 'Pointage de sortie enregistré avec succès',
+                        timestamp: '2025-10-24T17:02:12.000Z'
                         }
                     }
-                },
-                400: {
-                    description: 'Timesheet impossible (ex: déjà pointé)',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/Error' },
-                            examples: {
-                                alreadyClocked: {
-                                    summary: 'Déjà pointé aujourd\'hui',
-                                    value: {
-                                        success: false,
-                                        error: 'Vous avez déjà pointé votre entrée aujourd\'hui',
-                                        code: 'CONFLICT',
-                                        timestamp: '2025-10-12T09:05:35.000Z'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                401: {
-                    description: 'Non authentifié',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/Error' }
-                        }
                     }
                 }
-            }
-        }
-    },
-
-    '/api/timesheets/clockout': {
-        post: {
-            summary: 'Pointer la sortie',
-            description: 'Enregistre l\'hour de départ de l\'employé. L\'employeId est extrait du JWT, la date et l\'hour sont automatiques.',
-            tags: ['Timesheets'],
-            requestBody: {
-                required: true,
-                content: {
-                    'application/json': {
-                        schema: {
-                            $ref: '#/components/schemas/TimesheetUpdateDTO'
-                        },
-                        example: {
-                            date: new Date(),
-                            hour: new Date(),
-                            status: 'normal'
-                        }
-                    }
                 }
             },
-            security: [{ bearerAuth: [] }],
-            responses: {
-                201: {
-                    description: 'Timesheet de sortie enregistré avec succès',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/TimesheetCreatedResponse' },
-                            example: {
-                                success: true,
-                                data: {
-                                    id: 2,
-                                    employeId: 10,
-                                    date: '2025-10-12',
-                                    hour: '2025-10-12T17:35:00.000Z',
-                                    clockin: false,
-                                    status: 'normal',
-                                    createdAt: '2025-10-12T17:35:05.000Z',
-                                    updatedAt: '2025-10-12T17:35:05.000Z',
-                                    employe: {
-                                        id: 10,
-                                        firstName: 'Pierre',
-                                        lastName: 'Martin',
-                                        email: 'pierre.martin@example.com'
-                                    }
-                                },
-                                message: 'Timesheet de sortie enregistré avec succès',
-                                timestamp: '2025-10-12T17:35:05.000Z'
-                            }
+            400: {
+                description: 'Erreur de pointage (ex: déjà pointé deux fois de suite)',
+                content: {
+                'application/json': {
+                    schema: { $ref: '#/components/schemas/Error' },
+                    examples: {
+                    alreadyClocked: {
+                        summary: 'Pointage invalide (déjà effectué)',
+                        value: {
+                        success: false,
+                        error: 'Impossible de pointer deux fois une entrée consécutive',
+                        code: 'CONFLICT',
+                        timestamp: '2025-10-24T08:31:00.000Z'
                         }
                     }
-                },
-                400: {
-                    description: 'Timesheet impossible (ex: pas de timesheet d\'entrée)',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/Error' },
-                            examples: {
-                                noClockIn: {
-                                    summary: 'Pas de timesheet d\'entrée',
-                                    value: {
-                                        success: false,
-                                        error: 'Vous devez d\'abord pointer votre entrée',
-                                        code: 'CONFLICT',
-                                        timestamp: '2025-10-12T17:35:05.000Z'
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
+                }
+            },
+            401: {
+                description: 'Non authentifié',
+                content: {
+                'application/json': {
+                    schema: { $ref: '#/components/schemas/Error' }
+                }
+                }
+            }
             }
         }
     },
-
     '/api/timesheets': {
         get: {
             summary: 'Liste des timesheets',

@@ -1,5 +1,5 @@
 import { UserProps } from "../types/entitiyProps";
-import { ValidationError } from "../error/AppError";
+import { ForbiddenError, ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import {
   UserCreateDTO,
@@ -31,7 +31,7 @@ export class User {
   public deletedAt?: Date;
 
   public phone?: string;
-  public schedule?: {
+  public customSchedule?: {
     id: number;
     name?: string;
     startHour?: Date;
@@ -64,7 +64,7 @@ export class User {
     this.isActive = props.isActive;
     this.phone = props.phone;
     this.team = props.team;
-    this.schedule = props.schedule;
+    this.customSchedule = props.customSchedule;
     this.manager = props.manager;
     this.createdAt = props.createdAt || new Date(Date.now())
     this.updatedAt = props.updatedAt;
@@ -163,6 +163,45 @@ export class User {
   public static validatePassword(password: string): boolean {
     return password.length >= 6;
   }
+  // Avec parametres  externe
+  public static validateUpdateProfilePermissions(
+    targetUser: User,
+    dto: UserUpdateDTO,
+    requestingUserId: number,
+    requestingUserRole: string,
+  ): void {
+    // Admin peut tout modifier
+    if (requestingUserRole === 'admin') {
+      return;
+    }
+
+    // Manager et Employé : restrictions strictes
+    if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
+      // Vérifier que c'est leur propre profil
+      if (targetUser.id !== requestingUserId) {
+        throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+      }
+
+      // Champs interdits pour manager/employé
+      const forbiddenFields: string[] = [];
+
+      if (dto.role !== undefined) {
+        forbiddenFields.push('role');
+      }
+
+      if (dto.isActive !== undefined) {
+        forbiddenFields.push('isActive');
+      }
+
+      if (forbiddenFields.length > 0) {
+        throw new ForbiddenError(
+          `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+          `Seuls les administrateurs peuvent modifier ces informations.`
+        );
+      }
+    }
+  }
+
   // #endregion
 
   // #region UserAuthentication Methods
@@ -207,7 +246,7 @@ export class User {
       isActive: this.isActive,
       phone: this.phone,
       team: this.team,
-      schedule: this.schedule,
+      customSchedule: this.customSchedule,
       createdAt: this.createdAt?.toISOString(),
       updatedAt: this.updatedAt?.toISOString(),
       lastLoginAt: this.lastLoginAt?.toISOString(),
@@ -252,7 +291,7 @@ export class User {
       role: this.role,
       isActive: this.isActive,
       phone: this.phone,
-      schedule: this.schedule,
+      customSchedule: this.customSchedule,
     };
   }
   // #endregion
@@ -291,13 +330,13 @@ export class User {
 
   public static fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): User {
     
-    const schedule = dto.scheduleId? {id: dto.scheduleId} : undefined;
+    const customSchedule = dto.customScheduleId? {id: dto.customScheduleId} : undefined;
     const team = dto.teamId? {id: dto.teamId} : undefined;
     
     return new User({
       ...dto,
       manager: {id: dto.managerId,},
-      schedule: schedule,
+      customSchedule: customSchedule,
       team: team,
       hashedPassword: hashedPassword,
       isActive: true,
@@ -308,10 +347,9 @@ export class User {
    * Met à jour une entité User existante avec les données d'un DTO de mise à jour
    * Retourne une nouvelle instance (immutabilité)
    * 
-   * Note : teamId et scheduleId ne sont plus gérés ici car retirés du UserUpdateDTO
-   * Ces attributs seront modifiés via des routes admin dédiées
+   * Note : teamId et customScheduleId sont gérés pour les routes admin dédiées
    */
-  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
+  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO & { teamId?: number; customScheduleId?: number }): User {
     return new User({
       ...existingUser,
       firstName: dto.firstName ?? existingUser.firstName,
@@ -320,7 +358,8 @@ export class User {
       phone: dto.phone ?? existingUser.phone,
       role: dto.role ?? existingUser.role,
       isActive: dto.isActive ?? existingUser.isActive,
-      // team et schedule conservent leurs valeurs existantes (pas modifiables via ce DTO)
+      team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
+      customSchedule: dto.customScheduleId !== undefined ? { id: dto.customScheduleId } : existingUser.customSchedule,
       updatedAt: new Date(Date.now()),
     });
   }
@@ -358,7 +397,7 @@ export class User {
         isActive: this.isActive,
         phone: this.phone,
         team: this.team,
-        schedule: this.schedule,
+        customSchedule: this.customSchedule,
         ...this.toDateStrings(),
     };
 
@@ -418,7 +457,7 @@ export class User {
       isActive: this.isActive,
       phone: this.phone,
       teamId: this.team?.id,
-      scheduleId: this.schedule?.id,
+      customScheduleId: this.customSchedule?.id,
       ...this.toDateStrings(),
     };
   }

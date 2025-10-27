@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserFilterDTO } from '@/application/DTOS/user.dto';
+import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO } from '@/application/DTOS/user.dto';
 import { ValidationError } from '@/domain/error/AppError';
 
 /**
@@ -83,7 +83,7 @@ export class UserController {
    * 
    * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
-  async updateUser_ById(req: Request, res: Response): Promise<void> {
+  async updateUserProfile_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
@@ -96,10 +96,35 @@ export class UserController {
     const requestingUserId = req.user!.id;
     const requestingUserRole = req.user!.role;
 
-    const user = await this.UC_user.updateUser_ById(id, userDto, requestingUserId, requestingUserRole);
+    const user = await this.UC_user.updateUserProfile_ById(id, requestingUserId, requestingUserRole, userDto);
     const userDTO = user.toReadDTO();
 
     res.success(userDTO, "Utilisateur modifié avec succès");
+  }
+
+  /**
+   * PATCH /api/users/assign/team/:id
+   * Assigner un utilisateur à une équipe
+   * - Admin : peut assigner n'importe quel utilisateur
+   * - Manager : peut uniquement assigner ses propres employés
+   * 
+   * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
+   */
+  async updateUserTeam_ById(req: Request, res: Response): Promise<void> {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) throw new ValidationError("ID utilisateur invalide");
+
+    const dto: UserAsignTeamDTO = req.body;
+    if (!dto.teamId) throw new ValidationError("Le teamId est requis");
+
+    // Récupération des informations de l'utilisateur connecté
+    const requestingUserId = req.user!.id;
+    const requestingUserRole = req.user!.role;
+
+    const user = await this.UC_user.updateUserTeam_ById(userId, dto.teamId, requestingUserId, requestingUserRole);
+    const userDTO = user.toReadDTO();
+
+    res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
   }
   // #endregion
 
@@ -111,9 +136,11 @@ export class UserController {
    */
   async deleteUser_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
+    const requestingUserId = req.user!.id;
+    const requestingUserRole = req.user!.role;
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    await this.UC_user.deleteUser_ById(id);
+    await this.UC_user.deleteUser_ById(id, requestingUserId, requestingUserRole);
 
     res.success(null, "Utilisateur supprimé avec succès");
   }

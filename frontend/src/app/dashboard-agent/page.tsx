@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle, Calendar } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
 import {
@@ -13,8 +13,8 @@ import {
 import {
   useUserData,
   useSettings,
-  useTimeClock,
   useTeamSchedule,
+  useTimesheet,
 } from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
 
@@ -42,12 +42,19 @@ export default function Page() {
     pointageLoading,
     successMessage,
     errorMessage,
+    stats,
+    selectedWeek,
+    weekDays,
     getDayKey,
-    handleClockIn,
-    handleClockOut,
-    checkTodayPointages,
-    loadWeekPointages,
-  } = useTimeClock();
+    handleClockToggle,
+    checkTodayTimesheets,
+    loadWeekTimesheets,
+    loadStats,
+    previousWeek,
+    nextWeek,
+    currentWeek,
+    formatWeekRange,
+  } = useTimesheet();
   const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
   useEffect(() => {
@@ -58,7 +65,7 @@ export default function Page() {
     }, 1000);
 
     loadUserData();
-    checkTodayPointages();
+    checkTodayTimesheets();
 
     return () => {
       clearInterval(timer);
@@ -116,8 +123,8 @@ export default function Page() {
               </div>
               <ClockButton
                 isClockingIn={isClockingIn}
-                onClockIn={handleClockIn}
-                onClockOut={handleClockOut}
+                onClockIn={handleClockToggle}
+                onClockOut={handleClockToggle}
                 pointageLoading={pointageLoading}
                 successMessage={successMessage}
                 errorMessage={errorMessage}
@@ -128,15 +135,50 @@ export default function Page() {
             <div className="grid grid-cols-3 gap-8 mb-12">
               <StatCard
                 title="Travaillé ce jour"
-                value="02:00:05"
+                value={`${stats.heuresJour.toFixed(2)}h`}
                 icon={Clock}
               />
               <StatCard
                 title="Travaillé cette semaine"
-                value="40:00:05"
-                icon={Clock}
+                value={`${stats.heuresSemaine.toFixed(2)}h`}
+                icon={Calendar}
               />
-              <StatCard title="Retards ce mois" value="2" icon={AlertCircle} />
+              <StatCard
+                title="Retards ce mois"
+                value={stats.retardsMois.toString()}
+                icon={AlertCircle}
+              />
+            </div>
+
+            {/* Weekly Calendar Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-semibold">Planning de la semaine</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={previousWeek}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                >
+                  ← Précédent
+                </button>
+                <button
+                  onClick={currentWeek}
+                  className="px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors"
+                >
+                  Aujourd'hui
+                </button>
+                <button
+                  onClick={nextWeek}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Suivant →
+                </button>
+              </div>
+            </div>
+
+            {/* Week Range Display */}
+            <div className="flex items-center gap-2 text-gray-600 mb-4">
+              <Calendar size={20} />
+              <span className="font-medium">{formatWeekRange()}</span>
             </div>
 
             {/* Weekly Calendar */}
@@ -148,9 +190,10 @@ export default function Page() {
               onRefresh={() => {
                 setCurrentTime(new Date());
                 loadTeamSchedule();
-                loadWeekPointages();
+                loadWeekTimesheets();
               }}
               teamSchedule={teamSchedule}
+              weekDays={weekDays}
             />
           </main>
         </div>

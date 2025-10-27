@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserPlus, Users } from "lucide-react";
+import { UserPlus, Users, UserCheck, Clock } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
 import {
@@ -12,6 +12,12 @@ import {
   AgentList,
   EquipeList,
   SettingsModal,
+  KpiCard,
+  RetardsCard,
+  HeuresChart,
+  RetardsWeekChart,
+  PonctualiteScore,
+  PointagesManagement,
 } from "./components";
 import {
   useManagerDashboard,
@@ -76,8 +82,24 @@ function ManagerDashboard() {
   // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
-    loadEquipes();
   }, []);
+
+  // Recharger les équipes quand les agents changent (pour mettre à jour agentCount)
+  useEffect(() => {
+    if (agents.length >= 0) {
+      loadEquipes();
+    }
+  }, [agents]);
+
+  // Enrichir les équipes avec le vrai nombre d'agents
+  const enrichedEquipes = equipes.map(equipe => {
+    const agentsInTeam = agents.filter(agent => agent.equipeId === equipe.id);
+    return {
+      ...equipe,
+      agentCount: agentsInTeam.length,
+      agents: agentsInTeam
+    };
+  });
 
   // ==================== HANDLERS ====================
   const handleAgentSubmit = () => {
@@ -109,7 +131,7 @@ function ManagerDashboard() {
   // ==================== RENDER ====================
   return (
     <RoleProtection allowedRoles={["manager", "admin"]}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         <Navbar
           onOpenSettings={handleOpenSettings}
           sidebarOpen={sidebarOpen}
@@ -131,7 +153,7 @@ function ManagerDashboard() {
           />
         )}
 
-        <div className="flex">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <Sidebar
             isOpen={sidebarOpen}
@@ -140,7 +162,7 @@ function ManagerDashboard() {
           />
 
           {/* Main Content */}
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-8 overflow-y-auto">
             {/* DASHBOARD PAGE */}
             {currentPage === "dashboard" && (
               <>
@@ -170,102 +192,72 @@ function ManagerDashboard() {
                   </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  <DashboardStatCard
-                    title="Employés totaux"
-                    value={agents.length.toString()}
+                {/* KPIs en haut */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <KpiCard
+                    title="Employés en ligne"
+                    value={agents.filter((a) => a.isActive).length}
+                    subtitle={`sur ${agents.length} total`}
                     icon={Users}
+                    showGreenDot={true}
                   />
-                  <DashboardStatCard
-                    title="Employés actifs"
-                    icon={Users}
-                    value={agents.filter((a) => a.isActive).length.toString()}
+                  <KpiCard
+                    title="Taux de présence"
+                    value={`${Math.round((agents.filter((a) => a.isActive).length / Math.max(agents.length, 1)) * 100)}%`}
+                    subtitle={`${agents.filter((a) => a.isActive).length}/${agents.length} présents`}
+                    icon={UserCheck}
                   />
-                  <DashboardStatCard
-                    title="Équipes"
-                    value={equipes.length.toString()}
-                    icon={Users}
-                  />
-                  <DashboardStatCard
-                    title="Total des membres"
-                    icon={Users}
-                    value={equipes
-                      .reduce((sum, e) => sum + e.agentCount, 0)
-                      .toString()}
+                  <KpiCard
+                    title="Retards aujourd'hui"
+                    value="3"
+                    subtitle="Retard moyen: 12 min"
+                    icon={Clock}
                   />
                 </div>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
-                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
-                      Agents récents
-                    </h3>
-                    <div className="space-y-3">
-                      {agents.slice(0, 5).map((agent) => (
-                        <div
-                          key={agent.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                              {agent.prenom[0]}
-                              {agent.nom[0]}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900">
-                                {agent.prenom} {agent.nom}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {agent.email}
-                              </p>
-                            </div>
-                          </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              agent.isActive
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {agent.isActive ? "Actif" : "Inactif"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Section graphiques */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <HeuresChart
+                    equipes={[
+                      { nom: "Équipe A", heures: 38, objectif: 40 },
+                      { nom: "Équipe B", heures: 42, objectif: 40 },
+                      { nom: "Équipe C", heures: 35, objectif: 40 },
+                    ]}
+                  />
+                  <RetardsCard
+                    retards={[
+                      { employeNom: "Jean Dupont", minutes: 15, heureArrivee: "9h15" },
+                      { employeNom: "Marie Martin", minutes: 8, heureArrivee: "9h08" },
+                      { employeNom: "Paul Durand", minutes: 12, heureArrivee: "9h12" },
+                    ]}
+                    retardMoyen={12}
+                  />
+                </div>
 
-                  <div className="bg-white/60 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 hover:shadow-xl transition-all duration-300">
-                    <h3 className="text-2xl font-semibold mb-4 text-gray-900">
-                      Équipes
-                    </h3>
-                    <div className="space-y-3">
-                      {equipes.slice(0, 5).map((equipe) => (
-                        <div
-                          key={equipe.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-semibold">
-                              <Users size={20} />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900">
-                                {equipe.nom}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {equipe.description || "Aucune description"}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
-                            {equipe.agentCount} membres
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Section stats retards et ponctualité */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <RetardsWeekChart
+                    data={[
+                      { jour: "Lun", count: 2 },
+                      { jour: "Mar", count: 4 },
+                      { jour: "Mer", count: 1 },
+                      { jour: "Jeu", count: 3, isToday: true },
+                      { jour: "Ven", count: 0 },
+                      { jour: "Sam", count: 0 },
+                      { jour: "Dim", count: 0 },
+                    ]}
+                    total={10}
+                    evolution={-20}
+                  />
+                  <PonctualiteScore
+                    equipes={[
+                      { nom: "Équipe A", score: 94 },
+                      { nom: "Équipe B", score: 87 },
+                      { nom: "Équipe C", score: 78 },
+                    ]}
+                    scoreGlobal={86}
+                    objectif={90}
+                  />
                 </div>
               </>
             )}
@@ -274,7 +266,7 @@ function ManagerDashboard() {
             {currentPage === "agents" && (
               <AgentList
                 agents={filteredAgents}
-                equipes={equipes}
+                equipes={enrichedEquipes}
                 onAddAgent={openAgentModal}
                 onEditAgent={openEditAgentModal}
                 onDeleteAgent={handleDeleteAgent}
@@ -284,10 +276,18 @@ function ManagerDashboard() {
             {/* ÉQUIPES PAGE */}
             {currentPage === "equipes" && (
               <EquipeList
-                equipes={equipes}
+                equipes={enrichedEquipes}
                 onAddEquipe={openEquipeModal}
                 onEditEquipe={openEditEquipeModal}
                 onDeleteEquipe={handleDeleteEquipe}
+              />
+            )}
+
+            {/* POINTAGES PAGE */}
+            {currentPage === "pointages" && (
+              <PointagesManagement
+                agents={filteredAgents}
+                onRefresh={loadAgents}
               />
             )}
           </main>
@@ -302,7 +302,7 @@ function ManagerDashboard() {
           }}
           formData={agentFormData}
           setFormData={setAgentFormData}
-          equipes={equipes}
+          equipes={enrichedEquipes}
           agent={editingAgent}
           onSave={handleAgentSubmit}
           loading={loadingAgents}

@@ -12,7 +12,7 @@ export interface UserCreateDTO {
     password: string;
     role: Role;
     teamId?: number;
-    scheduleId?: number;
+    customScheduleId?: number;
     phone?: string;
 }
 
@@ -27,7 +27,7 @@ export interface BaseUserCreateDTO {
 export interface UserCreateEmployeeDTO extends BaseUserCreateDTO {
     role: Extract<Role, "employe">;
     teamId?: number;
-    scheduleId?: number;
+    customScheduleId?: number;
     managerId: number;
 }
 
@@ -42,11 +42,9 @@ export interface UserCreateManagerDTO extends BaseUserCreateDTO {
  * Tous les champs sont optionnels (PATCH)
  * 
  * Restrictions métier :
- * - teamId et scheduleId ne sont pas modifiables via ce DTO
  * - Seuls les champs de profil personnel sont autorisés
  * - Le mot de passe n'est pas inclus ici (route séparée pour changer le mot de passe)
- * 
- * Note : Pour modifier l'assignation d'équipe/planning, utiliser une route admin dédiée
+ * - teamId et customScheduleId ne sont pas modifiables via ce DTO (routes dédiées)
  */
 export interface UserUpdateDTO {
     firstName?: string;
@@ -55,6 +53,10 @@ export interface UserUpdateDTO {
     phone?: string;
     role?: Role;
     isActive?: boolean;
+}
+
+export interface UserAsignTeamDTO {
+    teamId: number;
 }
 
 /**
@@ -98,7 +100,7 @@ export interface UserReadDTO {
         name?: string;
     };
 
-    schedule?: {
+    customSchedule?: {
         id: number;
         name?: string;
         startHour?: Date;

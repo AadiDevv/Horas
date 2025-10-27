@@ -26,7 +26,7 @@ export class TimesheetController {
         };
         
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
         const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
         const dto: TimesheetListItemDTO[] = timesheets.map(t => t.toListItemDTO());
 
@@ -42,7 +42,7 @@ export class TimesheetController {
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
         const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
         const dto: TimesheetReadDTO = timesheet.toReadDTO();
 
@@ -58,7 +58,7 @@ export class TimesheetController {
         const startDate = req.query.startDate as string;
         const endDate = req.query.endDate as string;
         const userId = req.user!.id;
-        const userRole = req.user.role;
+        const userRole = req.user!.role;
 
         if (isNaN(employeId) || !startDate || !endDate) {
             throw new ValidationError("employeId, startDate et endDate sont requis");
@@ -74,16 +74,46 @@ export class TimesheetController {
 
     /**
      * POST /api/timesheets
-     * Crée un nouveau pointage (clockin ou clockout)
+     * Crée un nouveau pointage (clockin ou clockout automatique)
+     * - Employee: crée pour lui-même (auto clockin/out)
+     * - Manager/Admin: peut créer pour un employé spécifique avec clockin explicite
      */
-    async createTimesheet(req: Request, res: Response, clockin: boolean): Promise<void> {
-        const employeId = req.user!.id;
-        const { date, hour, status } = req.body;
+    async createTimesheet(req: Request, res: Response): Promise<void> {
+        const userRole = req.user!.role;
+        const userId = req.user!.id;
+        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = req.body;
 
+        // Déterminer l'employé cible
+        let employeId: number;
+        if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
+            employeId = Number(requestedEmployeId);
+        } else {
+            employeId = userId;
+        }
+
+        // Validation basique des champs date / hour
         if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
             throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
         }
 
+        // Déterminer le sens du pointage
+        let clockin: boolean;
+
+        if ((userRole === 'manager' || userRole === 'admin') && requestedClockin !== undefined) {
+            // Manager/Admin peut spécifier explicitement clockin
+            clockin = Boolean(requestedClockin);
+        } else {
+            // Employee: auto-déterminer selon le dernier timesheet
+            const lastTimesheet = await this.UC_timesheet.getLastTimesheetByEmployee(employeId);
+
+            if (!lastTimesheet) {
+                clockin = true;
+            } else {
+                clockin = !lastTimesheet.clockin;
+            }
+        }
+
+        // Créer l'entité Timesheet
         const timesheet = new Timesheet({
             date: new Date(date),
             hour: new Date(hour),
@@ -95,7 +125,7 @@ export class TimesheetController {
         const savedTimesheet = await this.UC_timesheet.createTimesheet(timesheet);
         const dto = savedTimesheet.toReadDTO();
 
-        res.success(dto, "Pointage enregistré avec succès");
+        res.success(dto, `Pointage ${clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
     }
 
     // #endregion

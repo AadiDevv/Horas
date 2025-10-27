@@ -3,14 +3,14 @@ export const scheduleSchemas = {
     // #region Request DTOs
     ScheduleCreateDTO: {
         type: 'object',
-        required: ['lastName', 'startHour', 'endHour', 'activeDays'],
+        required: ['name', 'startHour', 'endHour', 'activeDays'],
         properties: {
-            lastName: {
+            name: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Schedule de journée',
-                description: 'lastName de l\'schedule'
+                description: 'name de l\'schedule'
             },
             startHour: {
                 type: 'string',
@@ -41,12 +41,12 @@ export const scheduleSchemas = {
     ScheduleUpdateDTO: {
         type: 'object',
         properties: {
-            lastName: {
+            name: {
                 type: 'string',
                 minLength: 2,
                 maxLength: 100,
                 example: 'Schedule de journée modifié',
-                description: 'Nouveau lastName de l\'schedule'
+                description: 'Nouveau name de l\'schedule'
             },
             startHour: {
                 type: 'string',
@@ -84,10 +84,10 @@ export const scheduleSchemas = {
                 example: 1,
                 description: 'ID de l\'schedule'
             },
-            lastName: {
+            name: {
                 type: 'string',
                 example: 'Schedule de journée',
-                description: 'lastName de l\'schedule'
+                description: 'name de l\'schedule'
             },
             startHour: {
                 type: 'string',
@@ -122,7 +122,7 @@ export const scheduleSchemas = {
             usersCount: {
                 type: 'integer',
                 example: 25,
-                description: 'lastNamebre d\'users assignés à cet schedule'
+                description: 'namebre d\'users assignés à cet schedule'
             }
         }
     },
@@ -177,7 +177,7 @@ export const scheduleSchemas = {
                 type: 'integer',
                 example: 1
             },
-            lastName: {
+            name: {
                 type: 'string',
                 example: 'Schedule de journée'
             },

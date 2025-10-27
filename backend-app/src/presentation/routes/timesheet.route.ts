@@ -57,29 +57,14 @@ router.get('/:id',
 
 // #region POST Routes
 /**
- * POST /api/timesheets/clockin
+ * POST /api/timesheets/
  * - Employé uniquement
  */
-router.post('/clockin',
+router.post('/',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await timesheetController.createTimesheet(req, res, true);
-        } catch (error) {
-            next(error);
-        }
-    }
-);
-
-/**
- * POST /api/timesheets/clockout
- * - Employé uniquement
- */
-router.post('/clockout',
-    authMiddleware,
-    async (req, res, next) => {
-        try {
-            await timesheetController.createTimesheet(req, res, false);
+            await timesheetController.createTimesheet(req, res);
         } catch (error) {
             next(error);
         }

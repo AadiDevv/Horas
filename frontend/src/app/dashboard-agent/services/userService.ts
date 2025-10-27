@@ -29,7 +29,7 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
     const user = mockUsers.find(u => u.id === userId);
     console.log('🔍 Mock GET /api/users/' + userId);
     console.log('✅ Réponse:', user);
-    
+
     return {
       success: true,
       data: user,
@@ -37,7 +37,7 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const requete = await fetch(`${API_BASE_URL}/api/users/${userId}`);
   if (!requete.ok) {
     throw new Error("Erreur récupération utilisateur");

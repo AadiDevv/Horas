@@ -46,7 +46,7 @@ export const teamSchemas = {
                 example: 'Description mise à jour',
                 description: 'Nouvelle description'
             },
-            scheduleId: {
+            sccheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,

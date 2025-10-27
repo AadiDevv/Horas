@@ -5,6 +5,7 @@ import { prisma } from "../prisma.service";
 import { NotFoundError } from "@/domain/error/AppError";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 import { UserFilterDTO } from "@/application/DTOS/user.dto";
+import { connect } from "http2";
 
 /**
  * Repository pour les opérations User et Auth
@@ -55,7 +56,7 @@ export class UserRepository implements IAuth, IUser {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) return null;
-      return new User(nullToUndefined(user));
+      return new User(nullToUndefined({ ...user, manager: user.managerId ? { id: user.managerId } : undefined, team: user.teamId ? { id: user.teamId } : undefined, customSchedule: user.customScheduleId ? { id: user.customScheduleId } : undefined }));
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
@@ -77,8 +78,8 @@ export class UserRepository implements IAuth, IUser {
     // Récupérer tous les users qui ont un teamId correspondant aux équipes du manager
     const employees = await prisma.user.findMany({
       where: {
-        team: {
-          managerId: managerId
+        manager: {
+          id: managerId
         },
         deletedAt: null // Exclure les users supprimés
       },
@@ -89,12 +90,9 @@ export class UserRepository implements IAuth, IUser {
             name: true
           }
         },
-        schedule: {
+        customSchedule: {
           select: {
             id: true,
-            name: true,
-            startHour: true,
-            endHour: true
           }
         }
       },
@@ -104,16 +102,16 @@ export class UserRepository implements IAuth, IUser {
       ]
     });
 
-    return employees.map(employee => new User(nullToUndefined({ ...employee, team: employee.team ?? undefined, schedule: employee.schedule ?? undefined })));
+    return employees.map(employee => new User(nullToUndefined({ ...employee, team: employee.team ?? undefined, customSchedule: employee.customSchedule ?? undefined })));
   }
   // #endregion
   // #region Update (IAuth + IUser)
-  async updateUser_ById(user: User): Promise<User> {
+  async updateUserProfile_ById(user: User): Promise<User> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
 
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, employes, team, schedule, ...updateData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, employes, team, customSchedule, ...updateData } = user
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -125,6 +123,20 @@ export class UserRepository implements IAuth, IUser {
     return new User(nullToUndefined(updatedUser))
   }
 
+  async updateUserTeam_ById(userId: number, teamIdParam: number): Promise<User> {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        team: {
+          connect: { id: teamIdParam }
+        },
+        updatedAt: new Date(Date.now())
+      }
+    })
+    const { teamId, ...userData } = updatedUser
+
+    return new User(nullToUndefined({ ...userData, team: teamId ? { id: teamId } : undefined }))
+  }
   async updateUserLogin_byId(user: User): Promise<User> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
@@ -163,7 +175,7 @@ export class UserRepository implements IAuth, IUser {
   // #endregion
   // #region Auth
   async registerUser(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
 
     if (!userData.hashedPassword) {
       throw new Error('Le mot de passe hashé est requis pour créer un utilisateur');
@@ -173,7 +185,7 @@ export class UserRepository implements IAuth, IUser {
       data: {
         ...userData,
         managerId: manager?.id!,
-        scheduleId: schedule?.id,
+        customScheduleId: customSchedule?.id,
         teamId: team?.id,
         hashedPassword: userData.hashedPassword,
       },
@@ -182,7 +194,7 @@ export class UserRepository implements IAuth, IUser {
     return new User(nullToUndefined(createdUser));
   }
   async registerManager(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
 
     if (!userData.hashedPassword) {
       throw new Error('Le mot de passe hashé est requis pour créer un manager');
@@ -198,7 +210,7 @@ export class UserRepository implements IAuth, IUser {
     return new User(nullToUndefined(createdUser));
   }
   async registerEmployee(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, schedule, team, employes, ...userData } = user
+    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
 
     if (!userData.hashedPassword) {
       throw new Error('Le mot de passe hashé est requis pour créer un employé');
@@ -212,7 +224,7 @@ export class UserRepository implements IAuth, IUser {
       data: {
         ...userData,
         managerId: manager.id,
-        scheduleId: schedule?.id,
+        customScheduleId: customSchedule?.id,
         teamId: team?.id,
         hashedPassword: userData.hashedPassword,
       },

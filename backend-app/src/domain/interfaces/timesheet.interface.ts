@@ -25,6 +25,12 @@ export interface ITimesheet {
      */
     getTimesheets_ByEmployeId(employeId: number): Promise<Timesheet[]>;
 
+    /**
+     * Récupère tous le dernier timesheet d'un employé
+     * @param employeId - ID de l'employé
+     */
+    getLastByEmployee(employeId: number): Promise<Timesheet | null>;
+
     // #endregion
 
     // #region Create

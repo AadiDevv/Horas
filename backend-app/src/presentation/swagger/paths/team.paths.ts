@@ -131,7 +131,6 @@ export const teamPaths = {
                         example: {
                             name: 'Équipe Production',
                             description: 'Équipe responsable de la production du matin',
-                            managerId: 5
                         }
                     }
                 }
@@ -237,7 +236,7 @@ export const teamPaths = {
                                                     role: 'employe',
                                                     isActive: true,
                                                     phone: '+33 6 12 34 56 78',
-                                                    scheduleId: 1
+                                                    customScheduleId: 1
                                                 },
                                                 {
                                                     id: 11,
@@ -247,7 +246,7 @@ export const teamPaths = {
                                                     role: 'employe',
                                                     isActive: true,
                                                     phone: '+33 6 23 45 67 89',
-                                                    scheduleId: 1
+                                                    customScheduleId: 1
                                                 },
                                                 {
                                                     id: 12,
@@ -257,7 +256,7 @@ export const teamPaths = {
                                                     role: 'employe',
                                                     isActive: false,
                                                     phone: null,
-                                                    scheduleId: null
+                                                    customScheduleId: null
                                                 }
                                             ]
                                         },

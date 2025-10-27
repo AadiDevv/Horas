@@ -222,7 +222,7 @@ WHERE teams.managerId = :managerId
                                             isActive: true,
                                             phone: '+33 6 12 34 56 78',
                                             teamId: 5,
-                                            scheduleId: 2,
+                                            customScheduleId: 2,
                                             managerId: 3,
                                             manager: {
                                                 id: 3,
@@ -233,7 +233,7 @@ WHERE teams.managerId = :managerId
                                                 id: 5,
                                                 name: 'Équipe Production'
                                             },
-                                            schedule: {
+                                            customSchedule: {
                                                 id: 2,
                                                 name: 'Horaires Standard',
                                                 startHour: '2025-01-01T08:00:00.000Z',
@@ -261,7 +261,7 @@ WHERE teams.managerId = :managerId
                                             isActive: true,
                                             phone: '+33 6 12 34 56 78',
                                             teamId: 5,
-                                            scheduleId: 2,
+                                            customScheduleId: 2,
                                             employes: [
                                                 {
                                                     id: 1,
@@ -318,7 +318,7 @@ WHERE teams.managerId = :managerId
 - Champs autorisés : firstName, lastName, email, phone
 - Champs interdits : role, isActive
 
-**Note :** teamId et scheduleId ne sont plus modifiables via cette route. 
+**Note :** teamId et customScheduleId ne sont plus modifiables via cette route. 
 Ces attributs seront gérés par des routes admin dédiées dans une version future.`,
             tags: ['Users'],
             security: [{ bearerAuth: [] }],
@@ -419,6 +419,128 @@ Ces attributs seront gérés par des routes admin dédiées dans une version fut
                 },
                 403: {
                     description: 'Permissions insuffisantes (Admin uniquement)',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    '/api/users/assign/team/{id}': {
+        patch: {
+            summary: 'Assigner un utilisateur à une équipe',
+            description: `Assigne un utilisateur à une équipe avec restrictions basées sur le rôle.
+
+**Permissions :**
+
+**Admin :**
+- Peut assigner n'importe quel utilisateur à n'importe quelle équipe
+
+**Manager :**
+- Peut uniquement assigner ses propres employés à ses équipes
+- L'utilisateur doit être un employé (pas admin/manager)
+- L'équipe doit appartenir au manager
+
+**Restrictions métier :**
+- Seuls les employés peuvent être assignés à des équipes
+- Un utilisateur ne peut pas être assigné à la même équipe deux fois
+- L'équipe et l'utilisateur doivent exister`,
+            tags: ['Users'],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'id',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de l\'utilisateur à assigner'
+                }
+            ],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/UserAsignTeamDTO' },
+                        examples: {
+                            assignToTeam: {
+                                summary: 'Assigner à une équipe',
+                                value: {
+                                    teamId: 5
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: 'Utilisateur assigné à l\'équipe avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    data: { $ref: '#/components/schemas/UserReadDTO' },
+                                    message: { type: 'string', example: 'Utilisateur assigné à l\'équipe avec succès' },
+                                    timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: {
+                    description: 'Données invalides',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                missingTeamId: {
+                                    summary: 'teamId manquant',
+                                    value: {
+                                        success: false,
+                                        error: 'Le teamId est requis',
+                                        code: 'VALIDATION_ERROR',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Permissions insuffisantes',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                notEmployee: {
+                                    summary: 'Tentative d\'assigner un manager/admin',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez assigner que des employés',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                notOwnEmployee: {
+                                    summary: 'Tentative d\'assigner un employé d\'un autre manager',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez assigner que vos propres employés',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                404: {
+                    description: 'Utilisateur ou équipe non trouvé',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }

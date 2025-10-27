@@ -42,7 +42,7 @@ export class TeamController {
 
     // #region Create
     async createTeam(req: Request, res: Response): Promise<void> {
-        const teamDto: TeamCreateDTO = req.body;
+        const teamDto: TeamCreateDTO = {...req.body, managerId: req.user!.id};
         const userId = req.user!.id;
         if (!teamDto.name) throw new ValidationError("Le lastName de l'équipe est requis");
         if (!teamDto.managerId) throw new ValidationError("Le managerId est requis");

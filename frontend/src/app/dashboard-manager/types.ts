@@ -6,8 +6,30 @@ export interface Agent {
   role: string;
   telephone?: string;
   equipeId?: number;
+  managerId?: number;
+  scheduleId?: number;
   isActive: boolean;
   createdAt: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+  deletedAt?: string;
+  // Relations (retournées par GET /api/users/{id})
+  equipeNom?: string; // teamName depuis l'API
+  manager?: {
+    id: number;
+    prenom: string;
+    nom: string;
+  };
+  team?: {
+    id: number;
+    nom: string;
+  };
+  schedule?: {
+    id: number;
+    nom: string;
+    heureDebut: string;
+    heureFin: string;
+  };
 }
 
 export interface Horaire {
@@ -71,4 +93,4 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-export type DashboardPage = 'dashboard' | 'agents' | 'equipes';
+export type DashboardPage = 'dashboard' | 'agents' | 'equipes' | 'pointages';

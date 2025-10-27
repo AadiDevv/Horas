@@ -43,8 +43,8 @@ model User {
   role               Role      @default(employe)
   isActive           Boolean   @default(true)
   teamId             Int?
-  scheduleId         Int?
   managerId          Int?
+  customScheduleId   Int?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @default(now())
   deletedAt          DateTime?
@@ -52,19 +52,19 @@ model User {
 
 
   // Relations
-  team               Team?     @relation("TeamMembers",fields: [teamId], references: [id], onDelete: SetNull)
-  schedule           Schedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
-  manager            User?     @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
-  employes           User[]    @relation("UserManager")
-  managedTeams       Team[]    @relation("ManagerTeams")
+  team               Team?        @relation("TeamMembers",fields: [teamId], references: [id], onDelete: SetNull)
+  mySchedules        Schedule[]   @relation("ManagerSchedules")
+  manager            User?        @relation("UserManager", fields: [managerId], references: [id], onDelete: Cascade)
+  employes           User[]       @relation("UserManager")
+  managedTeams       Team[]       @relation("ManagerTeams")
   timesheets         Timesheet[]
-  reports            Report[]  @relation("ReportManager")
-  exceptionalSchedules ExceptionalSchedule[]
+  reports            Report[]     @relation("ReportManager")
+  customSchedule     CustomSchedule?     @relation("MyCustomSchedule",fields: [customScheduleId], references: [id], onDelete: SetNull)
 
   @@index([email])
   @@index([role])
   @@index([teamId])
-  @@index([scheduleId])
+  @@index([customScheduleId]) 
 }
 
 model Team {
@@ -89,16 +89,21 @@ model Team {
 
 model Schedule {
   id           Int       @id @default(autoincrement())
+  managerId    Int
   name         String    @db.VarChar(100)
   startHour    DateTime  @db.Time
   endHour      DateTime  @db.Time
   activeDays   Json
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now())
-
-  users        User[]
+  
+  // Relations
+  manager      User     @relation("ManagerSchedules", fields: [managerId], references: [id], onDelete: Restrict) 
   teams        Team[]    @relation("TeamSchedule")
-  exceptions   ExceptionalSchedule[]
+  exceptions   CustomSchedule[]
+
+  // Index
+  @@index([managerId])
 }
 
 model Timesheet {
@@ -141,18 +146,15 @@ model Report {
   @@index([periodStart, periodEnd])
 }
 
-model ExceptionalSchedule {
+model CustomSchedule {
   id             Int       @id @default(autoincrement())
-  employeId     Int
   date           DateTime  @db.Date
   scheduleId     Int
   createdAt      DateTime  @default(now())
 
   // Relations
-  employe       User      @relation(fields: [employeId], references: [id], onDelete: Cascade)
-  schedule       Schedule  @relation(fields: [scheduleId], references: [id])
-
-  @@index([employeId])
+  schedule      Schedule  @relation(fields: [scheduleId], references: [id])
+  employes      User[]    @relation("MyCustomSchedule")
   @@index([date])
   @@index([scheduleId])
 }

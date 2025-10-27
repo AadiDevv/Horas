@@ -1,0 +1,50 @@
+name: Daily merge dev into main
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  test-and-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Set up Docker (Compose v2 is included)
+        run: docker compose version
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Run tests inside backend container
+        run: docker compose exec backend npm run test:coverage
+
+      - name: Tear down containers
+        if: always()
+        run: docker compose down
+
+      - name: Merge dev into main
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+
+          # Vérifie s'il y a des différences entre main et dev
+          if git diff --quiet origin/main..origin/dev; then
+            echo "✅ Nothing to merge, main is already up-to-date."
+          else
+            echo "🔁 Changes detected, merging dev into main..."
+            git merge --no-ff origin/dev -m "Auto-merge dev into main after successful daily tests"
+            git push origin main
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

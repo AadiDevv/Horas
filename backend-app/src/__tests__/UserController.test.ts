@@ -112,6 +112,8 @@ describe('UserController', () => {
       getUser_ById: jest.fn(),
       getMyEmployees: jest.fn(),
       updateUser_ById: jest.fn(),
+      updateUserProfile_ById: jest.fn(),
+      updateUserTeam_ById: jest.fn(),
       deleteUser_ById: jest.fn(),
     } as unknown as jest.Mocked<UserUseCase>;
 
@@ -243,7 +245,7 @@ describe('UserController', () => {
   // ----------------------------------------
   describe('updateUser_ById', () => {
     test('should update user and return DTO', async () => {
-      useCaseMock.updateUser_ById.mockResolvedValue(mockUser6);
+      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockUser6);
 
       const req = mockRequest({
         params: { id: '6' },
@@ -252,9 +254,9 @@ describe('UserController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.updateUser_ById(req, res);
+      await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateUser_ById).toHaveBeenCalledWith(6, { firstName: 'Eve' }, 6, 'employe');
+      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,
@@ -273,26 +275,70 @@ describe('UserController', () => {
       const req = mockRequest({ params: { id: 'bad' }, body: {} }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateUser_ById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateUserProfile_ById(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError if body is empty', async () => {
       const req = mockRequest({ params: { id: '1' }, body: {} }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateUser_ById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateUserProfile_ById(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
   describe('deleteUser_ById', () => {
+  // ----------------------------------------
+  describe('updateUserTeam_ById', () => {
+    test('should assign user to team successfully', async () => {
+      useCaseMock.updateUserTeam_ById.mockResolvedValue(mockUser6);
+
+      const req = mockRequest({
+        params: { id: '6' },
+        body: { teamId: 3 },
+        user: { id: 1, role: 'admin' },
+      }) as any;
+      const res = mockResponse();
+
+      await controller.updateUserTeam_ById(req, res);
+
+      expect(useCaseMock.updateUserTeam_ById).toHaveBeenCalledWith(6, 3, 1, 'admin');
+      expect(res.success).toHaveBeenCalledWith(
+        {
+          id: 6,
+          firstName: 'Eve',
+          lastName: 'Jackson',
+          email: 'eve@mail.com',
+          role: 'employe',
+          isActive: true,
+          createdAt: expect.any(String),
+        },
+        'Utilisateur assigné à l\'équipe avec succès'
+      );
+    });
+
+    test('should throw ValidationError for invalid userId', async () => {
+      const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
+      const res = mockResponse();
+
+      await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+    });
+
+    test('should throw ValidationError if teamId is missing', async () => {
+      const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
+      const res = mockResponse();
+
+      await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+    });
+  });
+
     test('should delete user and return success', async () => {
       const req = mockRequest({ params: { id: '7' } }) as any;
       const res = mockResponse();
 
       await controller.deleteUser_ById(req, res);
 
-      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7);
+      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7, 1, 'admin');
       expect(res.success).toHaveBeenCalledWith(null, 'Utilisateur supprimé avec succès');
     });
 
