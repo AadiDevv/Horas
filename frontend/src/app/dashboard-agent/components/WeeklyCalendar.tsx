@@ -64,7 +64,7 @@ function DayTimeline({
   isClockingIn: boolean;
   currentDayLogs?: TimeLog;
 }) {
-  console.log(`📅 DayTimeline ${day}:`, { timeLogs, teamHoraire, isClockingIn, currentDayLogs });
+  // console.log(`📅 DayTimeline ${day}:`, { timeLogs, teamHoraire, isClockingIn, currentDayLogs });
 
   // Déterminer la plage horaire à afficher
   let minTime = 6 * 60; // 6:00
@@ -151,7 +151,7 @@ function DayTimeline({
               {/* Pointages réels superposés (petit espace à gauche pour apercevoir le fond) */}
               {timeLogs.map((log, idx) => {
                 if (!log.end) {
-                  console.log(`⚠️ ${day} - Log ${idx} ignoré (pas de end):`, log);
+                  // console.log(`⚠️ ${day} - Log ${idx} ignoré (pas de end):`, log);
                   return null;
                 }
                 const position = calculateBlockPosition(log.start, log.end, minTime, maxTime);
@@ -162,15 +162,7 @@ function DayTimeline({
                 const durationMinutes = endMin - startMin;
                 const isShortBlock = durationMinutes < 15;
 
-                console.log(`🎨 ${day} - Bloc ${idx}:`, {
-                  log,
-                  position,
-                  durationMinutes,
-                  isShortBlock,
-                  minTime,
-                  maxTime,
-                  style: `top: ${position.top}%, height: ${position.height}%`
-                });
+                // console.log(`🎨 ${day} - Bloc ${idx}:`, { log, position, durationMinutes, isShortBlock, minTime, maxTime });
 
                 return (
                   <div
