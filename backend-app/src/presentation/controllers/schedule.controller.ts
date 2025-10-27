@@ -69,8 +69,9 @@ export class ScheduleController {
             }
 
             const schedules = await this.scheduleUseCase.getSchedules_ByTeamId(teamId);
+            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
 
-            res.success(schedules, "Schedules récupérés avec succès");
+            res.success(schedulesDTO, "Schedules récupérés avec succès");
        
     }
 
@@ -122,9 +123,10 @@ export class ScheduleController {
 
             const dto: ScheduleUpdateDTO = req.body;
 
-            const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto);
+            const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto, req.user!);
+            const scheduleDTO = schedule.toReadDTO();
 
-            res.success(schedule, "Schedule mis à jour avec succès");
+            res.success(scheduleDTO, "Schedule mis à jour avec succès");
     }
     // #endregion
 

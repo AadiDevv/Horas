@@ -52,9 +52,9 @@ export class ScheduleUseCase {
      * Récupère les schedules d'une équipe spécifique
      * Accessible par le manager de l'équipe ou admin
      */
-    async getSchedules_ByTeamId(teamId: number): Promise<ScheduleListItemDTO[]> {
+    async getSchedules_ByTeamId(teamId: number): Promise<Schedule[]> {
         const schedules = await this.scheduleRepository.getSchedules_ByTeamId(teamId);
-        return schedules.map(schedule => schedule.toListItemDTO());
+        return schedules;
     }
     // #endregion
 
@@ -88,17 +88,22 @@ export class ScheduleUseCase {
      * Met à jour un schedule existant
      * Accessible par Admin uniquement
      */
-    async updateSchedule_ById(id: number, dto: ScheduleUpdateDTO): Promise<ScheduleReadDTO> {
+    async updateSchedule_ById(id: number, dto: ScheduleUpdateDTO, user: UserReadDTO): Promise<Schedule> {
+        
+
         // Vérifier que le schedule existe
         const existingSchedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!existingSchedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-
-        // Validation des données si fournies
-        if (Object.entries(dto).length > 0) {
-            this.validateScheduleUpdateData(dto);
+        if (user.role !== 'admin') {
+            if(user.role === 'employe') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour mettre à jour un schedule");
+            else if (user.role !== 'manager') {
+                if (existingSchedule.managerId!== user.id) throw new ForbiddenError("Vous essayez de mettre à jour un schedule qui ne vous appartient pas");
+            }
         }
+        // Validation des données si fournies
+            this.validateScheduleUpdateData(dto);
 
         // Vérifier l'unicité du nom si modifié
         if (dto.name && dto.name !== existingSchedule.name) {
@@ -114,7 +119,7 @@ export class ScheduleUseCase {
         // Sauvegarder
         const savedSchedule = await this.scheduleRepository.updateSchedule_ById(updatedSchedule);
 
-        return savedSchedule.toReadDTO();
+        return savedSchedule;
     }
     // #endregion
 
@@ -200,6 +205,7 @@ export class ScheduleUseCase {
      * Valide uniquement les champs fournis (non-undefined)
      */
     private validateScheduleFields(data: Partial<ScheduleCreateDTO>): void {
+        if(Object.entries(data).length === 0) throw new ValidationError("Aucun fourni pour la validation des champs du schedule");
         // Validation du nom (si fourni)
         if (data.name !== undefined) {
             if (!data.name || data.name.trim().length < 2) {

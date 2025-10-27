@@ -31,7 +31,8 @@ router.get('/',
  * Tous les utilisateurs authentifiés
  */
 router.get('/:id',
-    authMiddleware,      // 1️⃣ Vérifie le JWT
+    authMiddleware,
+    managerOrAdmin,      // 1️⃣ Vérifie le JWT
     async (req, res, next) => {
         try {
             await scheduleController.getSchedule_ById(req, res);
