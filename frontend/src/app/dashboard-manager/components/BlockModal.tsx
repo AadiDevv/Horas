@@ -51,16 +51,23 @@ export default function BlockModal({
   useEffect(() => {
     if (entryTimesheet && exitTimesheet) {
       // Mode édition
+      // Utiliser UTC pour éviter les problèmes de fuseau horaire
       const entryDate = new Date(entryTimesheet.hour);
       const exitDate = new Date(exitTimesheet.hour);
+
+      // Extraire l'heure au format HH:MM depuis l'ISO string directement
+      // Format ISO: "2025-10-27T14:26:00.000Z"
+      // On veut extraire "14:26" (l'heure UTC)
+      const startTime = entryTimesheet.hour.substring(11, 16); // "HH:MM"
+      const endTime = exitTimesheet.hour.substring(11, 16); // "HH:MM"
 
       setFormData({
         entryId: entryTimesheet.id,
         exitId: exitTimesheet.id,
         employeId: entryTimesheet.employeId,
         date: entryTimesheet.date,
-        startTime: `${entryDate.getHours().toString().padStart(2, '0')}:${entryDate.getMinutes().toString().padStart(2, '0')}`,
-        endTime: `${exitDate.getHours().toString().padStart(2, '0')}:${exitDate.getMinutes().toString().padStart(2, '0')}`,
+        startTime,
+        endTime,
         status: entryTimesheet.status
       });
     } else {
