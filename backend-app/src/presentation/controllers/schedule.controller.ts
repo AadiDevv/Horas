@@ -75,22 +75,7 @@ export class ScheduleController {
        
     }
 
-    /**
-     * GET /api/schedules/:id/can-delete
-     * Vérifie si un schedule peut être supprimé
-     * Admin uniquement
-     */
-    async canDeleteSchedule(req: Request, res: Response): Promise<void> {
-            const id = Number(req.params.id);
-            if (isNaN(id)) {
-                throw new ValidationError("ID invalide");
-            }
 
-            const result = await this.scheduleUseCase.canDeleteSchedule(id);
-
-            res.success(result, "Schedule peut être supprimé");
-    
-    }
     // #endregion
 
     // #region POST Routes
@@ -142,7 +127,7 @@ export class ScheduleController {
                 throw new ValidationError("ID invalide");
             }
 
-            await this.scheduleUseCase.deleteSchedule_ById(id);
+            await this.scheduleUseCase.deleteSchedule_ById(id, req.user!);
 
             res.success("Schedule supprimé avec succès");
     }

@@ -136,11 +136,6 @@ export class ScheduleRepository implements ISchedule {
      */
     async deleteSchedule_ById(id: number): Promise<void> {
         // Vérifier d'abord si le schedule est en cours d'utilisation
-        const isInUse = await this.isScheduleInUse(id);
-        if (isInUse) {
-            throw new Error("Impossible de supprimer ce schedule car il est utilisé par des utilisateurs ou des équipes");
-        }
-
         await this.prisma.schedule.delete({
             where: { id }
         });
@@ -151,13 +146,7 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Vérifie si un schedule est utilisé par des utilisateurs ou équipes
      */
-    async isScheduleInUse(id: number): Promise<boolean> {
-        const teamCount = await this.prisma.team.count({
-            where: { scheduleId: id }
-        });
-
-        return teamCount > 0;
-    }
+    
 
     /**
      * Récupère le nombre d'utilisateurs utilisant un schedule

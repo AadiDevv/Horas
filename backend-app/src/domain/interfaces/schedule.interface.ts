@@ -47,14 +47,7 @@ export interface ISchedule {
     // #endregion
 
     // #region Business Methods
-    /**
-     * Vérifie si un schedule est utilisé par des utilisateurs ou équipes
-     */
-    isScheduleInUse(id: number): Promise<boolean>;
-
-    /**
-     * Récupère le nombre d'utilisateurs utilisant un schedule
-     */
+   
     getScheduleUsersCount(id: number): Promise<number>;
     // #endregion
 }

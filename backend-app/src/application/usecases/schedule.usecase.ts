@@ -149,60 +149,29 @@ export class ScheduleUseCase {
      * Accessible par Admin uniquement
      * Vérifie qu'aucun utilisateur/équipe n'utilise ce schedule
      */
-    async deleteSchedule_ById(id: number): Promise<void> {
+    async deleteSchedule_ById(id: number, user: UserReadDTO): Promise<void> {
         // Vérifier que le schedule existe
         const schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!schedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-
+        if (user.role !== 'admin') {
+            if(user.role === 'employe') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour supprimer un schedule");
+            else if (user.role !== 'manager') {
+                if (schedule.managerId!== user.id) throw new ForbiddenError("Vous essayez de supprimer un schedule qui ne vous appartient pas");
+            }
+        }
         // Vérifier qu'il n'est pas en cours d'utilisation
-        const isInUse = await this.scheduleRepository.isScheduleInUse(id);
-        if (isInUse) {
-            const usersCount = await this.scheduleRepository.getScheduleUsersCount(id);
+        const isInUseByTeams = schedule.teams? schedule.teams.length > 0 : false;
+        const isInUseByUsers = await this.scheduleRepository.getScheduleUsersCount(id)
+        if (isInUseByTeams || isInUseByUsers) {
             throw new ForbiddenError(
-                `Impossible de supprimer ce schedule car il est utilisé par ${usersCount} utilisateur(s) ou équipe(s)`
+                `Impossible de supprimer ce schedule car il est utilisé par ${isInUseByTeams ? schedule.teams?.length : 0} équipe(s) ou ${isInUseByUsers ? isInUseByUsers : 0} utilisateur(s)`
             );
         }
-
-        // Supprimer
         await this.scheduleRepository.deleteSchedule_ById(id);
     }
     // #endregion
-
-    // #region Business Operations
-    /**
-     * Vérifie si un schedule peut être supprimé
-     * Accessible par Admin uniquement
-     */
-    async canDeleteSchedule(id: number): Promise<{ canDelete: boolean; reason?: string; usersCount: number }> {
-        const schedule = await this.scheduleRepository.getSchedule_ById(id);
-        if (!schedule) {
-            throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
-        }
-
-        const isInUse = await this.scheduleRepository.isScheduleInUse(id);
-        const usersCount = await this.scheduleRepository.getScheduleUsersCount(id);
-
-        if (isInUse) {
-            return {
-                canDelete: false,
-                reason: `Ce schedule est utilisé par ${usersCount} utilisateur(s) ou équipe(s)`,
-                usersCount
-            };
-        }
-
-        return {
-            canDelete: true,
-            usersCount: 0
-        };
-    }
-    // #endregion
-
-    // #region Private Validation Methods
-    /**
-     * Valide les données d'un schedule (pour création)
-     */
     private validateScheduleData(data: ScheduleCreateDTO): void {
         this.validateScheduleFields({
             name: data.name,

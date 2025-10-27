@@ -61,22 +61,7 @@ router.get('/team/:teamId',
     }
 );
 
-/**
- * GET /api/schedules/:id/can-delete
- * Vérifie si un schedule peut être supprimé
- * Admin uniquement
- */
-router.get('/:id/can-delete',
-    authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
-    async (req, res, next) => {
-        try {
-            await scheduleController.canDeleteSchedule(req, res);
-        } catch (error) {
-            next(error);
-        }
-    }
-);
+
 // #endregion
 
 // #region POST Routes
@@ -126,7 +111,7 @@ router.patch('/:id',
  */
 router.delete('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
             await scheduleController.deleteSchedule_ById(req, res);
