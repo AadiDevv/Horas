@@ -17,6 +17,7 @@ import {
   HeuresChart,
   RetardsWeekChart,
   PonctualiteScore,
+  PointagesManagement,
 } from "./components";
 import {
   useManagerDashboard,
@@ -279,6 +280,14 @@ function ManagerDashboard() {
                 onAddEquipe={openEquipeModal}
                 onEditEquipe={openEditEquipeModal}
                 onDeleteEquipe={handleDeleteEquipe}
+              />
+            )}
+
+            {/* POINTAGES PAGE */}
+            {currentPage === "pointages" && (
+              <PointagesManagement
+                agents={filteredAgents}
+                onRefresh={loadAgents}
               />
             )}
           </main>

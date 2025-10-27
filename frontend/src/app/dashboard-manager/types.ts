@@ -93,4 +93,4 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-export type DashboardPage = 'dashboard' | 'agents' | 'equipes';
+export type DashboardPage = 'dashboard' | 'agents' | 'equipes' | 'pointages';

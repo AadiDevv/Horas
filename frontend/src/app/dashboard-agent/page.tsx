@@ -13,8 +13,8 @@ import {
 import {
   useUserData,
   useSettings,
-  useTimeClock,
   useTeamSchedule,
+  useTimesheet,
 } from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
 
@@ -42,12 +42,13 @@ export default function Page() {
     pointageLoading,
     successMessage,
     errorMessage,
+    stats,
     getDayKey,
-    handleClockIn,
-    handleClockOut,
-    checkTodayPointages,
-    loadWeekPointages,
-  } = useTimeClock();
+    handleClockToggle,
+    checkTodayTimesheets,
+    loadWeekTimesheets,
+    loadStats,
+  } = useTimesheet();
   const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function Page() {
     }, 1000);
 
     loadUserData();
-    checkTodayPointages();
+    checkTodayTimesheets();
 
     return () => {
       clearInterval(timer);
@@ -116,8 +117,8 @@ export default function Page() {
               </div>
               <ClockButton
                 isClockingIn={isClockingIn}
-                onClockIn={handleClockIn}
-                onClockOut={handleClockOut}
+                onClockIn={handleClockToggle}
+                onClockOut={handleClockToggle}
                 pointageLoading={pointageLoading}
                 successMessage={successMessage}
                 errorMessage={errorMessage}
@@ -128,15 +129,19 @@ export default function Page() {
             <div className="grid grid-cols-3 gap-8 mb-12">
               <StatCard
                 title="Travaillé ce jour"
-                value="02:00:05"
+                value={`${stats.heuresJour.toFixed(2)}h`}
                 icon={Clock}
               />
               <StatCard
                 title="Travaillé cette semaine"
-                value="40:00:05"
+                value={`${stats.heuresSemaine.toFixed(2)}h`}
                 icon={Calendar}
               />
-              <StatCard title="Retards ce mois" value="2" icon={AlertCircle} />
+              <StatCard
+                title="Retards ce mois"
+                value={stats.retardsMois.toString()}
+                icon={AlertCircle}
+              />
             </div>
 
             {/* Weekly Calendar */}
@@ -148,7 +153,7 @@ export default function Page() {
               onRefresh={() => {
                 setCurrentTime(new Date());
                 loadTeamSchedule();
-                loadWeekPointages();
+                loadWeekTimesheets();
               }}
               teamSchedule={teamSchedule}
             />

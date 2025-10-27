@@ -10,3 +10,7 @@ export { default as RetardsCard } from './RetardsCard';
 export { default as HeuresChart } from './HeuresChart';
 export { default as RetardsWeekChart } from './RetardsWeekChart';
 export { default as PonctualiteScore } from './PonctualiteScore';
+export { default as PointagesManagement } from './PointagesManagement';
+export { default as WeeklyTimeline } from './WeeklyTimeline';
+export { default as TimesheetModal } from './TimesheetModal';
+export { default as DeleteConfirmModal } from './DeleteConfirmModal';

@@ -75,28 +75,42 @@ export class TimesheetController {
     /**
      * POST /api/timesheets
      * Crée un nouveau pointage (clockin ou clockout automatique)
+     * - Employee: crée pour lui-même (auto clockin/out)
+     * - Manager/Admin: peut créer pour un employé spécifique avec clockin explicite
      */
     async createTimesheet(req: Request, res: Response): Promise<void> {
-        const employeId = req.user!.id;
-        const { date, hour, status } = req.body;
+        const userRole = req.user!.role;
+        const userId = req.user!.id;
+        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = req.body;
+
+        // Déterminer l'employé cible
+        let employeId: number;
+        if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
+            employeId = Number(requestedEmployeId);
+        } else {
+            employeId = userId;
+        }
 
         // Validation basique des champs date / hour
         if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
             throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
         }
 
-        // Récupérer le dernier timesheet de l'employé
-        const lastTimesheet = await this.UC_timesheet.getLastTimesheetByEmployee(employeId);
-
-        // Déterminer automatiquement le sens du pointage
+        // Déterminer le sens du pointage
         let clockin: boolean;
 
-        if (!lastTimesheet) {
-            // Premier pointage
-            clockin = true;
+        if ((userRole === 'manager' || userRole === 'admin') && requestedClockin !== undefined) {
+            // Manager/Admin peut spécifier explicitement clockin
+            clockin = Boolean(requestedClockin);
         } else {
-            // Si le dernier était un clockin => maintenant clockout, sinon inversement
-            clockin = !lastTimesheet.clockin;
+            // Employee: auto-déterminer selon le dernier timesheet
+            const lastTimesheet = await this.UC_timesheet.getLastTimesheetByEmployee(employeId);
+
+            if (!lastTimesheet) {
+                clockin = true;
+            } else {
+                clockin = !lastTimesheet.clockin;
+            }
         }
 
         // Créer l'entité Timesheet
