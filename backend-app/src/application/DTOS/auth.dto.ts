@@ -11,7 +11,7 @@ export interface UserRegisterDTO {
     password: string;
     role: Role;
     teamId?: number;
-    scheduleId?: number;
+    customScheduleId?: number;
     phone?: string;
 }
 
@@ -46,7 +46,7 @@ export interface UserAuthDTO {
     isActive: boolean;
     phone?: string;
     teamId?: number;
-    scheduleId?: number;
+    customScheduleId?: number;
     createdAt: string;
     updatedAt?: string;
     lastLoginAt?: string;

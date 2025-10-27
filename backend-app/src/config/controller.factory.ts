@@ -1,4 +1,4 @@
-import { AuthController, UserController, TeamController, TimesheetController } from "@/presentation/controllers";
+import { AuthController, UserController, TeamController, TimesheetController, ScheduleController } from "@/presentation/controllers";
 import { app } from "./usecase.factory";
 
 class ControllerFactory {
@@ -6,6 +6,7 @@ class ControllerFactory {
     private static userController: UserController | null;
     private static teamController: TeamController | null;
     private static timesheetController: TimesheetController | null;
+    private static scheduleController: ScheduleController | null;
 
     public static getAuthController(): AuthController {
         if (!this.authController) {
@@ -39,11 +40,20 @@ class ControllerFactory {
         return this.timesheetController
     }
 
+    public static getScheduleController(): ScheduleController {
+        if (!this.scheduleController) {
+            const usecase = app.getScheduleUseCase();
+            this.scheduleController = new ScheduleController(usecase);
+        }
+        return this.scheduleController
+    }
+
     public static reset(): void {
         this.authController = null;
         this.userController = null;
         this.teamController = null;
         this.timesheetController = null;
+        this.scheduleController = null;
     }
 
 }
@@ -53,5 +63,6 @@ export const controllers = {
     UserController: () => (ControllerFactory.getUserController()),
     TeamController: () => (ControllerFactory.getTeamController()),
     TimesheetController: () => (ControllerFactory.getTimesheetController()),
+    ScheduleController: () => (ControllerFactory.getScheduleController()),
     reset: () => (ControllerFactory.reset())
 }

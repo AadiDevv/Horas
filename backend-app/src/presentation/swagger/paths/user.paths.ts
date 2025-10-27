@@ -222,7 +222,7 @@ WHERE teams.managerId = :managerId
                                             isActive: true,
                                             phone: '+33 6 12 34 56 78',
                                             teamId: 5,
-                                            scheduleId: 2,
+                                            customScheduleId: 2,
                                             managerId: 3,
                                             manager: {
                                                 id: 3,
@@ -233,7 +233,7 @@ WHERE teams.managerId = :managerId
                                                 id: 5,
                                                 name: 'Équipe Production'
                                             },
-                                            schedule: {
+                                            customSchedule: {
                                                 id: 2,
                                                 name: 'Horaires Standard',
                                                 startHour: '2025-01-01T08:00:00.000Z',
@@ -261,7 +261,7 @@ WHERE teams.managerId = :managerId
                                             isActive: true,
                                             phone: '+33 6 12 34 56 78',
                                             teamId: 5,
-                                            scheduleId: 2,
+                                            customScheduleId: 2,
                                             employes: [
                                                 {
                                                     id: 1,
@@ -318,7 +318,7 @@ WHERE teams.managerId = :managerId
 - Champs autorisés : firstName, lastName, email, phone
 - Champs interdits : role, isActive
 
-**Note :** teamId et scheduleId ne sont plus modifiables via cette route. 
+**Note :** teamId et customScheduleId ne sont plus modifiables via cette route. 
 Ces attributs seront gérés par des routes admin dédiées dans une version future.`,
             tags: ['Users'],
             security: [{ bearerAuth: [] }],

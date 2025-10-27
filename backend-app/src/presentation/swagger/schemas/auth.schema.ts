@@ -43,7 +43,7 @@ export const authSchemas = {
                 example: 5,
                 description: 'ID de l\'équipe (optionnel)'
             },
-            scheduleId: {
+            customScheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -95,7 +95,7 @@ export const authSchemas = {
                 example: 5,
                 description: 'ID de l\'équipe (optionnel)'
             },
-            scheduleId: {
+            customScheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
@@ -213,7 +213,7 @@ export const authSchemas = {
                 example: 5,
                 description: 'ID de l\'équipe à laquelle appartient l\'utilisateur'
             },
-            scheduleId: {
+            customScheduleId: {
                 type: 'integer',
                 nullable: true,
                 example: 2,
