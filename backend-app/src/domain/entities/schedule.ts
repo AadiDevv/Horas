@@ -60,19 +60,19 @@ export class Schedule {
      * Retourne une nouvelle instance (immutabilité)
      */
     public updateFromDTO(dto: ScheduleUpdateDTO): Schedule {
-
+        console.log(`dto avant cleaning : `, dto);
         const cleanDto = Object.fromEntries(
             Object.entries(dto).filter(([_, value]) => value !== undefined)
         );
-
+        console.log(`dto après cleaning : `, cleanDto);
         const props: ScheduleProps = {
-            ...cleanDto,
             ...this,
+            ...cleanDto,
             startHour: dto.startHour ? Schedule.parseTimeString(dto.startHour) : this.startHour,
             endHour: dto.endHour ? Schedule.parseTimeString(dto.endHour) : this.endHour,
             updatedAt: new Date(),
         };
-
+        console.log(`props : `, props);
         return new Schedule(props);
     }
     // #endregion
@@ -93,8 +93,8 @@ export class Schedule {
             startHour: Schedule.formatTimeToString(this.startHour),
             endHour: Schedule.formatTimeToString(this.endHour),
             activeDays: this.activeDays,
-            createdAt: this.createdAt.toISOString(),
-            updatedAt: this.updatedAt.toISOString(),
+            createdAt: this.createdAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
+            updatedAt: this.updatedAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
             usersCount: this.usersCount
         };
     }

@@ -27,7 +27,7 @@ export class ScheduleController {
                     undefined
             };
 
-            const schedules = await this.scheduleUseCase.getAllSchedules(filter);
+            const schedules = await this.scheduleUseCase.getAllSchedules(req.user!, filter);
             const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
             res.success(schedulesDTO, "Liste des schedules récupérée avec succès");
        

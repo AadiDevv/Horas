@@ -30,22 +30,8 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Récupère tous les schedules avec filtres optionnels
      */
-    async getAllSchedules(filter?: ScheduleFilterDTO): Promise<Schedule[]> {
-        const where: any = {};
-
-        if (filter?.name) {
-            where.name = {
-                contains: filter.name,
-                mode: 'insensitive'
-            };
-        }
-
-        if (filter?.activeDays && filter.activeDays.length > 0) {
-            // Recherche les schedules qui contiennent au moins un des jours spécifiés
-            where.activeDays = {
-                hasSome: filter.activeDays
-            };
-        }
+    async getAllSchedules( where?: any): Promise<Schedule[]> {
+        
 
         const schedules = await this.prisma.schedule.findMany({
             where,

@@ -19,9 +19,29 @@ export class ScheduleUseCase {
      * Récupère tous les schedules avec filtres optionnels
      * Accessible par Admin uniquement
      */
-    async getAllSchedules(filter?: ScheduleFilterDTO): Promise<Schedule[]> {
-        const schedules = await this.scheduleRepository.getAllSchedules(filter);
-        return schedules
+    async getAllSchedules(user: UserReadDTO,filter?: ScheduleFilterDTO): Promise<Schedule[]> {
+        const where: any = {};
+        // #region Filter
+        if (filter?.name) {
+            where.name = {
+                contains: filter.name,
+                mode: 'insensitive'
+            };
+        }
+
+        if (filter?.activeDays && filter.activeDays.length > 0) {
+            // Recherche les schedules qui contiennent au moins un des jours spécifiés
+            where.activeDays = {
+                hasSome: filter.activeDays
+            };
+        }
+        // #endregion
+        // #region Manager Filter
+        if(user.role === 'manager') {
+            where.managerId = user.id;
+        }
+        // #endregion
+        return await this.scheduleRepository.getAllSchedules(where);
     }
 
     /**

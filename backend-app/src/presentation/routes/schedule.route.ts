@@ -14,7 +14,7 @@ const scheduleController = controllers.ScheduleController();
  */
 router.get('/',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
             await scheduleController.getAllSchedules(req, res);
@@ -106,7 +106,7 @@ router.post('/',
  */
 router.patch('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
     async (req, res, next) => {
         try {
             await scheduleController.updateSchedule_ById(req, res);

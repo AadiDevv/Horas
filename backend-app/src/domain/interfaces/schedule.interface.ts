@@ -11,7 +11,7 @@ export interface ISchedule {
      * Récupère tous les schedules avec filtres optionnels
      * @param filter - Filtres (name, activeDays, etc.)
      */
-    getAllSchedules(filter?: ScheduleFilterDTO): Promise<Schedule[]>;
+    getAllSchedules(where?: any): Promise<Schedule[]>;
 
     /**
      * Récupère un schedule par son ID
