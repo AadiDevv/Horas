@@ -196,7 +196,7 @@ describe('TeamController', () => {
 
       await controller.createTeam(req, res);
 
-      expect(useCaseMock.createTeam).toHaveBeenCalledWith({ name: 'Sales Team', managerId: 99 });
+      expect(useCaseMock.createTeam).toHaveBeenCalledWith({ name: 'Sales Team', managerId: 99 }, 99);
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 3,
