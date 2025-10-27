@@ -119,11 +119,14 @@ export async function getTimesheets(
     const token = localStorage.getItem('token');
     const params = new URLSearchParams();
 
-    if (dateDebut) params.append('dateDebut', dateDebut);
-    if (dateFin) params.append('dateFin', dateFin);
+    // Le backend attend 'startDate' et 'endDate', pas 'dateDebut' et 'dateFin'
+    if (dateDebut) params.append('startDate', dateDebut);
+    if (dateFin) params.append('endDate', dateFin);
 
     const queryString = params.toString();
     const url = `${API_BASE_URL}/api/timesheets${queryString ? `?${queryString}` : ''}`;
+
+    console.log(`🔍 GET /api/timesheets - URL: ${url}`);
 
     const res = await fetch(url, {
       method: 'GET',
@@ -143,7 +146,7 @@ export async function getTimesheets(
     // L'API peut retourner directement un array ou un objet { data: [...] }
     const timesheets = Array.isArray(data) ? data : (data.data || []);
 
-    console.log(`✅ GET /api/timesheets - ${timesheets.length || 0} timesheets récupérés`);
+    console.log(`✅ GET /api/timesheets - ${timesheets.length || 0} timesheets récupérés`, timesheets);
 
     return {
       success: true,
@@ -350,18 +353,26 @@ export async function getTodayTimesheets(): Promise<ApiResponse<Timesheet[]>> {
 }
 
 /**
- * Récupère les timesheets de la semaine en cours
+ * Récupère les timesheets d'une semaine
+ * @param weekStart Date optionnelle pour le début de la semaine (lundi). Si non fournie, utilise la semaine en cours.
  */
-export async function getWeekTimesheets(): Promise<ApiResponse<Timesheet[]>> {
-  // Calculer le lundi de la semaine en cours
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, etc.
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si dimanche, -6, sinon 1 - jour
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
+export async function getWeekTimesheets(weekStart?: Date): Promise<ApiResponse<Timesheet[]>> {
+  // Calculer le lundi de la semaine
+  let monday: Date;
 
-  // Calculer le dimanche de la semaine en cours
+  if (weekStart) {
+    monday = new Date(weekStart);
+    monday.setHours(0, 0, 0, 0);
+  } else {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, etc.
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si dimanche, -6, sinon 1 - jour
+    monday = new Date(today);
+    monday.setDate(today.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+  }
+
+  // Calculer le dimanche de la semaine
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);

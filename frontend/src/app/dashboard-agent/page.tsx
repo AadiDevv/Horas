@@ -43,11 +43,17 @@ export default function Page() {
     successMessage,
     errorMessage,
     stats,
+    selectedWeek,
+    weekDays,
     getDayKey,
     handleClockToggle,
     checkTodayTimesheets,
     loadWeekTimesheets,
     loadStats,
+    previousWeek,
+    nextWeek,
+    currentWeek,
+    formatWeekRange,
   } = useTimesheet();
   const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
@@ -144,6 +150,37 @@ export default function Page() {
               />
             </div>
 
+            {/* Weekly Calendar Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-semibold">Planning de la semaine</h3>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={previousWeek}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                >
+                  ← Précédent
+                </button>
+                <button
+                  onClick={currentWeek}
+                  className="px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors"
+                >
+                  Aujourd'hui
+                </button>
+                <button
+                  onClick={nextWeek}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                >
+                  Suivant →
+                </button>
+              </div>
+            </div>
+
+            {/* Week Range Display */}
+            <div className="flex items-center gap-2 text-gray-600 mb-4">
+              <Calendar size={20} />
+              <span className="font-medium">{formatWeekRange()}</span>
+            </div>
+
             {/* Weekly Calendar */}
             <WeeklyCalendar
               timeLogs={timeLogs}
@@ -156,6 +193,7 @@ export default function Page() {
                 loadWeekTimesheets();
               }}
               teamSchedule={teamSchedule}
+              weekDays={weekDays}
             />
           </main>
         </div>
