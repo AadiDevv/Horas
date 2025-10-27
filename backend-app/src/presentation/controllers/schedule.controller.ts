@@ -3,7 +3,9 @@ import { ScheduleUseCase } from '@/application/usecases/schedule.usecase';
 import {
     ScheduleCreateDTO,
     ScheduleUpdateDTO,
-    ScheduleFilterDTO
+    ScheduleFilterDTO,
+    ScheduleReadDTO,
+    ScheduleWithUsersDTO
 } from '@/application/DTOS';
 import { ValidationError, NotFoundError, ForbiddenError } from '@/domain/error/AppError';
 
@@ -17,7 +19,7 @@ export class ScheduleController {
      * Admin uniquement
      */
     async getAllSchedules(req: Request, res: Response): Promise<void> {
-        try {
+  
             const filter: ScheduleFilterDTO = {
                 name: req.query.name as string,
                 activeDays: req.query.activeDays ?
@@ -26,25 +28,9 @@ export class ScheduleController {
             };
 
             const schedules = await this.scheduleUseCase.getAllSchedules(filter);
-
-            res.status(200).json({
-                success: true,
-                data: schedules,
-                count: schedules.length
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
+            res.success(schedulesDTO, "Liste des schedules récupérée avec succès");
+       
     }
 
     /**
@@ -53,80 +39,22 @@ export class ScheduleController {
      * Tous les utilisateurs authentifiés
      */
     async getSchedule_ById(req: Request, res: Response): Promise<void> {
-        try {
-            const id = parseInt(req.params.id);
+            const id = Number(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID invalide'
-                });
-                return;
+                throw new ValidationError("ID invalide");
             }
 
             const includeUsers = req.query.include === 'users';
-            let schedule;
+            let scheduleDTO: ScheduleReadDTO | ScheduleWithUsersDTO;
 
             if (includeUsers) {
-                schedule = await this.scheduleUseCase.getScheduleWithUsers(id);
+                scheduleDTO = (await this.scheduleUseCase.getScheduleWithUsers(id)).toWithUsersDTO();
             } else {
-                schedule = await this.scheduleUseCase.getSchedule_ById(id);
+                scheduleDTO = (await this.scheduleUseCase.getSchedule_ById(id)).toReadDTO();
             }
 
-            res.status(200).json({
-                success: true,
-                data: schedule
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
-    }
-
-    /**
-     * GET /api/schedules/user/:userId
-     * Récupère les schedules d'un utilisateur spécifique
-     * Utilisateur lui-même, son manager ou admin
-     */
-    async getSchedules_ByUserId(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = parseInt(req.params.userId);
-            if (isNaN(userId)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID utilisateur invalide'
-                });
-                return;
-            }
-
-            const schedules = await this.scheduleUseCase.getSchedules_ByUserId(userId);
-
-            res.status(200).json({
-                success: true,
-                data: schedules,
-                count: schedules.length
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            res.success(scheduleDTO, "Schedule récupéré avec succès");
+      
     }
 
     /**
@@ -135,36 +63,15 @@ export class ScheduleController {
      * Manager de l'équipe ou admin
      */
     async getSchedules_ByTeamId(req: Request, res: Response): Promise<void> {
-        try {
-            const teamId = parseInt(req.params.teamId);
+            const teamId = Number(req.params.teamId);
             if (isNaN(teamId)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID équipe invalide'
-                });
-                return;
+                throw new ValidationError("ID équipe invalide");
             }
 
             const schedules = await this.scheduleUseCase.getSchedules_ByTeamId(teamId);
 
-            res.status(200).json({
-                success: true,
-                data: schedules,
-                count: schedules.length
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            res.success(schedules, "Schedules récupérés avec succès");
+       
     }
 
     /**
@@ -173,35 +80,15 @@ export class ScheduleController {
      * Admin uniquement
      */
     async canDeleteSchedule(req: Request, res: Response): Promise<void> {
-        try {
-            const id = parseInt(req.params.id);
+            const id = Number(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID invalide'
-                });
-                return;
+                throw new ValidationError("ID invalide");
             }
 
             const result = await this.scheduleUseCase.canDeleteSchedule(id);
 
-            res.status(200).json({
-                success: true,
-                data: result
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            res.success(result, "Schedule peut être supprimé");
+    
     }
     // #endregion
 
@@ -213,7 +100,9 @@ export class ScheduleController {
      */
     async createSchedule(req: Request, res: Response): Promise<void> {
             const dto: ScheduleCreateDTO = req.body;
-            const schedule = await this.scheduleUseCase.createSchedule(dto,req.user!);
+            const managerId = req.user!.id
+
+            const schedule = await this.scheduleUseCase.createSchedule(dto, managerId);
             const scheduleDTO = schedule.toReadDTO();
             res.success(scheduleDTO, "Schedule créé avec succès");
     }
@@ -226,43 +115,16 @@ export class ScheduleController {
      * Admin uniquement
      */
     async updateSchedule_ById(req: Request, res: Response): Promise<void> {
-        try {
-            const id = parseInt(req.params.id);
+            const id = Number(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID invalide'
-                });
-                return;
+                throw new ValidationError("ID invalide");
             }
 
             const dto: ScheduleUpdateDTO = req.body;
 
             const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto);
 
-            res.status(200).json({
-                success: true,
-                data: schedule,
-                message: 'Schedule mis à jour avec succès'
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else if (error instanceof ValidationError) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            res.success(schedule, "Schedule mis à jour avec succès");
     }
     // #endregion
 
@@ -273,40 +135,14 @@ export class ScheduleController {
      * Admin uniquement
      */
     async deleteSchedule_ById(req: Request, res: Response): Promise<void> {
-        try {
-            const id = parseInt(req.params.id);
+            const id = Number(req.params.id);
             if (isNaN(id)) {
-                res.status(400).json({
-                    success: false,
-                    message: 'ID invalide'
-                });
-                return;
+                throw new ValidationError("ID invalide");
             }
 
             await this.scheduleUseCase.deleteSchedule_ById(id);
 
-            res.status(200).json({
-                success: true,
-                message: 'Schedule supprimé avec succès'
-            });
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                res.status(404).json({
-                    success: false,
-                    message: error.message
-                });
-            } else if (error instanceof ForbiddenError) {
-                res.status(403).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur interne du serveur'
-                });
-            }
-        }
+            res.success("Schedule supprimé avec succès");
     }
     // #endregion
 }

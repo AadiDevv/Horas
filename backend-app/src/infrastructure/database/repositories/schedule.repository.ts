@@ -1,8 +1,27 @@
 import { ISchedule } from "@/domain/interfaces/schedule.interface";
-import { Schedule } from "@/domain/entities/schedule";
+import { Schedule, Team } from "@/domain/entities/";
 import { ScheduleFilterDTO } from "@/application/DTOS";
 import { prismaService } from "../prisma.service";
+import { cleanEntityForUpdate } from "@/shared/utils/cleaner";
 import { NotFoundError } from "@/domain/error/AppError";
+import { Schedule as PrismaSchedule } from "@/generated/prisma";
+import { NonUndefined } from "@/domain/types";
+
+// #region Types et constantes pour éviter la répétition
+type ScheduleTeamSelect = {
+    id: number;
+    name: string;
+    managerId: number;
+    createdAt: Date;
+};
+const TEAM_SELECT_CONFIG = {
+    id: true,
+    name: true,
+    managerId: true,
+    createdAt: true,
+} as const;
+
+// #endregion
 
 export class ScheduleRepository implements ISchedule {
     private prisma = prismaService.getInstance();
@@ -31,20 +50,8 @@ export class ScheduleRepository implements ISchedule {
         const schedules = await this.prisma.schedule.findMany({
             where,
             include: {
-                users: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true
-                    }
-                },
                 teams: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
+                    select: TEAM_SELECT_CONFIG
                 }
             },
             orderBy: {
@@ -62,20 +69,8 @@ export class ScheduleRepository implements ISchedule {
         const schedule = await this.prisma.schedule.findUnique({
             where: { id },
             include: {
-                users: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true
-                    }
-                },
                 teams: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
+                    select: TEAM_SELECT_CONFIG
                 }
             }
         });
@@ -83,36 +78,6 @@ export class ScheduleRepository implements ISchedule {
         return schedule ? this.mapPrismaToEntity(schedule) : null;
     }
 
-    /**
-     * Récupère les schedules utilisés par un utilisateur spécifique
-     */
-    async getSchedules_ByUserId(userId: number): Promise<Schedule[]> {
-        const schedules = await this.prisma.schedule.findMany({
-            where: {
-                users: {
-                    some: {
-                        id: userId
-                    }
-                }
-            },
-            include: {
-                users: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true
-                    }
-                }
-            },
-            orderBy: {
-                name: 'asc'
-            }
-        });
-
-        return schedules.map(schedule => this.mapPrismaToEntity(schedule));
-    }
 
     /**
      * Récupère les schedules utilisés par une équipe spécifique
@@ -128,10 +93,7 @@ export class ScheduleRepository implements ISchedule {
             },
             include: {
                 teams: {
-                    select: {
-                        id: true,
-                        name: true
-                    }
+                    select: TEAM_SELECT_CONFIG
                 }
             },
             orderBy: {
@@ -148,24 +110,13 @@ export class ScheduleRepository implements ISchedule {
      * Crée un nouveau schedule
      */
     async createSchedule(schedule: Schedule): Promise<Schedule> {
+        const cleanSchedule = this.cleanScheduleForPrisma(schedule);
+
+
         const createdSchedule = await this.prisma.schedule.create({
             data: {
-                name: schedule.name,
-                startHour: schedule.startHour,
-                endHour: schedule.endHour,
-                activeDays: schedule.activeDays
+                ...cleanSchedule
             },
-            include: {
-                users: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true
-                    }
-                }
-            }
         });
 
         return this.mapPrismaToEntity(createdSchedule);
@@ -177,29 +128,14 @@ export class ScheduleRepository implements ISchedule {
      * Met à jour un schedule
      */
     async updateSchedule_ById(schedule: Schedule): Promise<Schedule> {
-        if (!schedule.id) {
-            throw new Error("L'ID du schedule est requis pour la mise à jour");
-        }
+
+        const {managerId,...cleanSchedule} = this.cleanScheduleForPrisma(schedule);
 
         const updatedSchedule = await this.prisma.schedule.update({
             where: { id: schedule.id },
             data: {
-                name: schedule.name,
-                startHour: schedule.startHour,
-                endHour: schedule.endHour,
-                activeDays: schedule.activeDays,
+                ...cleanSchedule,
                 updatedAt: new Date()
-            },
-            include: {
-                users: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true
-                    }
-                }
             }
         });
 
@@ -251,19 +187,23 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Mappe un objet Prisma vers une entité Schedule
      */
-    private mapPrismaToEntity(prismaSchedule: any): Schedule {
+    private mapPrismaToEntity<T extends PrismaSchedule & { teams?: { id: number; name: string; managerId: number; createdAt: Date; }[] }>(prismaSchedule: T): Schedule {
+        const activeDays = Array.isArray(prismaSchedule.activeDays)
+            ? prismaSchedule.activeDays as number[]
+            : [];
+
         return new Schedule({
-            id: prismaSchedule.id,
-            name: prismaSchedule.name,
-            startHour: prismaSchedule.startHour,
-            endHour: prismaSchedule.endHour,
-            activeDays: prismaSchedule.activeDays,
-            createdAt: prismaSchedule.createdAt,
-            updatedAt: prismaSchedule.updatedAt,
-            users: prismaSchedule.users,
-            usersCount: prismaSchedule.users?.length || 0
+            ...prismaSchedule,
+            activeDays: activeDays,
+            teams: prismaSchedule.teams?.map(team => new Team({ ...team })),
         });
+    }
+
+    private cleanScheduleForPrisma(schedule: Schedule){
+        const { users, usersCount, id,teams,createdAt,updatedAt, ...scheduleData } = schedule;
+        return {
+            ...scheduleData,
+        };
     }
     // #endregion
 }
-

@@ -19,42 +19,33 @@ export class ScheduleUseCase {
      * Récupère tous les schedules avec filtres optionnels
      * Accessible par Admin uniquement
      */
-    async getAllSchedules(filter?: ScheduleFilterDTO): Promise<ScheduleListItemDTO[]> {
+    async getAllSchedules(filter?: ScheduleFilterDTO): Promise<Schedule[]> {
         const schedules = await this.scheduleRepository.getAllSchedules(filter);
-        return schedules.map(schedule => schedule.toListItemDTO());
+        return schedules
     }
 
     /**
      * Récupère un schedule par son ID
      * Accessible par tous les utilisateurs authentifiés
      */
-    async getSchedule_ById(id: number): Promise<ScheduleReadDTO> {
+    async getSchedule_ById(id: number): Promise<Schedule> {
         const schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!schedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-        return schedule.toReadDTO();
+        return schedule;
     }
 
     /**
      * Récupère un schedule avec la liste des utilisateurs
      * Accessible par Admin et Manager uniquement
      */
-    async getScheduleWithUsers(id: number): Promise<ScheduleWithUsersDTO> {
+    async getScheduleWithUsers(id: number): Promise<Schedule> {
         const schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!schedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-        return schedule.toWithUsersDTO();
-    }
-
-    /**
-     * Récupère les schedules d'un utilisateur spécifique
-     * Accessible par l'utilisateur lui-même, son manager ou admin
-     */
-    async getSchedules_ByUserId(userId: number): Promise<ScheduleListItemDTO[]> {
-        const schedules = await this.scheduleRepository.getSchedules_ByUserId(userId);
-        return schedules.map(schedule => schedule.toListItemDTO());
+        return schedule;
     }
 
     /**
@@ -72,7 +63,7 @@ export class ScheduleUseCase {
      * Crée un nouveau schedule
      * Accessible par Admin uniquement
      */
-    async createSchedule(dto: ScheduleCreateDTO, user: UserReadDTO): Promise<Schedule> {
+    async createSchedule(dto: ScheduleCreateDTO, managerId: number): Promise<Schedule> {
         // Validation des données
         this.validateScheduleData(dto);
 
@@ -81,10 +72,9 @@ export class ScheduleUseCase {
         if (existingSchedules.length > 0) {
             throw new ValidationError(`Un schedule avec le nom "${dto.name}" existe déjà`);
         }
-        if
 
         // Créer l'entité
-        const schedule = Schedule.fromCreateDTO(dto);
+        const schedule = Schedule.fromCreateDTO({...dto, managerId});
 
         // Sauvegarder
         const createdSchedule = await this.scheduleRepository.createSchedule(schedule);
@@ -106,14 +96,8 @@ export class ScheduleUseCase {
         }
 
         // Validation des données si fournies
-        if (dto.name || dto.startHour || dto.endHour || dto.activeDays) {
-            const validationData = {
-                name: dto.name ?? existingSchedule.name,
-                startHour: dto.startHour ?? existingSchedule.startHour.toTimeString().slice(0, 5),
-                endHour: dto.endHour ?? existingSchedule.endHour.toTimeString().slice(0, 5),
-                activeDays: dto.activeDays ?? existingSchedule.activeDays
-            };
-            this.validateScheduleData(validationData);
+        if (Object.entries(dto).length > 0) {
+            this.validateScheduleUpdateData(dto);
         }
 
         // Vérifier l'unicité du nom si modifié
@@ -192,47 +176,77 @@ export class ScheduleUseCase {
 
     // #region Private Validation Methods
     /**
-     * Valide les données d'un schedule
+     * Valide les données d'un schedule (pour création)
      */
     private validateScheduleData(data: ScheduleCreateDTO): void {
-        if (!data.name || data.name.trim().length < 2) {
-            throw new ValidationError("Le nom du schedule doit contenir au moins 2 caractères");
+        this.validateScheduleFields({
+            name: data.name,
+            startHour: data.startHour,
+            endHour: data.endHour,
+            activeDays: data.activeDays
+        });
+    }
+
+    /**
+     * Valide les données d'un schedule (pour mise à jour)
+     * Ne valide que les champs fournis
+     */
+    private validateScheduleUpdateData(data: ScheduleUpdateDTO): void {
+        this.validateScheduleFields(data);
+    }
+
+    /**
+     * Validation générique des champs de schedule
+     * Valide uniquement les champs fournis (non-undefined)
+     */
+    private validateScheduleFields(data: Partial<ScheduleCreateDTO>): void {
+        // Validation du nom (si fourni)
+        if (data.name !== undefined) {
+            if (!data.name || data.name.trim().length < 2) {
+                throw new ValidationError("Le nom du schedule doit contenir au moins 2 caractères");
+            }
         }
 
-        if (!data.startHour || !data.endHour) {
-            throw new ValidationError("Les heures de début et de fin sont obligatoires");
+        // Validation des heures (si fournies)
+        if (data.startHour !== undefined || data.endHour !== undefined) {
+            if (data.startHour && data.endHour) {
+                // Valider le format des heures
+                const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+                if (!timeRegex.test(data.startHour) || !timeRegex.test(data.endHour)) {
+                    throw new ValidationError("Format d'heure invalide. Utilisez le format HH:mm");
+                }
+
+                // Valider que l'heure de début est antérieure à l'heure de fin
+                const [startH, startM] = data.startHour.split(':').map(Number);
+                const [endH, endM] = data.endHour.split(':').map(Number);
+                const startMinutes = startH * 60 + startM;
+                const endMinutes = endH * 60 + endM;
+
+                if (startMinutes >= endMinutes) {
+                    throw new ValidationError("L'heure de début doit être antérieure à l'heure de fin");
+                }
+            } else if (data.startHour || data.endHour) {
+                throw new ValidationError("Les heures de début et de fin doivent être fournies ensemble");
+            }
         }
 
-        // Valider le format des heures
-        const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-        if (!timeRegex.test(data.startHour) || !timeRegex.test(data.endHour)) {
-            throw new ValidationError("Format d'heure invalide. Utilisez le format HH:mm");
-        }
+        // Validation des jours actifs (si fournis)
+        if (data.activeDays !== undefined) {
+            if (!data.activeDays || data.activeDays.length === 0) {
+                throw new ValidationError("Au moins un jour actif doit être défini");
+            }
 
-        // Valider que l'heure de début est antérieure à l'heure de fin
-        const [startH, startM] = data.startHour.split(':').map(Number);
-        const [endH, endM] = data.endHour.split(':').map(Number);
-        const startMinutes = startH * 60 + startM;
-        const endMinutes = endH * 60 + endM;
+            // Vérifier que les jours sont valides (1-7)
+            const invalidDays = data.activeDays.filter(day => day < 1 || day > 7);
+            if (invalidDays.length > 0) {
+                throw new ValidationError("Les jours actifs doivent être entre 1 (Lundi) et 7 (Dimanche)");
+            }
 
-        if (startMinutes >= endMinutes) {
-            throw new ValidationError("L'heure de début doit être antérieure à l'heure de fin");
-        }
-
-        if (!data.activeDays || data.activeDays.length === 0) {
-            throw new ValidationError("Au moins un jour actif doit être défini");
-        }
-
-        // Vérifier que les jours sont valides (1-7)
-        const invalidDays = data.activeDays.filter(day => day < 1 || day > 7);
-        if (invalidDays.length > 0) {
-            throw new ValidationError("Les jours actifs doivent être entre 1 (Lundi) et 7 (Dimanche)");
-        }
-
-        // Vérifier qu'il n'y a pas de doublons
-        const uniqueDays = [...new Set(data.activeDays)];
-        if (uniqueDays.length !== data.activeDays.length) {
-            throw new ValidationError("Les jours actifs ne peuvent pas être dupliqués");
+            // Vérifier qu'il n'y a pas de doublons
+            const uniqueDays = [...new Set(data.activeDays)];
+            if (uniqueDays.length !== data.activeDays.length) {
+                throw new ValidationError("Les jours actifs ne peuvent pas être dupliqués");
+            }
         }
     }
     // #endregion

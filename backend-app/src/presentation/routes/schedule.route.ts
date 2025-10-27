@@ -41,22 +41,6 @@ router.get('/:id',
     }
 );
 
-/**
- * GET /api/schedules/user/:userId
- * Récupère les schedules d'un utilisateur spécifique
- * Utilisateur lui-même, son manager ou admin
- */
-router.get('/user/:userId',
-    authMiddleware,      // 1️⃣ Vérifie le JWT
-    // TODO: Ajouter middleware pour vérifier que c'est l'utilisateur lui-même, son manager ou admin
-    async (req, res, next) => {
-        try {
-            await scheduleController.getSchedules_ByUserId(req, res);
-        } catch (error) {
-            next(error);
-        }
-    }
-);
 
 /**
  * GET /api/schedules/team/:teamId
@@ -101,7 +85,8 @@ router.get('/:id/can-delete',
  * Admin uniquement
  */
 router.post('/',
-    authMiddleware,      // 1️⃣ Vérifie le JWT
+    authMiddleware,
+    managerOrAdmin,      // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await scheduleController.createSchedule(req, res);

@@ -233,7 +233,7 @@ WHERE teams.managerId = :managerId
                                                 id: 5,
                                                 name: 'Équipe Production'
                                             },
-                                            schedule: {
+                                            customSchedule: {
                                                 id: 2,
                                                 name: 'Horaires Standard',
                                                 startHour: '2025-01-01T08:00:00.000Z',

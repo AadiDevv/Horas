@@ -1,4 +1,4 @@
-import { Role } from "./valueType";
+import { Role, TimesheetStatus } from "./index";
 import { User } from "../entities/user";
 import { Team } from "../entities/team";
 export type UserProps = {
@@ -47,7 +47,6 @@ export type TeamProps = {
     membersCount?: number,
 }
 
-export type TimesheetStatus = 'normal' | 'delay' | 'absence' | 'incomplete';
 
 export type ScheduleProps = {
     id?: number;
@@ -55,10 +54,15 @@ export type ScheduleProps = {
     startHour: Date;
     endHour: Date;
     activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
+    managerId: number
     createdAt?: Date;
     updatedAt?: Date;
     users?: User[];
     usersCount?: number;
+    teams?: Team[] | {
+        id: number;
+        name: string;
+    }[];
 }
 
 export interface TimesheetProps {

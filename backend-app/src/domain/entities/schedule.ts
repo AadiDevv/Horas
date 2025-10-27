@@ -2,6 +2,7 @@ import { ScheduleProps } from "../types/entitiyProps";
 import { ScheduleCreateDTO, ScheduleUpdateDTO, ScheduleReadDTO, ScheduleListItemDTO, ScheduleWithUsersDTO } from "@/application/DTOS";
 import { ValidationError } from "../error/AppError";
 import { User } from "./user";
+import { Team } from "./team";
 
 export class Schedule {
     public readonly id?: number;
@@ -11,10 +12,15 @@ export class Schedule {
     public activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
     public createdAt: Date;
     public updatedAt: Date;
+    public managerId: number;
 
     // Relations
     public users?: User[];
     public usersCount?: number;
+    public teams?: Team[] | {
+        id: number;
+        name: string;
+    }[];
 
     constructor(props: ScheduleProps) {
         this.id = props.id;
@@ -22,10 +28,12 @@ export class Schedule {
         this.startHour = props.startHour;
         this.endHour = props.endHour;
         this.activeDays = props.activeDays;
+        this.managerId = props.managerId
         this.createdAt = props.createdAt || new Date(Date.now());
         this.updatedAt = props.updatedAt || new Date(Date.now());
         this.users = props.users;
         this.usersCount = props.usersCount;
+        this.teams = props.teams;
 
         this.validate();
     }
@@ -35,12 +43,11 @@ export class Schedule {
      * Crée une entité Schedule à partir d'un DTO de création
      * Utilisé lors de la création d'un nouveau schedule
      */
-    public static fromCreateDTO(dto: ScheduleCreateDTO): Schedule {
+    public static fromCreateDTO(dto: ScheduleCreateDTO & { managerId: number }): Schedule {
         const props: ScheduleProps = {
-            name: dto.name,
+            ...dto,
             startHour: Schedule.parseTimeString(dto.startHour),
             endHour: Schedule.parseTimeString(dto.endHour),
-            activeDays: dto.activeDays,
             createdAt: new Date(),
             updatedAt: new Date()
         };
@@ -53,16 +60,17 @@ export class Schedule {
      * Retourne une nouvelle instance (immutabilité)
      */
     public updateFromDTO(dto: ScheduleUpdateDTO): Schedule {
+
+        const cleanDto = Object.fromEntries(
+            Object.entries(dto).filter(([_, value]) => value !== undefined)
+        );
+
         const props: ScheduleProps = {
-            id: this.id,
-            name: dto.name ?? this.name,
+            ...cleanDto,
+            ...this,
             startHour: dto.startHour ? Schedule.parseTimeString(dto.startHour) : this.startHour,
             endHour: dto.endHour ? Schedule.parseTimeString(dto.endHour) : this.endHour,
-            activeDays: dto.activeDays ?? this.activeDays,
-            createdAt: this.createdAt,
             updatedAt: new Date(),
-            users: this.users,
-            usersCount: this.usersCount
         };
 
         return new Schedule(props);

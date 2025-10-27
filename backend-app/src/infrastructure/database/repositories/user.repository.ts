@@ -56,7 +56,7 @@ export class UserRepository implements IAuth, IUser {
     try {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) return null;
-      return new User(nullToUndefined({ ...user, manager: user.managerId ? { id: user.managerId } : undefined, team: user.teamId ? { id: user.teamId } : undefined, schedule: user.customScheduleId ? { id: user.customScheduleId } : undefined }));
+      return new User(nullToUndefined({ ...user, manager: user.managerId ? { id: user.managerId } : undefined, team: user.teamId ? { id: user.teamId } : undefined, customSchedule: user.customScheduleId ? { id: user.customScheduleId } : undefined }));
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }

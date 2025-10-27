@@ -19,11 +19,6 @@ export interface ISchedule {
     getSchedule_ById(id: number): Promise<Schedule | null>;
 
     /**
-     * Récupère les schedules utilisés par un utilisateur spécifique
-     */
-    getSchedules_ByUserId(userId: number): Promise<Schedule[]>;
-
-    /**
      * Récupère les schedules utilisés par une équipe spécifique
      */
     getSchedules_ByTeamId(teamId: number): Promise<Schedule[]>;

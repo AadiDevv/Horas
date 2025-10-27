@@ -100,7 +100,7 @@ export interface UserReadDTO {
         name?: string;
     };
 
-    schedule?: {
+    customSchedule?: {
         id: number;
         name?: string;
         startHour?: Date;

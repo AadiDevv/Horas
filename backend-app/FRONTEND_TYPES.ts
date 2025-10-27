@@ -48,7 +48,7 @@ export interface UserCreateDTO {
     password: string;
     role: Role;
     teamId?: number;
-    scheduleId?: number;
+    customScheduleId?: number;
     phone?: string;
 }
 
@@ -65,7 +65,7 @@ export interface UserUpdateDTO {
     role?: Role;
     isActive?: boolean;
     teamId?: number | null;
-    scheduleId?: number | null;
+    customScheduleId?: number | null;
 }
 
 export interface UserChangePasswordDTO {
@@ -86,7 +86,7 @@ export interface UserReadDTO {
     isActive: boolean;
     phone: string | null;
     teamId: number | null;
-    scheduleId: number | null;
+    customScheduleId: number | null;
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
@@ -94,7 +94,7 @@ export interface UserReadDTO {
         id: number;
         lastName: string;
     };
-    schedule?: {
+    customSchedule?: {
         id: number;
         lastName: string;
         startHour: string;
