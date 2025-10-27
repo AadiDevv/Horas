@@ -129,26 +129,43 @@ export default function PointagesManagement({ agents, onRefresh }: PointagesMana
     const exitDateTime = new Date(`${data.date}T${data.endTime}:00`);
 
     if (data.entryId && data.exitId) {
-      // Mode édition - mettre à jour les deux timesheets
-      // Le backend attend le format HH:MM:SS pour l'update
-      const entryResponse = await updateTimesheet(data.entryId, {
-        hour: `${data.startTime}:00`,
+      // Mode édition - Stratégie: supprimer les anciens et recréer
+      // Car le backend PATCH a un bug avec la transformation de date
+
+      // 1. Supprimer les anciens timesheets
+      const deleteEntryResponse = await deleteTimesheet(data.entryId);
+      if (!deleteEntryResponse.success) {
+        throw new Error(deleteEntryResponse.error || 'Erreur lors de la suppression de l\'entrée');
+      }
+
+      const deleteExitResponse = await deleteTimesheet(data.exitId);
+      if (!deleteExitResponse.success) {
+        throw new Error(deleteExitResponse.error || 'Erreur lors de la suppression de la sortie');
+      }
+
+      // 2. Recréer les nouveaux timesheets avec les nouvelles heures
+      const entryResponse = await createTimesheet({
+        employeId: data.employeId,
+        date: data.date,
+        hour: entryDateTime.toISOString(),
         clockin: true,
         status: data.status
       });
 
       if (!entryResponse.success) {
-        throw new Error(entryResponse.error || 'Erreur lors de la mise à jour de l\'entrée');
+        throw new Error(entryResponse.error || 'Erreur lors de la recréation de l\'entrée');
       }
 
-      const exitResponse = await updateTimesheet(data.exitId, {
-        hour: `${data.endTime}:00`,
+      const exitResponse = await createTimesheet({
+        employeId: data.employeId,
+        date: data.date,
+        hour: exitDateTime.toISOString(),
         clockin: false,
         status: data.status
       });
 
       if (!exitResponse.success) {
-        throw new Error(exitResponse.error || 'Erreur lors de la mise à jour de la sortie');
+        throw new Error(exitResponse.error || 'Erreur lors de la recréation de la sortie');
       }
     } else {
       // Mode création - créer une paire entrée/sortie (ISO format pour POST)
