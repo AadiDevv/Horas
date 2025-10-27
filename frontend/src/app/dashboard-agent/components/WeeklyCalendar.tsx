@@ -9,6 +9,7 @@ interface WeeklyCalendarProps {
   currentDayKey: DayKey;
   onRefresh: () => void;
   teamSchedule?: Horaire[];
+  weekDays: Date[];
 }
 
 const dayKeys: DayKey[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -53,12 +54,14 @@ function calculateBlockPosition(start: string, end: string, minTime: number, max
 // Composant Timeline pour un jour
 function DayTimeline({
   day,
+  date,
   timeLogs,
   teamHoraire,
   isClockingIn,
   currentDayLogs
 }: {
   day: DayKey;
+  date: Date;
   timeLogs: TimeLog[];
   teamHoraire: Horaire | null;
   isClockingIn: boolean;
@@ -92,10 +95,22 @@ function DayTimeline({
 
   const hasContent = teamHoraire || timeLogs.length > 0 || isClockingIn;
 
+  // Vérifier si c'est aujourd'hui
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isToday = date.toDateString() === today.toDateString();
+
   return (
     <div className="flex flex-col">
-      <div className="font-semibold text-gray-700 text-center mb-3 pb-2 border-b-2 border-gray-200">
-        {dayLabels[day]}
+      <div className={`font-semibold text-center mb-3 pb-2 border-b-2 rounded-t-lg ${
+        isToday ? 'bg-black text-white border-black' : 'text-gray-700 border-gray-200'
+      }`}>
+        <div className="text-xs">
+          {dayLabels[day]}
+        </div>
+        <div className="text-lg font-bold">
+          {date.getDate()}
+        </div>
       </div>
 
       <div className="flex-1 relative" style={{ minHeight: '300px' }}>
@@ -260,7 +275,8 @@ export default function WeeklyCalendar({
   currentDayLogs,
   currentDayKey,
   onRefresh,
-  teamSchedule = []
+  teamSchedule = [],
+  weekDays
 }: WeeklyCalendarProps) {
   const scheduleByDay: Record<DayKey, Horaire | null> = {
     Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null
@@ -276,7 +292,6 @@ export default function WeeklyCalendar({
   return (
     <div className="bg-gray-50 rounded-3xl p-8">
       <div className="mb-6">
-        <h3 className="text-xl font-bold">Planning Hebdomadaire</h3>
         <div className="flex items-center gap-4 mt-2 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded flex items-center justify-center border-2" style={{ backgroundColor: '#333333', opacity: 0.3, borderColor: 'rgba(51, 51, 51, 0.4)' }}>
@@ -303,10 +318,11 @@ export default function WeeklyCalendar({
       </div>
 
       <div className="grid grid-cols-7 gap-4 pl-12">
-        {dayKeys.map(day => (
+        {dayKeys.map((day, index) => (
           <DayTimeline
             key={day}
             day={day}
+            date={weekDays[index] || new Date()}
             timeLogs={timeLogs[day]}
             teamHoraire={scheduleByDay[day]}
             isClockingIn={isClockingIn && currentDayKey === day}
