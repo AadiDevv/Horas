@@ -15,6 +15,8 @@ import {
  * Utilise la nouvelle API /api/timesheets
  */
 export function useTimesheet() {
+  const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
+  const [weekDays, setWeekDays] = useState<Date[]>([]);
   const [timeLogs, setTimeLogs] = useState<Record<DayKey, TimeLog[]>>({
     Mon: [],
     Tue: [],
@@ -63,19 +65,13 @@ export function useTimesheet() {
 
   /**
    * Calcule les statistiques à partir des timesheets
+   * Les stats sont calculées pour TOUTE la semaine, peu importe le jour actuel
    */
   const calculateStatsFromTimesheets = (timesheets: Timesheet[]): TimesheetStats => {
     const today = new Date().toISOString().split('T')[0];
     const now = new Date();
 
-    // Calculer le lundi de la semaine en cours
-    const dayOfWeek = now.getDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const monday = new Date(now);
-    monday.setDate(now.getDate() + diff);
-    const mondayStr = monday.toISOString().split('T')[0];
-
-    // Calculer le premier jour du mois
+    // Calculer le premier jour du mois pour les retards
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
     let heuresJour = 0;
@@ -88,6 +84,9 @@ export function useTimesheet() {
       if (!byDate[t.date]) byDate[t.date] = [];
       byDate[t.date].push(t);
     });
+
+    console.log('📊 Calcul des stats pour les dates:', Object.keys(byDate));
+    console.log('📅 Aujourd\'hui:', today);
 
     // Calculer les heures pour chaque jour
     Object.entries(byDate).forEach(([date, dayTimesheets]) => {
@@ -110,7 +109,7 @@ export function useTimesheet() {
             dayHours += hours;
             i++; // Sauter le prochain
           } else if (date === today) {
-            // Clock-in actif, calculer jusqu'à maintenant
+            // Clock-in actif aujourd'hui, calculer jusqu'à maintenant
             const hours = calculateHours(ts.hour || ts.heure || '', now.toISOString());
             console.log(`  ⏱️ ${date} - Clock-in actif ${ts.hour} → maintenant = ${hours.toFixed(2)}h`);
             dayHours += hours;
@@ -125,15 +124,23 @@ export function useTimesheet() {
         heuresJour = dayHours;
         console.log(`  ✅ C'est aujourd'hui! heuresJour = ${heuresJour.toFixed(2)}h`);
       }
-      if (date >= mondayStr) {
-        heuresSemaine += dayHours;
-        console.log(`  ✅ Dans la semaine! heuresSemaine = ${heuresSemaine.toFixed(2)}h`);
-      }
+
+      // Ajouter TOUTES les heures à la semaine (pas de filtre par date)
+      heuresSemaine += dayHours;
+      console.log(`  ✅ Ajout à heuresSemaine: ${dayHours.toFixed(2)}h, total = ${heuresSemaine.toFixed(2)}h`);
+
       if (date >= firstDayOfMonth) {
         // Compter les retards (status === 'retard')
         const retards = sorted.filter(t => t.status === 'retard' && t.clockin === true);
         retardsMois += retards.length;
       }
+    });
+
+    console.log('📈 Stats finales:', {
+      heuresJour,
+      heuresSemaine,
+      retardsMois,
+      moyenneHebdo: heuresSemaine / 7
     });
 
     return {
@@ -145,14 +152,26 @@ export function useTimesheet() {
   };
 
   /**
+   * Calcule le lundi de la semaine pour une date donnée
+   */
+  const getMonday = (date: Date): Date => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+  };
+
+  /**
    * Charge les statistiques
    */
   const loadStats = async () => {
     try {
       console.log('🔄 Chargement des statistiques...');
 
-      // Toujours calculer côté frontend pour avoir les vraies valeurs
-      const weekResponse = await getWeekTimesheets();
+      const monday = getMonday(selectedWeek);
+      const weekResponse = await getWeekTimesheets(monday);
       if (weekResponse.success && weekResponse.data) {
         console.log('📊 Calcul des stats à partir de', weekResponse.data.length, 'timesheets');
         const calculatedStats = calculateStatsFromTimesheets(weekResponse.data);
@@ -171,7 +190,8 @@ export function useTimesheet() {
    */
   const loadWeekTimesheets = async () => {
     try {
-      const response = await getWeekTimesheets();
+      const monday = getMonday(selectedWeek);
+      const response = await getWeekTimesheets(monday);
 
       if (!response.success || !response.data) {
         console.error('❌ Erreur chargement timesheets semaine:', response.error);
@@ -263,6 +283,7 @@ export function useTimesheet() {
 
   /**
    * Vérifie les timesheets du jour au chargement pour restaurer l'état
+   * Met à jour l'état de clock in/out UNIQUEMENT si on regarde la semaine en cours
    */
   const checkTodayTimesheets = async () => {
     try {
@@ -272,7 +293,23 @@ export function useTimesheet() {
       // Charger les stats
       await loadStats();
 
-      // Vérifier le statut du jour actuel
+      // Vérifier si selectedWeek est la semaine en cours
+      const today = new Date();
+      const selectedMonday = getMonday(selectedWeek);
+      const currentMonday = getMonday(today);
+
+      const isCurrentWeek = selectedMonday.toDateString() === currentMonday.toDateString();
+
+      // Si on ne regarde pas la semaine en cours, réinitialiser l'état
+      if (!isCurrentWeek) {
+        console.log('📅 Semaine sélectionnée n\'est pas la semaine en cours, pas de clock-in actif');
+        setLastClockIn(null);
+        setIsClockingIn(false);
+        setCurrentDayLogs({ start: '' });
+        return;
+      }
+
+      // Vérifier le statut du jour actuel (seulement si on regarde la semaine en cours)
       const response = await getTodayTimesheets();
 
       if (!response.success || !response.data) {
@@ -338,6 +375,18 @@ export function useTimesheet() {
       setErrorMessage('');
       setSuccessMessage('');
 
+      // S'assurer qu'on est sur la semaine en cours avant de pointer
+      const today = new Date();
+      const currentMonday = getMonday(today);
+      const selectedMonday = getMonday(selectedWeek);
+
+      if (currentMonday.toDateString() !== selectedMonday.toDateString()) {
+        console.log('📅 Retour à la semaine en cours pour pointer');
+        setSelectedWeek(today);
+        // Attendre un peu pour que l'état se mette à jour
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
       const response = await clockInOut();
 
       console.log('📦 Réponse clockInOut:', response);
@@ -395,6 +444,62 @@ export function useTimesheet() {
     }
   };
 
+  // Recharger les données quand la semaine change
+  useEffect(() => {
+    const monday = getMonday(selectedWeek);
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      day.setHours(0, 0, 0, 0);
+      return day;
+    });
+    setWeekDays(days);
+
+    // Vérifier si c'est la semaine en cours pour gérer le clock-in actif
+    const today = new Date();
+    const currentMonday = getMonday(today);
+    const isCurrentWeek = monday.toDateString() === currentMonday.toDateString();
+
+    if (!isCurrentWeek) {
+      // Si on change pour une autre semaine, réinitialiser l'état de clock-in
+      setIsClockingIn(false);
+      setCurrentDayLogs({ start: '' });
+      setLastClockIn(null);
+    }
+
+    loadWeekTimesheets();
+    loadStats();
+  }, [selectedWeek]);
+
+  /**
+   * Navigation entre les semaines
+   */
+  const previousWeek = () => {
+    const newDate = new Date(selectedWeek);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedWeek(newDate);
+  };
+
+  const nextWeek = () => {
+    const newDate = new Date(selectedWeek);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedWeek(newDate);
+  };
+
+  const currentWeek = () => {
+    setSelectedWeek(new Date());
+  };
+
+  /**
+   * Formate la plage de dates de la semaine
+   */
+  const formatWeekRange = (): string => {
+    const monday = getMonday(selectedWeek);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return `${monday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  };
+
   return {
     timeLogs,
     isClockingIn,
@@ -404,10 +509,16 @@ export function useTimesheet() {
     errorMessage,
     lastClockIn,
     stats,
+    selectedWeek,
+    weekDays,
     getDayKey,
     handleClockToggle,
     checkTodayTimesheets,
     loadWeekTimesheets,
-    loadStats
+    loadStats,
+    previousWeek,
+    nextWeek,
+    currentWeek,
+    formatWeekRange
   };
 }
