@@ -5,7 +5,7 @@ import {
     ScheduleUpdateDTO,
     ScheduleFilterDTO,
     ScheduleReadDTO,
-    ScheduleWithUsersDTO
+    ScheduleWithUsersDTO,
 } from '@/application/DTOS';
 import { ValidationError, NotFoundError, ForbiddenError } from '@/domain/error/AppError';
 
@@ -113,6 +113,8 @@ export class ScheduleController {
 
             res.success(scheduleDTO, "Schedule mis à jour avec succès");
     }
+
+    
     // #endregion
 
     // #region DELETE Routes

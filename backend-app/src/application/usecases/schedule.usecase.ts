@@ -141,6 +141,7 @@ export class ScheduleUseCase {
 
         return savedSchedule;
     }
+    
     // #endregion
 
     // #region Delete Operations

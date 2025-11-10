@@ -56,6 +56,9 @@ export interface TeamUpdateDTO {
     scheduleId?: number;
     managerId?: number;
 }
+export interface TeamAsignScheduleDTO {
+    scheduleId: number;
+}
 // #endregion
 
 // #region Read DTO

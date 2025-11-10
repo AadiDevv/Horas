@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TeamUseCase } from '@/application/usecases';
-import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO } from '@/application/DTOS';
+import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO, TeamAsignScheduleDTO} from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
 
 /**
@@ -69,6 +69,19 @@ export class TeamController {
 
         res.success(teamDTO, "Équipe modifiée avec succès");
     }
+    async updateTeamSchedule_ById(req: Request, res: Response): Promise<void> {
+        const teamId = Number(req.params.id);
+        if (isNaN(teamId)) throw new ValidationError("ID schedule invalide");
+    
+        const dto: TeamAsignScheduleDTO = req.body;
+        if (!dto.scheduleId) throw new ValidationError("Le scheduleId est requis");
+    
+    
+        const user = await this.UC_team.updateTeamSchedule_ById(teamId, dto.scheduleId, req.user!);
+        const userDTO = user.toReadDTO();
+    
+        res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
+      }
     // #endregion
 
     // #region Delete

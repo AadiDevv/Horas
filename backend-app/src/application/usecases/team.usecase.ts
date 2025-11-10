@@ -1,7 +1,8 @@
-import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembersDTO } from "@/application/DTOS";
+import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembersDTO , UserReadDTO} from "@/application/DTOS";
 import { Team } from "@/domain/entities/team";
-import { ITeam } from "@/domain/interfaces/team.interface";
+import { ITeam, ISchedule} from "@/domain/interfaces/";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
+import {  } from "@/domain/interfaces/schedule.interface";
 
 /**
  * Use Case pour la gestion des équipes
@@ -9,7 +10,7 @@ import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/A
  */
 export class TeamUseCase {
 
-    constructor(private readonly R_team: ITeam) { }
+    constructor(private readonly R_team: ITeam, private readonly R_schedule: ISchedule) { }
 
     // #region Read
     /**
@@ -155,6 +156,47 @@ export class TeamUseCase {
 
         return teamUpdated;
     }
+        /**
+     * Assigne un utilisateur à une équipe
+     * 
+     * Règles métier :
+     * - Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
+     * - Manager : peut uniquement assigner ses propres employés à ses équipes
+     * 
+     * @param scheduleId - ID de l'utilisateur à assigner
+     * @param teamId - ID de l'équipe de destination
+     * @param requestingUserId - ID de l'utilisateur qui fait la requête
+     * @param requestingUserRole - Rôle de l'utilisateur connecté
+     * @returns L'utilisateur mis à jour
+     * @throws NotFoundError si l'utilisateur n'existe pas
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
+     */
+        async updateTeamSchedule_ById(
+            teamId: number,
+            scheduleId: number,
+            user: UserReadDTO
+        ): Promise<Team> {
+    
+            // #region Validation
+            const targetTeam = await this.R_team.getTeam_ById(teamId)
+            const targetSchedule = await this.R_schedule.getSchedule_ById(scheduleId)
+            // Vérification que l'équipe et l'utilisateur existent
+            if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
+            if (!targetSchedule) throw new NotFoundError(`L'utilisateur avec l'ID ${scheduleId} introuvable`);
+            if (targetTeam.schedule?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+            // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
+            if (targetUser.manager?.id !== user.id) {
+                console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
+                console.log(`user.id : ${user.id}`);
+                throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${requestingUserId}`);
+            }
+            if (user.role !== 'admin' && user.id != targetTeam.managerId) {
+                throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
+            }
+            //#endregion
+            const userEntityUpdated = await this.R_user.updateUserTeam_ById(scheduleId, teamId);
+            return new User(userEntityUpdated);
+        }
     // #endregion
 
     // #region Delete

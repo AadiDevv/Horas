@@ -1,4 +1,4 @@
-import { UserUpdateDTO, UserFilterDTO } from "@/application/DTOS/user.dto";
+import { UserUpdateDTO, UserFilterDTO, UserReadDTO } from "@/application/DTOS/";
 import { User } from "@/domain/entities/user";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
@@ -185,13 +185,9 @@ export class UserUseCase {
     async updateUserTeam_ById(
         userId: number,
         teamId: number,
-        requestingUserId: number,
-        requestingUserRole: string
+        user: UserReadDTO
     ): Promise<User> {
-        console.log(`user id : ${userId}`);
-        console.log(`team id : ${teamId}`);
-        console.log(`requesting user id : ${requestingUserId}`);
-        console.log(`requesting user role : ${requestingUserRole}`);
+
         // #region Validation
         const targetTeam = await this.R_team.getTeam_ById(teamId)
         const targetUser = await this.R_user.getUser_ById(userId)
@@ -201,17 +197,17 @@ export class UserUseCase {
         if (targetUser.role === 'admin' || targetUser.role === 'manager') throw new ForbiddenError("Vous ne pouvez assigner que des employés");
         if (targetUser.team?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
         // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
-        if (targetUser.manager?.id !== requestingUserId) {
+        if (targetUser.manager?.id !== user.id) {
             console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
-            console.log(`requestingUserId : ${requestingUserId}`);
+            console.log(`user.id : ${user.id}`);
             throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${requestingUserId}`);
         }
-        if (requestingUserRole !== 'admin' && requestingUserId != targetTeam.managerId) {
+        if (user.role !== 'admin' && user.id != targetTeam.managerId) {
             throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
         }
         //#endregion
-        const user = await this.R_user.updateUserTeam_ById(userId, teamId);
-        return user;
+        const userEntityUpdated = await this.R_user.updateUserTeam_ById(userId, teamId);
+        return new User(userEntityUpdated);
     }
     // #endregion
 

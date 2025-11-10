@@ -78,6 +78,24 @@ router.patch('/:id',
         }
     }
 );
+/**
+ * PATCH /api/teams/assign/schedule/:id
+ * Assigner un schedule à une équipe
+ * - Admin : peut assigner n'importe quel schedule à n'importe quelle équipe
+ * - Manager : peut uniquement assigner ses propres schedules à ses propres équipes
+ */
+router.patch('/assign/schedule/:id',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    managerOrAdmin,         // 2️⃣ Vérifie que c'est admin
+    async (req, res, next) => {
+        try {
+            await teamController.updateTeamSchedule_ById(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
 // #endregion
 
 // #region DELETE Routes

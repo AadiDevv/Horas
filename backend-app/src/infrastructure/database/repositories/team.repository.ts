@@ -1,10 +1,10 @@
 import { ITeam } from "@/domain/interfaces/team.interface";
-import { Team } from "@/domain/entities/team";
 import { prisma } from "../prisma.service";
-import { User } from "@/domain/entities/user";
+import { User, Schedule, Team } from "@/domain/entities/";
 import { ValidationError } from "@/domain/error/AppError";
 import { TeamFilterDTO } from "@/application/DTOS";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
+import { Schedule as PrismaSchedule, Team as PrismaTeam, User as PrismaUser } from "@/generated/prisma";
 
 export class TeamRepository implements ITeam {
 
@@ -74,6 +74,16 @@ export class TeamRepository implements ITeam {
                         phone: true,
                         customScheduleId: true,
                     }
+                },
+                schedule: {
+                    select: {
+                        id: true,
+                        name: true,
+                        startHour: true,
+                        endHour: true,
+                        activeDays: true,
+                        managerId: true,
+                    }
                 }
             }
         });
@@ -85,7 +95,8 @@ export class TeamRepository implements ITeam {
         return new Team({
             ...nullToUndefined(team),
             manager: new User({ ...team.manager }),
-            members: team.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined }))
+            members: team.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined })),
+            schedule:team.schedule ? new Schedule({ ...team.schedule }) : undefined
         });
     }
 
@@ -224,5 +235,22 @@ export class TeamRepository implements ITeam {
         });
     }
     // #endregion
+
+        // #region Private Helper Methods
+
+    private mapPrismaToEntity<T extends PrismaTeam & { schedule?: Omit<PrismaSchedule,'createdAt' | 'updatedAt'>, manager?: Omit<PrismaUser,'createdAt' | 'updatedAt'>, members?: Omit<PrismaUser,'createdAt' | 'updatedAt'>[] }>(prismaTeam: T): Team {
+        const activeDays = Array.isArray(prismaTeam.schedule?.activeDays)
+            ? prismaTeam.schedule?.activeDays as number[]
+            : [];
+
+        return new Team({ 
+        ...prismaTeam,
+        manager: prismaTeam.manager ? new User({ ...nullToUndefined(prismaTeam.manager)}) : undefined,
+        members: prismaTeam.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined })),
+        schedule:prismaTeam.schedule ? new Schedule({ ...team.schedule }) : undefined
+    });
+    }
+        // #endregion
+
 }
 

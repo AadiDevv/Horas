@@ -1,6 +1,5 @@
 import { Role, TimesheetStatus } from "./index";
-import { User } from "../entities/user";
-import { Team } from "../entities/team";
+import { Team,Schedule,User } from "../entities/";
 export type UserProps = {
     email: string,
     hashedPassword?: string,
@@ -38,12 +37,12 @@ export type TeamProps = {
     name: string,
     description?: string,
     managerId: number,
-    scheduleId?: number,
     createdAt?: Date,
     updatedAt?: Date,
     deletedAt?: Date | null,
     manager?: User,
     members?: User[],
+    schedule?: Schedule,
     membersCount?: number,
 }
 

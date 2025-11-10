@@ -162,7 +162,7 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Mappe un objet Prisma vers une entité Schedule
      */
-    private mapPrismaToEntity<T extends PrismaSchedule & { teams?: { id: number; name: string; managerId: number; createdAt: Date; }[] }>(prismaSchedule: T): Schedule {
+    private mapPrismaToEntity<T extends PrismaSchedule & { teams?: ScheduleTeamSelect[] }>(prismaSchedule: T): Schedule {
         const activeDays = Array.isArray(prismaSchedule.activeDays)
             ? prismaSchedule.activeDays as number[]
             : [];

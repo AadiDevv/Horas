@@ -2,6 +2,7 @@ import { TeamProps } from "../types/entitiyProps";
 import { User } from "./user";
 import { TeamCreateDTO, TeamUpdateDTO, TeamReadDTO, TeamListItemDTO, TeamWithMembersDTO } from "@/application/DTOS";
 import { ValidationError } from "../error/AppError";
+import { Schedule } from "./schedule";
 
 export class Team {
     public readonly id?: number;
@@ -14,6 +15,7 @@ export class Team {
     public deletedAt?: Date | null;
     public manager?: User;
     public members?: User[];
+    public schedule?: Schedule;
     public membersCount?: number;
 
     constructor(props: TeamProps) {
@@ -21,12 +23,12 @@ export class Team {
         this.name = props.name;
         this.description = props.description;
         this.managerId = props.managerId;
-        this.scheduleId = props.scheduleId;
         this.createdAt = props.createdAt || new Date(Date.now());
         this.updatedAt = props.updatedAt;
         this.deletedAt = props.deletedAt || null;
         this.manager = props.manager;
         this.members = props.members;
+        this.schedule = props.schedule;
         this.membersCount = props.membersCount;
         this.validate();
     }
@@ -41,7 +43,6 @@ export class Team {
             name: dto.name,
             description: dto.description,
             managerId: dto.managerId,
-            scheduleId: dto.scheduleId,
         });
     }
 
@@ -54,8 +55,6 @@ export class Team {
             ...existingTeam,
             name: dto.name ?? existingTeam.name,
             description: dto.description ?? existingTeam.description,
-            managerId: dto.managerId ?? existingTeam.managerId,
-            scheduleId: dto.scheduleId ?? existingTeam.scheduleId,
             updatedAt: new Date(Date.now()),
         });
     }

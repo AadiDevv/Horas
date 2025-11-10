@@ -23,6 +23,7 @@ export interface ScheduleUpdateDTO {
     endHour?: string;   // Format: "HH:mm"
     activeDays?: number[];
 }
+
 // #endregion
 
 // #region Read DTO
