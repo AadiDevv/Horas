@@ -102,12 +102,42 @@ XEntity extend XEntity_NoJoint          → Entité complete représentant sa r�
 ```
 ### XEntityProps
 ```
-// Pattern
-type XEntityProps = {...}// All joints and enrichissments. Represente la réalité de cette entité. Conforme avec sa table en bdd
-type XEntityProps_NoJoint = Omit<XEntityProps , 'xjoint1'| 'xjoint2'| ...> // core - jointure
-type XEntityProps_Core = Omit<XEntityProps, 'xprop1' | 'xprop2' | ...> // core - jointure - enrichissement
+// Pattern générique (namespacing + dérivations mécaniques)
+export namespace XEntity_Props {
+  // Helpers internes (non exportés) pour factoriser
+  // - Enrichissement: métadonnées générées en BDD
+  // - Jointures: entités liées
+  type XEntityDataEnrichment = {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  type XEntityJoints = {
+    // ex: relation vers une autre entité
+    // related: RelatedEntity;
+  };
 
+  // 1) Type complet = réalité BDD (inclut enrichissements + jointures)
+  export type XEntityProps = {
+    // ... propriétés métier (core)
+    // ... propriétés d'enrichissement (id, createdAt, updatedAt)
+    // ... propriétés de jointures (entités liées)
+  };
+
+  // 2) NoJoint = on retire TOUTES les jointures
+  export type XEntityProps_NoJoint = Omit<XEntityProps, keyof XEntityJoints>;
+
+  // 3) Core = on retire l'enrichissement (id, createdAt, updatedAt)
+  export type XEntityProps_Core = Omit<XEntityProps_NoJoint, keyof XEntityDataEnrichment>;
+}
 ```
+
+Règles de conception
+- Définir le type complet d’abord, dériver ensuite mécaniquement avec `Omit<>`.
+- Garder les helpers (`XEntityDataEnrichment`, `XEntityJoints`) internes au namespace, non exportés.
+- Exporter seulement les variantes utiles (`XEntityProps`, `XEntityProps_NoJoint`, `XEntityProps_Core`).
+- Nommer en PascalCase pour les types et rester cohérent entre entités.
+- Toute nouvelle propriété ajoutée au type complet se propage automatiquement aux variantes (limite la dette).
 ## Pattern Constructeur
 Destructurer et passer au super() :
 ```typescript

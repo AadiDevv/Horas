@@ -65,20 +65,29 @@ export type ScheduleProps = {
 }
 
 // Timesheet hierarchy types
-export type TimesheetProps_Core = {
-    employeId: number;
-    date: Date;
-    hour: Date;
-    clockin: boolean;
-    status: TimesheetStatus;
-}
+export namespace Timesheet_Props{
+    // Data enrichment types
+     type TimeSheet_dataEnrichment =  {
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+    }
 
-export type TimesheetProps_NoJoint = TimesheetProps_Core & {
-    id: number;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
-export type TimesheetProps = TimesheetProps_NoJoint & {
-    employe: User;
+    type TimeSheet_joints =  {
+        employe: User;
+    }
+    //Props Hierarchy
+    export type TimesheetProps = {
+        id: number;
+        employeId: number;
+        date: Date;
+        hour: Date;
+        clockin: boolean;
+        status: TimesheetStatus;
+        createdAt: Date;
+        updatedAt: Date;
+        employe: User;
+    }
+    export type TimesheetProps_NoJoint = Omit<TimesheetProps, keyof TimeSheet_joints>
+    export type TimesheetProps_Core = Omit<TimesheetProps_NoJoint, keyof TimeSheet_dataEnrichment>
 }
