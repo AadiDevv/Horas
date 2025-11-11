@@ -238,18 +238,7 @@ export class TeamRepository implements ITeam {
 
         // #region Private Helper Methods
 
-    private mapPrismaToEntity<T extends PrismaTeam & { schedule?: Omit<PrismaSchedule,'createdAt' | 'updatedAt'>, manager?: Omit<PrismaUser,'createdAt' | 'updatedAt'>, members?: Omit<PrismaUser,'createdAt' | 'updatedAt'>[] }>(prismaTeam: T): Team {
-        const activeDays = Array.isArray(prismaTeam.schedule?.activeDays)
-            ? prismaTeam.schedule?.activeDays as number[]
-            : [];
-
-        return new Team({ 
-        ...prismaTeam,
-        manager: prismaTeam.manager ? new User({ ...nullToUndefined(prismaTeam.manager)}) : undefined,
-        members: prismaTeam.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined })),
-        schedule:prismaTeam.schedule ? new Schedule({ ...team.schedule }) : undefined
-    });
-    }
+    
         // #endregion
 
 }

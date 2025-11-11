@@ -200,7 +200,7 @@ export class UserUseCase {
         if (targetUser.manager?.id !== user.id) {
             console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
             console.log(`user.id : ${user.id}`);
-            throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${requestingUserId}`);
+            throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${user.id}`);
         }
         if (user.role !== 'admin' && user.id != targetTeam.managerId) {
             throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);

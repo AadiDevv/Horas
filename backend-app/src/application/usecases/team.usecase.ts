@@ -177,25 +177,22 @@ export class TeamUseCase {
             user: UserReadDTO
         ): Promise<Team> {
     
-            // #region Validation
+            // #region 1. Validation
             const targetTeam = await this.R_team.getTeam_ById(teamId)
             const targetSchedule = await this.R_schedule.getSchedule_ById(scheduleId)
-            // Vérification que l'équipe et l'utilisateur existent
+            // 1.1 Vérification que l'équipe et l'utilisateur existent
             if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
             if (!targetSchedule) throw new NotFoundError(`L'utilisateur avec l'ID ${scheduleId} introuvable`);
             if (targetTeam.schedule?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
-            // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
-            if (targetUser.manager?.id !== user.id) {
-                console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
-                console.log(`user.id : ${user.id}`);
-                throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${requestingUserId}`);
+            // 1.2 En tant que manager, l'utilisateur ne peut assigner que ses propres schedules que pour ses propres équipes
+            if(user.role !== 'admin'){
+                if (targetTeam.manager?.id !== user.id) throw new ForbiddenError(`Vous ne pouvez assigner un schedule que pour vos propres équipes \n targetTeam.manager?.id : ${targetTeam.manager?.id} \n user.id : ${user.id}`);
+                if (targetSchedule.managerId !=  user.id) throw new ForbiddenError(`Impossible d'assigner un schedule. Vous n'êtes pas le manager de ce schedule`);
             }
-            if (user.role !== 'admin' && user.id != targetTeam.managerId) {
-                throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
-            }
+            
             //#endregion
-            const userEntityUpdated = await this.R_user.updateUserTeam_ById(scheduleId, teamId);
-            return new User(userEntityUpdated);
+            const teamEntityUpdated = await this.R_team.updateTeamSchedule_ById(teamId, scheduleId);
+            return new Team(teamEntityUpdated);
         }
     // #endregion
 
