@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { TimesheetUseCase } from '@/application/usecases';
 import { TimesheetFilterDTO, TimesheetUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
-import { Timesheet } from '@/domain/entities/timesheet';
+import { TimesheetMapper } from '@/application/mappers/timesheet.mapper';
 
 /**
  * Contrôleur pour la gestion des pointages (timesheets)
@@ -28,7 +28,7 @@ export class TimesheetController {
         const userId = req.user!.id;
         const userRole = req.user!.role;
         const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
-        const dto: TimesheetListItemDTO[] = timesheets.map(t => t.toListItemDTO());
+        const dto: TimesheetListItemDTO[] = timesheets.map(t => TimesheetMapper.toListItemDTO(t));
 
         res.success(dto, "Pointages récupérés avec succès");
     }
@@ -44,7 +44,7 @@ export class TimesheetController {
         const userId = req.user!.id;
         const userRole = req.user!.role;
         const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
-        const dto: TimesheetReadDTO = timesheet.toReadDTO();
+        const dto: TimesheetReadDTO = TimesheetMapper.toReadDTO(timesheet);
 
         res.success(dto, "Pointage récupéré avec succès");
     }
@@ -81,51 +81,26 @@ export class TimesheetController {
     async createTimesheet(req: Request, res: Response): Promise<void> {
         const userRole = req.user!.role;
         const userId = req.user!.id;
-        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = req.body;
-
-        // Déterminer l'employé cible
-        let employeId: number;
-        if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
-            employeId = Number(requestedEmployeId);
-        } else {
-            employeId = userId;
-        }
+        const { date, hour, status, clockin, employeId } = req.body;
 
         // Validation basique des champs date / hour
         if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
             throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
         }
 
-        // Déterminer le sens du pointage
-        let clockin: boolean;
-
-        if ((userRole === 'manager' || userRole === 'admin') && requestedClockin !== undefined) {
-            // Manager/Admin peut spécifier explicitement clockin
-            clockin = Boolean(requestedClockin);
-        } else {
-            // Employee: auto-déterminer selon le dernier timesheet
-            const lastTimesheet = await this.UC_timesheet.getLastTimesheetByEmployee(employeId);
-
-            if (!lastTimesheet) {
-                clockin = true;
-            } else {
-                clockin = !lastTimesheet.clockin;
-            }
-        }
-
-        // Créer l'entité Timesheet
-        const timesheet = new Timesheet({
+        // Déléguer toute la logique métier au usecase
+        const savedTimesheet = await this.UC_timesheet.createTimesheet({
             date: new Date(date),
             hour: new Date(hour),
+            status,
             clockin,
-            status: status ?? 'normal',
             employeId,
+            userRole,
+            userId,
         });
 
-        const savedTimesheet = await this.UC_timesheet.createTimesheet(timesheet);
-        const dto = savedTimesheet.toReadDTO();
-
-        res.success(dto, `Pointage ${clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
+        const dto = TimesheetMapper.toReadDTO(savedTimesheet);
+        res.success(dto, `Pointage ${savedTimesheet.clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
     }
 
     // #endregion
@@ -147,7 +122,7 @@ export class TimesheetController {
 
         dto.hour = new Date(`1970-01-01T${dto.hour}`);
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
-        const updatedDTO = updated.toReadDTO();
+        const updatedDTO = TimesheetMapper.toReadDTO(updated);
 
         res.success(updatedDTO, "Pointage modifié avec succès");
     }

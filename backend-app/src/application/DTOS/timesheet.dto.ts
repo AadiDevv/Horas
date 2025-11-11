@@ -1,5 +1,22 @@
 import { TimesheetStatus } from "@/domain/types";
 
+// #region Create Params
+/**
+ * Paramètres pour la création d'un timesheet
+ * Utilisé par le usecase pour encapsuler tous les paramètres de création
+ * Centralise le type pour éviter la propagation manuelle
+ */
+export interface TimesheetCreateParams {
+    date: Date;
+    hour: Date;
+    status?: TimesheetStatus;
+    clockin?: boolean;
+    employeId?: number;
+    userRole: string;
+    userId: number;
+}
+// #endregion
+
 // #region Update DTO
 /**
  * DTO pour corriger un timesheet (admin/manager uniquement)

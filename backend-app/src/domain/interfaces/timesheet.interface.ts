@@ -1,4 +1,4 @@
-import { Timesheet } from "@/domain/entities/timesheet";
+import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
 import { TimesheetFilterDTO, TimesheetStatsDTO } from "@/application/DTOS";
 
 /**
@@ -37,8 +37,10 @@ export interface ITimesheet {
 
     /**
      * Crée un nouveau timesheet
+     * @param timesheet - Timesheet_Core (avant insertion, sans id ni jointures)
+     * @returns Timesheet complet (après insertion, avec id et jointure employe)
      */
-    createTimesheet(timesheet: Timesheet): Promise<Timesheet>;
+    createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet>;
 
     // #endregion
 

@@ -2,6 +2,11 @@ import { TimesheetController } from '@/presentation/controllers/timesheet.contro
 import { TimesheetUseCase } from '@/application/usecases';
 import { ValidationError } from '@/domain/error/AppError';
 import { Timesheet } from '@/domain/entities/timesheet';
+import { TimesheetMapper } from '@/application/mappers/timesheet.mapper';
+import { User } from '@/domain/entities/user';
+
+// Mock le mapper
+jest.mock('@/application/mappers/timesheet.mapper');
 
 // -----------------------------
 // Mocks Express
@@ -20,6 +25,15 @@ const mockResponse = () => {
 // -----------------------------
 // Mock Timesheets
 // -----------------------------
+const mockEmploye = new User({
+  id: 5,
+  firstName: 'Alice',
+  lastName: 'Dupont',
+  email: 'alice@example.com',
+  role: 'employe',
+  isActive: true,
+});
+
 const mockTimesheet1 = new Timesheet({
   id: 1,
   date: new Date('2025-05-10'),
@@ -27,31 +41,10 @@ const mockTimesheet1 = new Timesheet({
   clockin: true,
   status: 'normal',
   employeId: 5,
+  createdAt: new Date('2025-05-10T08:00:00'),
+  updatedAt: new Date('2025-05-10T08:00:00'),
+  employe: mockEmploye,
 });
-mockTimesheet1.toListItemDTO = jest.fn(() => ({
-  id: 1,
-  date: '2025-05-10',
-  hour: '08:00',
-  clockin: true,
-  status: 'normal',
-  employeId: 5,
-  employeName: 'Alice',
-  employelastName: 'Dupont',
-  createdAt: new Date().toISOString(),
-}));
-
-mockTimesheet1.toReadDTO = jest.fn(() => ({
-  id: 1,
-  date: '2025-05-10',
-  hour: '08:00',
-  clockin: true,
-  status: 'normal',
-  employeId: 5,
-  employeName: 'Alice',
-  employelastName: 'Dupont',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
 
 const mockTimesheet2 = new Timesheet({
   id: 2,
@@ -60,19 +53,10 @@ const mockTimesheet2 = new Timesheet({
   clockin: false,
   status: 'normal',
   employeId: 5,
+  createdAt: new Date('2025-05-10T17:00:00'),
+  updatedAt: new Date('2025-05-10T17:00:00'),
+  employe: mockEmploye,
 });
-mockTimesheet2.toReadDTO = jest.fn(() => ({
-  id: 2,
-  date: '2025-05-10',
-  hour: '17:00',
-  clockin: false,
-  status: 'normal',
-  employeId: 5,
-  employeName: 'Alice',
-  employelastName: 'Dupont',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-}));
 
 // -----------------------------
 // Test Suite
@@ -93,6 +77,34 @@ describe('TimesheetController', () => {
     } as unknown as jest.Mocked<TimesheetUseCase>;
 
     controller = new TimesheetController(useCaseMock);
+
+    // Mock les méthodes du mapper
+    (TimesheetMapper.toListItemDTO as jest.Mock) = jest.fn(() => ({
+      id: 1,
+      date: '2025-05-10',
+      hour: '08:00',
+      clockin: true,
+      status: 'normal',
+      employeId: 5,
+      employelastName: 'Alice Dupont',
+    }));
+
+    (TimesheetMapper.toReadDTO as jest.Mock) = jest.fn(() => ({
+      id: 1,
+      date: '2025-05-10',
+      hour: '08:00',
+      clockin: true,
+      status: 'normal',
+      employeId: 5,
+      employe: {
+        id: 5,
+        firstName: 'Alice',
+        lastName: 'Dupont',
+        email: 'alice@example.com',
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
   });
 
   // ----------------------------------------
@@ -112,6 +124,7 @@ describe('TimesheetController', () => {
         status: 'normal',
         clockin: undefined,
       });
+      expect(TimesheetMapper.toListItemDTO).toHaveBeenCalledWith(mockTimesheet1);
       expect(res.success).toHaveBeenCalledWith(
         [expect.objectContaining({ id: 1, employeId: 5, clockin: true })],
         'Pointages récupérés avec succès'
@@ -130,6 +143,7 @@ describe('TimesheetController', () => {
       await controller.getTimesheetById(req, res);
 
       expect(useCaseMock.getTimesheetById).toHaveBeenCalledWith(1, 'admin', 1);
+      expect(TimesheetMapper.toReadDTO).toHaveBeenCalledWith(mockTimesheet1);
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 1,
@@ -152,9 +166,16 @@ describe('TimesheetController', () => {
   describe('getStats', () => {
     test('should return stats successfully', async () => {
       const mockStats = {
-        totalHours: 40,
-        totalDays: 5,
-        absences: 0,
+        employeId: 5,
+        periodStart: '2025-05-01',
+        periodEnd: '2025-05-07',
+        totalTimesheets: 10,
+        totalClockins: 5,
+        totalClockouts: 5,
+        timesheetsNormal: 10,
+        timesheetsDelay: 0,
+        timesheetsIncomplete: 0,
+        clockedDays: 5,
       };
       useCaseMock.getTimesheetStats.mockResolvedValue(mockStats as any);
 
@@ -190,13 +211,22 @@ describe('TimesheetController', () => {
 
       const req = mockRequest({
         body: { date: '2025-05-10', hour: '2025-05-10T08:00:00', status: 'normal' },
-        user: { id: 5 },
+        user: { id: 5, role: 'employe' },
       }) as any;
       const res = mockResponse();
 
       await controller.createTimesheet(req, res);
 
-      expect(useCaseMock.createTimesheet).toHaveBeenCalled();
+      expect(useCaseMock.createTimesheet).toHaveBeenCalledWith({
+        date: new Date('2025-05-10'),
+        hour: new Date('2025-05-10T08:00:00'),
+        status: 'normal',
+        clockin: undefined,
+        employeId: undefined,
+        userRole: 'employe',
+        userId: 5,
+      });
+      expect(TimesheetMapper.toReadDTO).toHaveBeenCalledWith(mockTimesheet1);
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ clockin: true, employeId: 5 }),
         'Pointage entrée enregistré avec succès'
@@ -230,8 +260,9 @@ describe('TimesheetController', () => {
         2,
         expect.objectContaining({ hour: expect.any(Date) })
       );
+      expect(TimesheetMapper.toReadDTO).toHaveBeenCalledWith(mockTimesheet2);
       expect(res.success).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 2, clockin: false }),
+        expect.objectContaining({ id: 1, clockin: true }),
         'Pointage modifié avec succès'
       );
     });

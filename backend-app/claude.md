@@ -102,12 +102,56 @@ Avant CHAQUE modification:
 
 ---
 
+## SÉPARATION DES RESPONSABILITÉS PAR LAYER
+
+### Controllers (Presentation Layer)
+**Rôle:** Gestion HTTP uniquement (request/response)
+- Extraire les données du `req.body` et `req.query`
+- Valider les formats basiques (dates, nombres, etc.)
+- Appeler le usecase avec les paramètres extraits
+- Utiliser les mappers pour convertir entité → DTO
+- Retourner la réponse HTTP avec `res.success()` ou `res.error()`
+
+**❌ INTERDIT:**
+- Instancier des entités (`new Entity()`)
+- Contenir de la logique métier
+- Accéder directement au repository
+
+### UseCases (Application Layer)
+**Rôle:** Logique métier et orchestration
+- Instancier les entités (`new Entity_Core()`, `new Entity()`)
+- Appliquer les règles métier
+- Valider les entités (`entity.validate()`)
+- Orchestrer les appels aux repositories
+- Gérer les autorisations métier
+
+**✅ DOIT:**
+- Instancier les entités à partir des paramètres reçus
+- Contenir toute la logique métier
+- Utiliser les mappers pour les transformations DTO ↔ Entité
+
+**❌ INTERDIT:**
+- Connaître les détails HTTP (req, res)
+- Retourner des DTOs directement (retourner des entités)
+
+### Mappers (Application Layer)
+**Rôle:** Transformation DTO ↔ Entité
+- `toReadDTO()`, `toListItemDTO()` : Entité → DTO
+- `fromUpdateDTO()` : DTO + Entité existante → Nouvelle entité
+- Centraliser toutes les transformations
+
+**❌ INTERDIT:**
+- Être dans l'entité (anti-pattern #2)
+
+---
+
 ## PRINCIPES DIRECTEURS
 
 1. **Éviter la propagation manuelle** - Centraliser, spread, DRY
 2. **Clean Architecture stricte** - Dépendances vers l'intérieur
 3. **Spreads partout** - Merge, destructuring, filtres conditionnels
-4. **Challenger les instructions** - Intransigeance sur les principes
+4. **Instanciation dans les UseCases uniquement** - Jamais dans les controllers
+5. **Challenger les instructions** - Intransigeance sur les principes
 
 ---
 

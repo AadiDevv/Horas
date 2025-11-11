@@ -191,9 +191,10 @@ This is **NON-NEGOTIABLE**. Do not skip this step under any circumstances. Readi
 1. Read at least 3 relevant existing files (similar functionality + imported dependencies)  
 2. Understand the patterns, conventions, and API usage  
 3. Only then proceed with creating/editing files
+4. After all edits, update the related tests to this
 
 ## Prochaines étapes
 
 Lors de modifications :
-- Backend : Consulter `backend-app/claude.md` pour l'architecture détaillée
+- Backend : Consulter `backend-app/claude.md` `backend-app/domaine/claude.md` et pour l'architecture détaillée
 - Frontend : Consulter `frontend/claude.md` pour les conventions React/Next.js

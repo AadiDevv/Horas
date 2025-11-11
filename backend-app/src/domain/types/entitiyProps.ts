@@ -64,14 +64,21 @@ export type ScheduleProps = {
     }[];
 }
 
-export interface TimesheetProps {
-    id?: number;
+// Timesheet hierarchy types
+export type TimesheetProps_Core = {
     employeId: number;
     date: Date;
     hour: Date;
     clockin: boolean;
-    status?: TimesheetStatus;
-    createdAt?: Date;
-    updatedAt?: Date;
-    employe?: User;
+    status: TimesheetStatus;
+}
+
+export type TimesheetProps_NoJoint = TimesheetProps_Core & {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type TimesheetProps = TimesheetProps_NoJoint & {
+    employe: User;
 }

@@ -1,10 +1,8 @@
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
-import { Timesheet } from "@/domain/entities/timesheet";
+import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
 import { prisma } from "../prisma.service";
 import { User } from "@/domain/entities/user";
-import { ValidationError } from "@/domain/error/AppError";
 import { TimesheetFilterDTO } from "@/application/DTOS";
-import { TimesheetStatus } from "@prisma/client";
 
 export class TimesheetRepository implements ITimesheet {
 
@@ -31,6 +29,8 @@ export class TimesheetRepository implements ITimesheet {
                         firstName: true,
                         lastName: true,
                         email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             },
@@ -55,6 +55,8 @@ export class TimesheetRepository implements ITimesheet {
                         firstName: true,
                         lastName: true,
                         email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             }
@@ -78,6 +80,8 @@ export class TimesheetRepository implements ITimesheet {
                         firstName: true,
                         lastName: true,
                         email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             },
@@ -102,6 +106,8 @@ export class TimesheetRepository implements ITimesheet {
                         firstName: true,
                         lastName: true,
                         email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             },
@@ -153,14 +159,14 @@ export class TimesheetRepository implements ITimesheet {
 
     // #region Create
 
-    async createTimesheet(timesheet: Timesheet): Promise<Timesheet> {
+    async createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet> {
         const created = await prisma.timesheet.create({
             data: {
                 employeId: timesheet.employeId,
                 date: timesheet.date,
                 hour: timesheet.hour,
                 clockin: timesheet.clockin,
-                status: timesheet.status ?? "normal",
+                status: timesheet.status,
             },
             include: {
                 employe: {
@@ -168,7 +174,9 @@ export class TimesheetRepository implements ITimesheet {
                         id: true,
                         firstName: true,
                         lastName: true,
-                        email: true
+                        email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             }
@@ -185,10 +193,6 @@ export class TimesheetRepository implements ITimesheet {
     // #region Update
 
     async updateTimesheet_ById(timesheet: Timesheet): Promise<Timesheet> {
-        if (!timesheet.id) {
-            throw new ValidationError("Le timesheet doit avoir un ID pour être mis à jour");
-        }
-
         const updated = await prisma.timesheet.update({
             where: { id: timesheet.id },
             data: {
@@ -204,7 +208,9 @@ export class TimesheetRepository implements ITimesheet {
                         id: true,
                         firstName: true,
                         lastName: true,
-                        email: true
+                        email: true,
+                        role: true,
+                        isActive: true,
                     }
                 }
             }

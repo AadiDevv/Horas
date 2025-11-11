@@ -1,7 +1,8 @@
-import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO } from "@/application/DTOS";
-import { Timesheet } from "@/domain/entities/timesheet";
+import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO, TimesheetCreateParams } from "@/application/DTOS";
+import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
-import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
+import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
+import { TimesheetMapper } from "@/application/mappers/timesheet.mapper";
 
 /**
  * Use Case pour la gestion des timesheets
@@ -33,8 +34,7 @@ export class TimesheetUseCase {
             effectiveFilter.employeId = userId;
         }
 
-        const timesheets = await this.R_timesheet.getAllTimesheets(effectiveFilter);
-        return timesheets.map(t => new Timesheet({ ...t }));
+        return await this.R_timesheet.getAllTimesheets(effectiveFilter);
     }
 
     /**
@@ -77,10 +77,50 @@ export class TimesheetUseCase {
     // #region Create
 
     /**
-     * Crée un nouveau timesheet
-     * @param timesheet - Entité Timesheet à sauvegarder
+     * Crée un nouveau timesheet avec logique métier complète
+     * - Détermine l'employé cible selon le rôle
+     * - Auto-détermine clockin/clockout pour les employés
+     * - Valide et enregistre le timesheet
+     *
+     * @param params - Paramètres de création (type centralisé)
+     * @returns Timesheet complet (après insertion, avec id et jointure employe)
      */
-    async createTimesheet(timesheet: Timesheet): Promise<Timesheet> {
+    async createTimesheet(params: TimesheetCreateParams): Promise<Timesheet> {
+        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId, userRole, userId } = params;
+
+        // Déterminer l'employé cible
+        let employeId: number;
+        if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
+            employeId = requestedEmployeId;
+        } else {
+            employeId = userId;
+        }
+
+        // Déterminer le sens du pointage
+        let clockin: boolean;
+        if ((userRole === 'manager' || userRole === 'admin') && requestedClockin !== undefined) {
+            // Manager/Admin peut spécifier explicitement clockin
+            clockin = requestedClockin;
+        } else {
+            // Employee: auto-déterminer selon le dernier timesheet
+            const lastTimesheet = await this.getLastTimesheetByEmployee(employeId);
+            if (!lastTimesheet) {
+                clockin = true;
+            } else {
+                clockin = !lastTimesheet.clockin;
+            }
+        }
+
+        // Instancier l'entité Timesheet_Core
+        const timesheet = new Timesheet_Core({
+            date,
+            hour,
+            clockin,
+            status: status ?? 'normal',
+            employeId,
+        });
+
+        // Validation et enregistrement
         timesheet.validate();
         return await this.R_timesheet.createTimesheet(timesheet);
     }
@@ -100,7 +140,7 @@ export class TimesheetUseCase {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
 
-        const updated = Timesheet.fromUpdateDTO(existing, dto);
+        const updated = TimesheetMapper.fromUpdateDTO(existing, dto);
         updated.validate();
 
         return await this.R_timesheet.updateTimesheet_ById(updated);
