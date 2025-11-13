@@ -1,5 +1,5 @@
 import { Role, TimesheetStatus } from "./index";
-import { Team,Schedule,User } from "../entities/";
+import { Team, Schedule, User } from "../entities/";
 export type UserProps = {
     email: string,
     hashedPassword?: string,
@@ -65,15 +65,15 @@ export type ScheduleProps = {
 }
 
 // Timesheet hierarchy types
-export namespace Timesheet_Props{
+export namespace Timesheet_Props {
     // Data enrichment types
-     type TimeSheet_dataEnrichment =  {
+    type TimeSheet_dataEnrichment = {
         id: number;
         createdAt: Date;
         updatedAt: Date;
     }
 
-    type TimeSheet_joints =  {
+    type TimeSheet_joints = {
         employe: User;
     }
     //Props Hierarchy
@@ -91,3 +91,8 @@ export namespace Timesheet_Props{
     export type TimesheetProps_NoJoint = Omit<TimesheetProps, keyof TimeSheet_joints>
     export type TimesheetProps_Core = Omit<TimesheetProps_NoJoint, keyof TimeSheet_dataEnrichment>
 }
+
+// Aliases top-level pour import direct ailleurs sans préfixe namespace
+export type TimesheetProps = Timesheet_Props.TimesheetProps;
+export type TimesheetProps_NoJoint = Timesheet_Props.TimesheetProps_NoJoint;
+export type TimesheetProps_Core = Timesheet_Props.TimesheetProps_Core;
