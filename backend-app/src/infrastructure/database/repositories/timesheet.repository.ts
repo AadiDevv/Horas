@@ -3,6 +3,9 @@ import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
 import { prisma } from "../prisma.service";
 import { User } from "@/domain/entities/user";
 import { TimesheetFilterDTO } from "@/application/DTOS";
+import { TIMESHEET_CORE_SELECT, TIMESHEET_L1_SELECT } from "@/infrastructure/prismaUtils/timesheets.prismaConfig";
+import { USER_CORE_SELECT } from "@/infrastructure/prismaUtils/user.prismaConfig";
+
 
 export class TimesheetRepository implements ITimesheet {
 
@@ -22,15 +25,11 @@ export class TimesheetRepository implements ITimesheet {
                 ...(status && { status }),
                 ...(clockin !== undefined && { clockin }),
             },
-            include: {
+            select: {
+                ...TIMESHEET_CORE_SELECT,
                 employe: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_CORE_SELECT,
                     }
                 }
             },

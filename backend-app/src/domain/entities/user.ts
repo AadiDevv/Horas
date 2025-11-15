@@ -1,468 +1,266 @@
-import { UserProps } from "../types/entitiyProps";
+import { UserProps_Core, UserProps_L1, UserProps } from "../types/entitiyProps";
 import { ForbiddenError, ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
-import {
-  UserCreateDTO,
-  UserUpdateDTO,
-  UserListItemDTO,
-  UserReadEmployeeDTO,
-  UserReadManagerDTO,
-  BaseUserReadDTO,
-  UserCreateEmployeeDTO,
-} from "@/application/DTOS/";
-import { UserAuthDTO } from "@/application/DTOS/auth.dto";
-import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
+import { UserCreateDTO, UserUpdateDTO } from "@/application/DTOS/";
 import { Role } from "../types";
-import { Team } from "./team";
+import { Team, Schedule } from "./";
 
-export class User {
-  public readonly id?: number;
-  public email: string;
-  public hashedPassword?: string;
-  public firstName: string;
-  public lastName: string;
-  public role: Role;
-  public isActive: boolean;
+/**
+ * User_Core
+ * Représente le minimum métier pour qu'un utilisateur soit valide
+ * Utilisé avant l'insertion en base de données
+ */
+export class User_Core {
+    public firstName: string;
+    public lastName: string;
+    public email: string;
+    public phone: string;
+    public hashedPassword: string;
+    public role: Role;
+    public isActive: boolean;
+    public teamId: number | null;
+    public managerId: number | null;
+    public customScheduleId: number | null;
 
+    constructor(props: UserProps_Core) {
+        this.firstName = props.firstName;
+        this.lastName = props.lastName;
+        this.email = props.email;
+        this.phone = props.phone;
+        this.hashedPassword = props.hashedPassword;
+        this.role = props.role;
+        this.isActive = props.isActive;
+        this.teamId = props.teamId;
+        this.managerId = props.managerId;
+        this.customScheduleId = props.customScheduleId;
 
-  public createdAt: Date;
-  public updatedAt?: Date;
-  public lastLoginAt?: Date;
-  public deletedAt?: Date;
-
-  public phone?: string;
-  public customSchedule?: {
-    id: number;
-    name?: string;
-    startHour?: Date;
-    endHour?: Date;
-  };
-  public team?: Team | {
-    id: number;
-    name?: string;
-  };
-  public manager?: User | {
-    id: number;
-    firstName?: string;
-    lastName?: string;
-  }
-  public employes?: User[] | {
-    id: number;
-    firstName?: string;
-    lastName?: string;
-  }[];
-  constructor(
-    props: UserProps
-  ) {
-    // Attribution des values
-    this.id = props.id;
-    this.email = props.email;
-    this.hashedPassword = props.hashedPassword;
-    this.firstName = props.firstName;
-    this.lastName = props.lastName;
-    this.role = props.role;
-    this.isActive = props.isActive;
-    this.phone = props.phone;
-    this.team = props.team;
-    this.customSchedule = props.customSchedule;
-    this.manager = props.manager;
-    this.createdAt = props.createdAt || new Date(Date.now())
-    this.updatedAt = props.updatedAt;
-    this.lastLoginAt = props.lastLoginAt;
-    this.deletedAt = props.deletedAt;
-
-    // Validation après attribution
-    this.validateMe();
-  }
-
-  // #region UserValidation Methods
-  public validateEmployee(): void {
-   this.validateMe();
-   if(this.role !== "employe") {
-    throw new ValidationError('Role invalide');
-   }
-   if(!this.manager?.id) {
-    throw new ValidationError('Manager ID invalide');
-   }
-   
-  }
-  public validateManager(): void {
-    this.validateMe();
-    if(this.role !== "manager") {
-     throw new ValidationError('Role invalide');
-    }
-    if(this.team?.id) {
-      throw new ValidationError('Manager cannot have a team');
-    }
-    if(this.manager?.id) {
-      throw new ValidationError('Manager cannot have a manager');
-    }
-  }
-  public validateMe(): void {
-    if (!User.validateEmail(this.email)) {
-      throw new ValidationError('Format d\'email invalide');
+        // Validation après attribution
+        this.validate();
     }
 
-    if (this.hashedPassword && !User.validatePassword(this.hashedPassword)) {
-      throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
+    // #region Validation
+    public validate(): void {
+        if (!User_Core.validateEmail(this.email)) {
+            throw new ValidationError('Format d\'email invalide');
+        }
+
+        if (this.hashedPassword && !User_Core.validatePassword(this.hashedPassword)) {
+            throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
+        }
+
+        if (!User_Core.validateLastName(this.lastName)) {
+            throw new ValidationError('Nom invalide (minimum 2 caractères)');
+        }
+
+        if (!User_Core.validateFirstName(this.firstName)) {
+            throw new ValidationError('Prénom invalide (minimum 2 caractères)');
+        }
+
+        if (this.phone && this.phone.trim() !== '' && !User_Core.validatePhone(this.phone)) {
+            throw new ValidationError('Format de téléphone invalide');
+        }
     }
 
-    if (!User.validatelastName(this.lastName)) {
-      throw new ValidationError('lastName invalide (minimum 2 caractères)');
+    public validateEmployee(): void {
+        this.validate();
+        if (this.role !== "employe") {
+            throw new ValidationError('Role invalide pour un employé');
+        }
+        if (!this.managerId) {
+            throw new ValidationError('Manager ID requis pour un employé');
+        }
     }
 
-    if (!User.validatefirstName(this.firstName)) {
-      throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
+    public validateManager(): void {
+        this.validate();
+        if (this.role !== "manager") {
+            throw new ValidationError('Role invalide pour un manager');
+        }
+        if (this.teamId) {
+            throw new ValidationError('Un manager ne peut pas avoir d\'équipe');
+        }
+        if (this.managerId) {
+            throw new ValidationError('Un manager ne peut pas avoir de manager');
+        }
     }
 
-    if (this.phone && this.phone.trim() !== '' && !User.validatePhone(this.phone)) {
-      throw new ValidationError('Format de téléphone invalide');
-    }
-  }
-
-  public static validateDTO(dto: UserCreateDTO): void {
-    if (!User.validateEmail(dto.email)) {
-      throw new ValidationError('Format d\'email invalide');
+    // Static validation methods
+    public static validateEmail(email: string): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
-    if (!this.validatePassword(dto.password)) {
-      throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
+    public static validatePassword(password: string): boolean {
+        return password.length >= 6;
     }
 
-    if (!this.validatelastName(dto.lastName)) {
-      throw new ValidationError('lastName invalide (minimum 2 caractères)');
+    public static validateLastName(lastName: string): boolean {
+        return lastName.length >= 2;
     }
 
-    if (!this.validatefirstName(dto.firstName)) {
-      throw new ValidationError('PrélastName invalide (minimum 2 caractères)');
+    public static validateFirstName(firstName: string): boolean {
+        return firstName.length >= 2;
     }
 
-    if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
-      throw new ValidationError('Format de téléphone invalide');
-    }
-  }
-
-  public static validatePhone(phone: string): boolean {
-    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    return phoneRegex.test(phone!);
-  }
-
-  public static validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  public static validatelastName(lastName: string): boolean {
-    return lastName.length >= 2;
-  }
-
-  public static validatefirstName(firstName: string): boolean {
-    return firstName.length >= 2;
-  }
-
-  public static validatePassword(password: string): boolean {
-    return password.length >= 6;
-  }
-  // Avec parametres  externe
-  public static validateUpdateProfilePermissions(
-    targetUser: User,
-    dto: UserUpdateDTO,
-    requestingUserId: number,
-    requestingUserRole: string,
-  ): void {
-    // Admin peut tout modifier
-    if (requestingUserRole === 'admin') {
-      return;
+    public static validatePhone(phone: string): boolean {
+        const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
+        return phoneRegex.test(phone);
     }
 
-    // Manager et Employé : restrictions strictes
-    if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
-      // Vérifier que c'est leur propre profil
-      if (targetUser.id !== requestingUserId) {
-        throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
-      }
+    public static validateDTO(dto: UserCreateDTO): void {
+        if (!User_Core.validateEmail(dto.email)) {
+            throw new ValidationError('Format d\'email invalide');
+        }
 
-      // Champs interdits pour manager/employé
-      const forbiddenFields: string[] = [];
+        if (!this.validatePassword(dto.password)) {
+            throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
+        }
 
-      if (dto.role !== undefined) {
-        forbiddenFields.push('role');
-      }
+        if (!this.validateLastName(dto.lastName)) {
+            throw new ValidationError('Nom invalide (minimum 2 caractères)');
+        }
 
-      if (dto.isActive !== undefined) {
-        forbiddenFields.push('isActive');
-      }
+        if (!this.validateFirstName(dto.firstName)) {
+            throw new ValidationError('Prénom invalide (minimum 2 caractères)');
+        }
 
-      if (forbiddenFields.length > 0) {
-        throw new ForbiddenError(
-          `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
-          `Seuls les administrateurs peuvent modifier ces informations.`
-        );
-      }
+        if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
+            throw new ValidationError('Format de téléphone invalide');
+        }
     }
-  }
+    // #endregion
 
-  // #endregion
+    // #region Authentication
+    public async verifyPassword(plainPassword: string): Promise<boolean> {
+        return await bcrypt.compare(plainPassword, this.hashedPassword || '');
+    }
+    // #endregion
 
-  // #region UserAuthentication Methods
-
-  public async verifyPassword(plainPassword: string): Promise<boolean> {
-    return await bcrypt.compare(plainPassword, this.hashedPassword || '');
-  }
-
-  public toJwtPayload(): Record<string, any> {
-    if (!this.id) {
-      throw new Error('Impossible de générer JWT pour un utilisateur sans ID');
+    // #region State Changes
+    public activate(): void {
+        this.isActive = true;
     }
 
-    return {
-      sub: this.id,
-      email: this.email,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      role: this.role,
-      isActive: this.isActive,
-      lastLoginAt: this.lastLoginAt
-    };
-  }
-
-  public updateLastLogin(): void {
-    this.lastLoginAt = new Date(Date.now());
-  }
-  // #endregion
-
-  // #region UserDisplay Methods
-  public getDisplayName(): string {
-    return `${this.firstName} ${this.lastName}`;
-  }
-
-  public toJSON(): Record<string, any> {
-    return {
-      id: this.id,
-      email: this.email,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      role: this.role,
-      isActive: this.isActive,
-      phone: this.phone,
-      team: this.team,
-      customSchedule: this.customSchedule,
-      createdAt: this.createdAt?.toISOString(),
-      updatedAt: this.updatedAt?.toISOString(),
-      lastLoginAt: this.lastLoginAt?.toISOString(),
-      deletedAt: this.deletedAt?.toISOString()
-    };
-  }
-  // #endregion
-
-  // #region Transformation Methods (pour Team)
-  /**
-   * Convertit l'utilisateur en TeamManagerDTO
-   * Utilisé dans les DTOs d'équipe pour afficher les infos du manager
-   */
-  public toTeamManagerDTO(): TeamManagerDTO {
-    if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamManagerDTO");
+    public deactivate(): void {
+        this.isActive = false;
     }
+    // #endregion
 
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      role: this.role,
-    };
-  }
-
-  /**
-   * Convertit l'utilisateur en TeamMembreDTO
-   * Utilisé dans les DTOs d'équipe pour afficher les infos des members
-   */
-  public toTeamMemberDTO(): TeamMembreDTO {
-    if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en TeamMembreDTO");
+    // #region Display Methods
+    public getDisplayName(): string {
+        return `${this.firstName} ${this.lastName}`;
     }
-
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      role: this.role,
-      isActive: this.isActive,
-      phone: this.phone,
-      customSchedule: this.customSchedule,
-    };
-  }
-  // #endregion
-
-  // #region Change UserState Methods
-
-  public activate(): void {
-    this.isActive = true;
-  }
-
-  public deactivate(): void {
-    this.isActive = false;
-  }
-
-  public softDelete(): void {
-    this.deletedAt = new Date();
-  }
-
-  public restore(): void {
-    this.deletedAt = undefined;
-  }
-  // #endregion
-
-  // #region Factory Methods (DTO → Entité)
-  /**
-   * Crée une entité User à partir d'un DTO de création
-   * Utilisé lors de la création d'un nouvel utilisateur
-   */
-  public static fromCreateDTO(dto: UserCreateDTO, hashedPassword: string): User {
-    return new User({
-      ...dto,
-      hashedPassword: hashedPassword,
-      isActive: true,
-    });
-  }
-
-  public static fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): User {
-    
-    const customSchedule = dto.customScheduleId? {id: dto.customScheduleId} : undefined;
-    const team = dto.teamId? {id: dto.teamId} : undefined;
-    
-    return new User({
-      ...dto,
-      manager: {id: dto.managerId,},
-      customSchedule: customSchedule,
-      team: team,
-      hashedPassword: hashedPassword,
-      isActive: true,
-    });
-  }
-
-  /**
-   * Met à jour une entité User existante avec les données d'un DTO de mise à jour
-   * Retourne une nouvelle instance (immutabilité)
-   * 
-   * Note : teamId et customScheduleId sont gérés pour les routes admin dédiées
-   */
-  public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO & { teamId?: number; customScheduleId?: number }): User {
-    return new User({
-      ...existingUser,
-      firstName: dto.firstName ?? existingUser.firstName,
-      lastName: dto.lastName ?? existingUser.lastName,
-      email: dto.email ?? existingUser.email,
-      phone: dto.phone ?? existingUser.phone,
-      role: dto.role ?? existingUser.role,
-      isActive: dto.isActive ?? existingUser.isActive,
-      team: dto.teamId !== undefined ? { id: dto.teamId } : existingUser.team,
-      customSchedule: dto.customScheduleId !== undefined ? { id: dto.customScheduleId } : existingUser.customSchedule,
-      updatedAt: new Date(Date.now()),
-    });
-  }
-  // #endregion
-
-  // #region Transformation Methods (Entité → DTO)
-  /**
-   * Convertit les dates en ISO string
-   * Helper privé pour éviter la duplication
-   */
-  private toDateStrings() {
-    return {
-      createdAt: this.createdAt.toISOString(),
-      updatedAt: this.updatedAt?.toISOString(),
-      lastLoginAt: this.lastLoginAt?.toISOString(),
-      deletedAt: this.deletedAt?.toISOString(),
-    };
-  }
-
-  /**
-   * Convertit l'entité en UserReadDTO (détail complet)
-   * Utilisé pour GET /users/:id
-   */
-  public toReadDTO(): UserReadEmployeeDTO | UserReadManagerDTO | BaseUserReadDTO{
-    if (!this.id) {
-        throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserReadDTO");
-    }
-
-    const base = {
-        id: this.id,
-        firstName: this.firstName,
-        lastName: this.lastName,
-        email: this.email,
-        role: this.role,
-        isActive: this.isActive,
-        phone: this.phone,
-        team: this.team,
-        customSchedule: this.customSchedule,
-        ...this.toDateStrings(),
-    };
-
-    if (this.role === "employe") {
-        return {
-            ...base,
-            manager: this.manager ? { id: this.manager.id, firstName: this.manager.firstName, lastName: this.manager.lastName } : undefined,
-        } as UserReadEmployeeDTO;
-    }
-
-    if (this.role === "manager") {
-        return {
-            ...base,
-            employees: this.employes?.map(e => ({ id: e.id, firstName: e.firstName, lastName: e.lastName })),
-        } as UserReadManagerDTO;
-    }
-
-    return base; // fallback pour d'autres rôles
+    // #endregion
 }
 
+/**
+ * User_L1
+ * Enrichissement : ajout des metadata (id, createdAt, updatedAt, etc.)
+ * Utilisé après récupération de la DB sans jointures
+ */
+export class User_L1 extends User_Core {
+    public readonly id: number;
+    public createdAt: Date;
+    public updatedAt: Date;
+    public lastLoginAt: Date;
+    public deletedAt: Date | null;
 
-  /**
-   * Convertit l'entité en UserListItemDTO (liste simplifiée)
-   * Utilisé pour GET /users (liste)
-   */
-  public toListItemDTO(): UserListItemDTO {
-    if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserListItemDTO");
+    constructor(props: UserProps_L1) {
+        const { createdAt, updatedAt, lastLoginAt, deletedAt, ...propsCore } = props;
+        super({ ...propsCore });
+
+        this.id = props.id;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastLoginAt = lastLoginAt;
+        this.deletedAt = deletedAt;
     }
 
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      role: this.role,
-      isActive: this.isActive,
-      teamId: this.team?.id,
-    };
-  }
-
-  /**
-   * Convertit l'entité en UserAuthDTO
-   * Utilisé pour les réponses d'authentification (login, register)
-   */
-  public toAuthDTO(): UserAuthDTO {
-    if (!this.id) {
-      throw new ValidationError("L'utilisateur doit avoir un ID pour être converti en UserAuthDTO");
+    // #region State Changes (deletedAt)
+    public softDelete(): void {
+        this.deletedAt = new Date();
     }
 
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      role: this.role,
-      isActive: this.isActive,
-      phone: this.phone,
-      teamId: this.team?.id,
-      customScheduleId: this.customSchedule?.id,
-      ...this.toDateStrings(),
-    };
-  }
-  // #endregion
+    public restore(): void {
+        this.deletedAt = null;
+    }
+    // #endregion
+
+    // #region Authentication
+    public toJwtPayload(): Record<string, any> {
+        return {
+            sub: this.id,
+            email: this.email,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            role: this.role,
+            isActive: this.isActive,
+            lastLoginAt: this.lastLoginAt
+        };
+    }
+
+    public updateLastLogin(): void {
+        this.lastLoginAt = new Date();
+    }
+    // #endregion
+
+    // #region Permissions
+    public static validateUpdateProfilePermissions(
+        targetUser: User_L1,
+        dto: UserUpdateDTO,
+        requestingUserId: number,
+        requestingUserRole: string,
+    ): void {
+        // Admin peut tout modifier
+        if (requestingUserRole === 'admin') {
+            return;
+        }
+
+        // Manager et Employé : restrictions strictes
+        if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
+            // Vérifier que c'est leur propre profil
+            if (targetUser.id !== requestingUserId) {
+                throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+            }
+
+            // Champs interdits pour manager/employé
+            const forbiddenFields: string[] = [];
+
+            if (dto.role !== undefined) {
+                forbiddenFields.push('role');
+            }
+
+            if (dto.isActive !== undefined) {
+                forbiddenFields.push('isActive');
+            }
+
+            if (forbiddenFields.length > 0) {
+                throw new ForbiddenError(
+                    `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+                    `Seuls les administrateurs peuvent modifier ces informations.`
+                );
+            }
+        }
+    }
+    // #endregion
 }
 
+/**
+ * User
+ * Entité complète avec toutes les jointures
+ * Représente la réalité complète d'un utilisateur
+ */
+export class User extends User_L1 {
+    public team?: Team;
+    public manager?: User;
+    public customSchedule?: Schedule;
 
+    constructor(props: UserProps) {
+        const { team, manager, customSchedule, ...propsL1 } = props;
+        super({ ...propsL1 });
 
+        this.team = team;
+        this.manager = manager;
+        this.customSchedule = customSchedule;
+    }
+}

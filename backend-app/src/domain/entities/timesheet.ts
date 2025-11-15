@@ -1,7 +1,7 @@
 import { TimesheetStatus } from "@/domain/types";
 import { ValidationError } from "../error/AppError";
 import { User } from "./user";
-import { TimesheetProps, TimesheetProps_NoJoint, TimesheetProps_Core } from "../types/entitiyProps";
+import { Timesheet_Props, TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../types/entitiyProps";
 
 /**
  * Timesheet_Core
@@ -45,19 +45,18 @@ export class Timesheet_Core {
 
 /**
  * Timesheet_NoJoint
- * Enrichissement : ajout des propriétés de base de données (id, timestamps)
+ * Enrichissement : ajout des metadata (id)
  * Utilisé après récupération de la DB sans jointures
  */
-export class Timesheet_NoJoint extends Timesheet_Core {
-    public readonly id: number;
+export class Timesheet_L1 extends Timesheet_Core {
+
     public createdAt: Date;
     public updatedAt: Date;
 
-    constructor(props: TimesheetProps_NoJoint) {
-        const { id, createdAt, updatedAt, ...propsCore } = props;
+    constructor(props: TimesheetProps_L1) {
+        const { createdAt, updatedAt, ...propsCore } = props;
         super({ ...propsCore });
 
-        this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -74,7 +73,7 @@ export class Timesheet_NoJoint extends Timesheet_Core {
  * Entité complète avec toutes les jointures
  * Représente la réalité complète d'un timesheet
  */
-export class Timesheet extends Timesheet_NoJoint {
+export class Timesheet extends Timesheet_L1 {
     public employe: User;
 
     constructor(props: TimesheetProps) {

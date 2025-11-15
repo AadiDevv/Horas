@@ -12,19 +12,13 @@ export class TimesheetMapper {
      */
     public static toReadDTO(timesheet: Timesheet): TimesheetReadDTO {
         return {
-            id: timesheet.id,
-            employeId: timesheet.employeId,
-            clockin: timesheet.clockin,
-            status: timesheet.status,
+            ...timesheet,
             date: timesheet.date.toISOString().split("T")[0], // YYYY-MM-DD
             hour: timesheet.hour.toISOString(),
             createdAt: timesheet.createdAt.toISOString(),
             updatedAt: timesheet.updatedAt.toISOString(),
             employe: {
-                id: timesheet.employe.id!,
-                firstName: timesheet.employe.firstName,
-                lastName: timesheet.employe.lastName,
-                email: timesheet.employe.email
+                ...timesheet.employe,
             },
         };
     }
@@ -35,13 +29,10 @@ export class TimesheetMapper {
      */
     public static toListItemDTO(timesheet: Timesheet): TimesheetListItemDTO {
         return {
-            id: timesheet.id,
-            employeId: timesheet.employeId,
-            employelastName: `${timesheet.employe.firstName} ${timesheet.employe.lastName}`,
+            ...timesheet,
             date: timesheet.date.toISOString().split("T")[0],
             hour: timesheet.hour.toISOString(),
-            clockin: timesheet.clockin,
-            status: timesheet.status,
+
         };
     }
 

@@ -1,140 +1,37 @@
-import { TeamProps } from "../types/entitiyProps";
+import { TeamProps_Core, TeamProps_L1, TeamProps } from "../types/entitiyProps";
 import { User } from "./user";
-import { TeamCreateDTO, TeamUpdateDTO, TeamReadDTO, TeamListItemDTO, TeamWithMembersDTO } from "@/application/DTOS";
 import { ValidationError } from "../error/AppError";
 import { Schedule } from "./schedule";
 
-export class Team {
-    public readonly id?: number;
+/**
+ * Team_Core
+ * Représente le minimum métier pour qu'une équipe soit valide
+ * Utilisé avant l'insertion en base de données
+ */
+export class Team_Core {
+    public readonly id: number;
     public name: string;
-    public description?: string;
+    public description: string | null;
     public managerId: number;
-    public scheduleId?: number;
-    public createdAt: Date;
-    public updatedAt?: Date;
-    public deletedAt?: Date | null;
-    public manager?: User;
-    public members?: User[];
-    public schedule?: Schedule;
-    public membersCount?: number;
+    public scheduleId: number | null;
+    public membersCount: number;
 
-    constructor(props: TeamProps) {
+    constructor(props: TeamProps_Core) {
         this.id = props.id;
         this.name = props.name;
         this.description = props.description;
         this.managerId = props.managerId;
-        this.createdAt = props.createdAt || new Date(Date.now());
-        this.updatedAt = props.updatedAt;
-        this.deletedAt = props.deletedAt || null;
-        this.manager = props.manager;
-        this.members = props.members;
-        this.schedule = props.schedule;
+        this.scheduleId = props.scheduleId;
         this.membersCount = props.membersCount;
+
+        // Validation après attribution
         this.validate();
     }
 
-    // #region Factory Methods (DTO → Entité)
-    /**
-     * Crée une entité Team à partir d'un DTO de création
-     * Utilisé lors de la création d'une nouvelle équipe
-     */
-    static fromCreateDTO(dto: TeamCreateDTO): Team {
-        return new Team({
-            name: dto.name,
-            description: dto.description,
-            managerId: dto.managerId,
-        });
-    }
-
-    /**
-     * Met à jour une entité Team existante avec les données d'un DTO de mise à jour
-     * Retourne une nouvelle instance (immutabilité)
-     */
-    static fromUpdateDTO(existingTeam: Team, dto: TeamUpdateDTO): Team {
-        return new Team({
-            ...existingTeam,
-            name: dto.name ?? existingTeam.name,
-            description: dto.description ?? existingTeam.description,
-            updatedAt: new Date(Date.now()),
-        });
-    }
-    // #endregion
-
-    // #region Transformation Methods (Entité → DTO)
-    /**
-     * Convertit les dates en ISO string
-     * Helper privé pour éviter la duplication
-     */
-    private toDateStrings() {
-        return {
-            createdAt: this.createdAt.toISOString(),
-            updatedAt: this.updatedAt?.toISOString(),
-            deletedAt: this.deletedAt?.toISOString(),
-        };
-    }
-
-    /**
-     * Convertit l'entité en TeamReadDTO (détail complet)
-     * Utilisé pour GET /teams/:id
-     */
-    toReadDTO(): TeamReadDTO {
-        if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
-
-        return {
-            id: this.id,
-            name: this.name,
-            description: this.description,
-            managerId: this.managerId,
-            scheduleId: this.scheduleId,
-            ...this.toDateStrings(),
-            manager: this.manager?.toTeamManagerDTO(),
-            membersCount: this.members?.length ?? this.membersCount ?? 0,
-        };
-    }
-
-    /**
-     * Convertit l'entité en TeamListItemDTO (liste simplifiée)
-     * Utilisé pour GET /teams (liste)
-     */
-    toListItemDTO(): TeamListItemDTO {
-        if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
-
-        return {
-            id: this.id,
-            name: this.name,
-            description: this.description,
-            managerId: this.managerId,
-            scheduleId: this.scheduleId,
-            managerlastName: this.manager ? `${this.manager.firstName} ${this.manager.lastName}` : "Manager inconnu",
-            membersCount: this.members?.length ?? this.membersCount ?? 0,
-            createdAt: this.createdAt.toISOString(),
-            deletedAt: this.deletedAt?.toISOString(),
-        };
-    }
-
-    /**
-     * Convertit l'entité en TeamWithMembersDTO (avec liste des members)
-     * Utilisé pour GET /teams/:id?include=members
-     */
-    toWithMembersDTO(): TeamWithMembersDTO {
-        if (!this.id) throw new ValidationError("L'équipe doit avoir un ID pour être convertie en DTO");
-        if (!this.members) throw new ValidationError("Les members doivent être chargés pour utiliser toWithMembersDTO()");
-
-        return {
-            ...this.toReadDTO(),
-            members: this.members.map(membre => membre.toTeamMemberDTO()),
-        };
-    }
-    // #endregion
-
-    // #region Validation Methods
-    /**
-     * Valide les données de l'équipe
-     * Peut être appelée avant la sauvegarde
-     */
-    validate(): void {
+    // #region Validation
+    public validate(): void {
         if (!this.name || this.name.trim().length < 2) {
-            throw new ValidationError("Le lastName de l'équipe doit contenir au moins 2 caractères");
+            throw new ValidationError("Le nom de l'équipe doit contenir au moins 2 caractères");
         }
         if (!this.managerId || this.managerId <= 0) {
             throw new ValidationError("L'équipe doit avoir un manager valide");
@@ -142,12 +39,59 @@ export class Team {
     }
     // #endregion
 
-    // #region Business Methods
-    /**
-     * Retourne le lastName d'affichage de l'équipe
-     */
-    getDisplayName(): string {
+    // #region Display Methods
+    public getDisplayName(): string {
         return this.name;
     }
     // #endregion
+}
+
+/**
+ * Team_L1
+ * Enrichissement : ajout des metadata (createdAt, updatedAt, deletedAt)
+ * Utilisé après récupération de la DB sans jointures
+ */
+export class Team_L1 extends Team_Core {
+    public createdAt: Date;
+    public updatedAt: Date;
+    public deletedAt: Date | null;
+
+    constructor(props: TeamProps_L1) {
+        const { createdAt, updatedAt, deletedAt, ...propsCore } = props;
+        super({ ...propsCore });
+
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
+    }
+
+    // #region State Changes (deletedAt)
+    public softDelete(): void {
+        this.deletedAt = new Date();
+    }
+
+    public restore(): void {
+        this.deletedAt = null;
+    }
+    // #endregion
+}
+
+/**
+ * Team
+ * Entité complète avec toutes les jointures
+ * Représente la réalité complète d'une équipe
+ */
+export class Team extends Team_L1 {
+    public manager?: User;
+    public members?: User[];
+    public schedule?: Schedule;
+
+    constructor(props: TeamProps) {
+        const { manager, members, schedule, ...propsL1 } = props;
+        super({ ...propsL1 });
+
+        this.manager = manager;
+        this.members = members;
+        this.schedule = schedule;
+    }
 }
