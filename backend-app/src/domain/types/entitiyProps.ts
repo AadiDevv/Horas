@@ -1,5 +1,5 @@
 import { Role, TimesheetStatus } from "./index";
-import { User_Core, Team_Core, Schedule_Core } from "../entities/";
+import { User_Core, Team_Core, Schedule_Core , UserEmployee_Core} from "../entities/";
 
 //#region User hierarchy types
 export namespace User_Props {
@@ -172,7 +172,7 @@ export namespace Timesheet_Props {
     }
 
     type Timesheet_joints = {
-        employe: User_Core;
+        employe: UserEmployee_Core;
     }
 
     //Props Hierarchy

@@ -17,9 +17,7 @@ export class TimesheetMapper {
             hour: timesheet.hour.toISOString(),
             createdAt: timesheet.createdAt.toISOString(),
             updatedAt: timesheet.updatedAt.toISOString(),
-            employe: {
-                ...timesheet.employe,
-            },
+            employe: this.toReadDTO /// emplouee toReadDTO
         };
     }
 

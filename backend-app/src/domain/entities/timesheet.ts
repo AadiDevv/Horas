@@ -1,6 +1,6 @@
 import { TimesheetStatus } from "@/domain/types";
 import { ValidationError } from "../error/AppError";
-import { User_Core } from "./user";
+import { User_Core , UserEmployee_Core} from "./user";
 import {  TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../types/entitiyProps";
 
 /**
@@ -74,7 +74,7 @@ export class Timesheet_L1 extends Timesheet_Core {
  * Représente la réalité complète d'un timesheet
  */
 export class Timesheet extends Timesheet_L1 {
-    public employe: User_Core;
+    public employe: UserEmployee_Core;
 
     constructor(props: TimesheetProps) {
         const { employe, ...propsNoJoint } = props;

@@ -1,5 +1,6 @@
 import { TimesheetStatus } from "@/domain/types";
 import {
+    TimesheetProps,
     TimesheetProps_Core,
     TimesheetProps_L1,
     UserEmployeeProps_Core
@@ -40,7 +41,7 @@ export interface TimesheetUpdateDTO {
  * DTO de retour pour un timesheet (GET /timesheets/:id)
  * Basé sur TimesheetProps_L1 avec transformations Date → string + relation employe
  */
-export type TimesheetReadDTO = Omit<TimesheetProps_L1, 'date' | 'hour' | 'createdAt' | 'updatedAt'> & {
+export type TimesheetReadDTO = Omit<TimesheetProps, 'date' | 'hour' | 'createdAt' | 'updatedAt'> & {
     date: string;      // Date → string "YYYY-MM-DD"
     hour: string;      // Date → string ISO DateTime
     createdAt: string;
