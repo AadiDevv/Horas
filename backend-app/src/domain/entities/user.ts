@@ -1,16 +1,23 @@
-import { UserProps_Core, UserProps_L1, UserProps } from "../types/entitiyProps";
+import {
+    UserEmployeeProps_Core,
+    UserEmployeeProps_L1,
+    UserEmployeeProps,
+    UserManagerProps_Core,
+    UserManagerProps_L1,
+    UserManagerProps,
+} from "../types/entitiyProps";
 import { ForbiddenError, ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
-import { UserCreateDTO, UserUpdateDTO } from "@/application/DTOS/";
+import { UserUpdateDTO } from "@/application/DTOS/";
 import { Role } from "../types";
-import { Team, Schedule } from "./";
+import { Team_Core, Schedule_Core } from "./";
 
 /**
- * User_Core
- * Représente le minimum métier pour qu'un utilisateur soit valide
- * Utilisé avant l'insertion en base de données
+ * User_Core (Abstract)
+ * Classe de base contenant les champs communs à tous les utilisateurs
  */
-export class User_Core {
+export abstract class User_Core {
+    public readonly id: number;
     public firstName: string;
     public lastName: string;
     public email: string;
@@ -18,21 +25,16 @@ export class User_Core {
     public hashedPassword: string;
     public role: Role;
     public isActive: boolean;
-    public teamId: number | null;
-    public managerId: number | null;
-    public customScheduleId: number | null;
 
-    constructor(props: UserProps_Core) {
-        this.firstName = props.firstName;
-        this.lastName = props.lastName;
-        this.email = props.email;
-        this.phone = props.phone;
-        this.hashedPassword = props.hashedPassword;
-        this.role = props.role;
-        this.isActive = props.isActive;
-        this.teamId = props.teamId;
-        this.managerId = props.managerId;
-        this.customScheduleId = props.customScheduleId;
+    constructor(id: number, firstName: string, lastName: string, email: string, phone: string, hashedPassword: string, role: Role, isActive: boolean) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.hashedPassword = hashedPassword;
+        this.role = role;
+        this.isActive = isActive;
 
         // Validation après attribution
         this.validate();
@@ -61,29 +63,6 @@ export class User_Core {
         }
     }
 
-    public validateEmployee(): void {
-        this.validate();
-        if (this.role !== "employe") {
-            throw new ValidationError('Role invalide pour un employé');
-        }
-        if (!this.managerId) {
-            throw new ValidationError('Manager ID requis pour un employé');
-        }
-    }
-
-    public validateManager(): void {
-        this.validate();
-        if (this.role !== "manager") {
-            throw new ValidationError('Role invalide pour un manager');
-        }
-        if (this.teamId) {
-            throw new ValidationError('Un manager ne peut pas avoir d\'équipe');
-        }
-        if (this.managerId) {
-            throw new ValidationError('Un manager ne peut pas avoir de manager');
-        }
-    }
-
     // Static validation methods
     public static validateEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -105,28 +84,6 @@ export class User_Core {
     public static validatePhone(phone: string): boolean {
         const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
         return phoneRegex.test(phone);
-    }
-
-    public static validateDTO(dto: UserCreateDTO): void {
-        if (!User_Core.validateEmail(dto.email)) {
-            throw new ValidationError('Format d\'email invalide');
-        }
-
-        if (!this.validatePassword(dto.password)) {
-            throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
-        }
-
-        if (!this.validateLastName(dto.lastName)) {
-            throw new ValidationError('Nom invalide (minimum 2 caractères)');
-        }
-
-        if (!this.validateFirstName(dto.firstName)) {
-            throw new ValidationError('Prénom invalide (minimum 2 caractères)');
-        }
-
-        if (dto.phone && dto.phone.trim() !== '' && !this.validatePhone(dto.phone)) {
-            throw new ValidationError('Format de téléphone invalide');
-        }
     }
     // #endregion
 
@@ -154,22 +111,96 @@ export class User_Core {
 }
 
 /**
- * User_L1
- * Enrichissement : ajout des metadata (id, createdAt, updatedAt, etc.)
- * Utilisé après récupération de la DB sans jointures
+ * UserEmployee_Core
+ * Représente le minimum métier pour qu'un employé soit valide
  */
-export class User_L1 extends User_Core {
-    public readonly id: number;
+export class UserEmployee_Core extends User_Core {
+    public teamId: number | null;
+    public managerId: number;
+    public customScheduleId: number | null;
+
+    constructor(props: UserEmployeeProps_Core) {
+        super(
+            props.id,
+            props.firstName,
+            props.lastName,
+            props.email,
+            props.phone,
+            props.hashedPassword,
+            props.role,
+            props.isActive
+        );
+
+        this.teamId = props.teamId;
+        this.managerId = props.managerId;
+        this.customScheduleId = props.customScheduleId;
+
+        // Validation spécifique employé
+        this.validateEmployee();
+    }
+
+    // #region Validation Employee
+    public validateEmployee(): void {
+        if (this.role !== "employe") {
+            throw new ValidationError('Role invalide pour un employé');
+        }
+        if (!this.managerId) {
+            throw new ValidationError('Manager ID requis pour un employé');
+        }
+    }
+    // #endregion
+}
+
+/**
+ * UserManager_Core
+ * Représente le minimum métier pour qu'un manager soit valide
+ */
+export class UserManager_Core extends User_Core {
+    public teamIds: number[] | null;
+    public employeeIds: number[] | null;
+
+    constructor(props: UserManagerProps_Core) {
+        super(
+            props.id,
+            props.firstName,
+            props.lastName,
+            props.email,
+            props.phone,
+            props.hashedPassword,
+            props.role,
+            props.isActive
+        );
+
+        this.teamIds = props.teamIds;
+        this.employeeIds = props.employeeIds;
+
+        // Validation spécifique manager
+        this.validateManager();
+    }
+
+    // #region Validation Manager
+    public validateManager(): void {
+        if (this.role !== "manager") {
+            throw new ValidationError('Role invalide pour un manager');
+        }
+    }
+    // #endregion
+}
+
+/**
+ * UserEmployee_L1
+ * Enrichissement : ajout des metadata (createdAt, updatedAt, etc.)
+ */
+export class UserEmployee_L1 extends UserEmployee_Core {
     public createdAt: Date;
     public updatedAt: Date;
     public lastLoginAt: Date;
     public deletedAt: Date | null;
 
-    constructor(props: UserProps_L1) {
+    constructor(props: UserEmployeeProps_L1) {
         const { createdAt, updatedAt, lastLoginAt, deletedAt, ...propsCore } = props;
         super({ ...propsCore });
 
-        this.id = props.id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.lastLoginAt = lastLoginAt;
@@ -204,9 +235,20 @@ export class User_L1 extends User_Core {
     }
     // #endregion
 
+    // #region Date Transformation
+    public dateToISOString() {
+        return {
+            createdAt: this.createdAt.toISOString(),
+            updatedAt: this.updatedAt.toISOString(),
+            lastLoginAt: this.lastLoginAt.toISOString(),
+            deletedAt: this.deletedAt ? this.deletedAt?.toISOString() : null,
+        }
+    }
+    // #endregion
+
     // #region Permissions
     public static validateUpdateProfilePermissions(
-        targetUser: User_L1,
+        targetUser: UserEmployee_L1 | UserManager_L1,
         dto: UserUpdateDTO,
         requestingUserId: number,
         requestingUserRole: string,
@@ -246,16 +288,75 @@ export class User_L1 extends User_Core {
 }
 
 /**
- * User
- * Entité complète avec toutes les jointures
- * Représente la réalité complète d'un utilisateur
+ * UserManager_L1
+ * Enrichissement : ajout des metadata (createdAt, updatedAt, etc.)
  */
-export class User extends User_L1 {
-    public team?: Team;
-    public manager?: User;
-    public customSchedule?: Schedule;
+export class UserManager_L1 extends UserManager_Core {
+    public createdAt: Date;
+    public updatedAt: Date;
+    public lastLoginAt: Date;
+    public deletedAt: Date | null;
 
-    constructor(props: UserProps) {
+    constructor(props: UserManagerProps_L1) {
+        const { createdAt, updatedAt, lastLoginAt, deletedAt, ...propsCore } = props;
+        super({ ...propsCore });
+
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastLoginAt = lastLoginAt;
+        this.deletedAt = deletedAt;
+    }
+
+    // #region State Changes (deletedAt)
+    public softDelete(): void {
+        this.deletedAt = new Date();
+    }
+
+    public restore(): void {
+        this.deletedAt = null;
+    }
+    // #endregion
+
+    // #region Authentication
+    public toJwtPayload(): Record<string, any> {
+        return {
+            sub: this.id,
+            email: this.email,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            role: this.role,
+            isActive: this.isActive,
+            lastLoginAt: this.lastLoginAt
+        };
+    }
+
+    public updateLastLogin(): void {
+        this.lastLoginAt = new Date();
+    }
+    // #endregion
+
+    // #region Date Transformation
+    public dateToISOString(){
+        return {
+            createdAt: this.createdAt.toISOString(),
+            updatedAt: this.updatedAt.toISOString(),
+            lastLoginAt: this.lastLoginAt.toISOString(),
+            deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
+        }
+    }
+    // #endregion
+}
+
+/**
+ * UserEmployee
+ * Entité complète avec toutes les jointures
+ */
+export class UserEmployee extends UserEmployee_L1 {
+    public team: Team_Core | null;
+    public manager: User_Core;
+    public customSchedule: Schedule_Core | null;
+
+    constructor(props: UserEmployeeProps) {
         const { team, manager, customSchedule, ...propsL1 } = props;
         super({ ...propsL1 });
 
@@ -264,3 +365,23 @@ export class User extends User_L1 {
         this.customSchedule = customSchedule;
     }
 }
+
+/**
+ * UserManager
+ * Entité complète avec toutes les jointures
+ */
+export class UserManager extends UserManager_L1 {
+    public employes: User_Core[];
+    public managedTeams: Team_Core[];
+
+    constructor(props: UserManagerProps) {
+        const { employes, managedTeams, ...propsL1 } = props;
+        super({ ...propsL1 });
+
+        this.employes = employes;
+        this.managedTeams = managedTeams;
+    }
+}
+
+// Type union pour compatibilité
+export type User = UserEmployee | UserManager;

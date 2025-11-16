@@ -1,39 +1,29 @@
 import { Role } from "@/domain/types";
+import {
+    UserEmployeeProps,
+    UserManagerProps,
+    UserEmployeeProps_Core,
+    UserManagerProps_Core
+} from "@/domain/types/entitiyProps";
 
 // #region Create DTO
 /**
  * DTO pour créer un utilisateur (via admin/manager)
  * Différent de UserRegisterDTO (auth.dto.ts) qui est pour l'auto-inscription
  */
-export interface UserCreateDTO {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    role: Role;
-    teamId?: number;
-    customScheduleId?: number;
-    phone?: string;
-}
 
-export interface BaseUserCreateDTO {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    phone?: string;
-}
 
-export interface UserCreateEmployeeDTO extends BaseUserCreateDTO {
-    role: Extract<Role, "employe">;
-    teamId?: number;
-    customScheduleId?: number;
-    managerId: number;
-}
 
-export interface UserCreateManagerDTO extends BaseUserCreateDTO {
+export type UserCreateEmployeeDTO  = Omit<UserEmployeeProps_Core,'id'> &{
+        teamId?: number; // null if the employee is not assigned to a team
+        customScheduleId?: number; 
+}
+export type UserCreateManagerDTO  = Omit<UserManagerProps_Core,'id'> &{
+    teamIds?: number[] ; 
+    employeeIds?: number[];
     role: Extract<Role, "manager">;
 }
+
 // #endregion
 
 // #region Update DTO
@@ -78,78 +68,25 @@ export interface UserResetPasswordDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour un utilisateur (complet)
- * Le mot de passe haché n'est jamais retourné
+ * DTO de retour pour un employé (GET /users/:id pour role employe)
+ * Basé sur UserEmployeeProps avec transformations Date → string
  */
-export interface UserReadDTO {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: Role;
-    isActive: boolean;
-    phone?: string;
+export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
     createdAt: string;
-    updatedAt?: string;
-    lastLoginAt?: string;
-    deletedAt?: string;
-
-    // Informations enrichies (optionnelles selon le endpoint)
-    team?: {
-        id: number;
-        name?: string;
-    };
-
-    customSchedule?: {
-        id: number;
-        name?: string;
-        startHour?: Date;
-        endHour?: Date;
-    };
+    updatedAt: string;
+    lastLoginAt: string;
+    deletedAt: string | null;
 }
-export interface BaseUserReadDTO {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: Role;
-    isActive: boolean;
-    phone?: string;
+
+/**
+ * DTO de retour pour un manager (GET /users/:id pour role manager)
+ * Basé sur UserManagerProps avec transformations Date → string
+ */
+export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
     createdAt: string;
-    updatedAt?: string;
-    lastLoginAt?: string;
-    deletedAt?: string;
-
-    
-
-    schedule?: {
-        id: number;
-        name?: string;
-        startHour?: Date;
-        endHour?: Date;
-    };
-}
-
-export interface UserReadEmployeeDTO extends BaseUserReadDTO {
-    role: Extract<Role, "employe">;
-    manager?: {
-        id: number;
-        firstName?: string;
-        lastName?: string;
-    };
-    team?: {
-        id: number;
-        name?: string;
-    };
-}
-
-export interface UserReadManagerDTO extends BaseUserReadDTO {
-    role: Extract<Role, "manager">;
-    employes?: {
-        id: number;
-        firstName?: string;
-        lastName?: string;
-    }[];
+    updatedAt: string;
+    lastLoginAt: string;
+    deletedAt: string | null;
 }
 
 // #endregion
@@ -157,17 +94,10 @@ export interface UserReadManagerDTO extends BaseUserReadDTO {
 // #region List DTO
 /**
  * DTO pour la liste des users (version simplifiée)
+ * Format léger pour performance - pas de relations complètes, juste IDs
  */
-export interface UserListItemDTO {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: Role;
-    isActive: boolean;
-    teamId?: number;
-    teamlastName?: string;
-}
+export type UserEmployeeListItemDTO =  UserEmployeeProps_Core[]
+export type UserManagerListItemDTO =  UserManagerProps_Core[]
 
 /**
  * DTO pour filtrer les users
@@ -177,7 +107,7 @@ export interface UserFilterDTO {
     role?: Role;
     teamId?: number;
     isActive?: boolean;
-    search?: string; // Recherche par lastName, prélastName ou email
+    search?: string; // Recherche par nom, prénom ou email
 }
 // #endregion
 

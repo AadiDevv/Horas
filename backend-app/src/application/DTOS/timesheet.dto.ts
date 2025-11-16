@@ -1,4 +1,9 @@
 import { TimesheetStatus } from "@/domain/types";
+import {
+    TimesheetProps_Core,
+    TimesheetProps_L1,
+    UserEmployeeProps_Core
+} from "@/domain/types/entitiyProps";
 
 // #region Create Params
 /**
@@ -20,6 +25,7 @@ export interface TimesheetCreateParams {
 // #region Update DTO
 /**
  * DTO pour corriger un timesheet (admin/manager uniquement)
+ * Tous les champs sont optionnels (PATCH) pour flexibilité
  */
 export interface TimesheetUpdateDTO {
     date?: Date;    // Format: "YYYY-MM-DD"
@@ -31,25 +37,15 @@ export interface TimesheetUpdateDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour un timesheet
+ * DTO de retour pour un timesheet (GET /timesheets/:id)
+ * Basé sur TimesheetProps_L1 avec transformations Date → string + relation employe
  */
-export interface TimesheetReadDTO {
-    id: number;
-    employeId: number;
-    date: string;      // Format: "YYYY-MM-DD"
-    hour: string;     // Format ISO DateTime complet
-    clockin: boolean;
-    status: TimesheetStatus;
+export type TimesheetReadDTO = Omit<TimesheetProps_L1, 'date' | 'hour' | 'createdAt' | 'updatedAt'> & {
+    date: string;      // Date → string "YYYY-MM-DD"
+    hour: string;      // Date → string ISO DateTime
     createdAt: string;
     updatedAt: string;
-
-    // Informations enrichies pour le frontend
-    employe?: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-    };
+    employe: UserEmployeeProps_Core;
 }
 // #endregion
 
@@ -68,15 +64,12 @@ export interface TimesheetFilterDTO {
 
 /**
  * DTO pour la liste des timesheets (version simplifiée)
+ * Basé sur TimesheetProps_Core avec transformations Date → string + employeeName dénormalisé
  */
-export interface TimesheetListItemDTO {
-    id: number;
-    employeId: number;
-    employelastName: string; // firstName + lastName
-    date: string;
-    hour: string;
-    clockin: boolean;
-    status: TimesheetStatus;
+export type TimesheetListItemDTO = Omit<TimesheetProps_Core, 'date' | 'hour'> & {
+    date: string;      // Date → string "YYYY-MM-DD"
+    hour: string;      // Date → string ISO DateTime
+    employeeName: string;  // Dénormalisé (firstName + lastName)
 }
 // #endregion
 
@@ -95,7 +88,6 @@ export interface TimesheetStatsDTO {
     timesheetsNormal: number;
     timesheetsDelay: number;
     timesheetsIncomplete: number;
-    clockedDays: number; // lastNamebre de jours uniques
+    clockedDays: number; // Nombre de jours uniques
 }
 // #endregion
-

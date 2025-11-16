@@ -1,7 +1,6 @@
 import { TeamProps_Core, TeamProps_L1, TeamProps } from "../types/entitiyProps";
-import { User } from "./user";
+import { User_Core, Schedule_Core } from "./";
 import { ValidationError } from "../error/AppError";
-import { Schedule } from "./schedule";
 
 /**
  * Team_Core
@@ -82,9 +81,9 @@ export class Team_L1 extends Team_Core {
  * Représente la réalité complète d'une équipe
  */
 export class Team extends Team_L1 {
-    public manager?: User;
-    public members?: User[];
-    public schedule?: Schedule;
+    public manager: User_Core;
+    public members: User_Core[];
+    public schedule: Schedule_Core;
 
     constructor(props: TeamProps) {
         const { manager, members, schedule, ...propsL1 } = props;

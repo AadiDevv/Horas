@@ -1,48 +1,17 @@
-// #region Nested DTOs (Types réutilisables)
-/**
- * Format d'un manager pour les DTOs d'équipe
- * Utilisé dans TeamReadDTO et TeamWithMembersDTO
- */
-export interface TeamManagerDTO {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: "admin" | "manager" | "employe";
-}
-
-/**
- * Format d'un membre (employé) pour les DTOs d'équipe
- * Utilisé dans TeamWithMembersDTO
- */
-export interface TeamMembreDTO {
-    id: number;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: "admin" | "manager" | "employe";
-    isActive: boolean;
-    phone?: string;
-    customSchedule?: {
-        id: number;
-        name?: string;
-        startHour?: Date;
-        endHour?: Date;
-    };
-}
-// #endregion
+import {
+    TeamProps_Core,
+    TeamProps_L1,
+    UserEmployeeProps_Core,
+    UserManagerProps_Core,
+    ScheduleProps_Core
+} from "@/domain/types/entitiyProps";
 
 // #region Create DTO
 /**
  * DTO pour créer une équipe
- * Le managerId est fourni dans le body ou extrait du JWT selon les permissions
+ * Basé sur TeamProps_Core sans id ni membersCount (champ calculé)
  */
-export interface TeamCreateDTO {
-    name: string;
-    description?: string;
-    managerId: number;
-    scheduleId?: number;
-}
+export type TeamCreateDTO = Omit<TeamProps_Core, 'id' | 'membersCount'>
 // #endregion
 
 // #region Update DTO
@@ -56,6 +25,7 @@ export interface TeamUpdateDTO {
     scheduleId?: number;
     managerId?: number;
 }
+
 export interface TeamAsignScheduleDTO {
     scheduleId: number;
 }
@@ -63,61 +33,45 @@ export interface TeamAsignScheduleDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour une équipe
- * Inclut les informations du manager et le lastNamebre de members
+ * DTO de retour pour une équipe (GET /teams/:id)
+ * Basé sur TeamProps_L1 avec transformations Date → string + relations
  */
-export interface TeamReadDTO {
-    id: number;
-    name: string;
-    description?: string;
-    managerId: number;
-    scheduleId?: number;
+export type TeamReadDTO = Omit<TeamProps_L1, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
     createdAt: string;
-    updatedAt?: string;
-    deletedAt?: string;
-
-    // Informations enrichies pour le frontend
-    manager?: TeamManagerDTO;
-
-    membersCount?: number; // lastNamebre de members dans l'équipe
+    updatedAt: string;
+    deletedAt: string | null;
+    manager: UserManagerProps_Core;
+    schedule: Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
+        startHour: string;
+        endHour: string;
+    };
 }
 
 /**
- * DTO pour une équipe avec la liste complète des members
- * Utilisé pour GET /teams/:id avec include=members
+ * DTO pour une équipe avec la liste complète des membres
+ * Utilisé pour GET /teams/:id?include=members
  */
 export interface TeamWithMembersDTO extends TeamReadDTO {
-    members: TeamMembreDTO[];
+    members: UserEmployeeProps_Core[];
 }
 // #endregion
 
 // #region List DTO
 /**
  * DTO pour la liste des équipes (version simplifiée)
+ * Basé sur TeamProps_Core + champs Date transformés + managerName dénormalisé
  */
-export interface TeamListItemDTO {
-    id: number;
-    name: string;
-    description?: string;
-    managerId: number;
-    scheduleId?: number;
-    managerlastName: string; // lastName complet du manager (firstName + lastName)
-    membersCount: number;
+export type TeamListItemDTO = TeamProps_Core & {
     createdAt: string;
-    deletedAt?: string;
+    deletedAt: string | null;
+    managerName: string;  // Dénormalisé pour affichage
 }
 
 /**
  * DTO pour filtrer les équipes (Query Params)
  * Utilisé dans GET /api/teams?managerId=X
- * 
- * Logique métier :
- * - Manager : managerId optionnel (déduit du JWT si omis, vérifié si fourni)
- * - Admin : managerId optionnel (retourne toutes les équipes si omis)
- * - Employé : accès refusé
  */
 export interface TeamFilterDTO {
-    managerId?: number; // ID du manager dont on veut voir les équipes
+    managerId?: number;
 }
 // #endregion
-

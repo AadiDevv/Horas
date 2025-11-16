@@ -1,7 +1,6 @@
 import { ScheduleProps_Core, ScheduleProps_L1, ScheduleProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
-import { User } from "./user";
-import { Team } from "./team";
+import { User_Core, Team_Core } from "./";
 
 /**
  * Schedule_Core
@@ -15,7 +14,6 @@ export class Schedule_Core {
     public endHour: Date;
     public activeDays: number[]; // [1, 2, 3, 4, 5] pour Lun-Ven
     public managerId: number;
-    public usersCount: number;
 
     constructor(props: ScheduleProps_Core) {
         this.id = props.id;
@@ -24,7 +22,6 @@ export class Schedule_Core {
         this.endHour = props.endHour;
         this.activeDays = props.activeDays;
         this.managerId = props.managerId;
-        this.usersCount = props.usersCount;
 
         // Validation après attribution
         this.validate();
@@ -114,13 +111,17 @@ export class Schedule_Core {
 export class Schedule_L1 extends Schedule_Core {
     public createdAt: Date;
     public updatedAt: Date;
+    public usersCount: number;
+
 
     constructor(props: ScheduleProps_L1) {
-        const { createdAt, updatedAt, ...propsCore } = props;
+        const { createdAt, updatedAt,usersCount, ...propsCore } = props;
         super({ ...propsCore });
 
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.usersCount = props.usersCount;
+
     }
 }
 
@@ -130,14 +131,14 @@ export class Schedule_L1 extends Schedule_Core {
  * Représente la réalité complète d'un horaire
  */
 export class Schedule extends Schedule_L1 {
-    public users?: User[];
-    public teams?: Team[];
+    public manager: User_Core;
+    public teams: Team_Core[];
 
     constructor(props: ScheduleProps) {
-        const { users, teams, ...propsL1 } = props;
+        const { manager, teams, ...propsL1 } = props;
         super({ ...propsL1 });
 
-        this.users = users;
+        this.manager = manager;
         this.teams = teams;
     }
 }

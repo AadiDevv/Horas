@@ -1,81 +1,121 @@
-import { User, User_Core } from "@/domain/entities/user";
+import {
+    User,
+    UserEmployee,
+    UserManager,
+    User_Core,
+    UserEmployee_Core,
+    UserManager_Core
+} from "@/domain/entities/user";
 import {
     UserReadEmployeeDTO,
     UserReadManagerDTO,
-    BaseUserReadDTO,
-    UserListItemDTO,
+    UserEmployeeListItemDTO,
+    UserManagerListItemDTO,
     UserAuthDTO,
-    UserCreateDTO,
     UserCreateEmployeeDTO,
+    UserCreateManagerDTO,
     UserUpdateDTO
 } from "@/application/DTOS/";
-import { TeamManagerDTO, TeamMembreDTO } from "@/application/DTOS/team.dto";
-import * as bcrypt from "bcrypt";
+import { } from "@/application/DTOS/team.dto";
 
 /**
  * Mapper pour convertir les entités User en DTOs et vice-versa
  * Remplace les méthodes toXDTO() et fromXDTO() de l'entité (anti-pattern #2)
  */
 export class UserMapper {
+    // #region Type Guards
+
+    /**
+     * Vérifie si un User est un UserEmployee
+     */
+    public static isUserEmployee(user: User_Core): user is UserEmployee {
+        return user.role === "employe";
+    }
+
+    /**
+     * Vérifie si un User est un UserManager
+     */
+    public static isUserManager(user: User_Core): user is UserManager {
+        return user.role === "manager";
+    }
+    // #endregion
+
     // #region Transformation Entité → DTO
 
     /**
      * Convertit une entité User en UserReadDTO (détail complet)
      * Utilisé pour GET /users/:id
      */
-    public static toReadDTO(user: User): UserReadEmployeeDTO | UserReadManagerDTO | BaseUserReadDTO {
-        const base = {
-            ...user,
-            createdAt: user.createdAt.toISOString(),
-            updatedAt: user.updatedAt.toISOString(),
-            lastLoginAt: user.lastLoginAt.toISOString(),
-            deletedAt: user.deletedAt?.toISOString(),
+    public static toReadDTO(user: User): UserReadEmployeeDTO | UserReadManagerDTO {
+        if (this.isUserEmployee(user)) {
+            return this.toEmployeeReadDTO(user);
+        }
+        return this.toManagerReadDTO(user);
+    }
+
+    /**
+     * Convertit un UserEmployee en UserReadEmployeeDTO
+     */
+    private static toEmployeeReadDTO(employee: UserEmployee): UserReadEmployeeDTO {
+        return {
+            ...employee,
+            ...employee.dateToISOString()
         };
+    }
 
-        if (user.role === "employe") {
-            return {
-                ...base,
-                manager: user.manager ? {
-                    ...user.manager,
-                } : undefined,
-            } as UserReadEmployeeDTO;
-        }
-
-        if (user.role === "manager") {
-            return {
-                ...base,
-                employees: undefined, // TODO: gérer la liste des employés si nécessaire
-            } as UserReadManagerDTO;
-        }
-
-        return base;
+    /**
+     * Convertit un UserManager en UserReadManagerDTO
+     */
+    private static toManagerReadDTO(manager: UserManager): UserReadManagerDTO {
+        return {
+            ...manager,
+            ...manager.dateToISOString(),
+            employes: manager.employes?.map(emp => ({
+                id: emp.id,
+                firstName: emp.firstName,
+                lastName: emp.lastName,
+            })) ?? [],
+        } as UserReadManagerDTO;
     }
 
     /**
      * Convertit une entité User en UserListItemDTO (liste simplifiée)
      * Utilisé pour GET /users (liste)
      */
-    public static toListItemDTO(user: User): UserListItemDTO {
+    public static toListItemDTO(users: User_Core[]): UserEmployeeListItemDTO | UserManagerListItemDTO {
+
+        if (this.isUserEmployee(users[0])) {
+        }
+        // Manager n'a pas de team
         return {
-            ...user,
-            teamId: user.team?.id,
         };
     }
+    private static toListEmployeeDTO(user: User):
 
     /**
      * Convertit une entité User en UserAuthDTO
      * Utilisé pour les réponses d'authentification (login, register)
      */
     public static toAuthDTO(user: User): UserAuthDTO {
-        return {
+        const base = {
             ...user,
-            teamId: user.team?.id,
-            customScheduleId: user.customSchedule?.id,
-            createdAt: user.createdAt.toISOString(),
-            updatedAt: user.updatedAt.toISOString(),
-            lastLoginAt: user.lastLoginAt.toISOString(),
-            deletedAt: user.deletedAt?.toISOString(),
+            ...user.dateToISOString(),
         };
+
+        if (this.isUserEmployee(user)) {
+            return {
+                ...base,
+                teamId: user.team?.id,
+                customScheduleId: user.customSchedule?.id,
+            } as UserAuthDTO;
+        }
+
+        // Manager
+        return {
+            ...base,
+            teamId: undefined,
+            customScheduleId: undefined,
+        } as UserAuthDTO;
     }
 
     /**
@@ -84,7 +124,11 @@ export class UserMapper {
      */
     public static toTeamManagerDTO(user: User): TeamManagerDTO {
         return {
-            ...user,
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
         };
     }
 
@@ -94,7 +138,13 @@ export class UserMapper {
      */
     public static toTeamMemberDTO(user: User): TeamMembreDTO {
         return {
-            ...user,
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            isActive: user.isActive,
+            phone: user.phone,
         };
     }
     // #endregion
@@ -102,50 +152,95 @@ export class UserMapper {
     // #region Transformation DTO → Entité (Factory)
 
     /**
-     * Crée une entité User_Core à partir d'un DTO de création
-     * Utilisé lors de la création d'un nouvel utilisateur
+     * Crée une entité UserEmployee_Core à partir d'un DTO de création employé
+     * Utilisé lors de la création d'un employé
      */
-    public static async fromCreateDTO(dto: UserCreateDTO, hashedPassword: string): Promise<User_Core> {
-        return new User_Core({
-            ...dto,
-            hashedPassword,
-            isActive: true,
-            teamId: null,
-            managerId: null,
-            customScheduleId: null,
-        });
-    }
-
-    /**
-     * Crée une entité User_Core à partir d'un DTO de création employé
-     * Utilisé lors de la création d'un employé avec manager/team
-     */
-    public static async fromCreateEmployeeDTO(dto: UserCreateEmployeeDTO, hashedPassword: string): Promise<User_Core> {
-        return new User_Core({
+    public static fromCreateEmployeeDTO(
+        dto: UserCreateEmployeeDTO,
+        hashedPassword: string
+    ): UserEmployee_Core {
+        return new UserEmployee_Core({
+            id: 0, // Sera généré par Prisma
             ...dto,
             hashedPassword,
             isActive: true,
             teamId: dto.teamId ?? null,
-            managerId: dto.managerId,
             customScheduleId: dto.customScheduleId ?? null,
         });
     }
 
     /**
-     * Met à jour une entité User existante avec les données d'un DTO de mise à jour
+     * Crée une entité UserManager_Core à partir d'un DTO de création manager
+     * Utilisé lors de la création d'un manager
+     */
+    public static fromCreateManagerDTO(
+        dto: UserCreateManagerDTO,
+        hashedPassword: string
+    ): UserManager_Core {
+        return new UserManager_Core({
+            id: 0, // Sera généré par Prisma
+            ...dto,
+            hashedPassword,
+            isActive: true,
+            teamIds: null,
+            employeeIds: null,
+        });
+    }
+
+    /**
+     * Met à jour une entité UserEmployee existante avec les données d'un DTO de mise à jour
      * Retourne une nouvelle instance (immutabilité)
      */
-    public static fromUpdateDTO(
-        existingUser: User,
-        dto: UserUpdateDTO & { teamId?: number; customScheduleId?: number }
-    ): User {
-        return new User({
-            ...existingUser,
-            ...dto,
-            teamId: dto.teamId !== undefined ? dto.teamId : existingUser.teamId,
-            customScheduleId: dto.customScheduleId !== undefined ? dto.customScheduleId : existingUser.customScheduleId,
+    public static fromUpdateEmployeeDTO(
+        existingEmployee: UserEmployee,
+        dto: UserUpdateDTO
+    ): UserEmployee {
+        return new UserEmployee({
+            ...existingEmployee,
+            firstName: dto.firstName ?? existingEmployee.firstName,
+            lastName: dto.lastName ?? existingEmployee.lastName,
+            email: dto.email ?? existingEmployee.email,
+            phone: dto.phone ?? existingEmployee.phone,
+            role: dto.role ?? existingEmployee.role,
+            isActive: dto.isActive ?? existingEmployee.isActive,
             updatedAt: new Date(),
         });
+    }
+
+    /**
+     * Met à jour une entité UserManager existante avec les données d'un DTO de mise à jour
+     * Retourne une nouvelle instance (immutabilité)
+     */
+    public static fromUpdateManagerDTO(
+        existingManager: UserManager,
+        dto: UserUpdateDTO
+    ): UserManager {
+        return new UserManager({
+            ...existingManager,
+            firstName: dto.firstName ?? existingManager.firstName,
+            lastName: dto.lastName ?? existingManager.lastName,
+            email: dto.email ?? existingManager.email,
+            phone: dto.phone ?? existingManager.phone,
+            role: dto.role ?? existingManager.role,
+            isActive: dto.isActive ?? existingManager.isActive,
+            updatedAt: new Date(),
+        });
+    }
+
+    /**
+     * Met à jour une entité User (Employee ou Manager) générique
+     * Détermine automatiquement le type et appelle la bonne méthode
+     */
+    public static fromUpdateDTO(existingUser: User, dto: UserUpdateDTO): User {
+        if (this.isUserEmployee(existingUser)) {
+            return this.fromUpdateEmployeeDTO(existingUser, dto);
+        }
+
+        if (this.isUserManager(existingUser)) {
+            return this.fromUpdateManagerDTO(existingUser, dto);
+        }
+
+        throw new Error("Type d'utilisateur inconnu");
     }
     // #endregion
 }
