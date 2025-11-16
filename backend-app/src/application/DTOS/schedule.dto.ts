@@ -4,14 +4,14 @@ import {
     ScheduleProps_Core,
     ScheduleProps
 } from "@/domain/types/entitiyProps";
-
+import {UserReadManagerCoreDTO, TeamListItemDTO, UserEmployeeListItemDTO} from "@/application/DTOS"
 // #region Create DTO
 /**
  * DTO pour créer un schedule de travail
  * Les hours sont au format "HH:mm" (ex: "09:00", "17:30")
  * activeDays est un tableau de nombres représentant les jours (1=Lundi, 7=Dimanche)
  */
-export type ScheduleCreateDTO = Omit<ScheduleProps_Core,'id'>
+export type ScheduleCreateDTO = Omit<ScheduleProps_Core,'id' | 'managerId'>
 // #endregion
 
 // #region Update DTO
@@ -33,19 +33,21 @@ export interface ScheduleUpdateDTO {
  * Basé sur ScheduleProps avec transformations Date → string
  * Les hours sont retournées au format "HH:mm"
  */
-export type ScheduleReadDTO = Omit<ScheduleProps, 'startHour' | 'endHour' | 'createdAt' | 'updatedAt'> & {
+export type ScheduleReadDTO = Omit<Omit<ScheduleProps, 'startHour' | 'endHour' | 'createdAt' | 'updatedAt' |'teams' | 'manager'> & {
     startHour: string;   // Date → string "HH:mm"
     endHour: string;     // Date → string "HH:mm"
     createdAt: string;   // Date → string ISO
     updatedAt: string;   // Date → string ISO
-}
+    manager: UserReadManagerCoreDTO
+    teams: TeamListItemDTO[]
+}, never>
 
 /**
  * DTO pour un schedule avec la liste des users assignés
  * Utilisé pour GET /schedules/:id?include=users
  */
 export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
-    users: UserEmployeeProps_Core[];
+    users: UserEmployeeListItemDTO;
 }
 // #endregion
 
@@ -54,10 +56,14 @@ export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
  * DTO pour la liste des schedules (version simplifiée)
  * Format léger pour performance avec transformations Date → string
  */
-export type ScheduleListItemDTO = Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
+export type ScheduleListItemDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
     startHour: string;   // Date → string "HH:mm"
     endHour: string;     // Date → string "HH:mm"
-}
+},never>
+export type ScheduleCoreDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
+    startHour: string;   // Date → string "HH:mm"
+    endHour: string;     // Date → string "HH:mm"
+},never>
 // #endregion
 
 // #region Filter DTO

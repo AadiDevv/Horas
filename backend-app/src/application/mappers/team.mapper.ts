@@ -5,9 +5,9 @@ import {
     TeamWithMembersDTO,
     TeamCreateDTO,
     TeamUpdateDTO,
-    TeamManagerDTO,
-    TeamMembreDTO
 } from "@/application/DTOS/team.dto";
+import { UserMapper } from "./user.mapper";
+import { ScheduleMapper } from "./schedule.mapper";
 
 /**
  * Mapper pour convertir les entités Team en DTOs et vice-versa
@@ -25,10 +25,9 @@ export class TeamMapper {
             ...team,
             createdAt: team.createdAt.toISOString(),
             updatedAt: team.updatedAt.toISOString(),
-            deletedAt: team.deletedAt?.toISOString(),
-            manager: team.manager ? {
-                ...team.manager,
-            } as TeamManagerDTO : undefined,
+            deletedAt: team.deletedAt? team.deletedAt.toISOString() : null,
+            manager: UserMapper.toReadManagerCoreDTO(team.manager),
+            schedule: ScheduleMapper.scheduleCore_ToReadDTO(team.schedule),
             membersCount: team.members?.length ?? team.membersCount ?? 0,
         };
     }
@@ -37,16 +36,8 @@ export class TeamMapper {
      * Convertit une entité Team en TeamListItemDTO (liste simplifiée)
      * Utilisé pour GET /teams (liste)
      */
-    public static toListItemDTO(team: Team): TeamListItemDTO {
-        return {
-            ...team,
-            createdAt: team.createdAt.toISOString(),
-            deletedAt: team.deletedAt?.toISOString(),
-            managerlastName: team.manager
-                ? `${team.manager.firstName} ${team.manager.lastName}`
-                : "Manager inconnu",
-            membersCount: team.members?.length ?? team.membersCount ?? 0,
-        };
+    public static toListItemDTO(teams: Team_Core[]): TeamListItemDTO[]{
+        return teams;
     }
 
     /**
@@ -56,9 +47,7 @@ export class TeamMapper {
     public static toWithMembersDTO(team: Team): TeamWithMembersDTO {
         return {
             ...this.toReadDTO(team),
-            members: team.members?.map(member => ({
-                ...member,
-            } as TeamMembreDTO)) ?? [],
+            members: UserMapper.UserEmployeeToListDTO(team.members)
         };
     }
     // #endregion

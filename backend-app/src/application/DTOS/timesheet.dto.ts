@@ -5,6 +5,7 @@ import {
     TimesheetProps_L1,
     UserEmployeeProps_Core
 } from "@/domain/types/entitiyProps";
+import { UserReadEmployeeCoreDTO, UserReadEmployeeDTO } from "./user.dto";
 
 // #region Create Params
 /**
@@ -41,13 +42,13 @@ export interface TimesheetUpdateDTO {
  * DTO de retour pour un timesheet (GET /timesheets/:id)
  * Basé sur TimesheetProps_L1 avec transformations Date → string + relation employe
  */
-export type TimesheetReadDTO = Omit<TimesheetProps, 'date' | 'hour' | 'createdAt' | 'updatedAt'> & {
+export type TimesheetReadDTO = Omit<Omit<TimesheetProps, 'date' | 'hour' | 'createdAt' | 'updatedAt'|'employe'> & {
     date: string;      // Date → string "YYYY-MM-DD"
     hour: string;      // Date → string ISO DateTime
     createdAt: string;
     updatedAt: string;
-    employe: UserEmployeeProps_Core;
-}
+    employe: UserReadEmployeeCoreDTO;
+},never>
 // #endregion
 
 // #region List & Filter DTOs
@@ -67,11 +68,10 @@ export interface TimesheetFilterDTO {
  * DTO pour la liste des timesheets (version simplifiée)
  * Basé sur TimesheetProps_Core avec transformations Date → string + employeeName dénormalisé
  */
-export type TimesheetListItemDTO = Omit<TimesheetProps_Core, 'date' | 'hour'> & {
+export type TimesheetListItemDTO = Omit<Omit<TimesheetProps_Core, 'date' | 'hour'> & {
     date: string;      // Date → string "YYYY-MM-DD"
     hour: string;      // Date → string ISO DateTime
-    employeeName: string;  // Dénormalisé (firstName + lastName)
-}
+},never>
 // #endregion
 
 // #region Statistics DTO

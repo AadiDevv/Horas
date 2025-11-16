@@ -5,7 +5,7 @@ import {
     UserManagerProps_Core,
     ScheduleProps_Core
 } from "@/domain/types/entitiyProps";
-
+import {ScheduleCoreDTO, UserEmployeeListItemDTO, UserReadManagerCoreDTO} from "@/application/DTOS"
 // #region Create DTO
 /**
  * DTO pour créer une équipe
@@ -36,23 +36,20 @@ export interface TeamAsignScheduleDTO {
  * DTO de retour pour une équipe (GET /teams/:id)
  * Basé sur TeamProps_L1 avec transformations Date → string + relations
  */
-export type TeamReadDTO = Omit<TeamProps_L1, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
+export type TeamReadDTO = Omit<Omit<TeamProps_L1, 'createdAt' | 'updatedAt' | 'deletedAt'> & {
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;
-    manager: UserManagerProps_Core;
-    schedule: Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
-        startHour: string;
-        endHour: string;
-    };
-}
+    manager: UserReadManagerCoreDTO;
+    schedule: ScheduleCoreDTO
+},never>
 
 /**
  * DTO pour une équipe avec la liste complète des membres
  * Utilisé pour GET /teams/:id?include=members
  */
 export interface TeamWithMembersDTO extends TeamReadDTO {
-    members: UserEmployeeProps_Core[];
+    members: UserEmployeeListItemDTO;
 }
 // #endregion
 
@@ -61,11 +58,8 @@ export interface TeamWithMembersDTO extends TeamReadDTO {
  * DTO pour la liste des équipes (version simplifiée)
  * Basé sur TeamProps_Core + champs Date transformés + managerName dénormalisé
  */
-export type TeamListItemDTO = TeamProps_Core & {
-    createdAt: string;
-    deletedAt: string | null;
-    managerName: string;  // Dénormalisé pour affichage
-}
+export type TeamListItemDTO = TeamProps_Core
+export type TeamCoreDTO = TeamProps_Core
 
 /**
  * DTO pour filtrer les équipes (Query Params)

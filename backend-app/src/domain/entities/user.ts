@@ -1,4 +1,5 @@
 import {
+    UserProps_Core,
     UserEmployeeProps_Core,
     UserEmployeeProps_L1,
     UserEmployeeProps,
@@ -26,15 +27,15 @@ export abstract class User_Core {
     public role: Role;
     public isActive: boolean;
 
-    constructor(id: number, firstName: string, lastName: string, email: string, phone: string, hashedPassword: string, role: Role, isActive: boolean) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phone = phone;
-        this.hashedPassword = hashedPassword;
-        this.role = role;
-        this.isActive = isActive;
+    constructor(props: UserProps_Core) {
+        this.id = props.id;
+        this.firstName = props.firstName;
+        this.lastName = props.lastName;
+        this.email = props.email;
+        this.phone = props.phone;
+        this.hashedPassword = props.hashedPassword;
+        this.role = props.role;
+        this.isActive = props.isActive;
 
         // Validation après attribution
         this.validate();
@@ -120,20 +121,12 @@ export class UserEmployee_Core extends User_Core {
     public customScheduleId: number | null;
 
     constructor(props: UserEmployeeProps_Core) {
-        super(
-            props.id,
-            props.firstName,
-            props.lastName,
-            props.email,
-            props.phone,
-            props.hashedPassword,
-            props.role,
-            props.isActive
-        );
+        const {teamId, managerId,customScheduleId, ...superProps} = props;
+        super({...superProps});
 
-        this.teamId = props.teamId;
-        this.managerId = props.managerId;
-        this.customScheduleId = props.customScheduleId;
+        this.teamId = teamId;
+        this.managerId = managerId;
+        this.customScheduleId = customScheduleId;
 
         // Validation spécifique employé
         this.validateEmployee();
@@ -160,19 +153,11 @@ export class UserManager_Core extends User_Core {
     public employeeIds: number[] | null;
 
     constructor(props: UserManagerProps_Core) {
-        super(
-            props.id,
-            props.firstName,
-            props.lastName,
-            props.email,
-            props.phone,
-            props.hashedPassword,
-            props.role,
-            props.isActive
-        );
+        const {teamIds, employeeIds, ...superProps} = props;
+        super({...superProps});
 
-        this.teamIds = props.teamIds;
-        this.employeeIds = props.employeeIds;
+        this.teamIds = teamIds;
+        this.employeeIds = employeeIds;
 
         // Validation spécifique manager
         this.validateManager();

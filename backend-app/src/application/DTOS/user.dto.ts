@@ -97,7 +97,8 @@ export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt
  */
 export type UserEmployeeListItemDTO =  UserEmployeeProps_Core[]
 export type UserManagerListItemDTO =  UserManagerProps_Core[]
-
+export type UserReadEmployeeCoreDTO = UserEmployeeProps_Core;
+export type UserReadManagerCoreDTO = UserManagerProps_Core;
 /**
  * DTO pour filtrer les users
  * Query params: GET /users?role=employe&teamId=1&isActive=true

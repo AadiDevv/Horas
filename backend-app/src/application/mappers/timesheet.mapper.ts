@@ -1,5 +1,6 @@
 import { Timesheet } from "@/domain/entities/timesheet";
 import { TimesheetReadDTO, TimesheetListItemDTO, TimesheetUpdateDTO } from "@/application/DTOS";
+import { UserMapper } from "./user.mapper";
 
 /**
  * Mapper pour convertir les entités Timesheet en DTOs et vice-versa
@@ -17,7 +18,7 @@ export class TimesheetMapper {
             hour: timesheet.hour.toISOString(),
             createdAt: timesheet.createdAt.toISOString(),
             updatedAt: timesheet.updatedAt.toISOString(),
-            employe: this.toReadDTO /// emplouee toReadDTO
+            employe: UserMapper.toReadEmployeeCoreDTO(timesheet.employe) /// emplouee toReadDTO
         };
     }
 
@@ -25,13 +26,13 @@ export class TimesheetMapper {
      * Convertit une entité Timesheet en TimesheetListItemDTO (liste simplifiée)
      * Utilisé pour GET /timesheets (liste)
      */
-    public static toListItemDTO(timesheet: Timesheet): TimesheetListItemDTO {
-        return {
+    public static toListItemDTO(timesheets: Timesheet[]): TimesheetListItemDTO[] {
+        return timesheets.map(timesheet => ({
             ...timesheet,
             date: timesheet.date.toISOString().split("T")[0],
             hour: timesheet.hour.toISOString(),
 
-        };
+        }));
     }
 
     /**

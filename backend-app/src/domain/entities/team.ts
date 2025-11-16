@@ -1,5 +1,5 @@
 import { TeamProps_Core, TeamProps_L1, TeamProps } from "../types/entitiyProps";
-import { User_Core, Schedule_Core } from "./";
+import { User_Core, Schedule_Core, UserManager_Core, UserEmployee_Core } from "./";
 import { ValidationError } from "../error/AppError";
 
 /**
@@ -81,8 +81,8 @@ export class Team_L1 extends Team_Core {
  * Représente la réalité complète d'une équipe
  */
 export class Team extends Team_L1 {
-    public manager: User_Core;
-    public members: User_Core[];
+    public manager: UserManager_Core;
+    public members: UserEmployee_Core[];
     public schedule: Schedule_Core;
 
     constructor(props: TeamProps) {

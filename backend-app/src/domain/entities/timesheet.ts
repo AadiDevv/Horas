@@ -9,6 +9,7 @@ import {  TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../type
  * Utilisé avant l'insertion en base de données
  */
 export class Timesheet_Core {
+    public id: number;
     public employeId: number;
     public date: Date;
     public hour: Date;
@@ -16,6 +17,7 @@ export class Timesheet_Core {
     public status: TimesheetStatus;
 
     constructor(props: TimesheetProps_Core) {
+        this.id = props.id;
         this.employeId = props.employeId;
         this.date = props.date;
         this.hour = props.hour;

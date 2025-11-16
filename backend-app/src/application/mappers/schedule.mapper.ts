@@ -4,8 +4,12 @@ import {
     ScheduleListItemDTO,
     ScheduleWithUsersDTO,
     ScheduleCreateDTO,
-    ScheduleUpdateDTO
+    ScheduleUpdateDTO,
+    ScheduleCoreDTO
 } from "@/application/DTOS/schedule.dto";
+import { TeamMapper } from "./team.mapper";
+import { UserMapper } from "./user.mapper";
+import { UserEmployee_Core } from "@/domain/entities";
 
 /**
  * Mapper pour convertir les entités Schedule en DTOs et vice-versa
@@ -26,6 +30,14 @@ export class ScheduleMapper {
             createdAt: schedule.createdAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
             updatedAt: schedule.updatedAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
             usersCount: schedule.usersCount,
+            teams: TeamMapper.toListItemDTO(schedule.teams),
+            manager: UserMapper.toReadManagerCoreDTO(schedule.manager)
+        };
+    }
+    public static scheduleCore_ToReadDTO(schedule: Schedule_Core): ScheduleCoreDTO {
+        return {
+            ...schedule,
+            ...schedule.hoursToISOString()
         };
     }
 
@@ -33,29 +45,21 @@ export class ScheduleMapper {
      * Convertit une entité Schedule en ScheduleListItemDTO (liste simplifiée)
      * Utilisé pour GET /schedules (liste)
      */
-    public static toListItemDTO(schedule: Schedule): ScheduleListItemDTO {
-        return {
+    public static toListItemDTO(schedules: Schedule_Core[]): ScheduleListItemDTO[] {
+        return schedules.map(schedule => ({
             ...schedule,
-            startHour: Schedule_Core.formatTimeToString(schedule.startHour),
-            endHour: Schedule_Core.formatTimeToString(schedule.endHour),
-            usersCount: schedule.usersCount ?? 0,
-        };
+            ...schedule.hoursToISOString()
+        }))
     }
 
     /**
      * Convertit une entité Schedule en ScheduleWithUsersDTO (avec liste des utilisateurs)
      * Utilisé pour GET /schedules/:id?include=users
      */
-    public static toWithUsersDTO(schedule: Schedule): ScheduleWithUsersDTO {
+    public static toWithUsersDTO(schedule: Schedule, users: UserEmployee_Core[]): ScheduleWithUsersDTO {
         return {
             ...this.toReadDTO(schedule),
-            users: schedule.users?.map(user => ({
-                id: user.id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                role: user.role,
-            })) ?? [],
+            users:UserMapper.UserEmployeeToListDTO(users)
         };
     }
     // #endregion
@@ -69,12 +73,8 @@ export class ScheduleMapper {
     public static fromCreateDTO(dto: ScheduleCreateDTO, managerId: number): Schedule_Core {
         return new Schedule_Core({
             id: 0, // Sera généré par Prisma
-            name: dto.name,
-            startHour: Schedule_Core.parseTimeString(dto.startHour),
-            endHour: Schedule_Core.parseTimeString(dto.endHour),
-            activeDays: dto.activeDays,
+            ...dto,
             managerId: managerId,
-            usersCount: 0,
         });
     }
 

@@ -1,5 +1,5 @@
 import { Role, TimesheetStatus } from "./index";
-import { User_Core, Team_Core, Schedule_Core , UserEmployee_Core} from "../entities/";
+import { User_Core, Team_Core, Schedule_Core , UserEmployee_Core, UserManager_Core} from "../entities/";
 
 //#region User hierarchy types
 export namespace User_Props {
@@ -91,9 +91,9 @@ export namespace Team_Props {
     }
 
     type Team_joints = {
-        manager: User_Core;
+        manager: UserManager_Core;
         schedule: Schedule_Core;
-        members: User_Core[];
+        members: UserEmployee_Core[];
     }
 
     // Props Hierarchy
@@ -133,7 +133,7 @@ export namespace Schedule_Props {
     }
 
     type Schedule_joints = {
-        manager: User_Core;
+        manager: UserManager_Core;
         teams: Team_Core[];
     }
 

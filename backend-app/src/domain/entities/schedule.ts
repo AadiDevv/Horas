@@ -1,6 +1,6 @@
 import { ScheduleProps_Core, ScheduleProps_L1, ScheduleProps } from "../types/entitiyProps";
 import { ValidationError } from "../error/AppError";
-import { User_Core, Team_Core } from "./";
+import { UserManager_Core, Team_Core } from "./";
 
 /**
  * Schedule_Core
@@ -60,6 +60,12 @@ export class Schedule_Core {
     // #endregion
 
     // #region Business Methods
+    public hoursToISOString() {
+        return {
+            startHour: this.startHour.toISOString(),
+            endHour: this.endHour.toISOString(),
+        }
+    }
     public getDisplayName(): string {
         return this.name;
     }
@@ -131,7 +137,7 @@ export class Schedule_L1 extends Schedule_Core {
  * Représente la réalité complète d'un horaire
  */
 export class Schedule extends Schedule_L1 {
-    public manager: User_Core;
+    public manager: UserManager_Core;
     public teams: Team_Core[];
 
     constructor(props: ScheduleProps) {

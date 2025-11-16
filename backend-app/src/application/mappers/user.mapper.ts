@@ -13,7 +13,9 @@ import {
     UserAuthDTO,
     UserCreateEmployeeDTO,
     UserCreateManagerDTO,
-    UserUpdateDTO
+    UserUpdateDTO,
+    UserReadEmployeeCoreDTO,
+    UserReadManagerCoreDTO
 } from "@/application/DTOS/";
 import { } from "@/application/DTOS/team.dto";
 import { Role } from "@/domain/types";
@@ -30,14 +32,14 @@ export class UserMapper {
     /**
      * Vérifie si un User est un UserEmployee
      */
-    public static isUserEmployee(user: User_Core): user is UserEmployee {
+    public static isUserEmployee(user: User_Core): user is UserEmployee_Core {
         return user.role === "employe";
     }
 
     /**
      * Vérifie si un User est un UserManager
      */
-    public static isUserManager(user: User_Core): user is UserManager {
+    public static isUserManager(user: User_Core): user is UserManager_Core {
         return user.role === "manager";
     }
     // #endregion
@@ -53,6 +55,21 @@ export class UserMapper {
             return this.toEmployeeReadDTO(user);
         }
         return this.toManagerReadDTO(user);
+    }
+    public static toReadEmployeeCoreDTO(user: UserEmployee_Core): UserReadEmployeeCoreDTO  {
+        if (this.isUserEmployee(user)) {
+            return {
+                ...user
+            };
+        } else throw new Error('Type d’utilisateur inconnu pour le mapping CoreDTO');
+    }
+    public static toReadManagerCoreDTO(user: UserManager_Core): UserReadManagerCoreDTO {
+        if (this.isUserManager(user)) {
+            return {
+                ...user
+            };
+        } else 
+        throw new Error('Type d’utilisateur inconnu pour le mapping CoreDTO');
     }
 
     /**
@@ -92,6 +109,12 @@ export class UserMapper {
         // Manager n'a pas de team
         return users as UserManagerListItemDTO
     }
+    public static UserEmployeeToListDTO(users: UserEmployee_Core[]): UserEmployeeListItemDTO{
+            return users 
+    }
+    public static UserManagerToListDTO(users: UserManager_Core[]): UserManagerListItemDTO{
+        return users 
+}
 
     /**
      * Convertit une entité User en UserAuthDTO
