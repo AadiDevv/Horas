@@ -14,15 +14,14 @@ import {
 
 
 
-export type UserCreateEmployeeDTO  = Omit<UserEmployeeProps_Core,'id'> &{
+export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'hashedPassword' | 'role'> &{
         teamId?: number; // null if the employee is not assigned to a team
         customScheduleId?: number; 
-}
-export type UserCreateManagerDTO  = Omit<UserManagerProps_Core,'id'> &{
+},never>
+export type UserCreateManagerDTO  = Omit<Omit<UserManagerProps_Core,'id'| 'hashedPassword' | 'role'> &{
     teamIds?: number[] ; 
     employeeIds?: number[];
-    role: Extract<Role, "manager">;
-}
+},never>
 
 // #endregion
 

@@ -1,11 +1,11 @@
 import { Role, TimesheetStatus } from "./index";
-import {  User_Core, Team_Core, Schedule_Core } from "../entities/";
+import { User_Core, Team_Core, Schedule_Core } from "../entities/";
 
 //#region User hierarchy types
 export namespace User_Props {
     //#region private
     //CORE
-    type UserProps_Core = {
+    export type UserProps_Core = {
 
         id: number;
         firstName: string;
@@ -61,6 +61,7 @@ export namespace User_Props {
 }
 
 // Aliases top-level pour import direct ailleurs sans préfixe namespace
+export type UserProps_Core = User_Props.UserProps_Core
 
 export type UserManagerProps = User_Props.UserManagerProps;
 export type UserManagerProps_L1 = User_Props.UserManagerProps_L1;

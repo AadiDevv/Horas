@@ -2,7 +2,6 @@ import {
     User,
     UserEmployee,
     UserManager,
-    User_Core,
     UserEmployee_Core,
     UserManager_Core
 } from "@/domain/entities/user";
@@ -17,11 +16,14 @@ import {
     UserUpdateDTO
 } from "@/application/DTOS/";
 import { } from "@/application/DTOS/team.dto";
+import { Role } from "@/domain/types";
 
 /**
  * Mapper pour convertir les entités User en DTOs et vice-versa
  * Remplace les méthodes toXDTO() et fromXDTO() de l'entité (anti-pattern #2)
  */
+
+type User_Core = UserEmployee_Core | UserManager_Core
 export class UserMapper {
     // #region Type Guards
 
@@ -85,70 +87,22 @@ export class UserMapper {
     public static toListItemDTO(users: User_Core[]): UserEmployeeListItemDTO | UserManagerListItemDTO {
 
         if (this.isUserEmployee(users[0])) {
+            return users as UserEmployeeListItemDTO
         }
         // Manager n'a pas de team
-        return {
-        };
+        return users as UserManagerListItemDTO
     }
-    private static toListEmployeeDTO(user: User):
 
     /**
      * Convertit une entité User en UserAuthDTO
      * Utilisé pour les réponses d'authentification (login, register)
      */
-    public static toAuthDTO(user: User): UserAuthDTO {
-        const base = {
-            ...user,
-            ...user.dateToISOString(),
-        };
-
-        if (this.isUserEmployee(user)) {
+    public static toAuthDTO(user: User_Core): UserAuthDTO {
             return {
-                ...base,
-                teamId: user.team?.id,
-                customScheduleId: user.customSchedule?.id,
-            } as UserAuthDTO;
-        }
+                ...user,
+            } ;
 
-        // Manager
-        return {
-            ...base,
-            teamId: undefined,
-            customScheduleId: undefined,
-        } as UserAuthDTO;
     }
-
-    /**
-     * Convertit l'utilisateur en TeamManagerDTO
-     * Utilisé dans les DTOs d'équipe pour afficher les infos du manager
-     */
-    public static toTeamManagerDTO(user: User): TeamManagerDTO {
-        return {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role: user.role,
-        };
-    }
-
-    /**
-     * Convertit l'utilisateur en TeamMembreDTO
-     * Utilisé dans les DTOs d'équipe pour afficher les infos des membres
-     */
-    public static toTeamMemberDTO(user: User): TeamMembreDTO {
-        return {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            role: user.role,
-            isActive: user.isActive,
-            phone: user.phone,
-        };
-    }
-    // #endregion
-
     // #region Transformation DTO → Entité (Factory)
 
     /**
@@ -157,7 +111,8 @@ export class UserMapper {
      */
     public static fromCreateEmployeeDTO(
         dto: UserCreateEmployeeDTO,
-        hashedPassword: string
+        hashedPassword: string,
+        role : Extract<Role, "employe">
     ): UserEmployee_Core {
         return new UserEmployee_Core({
             id: 0, // Sera généré par Prisma
@@ -166,6 +121,7 @@ export class UserMapper {
             isActive: true,
             teamId: dto.teamId ?? null,
             customScheduleId: dto.customScheduleId ?? null,
+            role
         });
     }
 
@@ -175,7 +131,8 @@ export class UserMapper {
      */
     public static fromCreateManagerDTO(
         dto: UserCreateManagerDTO,
-        hashedPassword: string
+        hashedPassword: string,
+        role : Extract<Role, "manager">
     ): UserManager_Core {
         return new UserManager_Core({
             id: 0, // Sera généré par Prisma
@@ -184,6 +141,7 @@ export class UserMapper {
             isActive: true,
             teamIds: null,
             employeeIds: null,
+            role
         });
     }
 
