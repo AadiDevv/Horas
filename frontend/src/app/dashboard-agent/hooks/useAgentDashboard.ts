@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DayKey, TimeLog, User, UserFormData, Horaire } from '../types';
-import { getUser, updateUser, changePassword } from '../services/userService';
+import { getUserById, updateAgent, changeUserPassword } from '../../dashboard-manager/services/apiService';
 import { getEquipeHoraires } from '../services/equipeService';
 
 // Export du nouveau hook timesheet
@@ -22,7 +22,7 @@ export function useUserData() {
     try {
       setLoading(true);
       const userId = 1; // TODO: Get from auth context
-      const response = await getUser(userId);
+      const response = await getUserById(userId);
 
       if (response.success && response.data) {
         setUserData(response.data);
@@ -104,7 +104,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
           return;
         }
         
-        const passwordResponse = await changePassword(
+        const passwordResponse = await changeUserPassword(
           userData.id,
           formData.oldPassword,
           formData.newPassword
@@ -117,7 +117,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
         }
       }
       
-      const response = await updateUser(userData.id, {
+      const response = await updateAgent(userData.id, {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email

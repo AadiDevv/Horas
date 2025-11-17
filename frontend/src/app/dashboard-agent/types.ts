@@ -10,7 +10,7 @@ export interface User {
   equipeId?: number;
   plageHoraireId?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   lastLoginAt?: string;
   deletedAt?: string | null;
 }

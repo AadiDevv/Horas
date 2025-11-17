@@ -1,7 +1,7 @@
 import { User, ApiResponse } from '../types';
 
 const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Mock Data
 const mockUsers: User[] = [
