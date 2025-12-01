@@ -56,11 +56,33 @@ export function useTimesheet() {
   /**
    * Calcule les heures travaillées à partir d'une paire entrée/sortie
    */
-  const calculateHours = (startISO: string, endISO: string): number => {
-    const start = new Date(startISO);
-    const end = new Date(endISO);
+  const calculateHours = (startISO: string, endISO: string, date?: string): number => {
+    let start: Date;
+    let end: Date;
+
+    // Vérifier si startISO est un timestamp complet ou juste une heure
+    if (startISO.includes('T')) {
+      // Format complet ISO "2025-10-24T08:30:00.000Z"
+      start = new Date(startISO);
+      end = new Date(endISO);
+    } else {
+      // Format heure seule "08:30:00" ou "08:30"
+      // Utiliser la date fournie ou aujourd'hui
+      const baseDate = date || new Date().toISOString().split('T')[0];
+      start = new Date(`${baseDate}T${startISO}`);
+      end = new Date(`${baseDate}T${endISO}`);
+    }
+
     const diffMs = end.getTime() - start.getTime();
-    return diffMs / (1000 * 60 * 60); // Convertir en heures
+    const hours = diffMs / (1000 * 60 * 60); // Convertir en heures
+
+    // Si le résultat est négatif ou absurde (> 24h), retourner 0
+    if (hours < 0 || hours > 24) {
+      console.warn(`⚠️ Calcul d'heures invalide: ${startISO} → ${endISO} = ${hours}h`);
+      return 0;
+    }
+
+    return hours;
   };
 
   /**
@@ -104,13 +126,13 @@ export function useTimesheet() {
         if (ts.clockin === true) {
           const nextTs = sorted[i + 1];
           if (nextTs && nextTs.clockin === false) {
-            const hours = calculateHours(ts.hour || ts.heure || '', nextTs.hour || nextTs.heure || '');
+            const hours = calculateHours(ts.hour || ts.heure || '', nextTs.hour || nextTs.heure || '', date);
             console.log(`  ⏱️ ${date} - Paire ${ts.hour} → ${nextTs.hour} = ${hours.toFixed(2)}h`);
             dayHours += hours;
             i++; // Sauter le prochain
           } else if (date === today) {
             // Clock-in actif aujourd'hui, calculer jusqu'à maintenant
-            const hours = calculateHours(ts.hour || ts.heure || '', now.toISOString());
+            const hours = calculateHours(ts.hour || ts.heure || '', now.toISOString(), date);
             console.log(`  ⏱️ ${date} - Clock-in actif ${ts.hour} → maintenant = ${hours.toFixed(2)}h`);
             dayHours += hours;
           }

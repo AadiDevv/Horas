@@ -25,6 +25,7 @@ import {
   useEquipeManager,
 } from "./hooks/useManagerDashboard";
 import { useManagerSettings } from "./hooks/useManagerSettings";
+import { useManagerStats } from "./hooks/useManagerStats";
 
 // ==================== MAIN COMPONENT ====================
 function ManagerDashboard() {
@@ -100,6 +101,9 @@ function ManagerDashboard() {
       agents: agentsInTeam
     };
   });
+
+  // Stats hook pour les données réelles (APRÈS enrichedEquipes)
+  const { stats, loading: statsLoading, refreshStats } = useManagerStats(agents, enrichedEquipes);
 
   // ==================== HANDLERS ====================
   const handleAgentSubmit = () => {
@@ -209,56 +213,40 @@ function ManagerDashboard() {
                   />
                   <KpiCard
                     title="Retards aujourd'hui"
-                    value="3"
-                    subtitle="Retard moyen: 12 min"
+                    value={stats.retardsAujourdhui.toString()}
+                    subtitle={stats.retardMoyen > 0 ? `Retard moyen: ${stats.retardMoyen} min` : "Aucun retard"}
                     icon={Clock}
                   />
                 </div>
 
-                {/* Section graphiques */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <HeuresChart
-                    equipes={[
-                      { nom: "Équipe A", heures: 38, objectif: 40 },
-                      { nom: "Équipe B", heures: 42, objectif: 40 },
-                      { nom: "Équipe C", heures: 35, objectif: 40 },
-                    ]}
-                  />
-                  <RetardsCard
-                    retards={[
-                      { employeNom: "Jean Dupont", minutes: 15, heureArrivee: "9h15" },
-                      { employeNom: "Marie Martin", minutes: 8, heureArrivee: "9h08" },
-                      { employeNom: "Paul Durand", minutes: 12, heureArrivee: "9h12" },
-                    ]}
-                    retardMoyen={12}
-                  />
-                </div>
+                {/* Section graphiques - Données réelles */}
+                {enrichedEquipes.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <HeuresChart
+                      equipes={stats.heuresParEquipe}
+                    />
+                    <RetardsCard
+                      retards={stats.retardsDetail}
+                      retardMoyen={stats.retardMoyen}
+                    />
+                  </div>
+                )}
 
-                {/* Section stats retards et ponctualité */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <RetardsWeekChart
-                    data={[
-                      { jour: "Lun", count: 2 },
-                      { jour: "Mar", count: 4 },
-                      { jour: "Mer", count: 1 },
-                      { jour: "Jeu", count: 3, isToday: true },
-                      { jour: "Ven", count: 0 },
-                      { jour: "Sam", count: 0 },
-                      { jour: "Dim", count: 0 },
-                    ]}
-                    total={10}
-                    evolution={-20}
-                  />
-                  <PonctualiteScore
-                    equipes={[
-                      { nom: "Équipe A", score: 94 },
-                      { nom: "Équipe B", score: 87 },
-                      { nom: "Équipe C", score: 78 },
-                    ]}
-                    scoreGlobal={86}
-                    objectif={90}
-                  />
-                </div>
+                {/* Section stats retards et ponctualité - Données réelles */}
+                {enrichedEquipes.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <RetardsWeekChart
+                      data={stats.retardsParJour}
+                      total={stats.totalRetardsSemaine}
+                      evolution={stats.evolutionRetards}
+                    />
+                    <PonctualiteScore
+                      equipes={stats.scoreParEquipe}
+                      scoreGlobal={stats.scoreGlobal}
+                      objectif={90}
+                    />
+                  </div>
+                )}
               </>
             )}
 
