@@ -1,5 +1,5 @@
-import { TeamProps_Core, TeamProps_L1, TeamProps } from "../types/entitiyProps";
-import { User_Core, Schedule_Core, UserManager_Core, UserEmployee_Core } from "./";
+import { TeamProps_Core, TeamProps_L1, TeamProps } from "../types/";
+import { Schedule_Core, UserManager_Core, UserEmployee_Core } from "./";
 import { ValidationError } from "../error/AppError";
 
 /**

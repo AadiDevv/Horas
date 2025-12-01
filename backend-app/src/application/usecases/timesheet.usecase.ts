@@ -85,7 +85,7 @@ export class TimesheetUseCase {
      * @param params - Paramètres de création (type centralisé)
      * @returns Timesheet complet (après insertion, avec id et jointure employe)
      */
-    async createTimesheet(params: TimesheetCreateParams): Promise<Timesheet> {
+    async createTimesheet(params: TimesheetCreateParams): Promise<Timesheet_Core> {
         const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId, userRole, userId } = params;
 
         // Déterminer l'employé cible

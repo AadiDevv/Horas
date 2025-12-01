@@ -12,7 +12,7 @@ export interface ITimesheet {
      * Récupère tous les timesheets, éventuellement filtrés (par employeId, période, etc.)
      * @param filter - Filtres optionnels (employeId, startDate, endDate, status, clockin)
      */
-    getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet[]>;
+    getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet_Core[]>;
 
     /**
      * Récupère un timesheet par son ID

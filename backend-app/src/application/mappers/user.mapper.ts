@@ -29,33 +29,42 @@ type User_Core = UserEmployee_Core | UserManager_Core
 export class UserMapper {
     // #region Type Guards
 
-    /**
-     * Vérifie si un User est un UserEmployee
-     */
     public static isUserEmployee(user: User_Core): user is UserEmployee_Core {
         return user.role === "employe";
     }
 
-    /**
-     * Vérifie si un User est un UserManager
-     */
     public static isUserManager(user: User_Core): user is UserManager_Core {
         return user.role === "manager";
     }
     // #endregion
 
-    // #region Transformation Entité → DTO
-
-    /**
-     * Convertit une entité User en UserReadDTO (détail complet)
-     * Utilisé pour GET /users/:id
-     */
+    //Transformation Entité → DTO
+    // #region READ
     public static toReadDTO(user: User): UserReadEmployeeDTO | UserReadManagerDTO {
         if (this.isUserEmployee(user)) {
             return this.toEmployeeReadDTO(user);
         }
         return this.toManagerReadDTO(user);
     }
+    private static toEmployeeReadDTO(employee: UserEmployee): UserReadEmployeeDTO {
+        return {
+            ...employee,
+            ...employee.dateToISOString()
+        };
+    }
+
+    private static toManagerReadDTO(manager: UserManager): UserReadManagerDTO {
+        return {
+            ...manager,
+            ...manager.dateToISOString(),
+            employes: manager.employes?.map(emp => ({
+                id: emp.id,
+                firstName: emp.firstName,
+                lastName: emp.lastName,
+            })) ?? [],
+        } as UserReadManagerDTO;
+    }
+    // #region READ CORE
     public static toReadEmployeeCoreDTO(user: UserEmployee_Core): UserReadEmployeeCoreDTO  {
         if (this.isUserEmployee(user)) {
             return {
@@ -72,43 +81,7 @@ export class UserMapper {
         throw new Error('Type d’utilisateur inconnu pour le mapping CoreDTO');
     }
 
-    /**
-     * Convertit un UserEmployee en UserReadEmployeeDTO
-     */
-    private static toEmployeeReadDTO(employee: UserEmployee): UserReadEmployeeDTO {
-        return {
-            ...employee,
-            ...employee.dateToISOString()
-        };
-    }
-
-    /**
-     * Convertit un UserManager en UserReadManagerDTO
-     */
-    private static toManagerReadDTO(manager: UserManager): UserReadManagerDTO {
-        return {
-            ...manager,
-            ...manager.dateToISOString(),
-            employes: manager.employes?.map(emp => ({
-                id: emp.id,
-                firstName: emp.firstName,
-                lastName: emp.lastName,
-            })) ?? [],
-        } as UserReadManagerDTO;
-    }
-
-    /**
-     * Convertit une entité User en UserListItemDTO (liste simplifiée)
-     * Utilisé pour GET /users (liste)
-     */
-    public static toListItemDTO(users: User_Core[]): UserEmployeeListItemDTO | UserManagerListItemDTO {
-
-        if (this.isUserEmployee(users[0])) {
-            return users as UserEmployeeListItemDTO
-        }
-        // Manager n'a pas de team
-        return users as UserManagerListItemDTO
-    }
+    // #region READ LIST CORE
     public static UserEmployeeToListDTO(users: UserEmployee_Core[]): UserEmployeeListItemDTO{
             return users 
     }
@@ -126,6 +99,8 @@ export class UserMapper {
             } ;
 
     }
+
+    // #endregion
     // #region Transformation DTO → Entité (Factory)
 
     /**

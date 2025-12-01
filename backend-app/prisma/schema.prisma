@@ -108,7 +108,7 @@ model Schedule {
 
 model Timesheet {
   id           Int             @id @default(autoincrement())
-  employeId   Int
+  employeId    Int
   date         DateTime         @db.Date
   hour         DateTime         @db.Time
   clockin      Boolean

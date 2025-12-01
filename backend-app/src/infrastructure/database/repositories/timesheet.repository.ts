@@ -1,17 +1,17 @@
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
 import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
 import { prisma } from "../prisma.service";
-import { User } from "@/domain/entities/user";
+import { UserEmployee_Core } from "@/domain/entities/user";
 import { TimesheetFilterDTO } from "@/application/DTOS";
-import { TIMESHEET_CORE_SELECT, TIMESHEET_L1_SELECT } from "@/infrastructure/prismaUtils/timesheets.prismaConfig";
-import { USER_CORE_SELECT } from "@/infrastructure/prismaUtils/user.prismaConfig";
+import { TIMESHEET_CORE_SELECT, TIMESHEET_L1_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/timesheets.prismaConfig";
+import { USER_EMPLOYEE_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/user.prismaConfig";
 
 
 export class TimesheetRepository implements ITimesheet {
 
     // #region Read
 
-    async getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet[]> {
+    async getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet_Core[]> {
         const { employeId, startDate, endDate, status, clockin } = filter || {};
 
         const dateFilter: any = {};
@@ -26,61 +26,47 @@ export class TimesheetRepository implements ITimesheet {
                 ...(clockin !== undefined && { clockin }),
             },
             select: {
-                ...TIMESHEET_CORE_SELECT,
-                employe: {
-                    select: {
-                        ...USER_CORE_SELECT,
-                    }
-                }
+                ...TIMESHEET_CORE_SELECT, 
             },
             orderBy: {
                 date: 'desc'
             }
         });
 
-        return timesheets.map(t => new Timesheet({
+        return timesheets.map(t => new Timesheet_Core({
             ...t,
-            employe: new User({ ...t.employe })
         }));
     }
 
     async getTimesheetById(id: number): Promise<Timesheet | null> {
         const timesheet = await prisma.timesheet.findUnique({
             where: { id },
-            include: {
+            select: {
+                ...TIMESHEET_L1_SELECT,
                 employe: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_EMPLOYEE_CORE_SELECT,
                     }
                 }
-            }
+            },
         });
 
         if (!timesheet) return null;
 
         return new Timesheet({
             ...timesheet,
-            employe: new User({ ...timesheet.employe })
+            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId! })
         });
     }
 
     async getTimesheets_ByEmployeId(employeId: number): Promise<Timesheet[]> {
         const timesheets = await prisma.timesheet.findMany({
             where: { employeId },
-            include: {
+            select: {
+                ...TIMESHEET_L1_SELECT,
                 employe: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_EMPLOYEE_CORE_SELECT,
                     }
                 }
             },
@@ -91,22 +77,18 @@ export class TimesheetRepository implements ITimesheet {
 
         return timesheets.map(t => new Timesheet({
             ...t,
-            employe: new User({ ...t.employe })
+            employe: new UserEmployee_Core({ ...t.employe, managerId: t.employe.managerId! })
         }));
     }
 
     async getLastByEmployee(employeId: number): Promise<Timesheet | null> {
         const timesheet = await prisma.timesheet.findFirst({
             where: { employeId },
-            include: {
+            select: {
+                ...TIMESHEET_L1_SELECT,
                 employe: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_EMPLOYEE_CORE_SELECT,
                     }
                 }
             },
@@ -120,7 +102,7 @@ export class TimesheetRepository implements ITimesheet {
 
         return new Timesheet({
             ...timesheet,
-            employe: new User({ ...timesheet.employe }),
+            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId! })
         });
     }
 
@@ -159,13 +141,10 @@ export class TimesheetRepository implements ITimesheet {
     // #region Create
 
     async createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet> {
+        const { id, ...rest } = timesheet;
         const created = await prisma.timesheet.create({
             data: {
-                employeId: timesheet.employeId,
-                date: timesheet.date,
-                hour: timesheet.hour,
-                clockin: timesheet.clockin,
-                status: timesheet.status,
+                ...rest,
             },
             include: {
                 employe: {

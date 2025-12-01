@@ -1,4 +1,4 @@
-import { Schedule } from "@/domain/entities/schedule";
+import { Schedule, Schedule_Core } from "@/domain/entities/schedule";
 import { ScheduleFilterDTO } from "@/application/DTOS";
 
 /**
@@ -11,7 +11,7 @@ export interface ISchedule {
      * Récupère tous les schedules avec filtres optionnels
      * @param filter - Filtres (name, activeDays, etc.)
      */
-    getAllSchedules(where?: any): Promise<Schedule[]>;
+    getAllSchedules(where?: any): Promise<Schedule_Core[]>;
 
     /**
      * Récupère un schedule par son ID
