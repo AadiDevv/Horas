@@ -9,12 +9,14 @@ interface AgentListProps {
   onDeleteAgent: (id: number) => void;
 }
 
+export const getEquipeName = (equipes: Equipe[], equipeId?: number) => {
+  if (!equipeId) return null;
+  const equipe = equipes.find(e => e.id === equipeId);
+  return equipe?.nom || 'Équipe inconnue';
+};
+
+
 export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, onDeleteAgent }: AgentListProps) {
-  const getEquipeName = (equipeId?: number) => {
-    if (!equipeId) return null;
-    const equipe = equipes.find(e => e.id === equipeId);
-    return equipe?.nom || 'Équipe inconnue';
-  };
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -62,7 +64,7 @@ export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, on
                           <span className="text-gray-300">•</span>
                           <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">
                             <Users size={12} />
-                            <span>{getEquipeName(agent.equipeId)}</span>
+                            <span>{getEquipeName(equipes, agent.equipeId)}</span>
                           </div>
                         </>
                       )}

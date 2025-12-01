@@ -287,6 +287,7 @@ function ManagerDashboard() {
             {currentPage === "pointages" && (
               <PointagesManagement
                 agents={filteredAgents}
+                equipes={equipes}
                 onRefresh={loadAgents}
               />
             )}
