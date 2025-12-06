@@ -1,4 +1,4 @@
-import { User } from "@/domain/entities/user";
+import { User, UserEmployee, UserEmployee_Core, UserEmployee_L1 } from "@/domain/entities/user";
 import { UserFilterDTO } from "@/application/DTOS/user.dto";
 
 /**
@@ -13,18 +13,17 @@ export interface IUser {
      * Récupère tous les utilisateurs avec filtres optionnels
      * @param filter - Filtres (role, teamId, isActive, search)
      */
-    getAllUsers(filter?: UserFilterDTO): Promise<User[]>;
 
     /**
      * Récupère un utilisateur par son ID
      */
-    getUser_ById(id: number): Promise<User | null>;
+    getEmployee_ById(id: number): Promise<UserEmployee>;
 
     /**
      * Récupère tous les employés d'un manager spécifique
      * (JOIN sur les équipes : Team.managerId → Team.members)
      */
-    getEmployees_ByManagerId(managerId: number): Promise<User[]>;
+    getEmployees_ByManagerId(managerId: number): Promise<UserEmployee_Core[]>;
     // #endregion
 
     // #region Update
@@ -32,13 +31,14 @@ export interface IUser {
      * Met à jour un utilisateur
      * @param user - L'entité utilisateur mise à jour (avec son ID)
      */
-    updateUserProfile_ById(user: User): Promise<User>;
+    updateEmployeeProfile_ById(user: UserEmployee_Core): Promise<UserEmployee_Core>;
     /**
      * Met à jour un utilisateur
      * @param userId - ID de l'utilisateur à mettre à jour
      * @param teamId - ID de l'équipe à assigner
      */
-    updateUserTeam_ById(userId: number, teamId: number): Promise<User>;
+    updateUserTeam_ById(userId: number, teamId: number): Promise<UserEmployee_Core>;
+
 
     // #endregion
 
@@ -46,7 +46,7 @@ export interface IUser {
     /**
      * Suppression logique d'un utilisateur (soft delete)
      */
-    deleteUser_ById(id: number): Promise<User>;
+    deleteUser_ById(id: number): Promise<UserEmployee_L1>;
     // #endregion
 }
 

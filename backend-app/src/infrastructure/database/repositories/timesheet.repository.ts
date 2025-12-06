@@ -1,5 +1,5 @@
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
-import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
+import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { prisma } from "../prisma.service";
 import { UserEmployee_Core } from "@/domain/entities/user";
 import { TimesheetFilterDTO } from "@/application/DTOS";
@@ -140,29 +140,19 @@ export class TimesheetRepository implements ITimesheet {
 
     // #region Create
 
-    async createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet> {
+    async createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet_Core> {
         const { id, ...rest } = timesheet;
         const created = await prisma.timesheet.create({
             data: {
                 ...rest,
             },
-            include: {
-                employe: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                    }
-                }
+            select: {
+                ...TIMESHEET_CORE_SELECT,
             }
         });
 
-        return new Timesheet({
+        return new Timesheet_Core({
             ...created,
-            employe: new User({ ...created.employe })
         });
     }
 
@@ -170,33 +160,20 @@ export class TimesheetRepository implements ITimesheet {
 
     // #region Update
 
-    async updateTimesheet_ById(timesheet: Timesheet): Promise<Timesheet> {
+    async updateTimesheet_ById(timesheet: Timesheet_L1): Promise<Timesheet_L1> {
         const updated = await prisma.timesheet.update({
             where: { id: timesheet.id },
             data: {
-                date: timesheet.date,
-                hour: timesheet.hour,
-                clockin: timesheet.clockin,
-                status: timesheet.status,
+                ...timesheet,
                 updatedAt: new Date()
             },
-            include: {
-                employe: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                    }
-                }
+            select: {
+                ...TIMESHEET_L1_SELECT,
             }
         });
 
-        return new Timesheet({
+        return new Timesheet_L1({
             ...updated,
-            employe: new User({ ...updated.employe })
         });
     }
 

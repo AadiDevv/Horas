@@ -123,14 +123,14 @@ describe('UserController', () => {
   // ----------------------------------------
   describe('getAllUsers', () => {
     test('should return list of users with success', async () => {
-      useCaseMock.getAllUsers.mockResolvedValue([mockUser1]);
+      useCaseMock.getAllEmployes.mockResolvedValue([mockUser1]);
 
       const req = mockRequest({ query: {} }) as any;
       const res = mockResponse();
 
       await controller.getAllUsers(req, res);
 
-      expect(useCaseMock.getAllUsers).toHaveBeenCalledWith({
+      expect(useCaseMock.getAllEmployes).toHaveBeenCalledWith({
         role: undefined,
         teamId: undefined,
         isActive: undefined,
@@ -245,7 +245,7 @@ describe('UserController', () => {
   // ----------------------------------------
   describe('updateUser_ById', () => {
     test('should update user and return DTO', async () => {
-      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockUser6);
+      useCaseMock.updateEmployeeProfile_ById.mockResolvedValue(mockUser6);
 
       const req = mockRequest({
         params: { id: '6' },
@@ -256,7 +256,7 @@ describe('UserController', () => {
 
       await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
+      expect(useCaseMock.updateEmployeeProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,
@@ -288,49 +288,49 @@ describe('UserController', () => {
 
   // ----------------------------------------
   describe('deleteUser_ById', () => {
-  // ----------------------------------------
-  describe('updateUserTeam_ById', () => {
-    test('should assign user to team successfully', async () => {
-      useCaseMock.updateUserTeam_ById.mockResolvedValue(mockUser6);
+    // ----------------------------------------
+    describe('updateUserTeam_ById', () => {
+      test('should assign user to team successfully', async () => {
+        useCaseMock.updateEmployeeTeam_ById.mockResolvedValue(mockUser6);
 
-      const req = mockRequest({
-        params: { id: '6' },
-        body: { teamId: 3 },
-        user: { id: 1, role: 'admin' },
-      }) as any;
-      const res = mockResponse();
+        const req = mockRequest({
+          params: { id: '6' },
+          body: { teamId: 3 },
+          user: { id: 1, role: 'admin' },
+        }) as any;
+        const res = mockResponse();
 
-      await controller.updateUserTeam_ById(req, res);
+        await controller.updateUserTeam_ById(req, res);
 
-      expect(useCaseMock.updateUserTeam_ById).toHaveBeenCalledWith(6, 3, 1, 'admin');
-      expect(res.success).toHaveBeenCalledWith(
-        {
-          id: 6,
-          firstName: 'Eve',
-          lastName: 'Jackson',
-          email: 'eve@mail.com',
-          role: 'employe',
-          isActive: true,
-          createdAt: expect.any(String),
-        },
-        'Utilisateur assigné à l\'équipe avec succès'
-      );
+        expect(useCaseMock.updateEmployeeTeam_ById).toHaveBeenCalledWith(6, 3, 1, 'admin');
+        expect(res.success).toHaveBeenCalledWith(
+          {
+            id: 6,
+            firstName: 'Eve',
+            lastName: 'Jackson',
+            email: 'eve@mail.com',
+            role: 'employe',
+            isActive: true,
+            createdAt: expect.any(String),
+          },
+          'Utilisateur assigné à l\'équipe avec succès'
+        );
+      });
+
+      test('should throw ValidationError for invalid userId', async () => {
+        const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
+        const res = mockResponse();
+
+        await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+      });
+
+      test('should throw ValidationError if teamId is missing', async () => {
+        const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
+        const res = mockResponse();
+
+        await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+      });
     });
-
-    test('should throw ValidationError for invalid userId', async () => {
-      const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
-      const res = mockResponse();
-
-      await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
-    });
-
-    test('should throw ValidationError if teamId is missing', async () => {
-      const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
-      const res = mockResponse();
-
-      await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
-    });
-  });
 
     test('should delete user and return success', async () => {
       const req = mockRequest({ params: { id: '7' } }) as any;

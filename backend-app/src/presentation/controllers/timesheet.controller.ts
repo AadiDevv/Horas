@@ -28,7 +28,7 @@ export class TimesheetController {
         const userId = req.user!.id;
         const userRole = req.user!.role;
         const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
-        const dto: TimesheetListItemDTO[] = timesheets.map(t => TimesheetMapper.toListItemDTO(t));
+        const dto: TimesheetListItemDTO[] = TimesheetMapper.toListItemDTO(timesheets);
 
         res.success(dto, "Pointages récupérés avec succès");
     }
@@ -79,8 +79,6 @@ export class TimesheetController {
      * - Manager/Admin: peut créer pour un employé spécifique avec clockin explicite
      */
     async createTimesheet(req: Request, res: Response): Promise<void> {
-        const userRole = req.user!.role;
-        const userId = req.user!.id;
         const { date, hour, status, clockin, employeId } = req.body;
 
         // Validation basique des champs date / hour
@@ -88,19 +86,26 @@ export class TimesheetController {
             throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
         }
 
-        // Déléguer toute la logique métier au usecase
-        const savedTimesheet = await this.UC_timesheet.createTimesheet({
+        // Extraction du contexte d'authentification
+        const auth = {
+            userId: req.user!.id,
+            userRole: req.user!.role,
+        };
+
+        // Préparation du DTO métier
+        const dto = {
             date: new Date(date),
             hour: new Date(hour),
             status,
             clockin,
             employeId,
-            userRole,
-            userId,
-        });
+        };
 
-        const dto = TimesheetMapper.toReadDTO(savedTimesheet);
-        res.success(dto, `Pointage ${savedTimesheet.clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
+        // Déléguer toute la logique métier au usecase (séparation auth/data)
+        const savedTimesheet = await this.UC_timesheet.createTimesheet(dto, auth);
+
+        const responseDto = TimesheetMapper.toReadDTO_Core(savedTimesheet);
+        res.success(responseDto, `Pointage ${savedTimesheet.clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
     }
 
     // #endregion
@@ -122,7 +127,7 @@ export class TimesheetController {
 
         dto.hour = new Date(`1970-01-01T${dto.hour}`);
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
-        const updatedDTO = TimesheetMapper.toReadDTO(updated);
+        const updatedDTO = TimesheetMapper.toReadDTO_L1(updated);
 
         res.success(updatedDTO, "Pointage modifié avec succès");
     }

@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import { TeamUseCase } from '@/application/usecases';
-import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO, TeamAsignScheduleDTO} from '@/application/DTOS';
+import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO, TeamAsignScheduleDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
+import { TeamMapper } from '@/application/mappers/team.mapper';
+import { UserMapper } from '@/application/mappers/user.mapper';
+import { Team_L1 } from '@/domain/entities/team';
 
 /**
  * Contrôleur pour la gestion des équipes
@@ -23,8 +26,8 @@ export class TeamController {
         const userId = req.user!.id;
         const managerId = req.query.managerId ? Number(req.query.managerId) : undefined;
 
-        const teams = await this.UC_team.getTeams(userRole, userId, { managerId });
-        const teamsDTO = teams.map(team => team.toListItemDTO());
+        const teams: Team_L1[] = await this.UC_team.getTeams(userRole, userId, { managerId });
+        const teamsDTO = TeamMapper.toListL1DTO(teams);
 
         res.success(teamsDTO, "Équipes récupérées avec succès");
     }
@@ -34,7 +37,7 @@ export class TeamController {
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
         const team = await this.UC_team.getTeam_ById(id);
-        const teamWithMembers: TeamWithMembersDTO = team?.toWithMembersDTO();
+        const teamWithMembers: TeamWithMembersDTO = TeamMapper.toReadDTO(team);
 
         res.success(teamWithMembers, "Équipe récupérée avec succès");
     }
@@ -42,13 +45,13 @@ export class TeamController {
 
     // #region Create
     async createTeam(req: Request, res: Response): Promise<void> {
-        const teamDto: TeamCreateDTO = {...req.body, managerId: req.user!.id};
+        const teamDto: TeamCreateDTO = { ...req.body, managerId: req.user!.id };
         const userId = req.user!.id;
         if (!teamDto.name) throw new ValidationError("Le lastName de l'équipe est requis");
         if (!teamDto.managerId) throw new ValidationError("Le managerId est requis");
 
         const team = await this.UC_team.createTeam(teamDto, userId);
-        const teamDTO = team.toReadDTO();
+        const teamDTO = TeamMapper.toReadDTO_Core(team);
 
         res.success(teamDTO, "Équipe créée avec succès");
     }
@@ -65,23 +68,23 @@ export class TeamController {
         }
 
         const team = await this.UC_team.updateTeam(id, teamDto, req.user!.id);
-        const teamDTO = team.toReadDTO();
+        const teamDTO = TeamMapper.toReadDTO_Core(team);
 
         res.success(teamDTO, "Équipe modifiée avec succès");
     }
     async updateTeamSchedule_ById(req: Request, res: Response): Promise<void> {
         const teamId = Number(req.params.id);
         if (isNaN(teamId)) throw new ValidationError("ID schedule invalide");
-    
+
         const dto: TeamAsignScheduleDTO = req.body;
         if (!dto.scheduleId) throw new ValidationError("Le scheduleId est requis");
-    
-    
-        const user = await this.UC_team.updateTeamSchedule_ById(teamId, dto.scheduleId, req.user!);
-        const userDTO = user.toReadDTO();
-    
-        res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
-      }
+
+
+        const team = await this.UC_team.updateTeamSchedule_ById(teamId, dto.scheduleId, req.user!);
+        const teamDTO = TeamMapper.toReadDTO_Core(team);
+
+        res.success(teamDTO, "Équipe assignée à l'équipe avec succès");
+    }
     // #endregion
 
     // #region Delete

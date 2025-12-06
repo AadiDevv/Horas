@@ -1,4 +1,4 @@
-import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
+import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { TimesheetFilterDTO, TimesheetStatsDTO } from "@/application/DTOS";
 
 /**
@@ -40,7 +40,7 @@ export interface ITimesheet {
      * @param timesheet - Timesheet_Core (avant insertion, sans id ni jointures)
      * @returns Timesheet complet (après insertion, avec id et jointure employe)
      */
-    createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet>;
+    createTimesheet(timesheet: Timesheet_Core): Promise<Timesheet_Core>;
 
     // #endregion
 
@@ -49,7 +49,7 @@ export interface ITimesheet {
     /**
      * Met à jour un timesheet
      */
-    updateTimesheet_ById(timesheet: Timesheet): Promise<Timesheet>;
+    updateTimesheet_ById(timesheet: Timesheet_L1): Promise<Timesheet_L1>;
 
     // #endregion
 

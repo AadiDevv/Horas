@@ -1,8 +1,10 @@
-import { UserUpdateDTO, UserFilterDTO, UserReadDTO } from "@/application/DTOS/";
-import { User } from "@/domain/entities/user";
+import { UserUpdateDTO } from "@/application/DTOS/";
+import { User, UserEmployee, UserEmployee_Core } from "@/domain/entities/user";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
 import { ITeam } from "@/domain/interfaces/team.interface";
+import { UserMapper } from "../mappers/user";
+import { UserEmployee_L1 } from "@/domain/entities/user";
 /**
  * Use Case pour la gestion des utilisateurs (CRUD)
  * Contient la logique métier et les règles de gestion
@@ -14,17 +16,6 @@ export class UserUseCase {
     constructor(private readonly R_user: IUser, private readonly R_team: ITeam) { }
 
     // #region Read
-    /**
-     * Récupère tous les utilisateurs avec filtres optionnels
-     * Réservé aux Admins uniquement
-     * 
-     * @param filter - Filtres (role, teamId, isActive, search)
-     * @returns Liste des utilisateurs
-     */
-    async getAllUsers(filter?: UserFilterDTO): Promise<User[]> {
-        const users = await this.R_user.getAllUsers(filter);
-        return users.map(user => new User(user));
-    }
 
     /**
      * Récupère un utilisateur par son ID
@@ -33,13 +24,17 @@ export class UserUseCase {
      * @returns L'utilisateur trouvé
      * @throws NotFoundError si l'utilisateur n'existe pas
      */
-    async getUser_ById(id: number): Promise<User> {
-        const user = await this.R_user.getUser_ById(id);
+    async getEmployee_ById(id: number): Promise<UserEmployee> {
+        const user = await this.R_user.getEmployee_ById(id);
         if (!user) {
             throw new NotFoundError(`Utilisateur avec l'ID ${id} introuvable`);
         }
 
-        return new User(user);
+        return new UserEmployee({ ...user });
+    }
+    async getEmployeeCore_ById(id: number): Promise<UserEmployee_Core> {
+        const user = await this.getEmployee_ById(id);
+        return new UserEmployee_Core({ ...user });
     }
 
     /**
@@ -60,14 +55,14 @@ export class UserUseCase {
         managerId: number,
         requestingUserId: number,
         requestingUserRole: string
-    ): Promise<User[]> {
+    ): Promise<UserEmployee_Core[]> {
         // Vérification des permissions
         if (requestingUserRole === "manager" && managerId !== requestingUserId) {
             throw new ForbiddenError("Vous ne pouvez consulter que vos propres employés");
         }
 
         const employees = await this.R_user.getEmployees_ByManagerId(managerId);
-        return employees.map(employee => new User({ ...employee }));
+        return employees.map(employee => new UserEmployee_Core({ ...employee }));
     }
     // #endregion
 
@@ -91,32 +86,32 @@ export class UserUseCase {
      * @throws ValidationError si les données sont invalides ou restrictions non respectées
      * @throws ForbiddenError si l'utilisateur n'a pas les droits
      */
-    async updateUserProfile_ById(
+    async updateEmployeeProfile_ById(
         id: number,
         requestingUserId: number,
         requestingUserRole: string,
         dtoUserProfile: UserUpdateDTO
-    ): Promise<User> {
+    ): Promise<UserEmployee_Core> {
         // #region Validate
         // Récupération de l'utilisateur existant
-        const existingUser = await this.getUser_ById(id);
+        const existingUser = await this.getEmployeeCore_ById(id);
         if (!existingUser) throw new NotFoundError(`Utilisateur avec l'ID ${id} introuvable`);
 
-        if (existingUser.manager?.id !== requestingUserId) {
+        if (existingUser.managerId !== requestingUserId) {
             throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
         }
         // Cas Modifications User profile / il y a des données dans le UserUpdateDTO
-        User.validateUpdateProfilePermissions(existingUser, dtoUserProfile, requestingUserId, requestingUserRole);
+        this.validateUpdateProfilePermissions(existingUser, dtoUserProfile, requestingUserId, requestingUserRole);
         // #endregion
         // Mise à jour via la factory method
-        const updatedUser = User.fromUpdateDTO(existingUser, dtoUserProfile);
+        const updatedUser = UserMapper.FromDTO.UpdateEmployee_ToEntity(existingUser, dtoUserProfile);
 
         // Validation métier
-        updatedUser.validateMe();
+        updatedUser.validate();
 
         // Sauvegarde via le repository
-        const userUpdated = await this.R_user.updateUserProfile_ById(updatedUser);
-        return new User(userUpdated);
+        const userUpdated = await this.R_user.updateEmployeeProfile_ById(updatedUser);
+        return new UserEmployee_Core({ ...userUpdated });
     }
 
     /**
@@ -129,85 +124,87 @@ export class UserUseCase {
      * 
      * Note : teamId et customScheduleId sont autorisés pour les admins via les routes dédiées
      */
-    private validateUpdateProfilePermissions(
-        targetUser: User,
+    private async validateUpdateProfilePermissions(
+        targetUser: UserEmployee_Core,
         dto: UserUpdateDTO,
         requestingUserId: number,
         requestingUserRole: string,
-    ): void {
+    ): Promise<void> {
         // Admin peut tout modifier
         if (requestingUserRole === 'admin') {
             return;
         }
 
         // Manager et Employé : restrictions strictes
-        if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
+        if (requestingUserRole === 'employe') {
             // Vérifier que c'est leur propre profil
             if (targetUser.id !== requestingUserId) {
                 throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
             }
-
-            // Champs interdits pour manager/employé
-            const forbiddenFields: string[] = [];
-
-            if (dto.role !== undefined) {
-                forbiddenFields.push('role');
-            }
-
-            if (dto.isActive !== undefined) {
-                forbiddenFields.push('isActive');
-            }
-
-            if (forbiddenFields.length > 0) {
-                throw new ForbiddenError(
-                    `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
-                    `Seuls les administrateurs peuvent modifier ces informations.`
-                );
+        } else if (requestingUserRole === 'manager') {
+            const employees: UserEmployee_Core[] = await this.R_user.getEmployees_ByManagerId(requestingUserId);
+            if (!employees.some(employee => employee.id === targetUser.id)) {
+                throw new ForbiddenError("Vous ne pouvez modifier que vos propres employés");
             }
         }
+        // Champs interdits pour manager/employé
+        const forbiddenFields: string[] = [];
+
+        if (dto.role !== undefined) {
+            forbiddenFields.push('role');
+        }
+
+        if (dto.isActive !== undefined) {
+            forbiddenFields.push('isActive');
+        }
+
+        if (forbiddenFields.length > 0) {
+            throw new ForbiddenError(
+                `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+                `Seuls les administrateurs peuvent modifier ces informations.`
+            );
+        }
+
     }
 
     /**
      * Assigne un utilisateur à une équipe
-     * 
+     *
      * Règles métier :
      * - Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
      * - Manager : peut uniquement assigner ses propres employés à ses équipes
-     * 
+     *
      * @param userId - ID de l'utilisateur à assigner
      * @param teamId - ID de l'équipe de destination
-     * @param requestingUserId - ID de l'utilisateur qui fait la requête
-     * @param requestingUserRole - Rôle de l'utilisateur connecté
+     * @param user - Utilisateur authentifié qui fait la requête (contient id et role)
      * @returns L'utilisateur mis à jour
-     * @throws NotFoundError si l'utilisateur n'existe pas
+     * @throws NotFoundError si l'utilisateur ou l'équipe n'existe pas
      * @throws ForbiddenError si l'utilisateur n'a pas les droits
      */
-    async updateUserTeam_ById(
+    async updateEmployeeTeam_ById(
         userId: number,
         teamId: number,
-        user: UserReadDTO
-    ): Promise<User> {
+        user: UserEmployee_Core
+    ): Promise<UserEmployee_Core> {
 
         // #region Validation
         const targetTeam = await this.R_team.getTeam_ById(teamId)
-        const targetUser = await this.R_user.getUser_ById(userId)
+        const targetUser = await this.getEmployeeCore_ById(userId)
         // Vérification que l'équipe et l'utilisateur existent
         if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
         if (!targetUser) throw new NotFoundError(`L'utilisateur avec l'ID ${userId} introuvable`);
         if (targetUser.role === 'admin' || targetUser.role === 'manager') throw new ForbiddenError("Vous ne pouvez assigner que des employés");
-        if (targetUser.team?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+        if (targetUser.teamId === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
         // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
-        if (targetUser.manager?.id !== user.id) {
-            console.log(`targetUser.manager?.id : ${targetUser.manager?.id}`);
-            console.log(`user.id : ${user.id}`);
-            throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.manager?.id : ${targetUser.manager?.id} \n requestingUserId : ${user.id}`);
+        if (targetUser.managerId !== user.id) {
+            throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.managerId : ${targetUser.managerId} \n requestingUserId : ${user.id}`);
         }
         if (user.role !== 'admin' && user.id != targetTeam.managerId) {
             throw new ForbiddenError(`Impossible d'assigner l'utilisateur. Vous n'êtes pas le manager cette équipe`);
         }
         //#endregion
         const userEntityUpdated = await this.R_user.updateUserTeam_ById(userId, teamId);
-        return new User(userEntityUpdated);
+        return new UserEmployee_Core({ ...userEntityUpdated });
     }
     // #endregion
 
@@ -225,16 +222,21 @@ export class UserUseCase {
      */
     async deleteUser_ById(id: number, requestingUserId: number, requestingUserRole: string): Promise<void> {
         // Vérifier que l'utilisateur existe
-        const user = await this.getUser_ById(id);
+        const user = await this.getEmployeeCore_ById(id);
         if (!user) throw new NotFoundError(`L'utilisateur avec l'ID ${id} introuvable`);
-        if(requestingUserRole === 'manager'){
-            if(user.id !== requestingUserId){
-                if(user.role !== 'employe') throw new ForbiddenError("Vous ne pouvez supprimer que des employés");
-            }
-            if(user.manager?.id !== requestingUserId) throw new ForbiddenError("Vous ne pouvez supprimer que vos propres employés");
 
-        }else if(requestingUserRole === 'admin'){
-            if(user.role === 'admin') throw new ForbiddenError("Vous ne pouvez pas supprimer un administrateur");
+        if (requestingUserRole === 'manager') {
+
+            // Vérifier que l'utilisateur a delete est un employee
+            if (user.id !== requestingUserId) {
+                if (user.role !== 'employe') throw new ForbiddenError("Vous ne pouvez supprimer que des employés");
+            }
+
+            // Manager que que delete ses propre employees
+            if (user.managerId !== requestingUserId) throw new ForbiddenError("Vous ne pouvez supprimer que vos propres employés");
+
+        } else if (requestingUserRole === 'admin') {
+            if (user.role === 'admin') throw new ForbiddenError("Vous ne pouvez pas supprimer un administrateur");
         }
 
         // TODO: Règles métier additionnelles ?

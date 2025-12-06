@@ -38,9 +38,8 @@ export const USER_MANAGER_CORE_SELECT = {
     hashedPassword: true,
     role: true,
     isActive: true,
-    teamIds: true,
-    employeeIds: true,
-} as const satisfies Record<keyof UserManagerProps_Core, true>;
+    
+} as const satisfies Omit<Record<keyof UserManagerProps_Core, true>, 'teamIds' | 'employeeIds'>;
 
 export const USER_MANAGER_L1_SELECT = {
     ...USER_MANAGER_CORE_SELECT,
@@ -48,4 +47,4 @@ export const USER_MANAGER_L1_SELECT = {
     updatedAt: true,
     lastLoginAt: true,
     deletedAt: true,
-} as const satisfies Record<keyof UserManagerProps_L1, true>;
+} as const satisfies Omit<Record<keyof UserManagerProps_L1, true>, 'teamIds' | 'employeeIds'>;

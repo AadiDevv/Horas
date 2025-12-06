@@ -82,8 +82,8 @@ export class Team_L1 extends Team_Core {
  */
 export class Team extends Team_L1 {
     public manager: UserManager_Core;
-    public members: UserEmployee_Core[];
-    public schedule: Schedule_Core;
+    public members: UserEmployee_Core[] | null;
+    public schedule: Schedule_Core | null;
 
     constructor(props: TeamProps) {
         const { manager, members, schedule, ...propsL1 } = props;

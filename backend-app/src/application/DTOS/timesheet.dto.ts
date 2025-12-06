@@ -7,20 +7,31 @@ import {
 } from "@/domain/types/entitiyProps";
 import { UserReadEmployeeCoreDTO, UserReadEmployeeDTO } from "./user.dto";
 
-// #region Create Params
+// #region Common Types
 /**
- * Paramètres pour la création d'un timesheet
- * Utilisé par le usecase pour encapsuler tous les paramètres de création
- * Centralise le type pour éviter la propagation manuelle
+ * Contexte d'authentification de l'utilisateur
+ * Extrait du JWT par le middleware d'auth dans les controllers
  */
-export interface TimesheetCreateParams {
+export interface AuthContext {
+    /** ID de l'utilisateur authentifié (qui fait la requête) */
+    userId: number;
+    /** Rôle de l'utilisateur authentifié */
+    userRole: string;
+}
+// #endregion
+
+// #region Create DTO
+/**
+ * DTO pour créer un timesheet
+ * Données métier uniquement (pas d'auth - fournie séparément via AuthContext)
+ */
+export interface TimesheetCreateDTO {
     date: Date;
     hour: Date;
     status?: TimesheetStatus;
     clockin?: boolean;
+    /** ID de l'employé cible (optionnel - si absent, = userId de l'AuthContext) */
     employeId?: number;
-    userRole: string;
-    userId: number;
 }
 // #endregion
 
@@ -49,6 +60,10 @@ export type TimesheetReadDTO = Omit<Omit<TimesheetProps, 'date' | 'hour' | 'crea
     updatedAt: string;
     employe: UserReadEmployeeCoreDTO;
 },never>
+
+export type TimesheetReadDTO_L1 = Omit<Omit<TimesheetReadDTO, 'employe'> ,never>
+
+export type TimesheetReadDTO_Core = Omit<Omit<TimesheetReadDTO_L1, 'createdAt' | 'updatedAt'> ,never>
 // #endregion
 
 // #region List & Filter DTOs

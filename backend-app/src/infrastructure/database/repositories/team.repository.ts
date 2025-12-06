@@ -1,10 +1,11 @@
 import { ITeam } from "@/domain/interfaces/team.interface";
 import { prisma } from "../prisma.service";
-import { User, Schedule, Team } from "@/domain/entities/";
+import { User, Schedule, Team, Team_Core, Schedule_Core, UserEmployee_Core, UserManager_Core, Team_L1 } from "@/domain/entities/";
 import { ValidationError } from "@/domain/error/AppError";
 import { TeamFilterDTO } from "@/application/DTOS";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 import { Schedule as PrismaSchedule, Team as PrismaTeam, User as PrismaUser } from "@/generated/prisma";
+import { SCHEDULE_CORE_SELECT, TEAM_CORE_SELECT, TEAM_L1_SELECT, USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs";
 
 export class TeamRepository implements ITeam {
 
@@ -24,12 +25,17 @@ export class TeamRepository implements ITeam {
                 },
                 manager: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_MANAGER_CORE_SELECT,
+                    }
+                },
+                schedule: {
+                    select: {
+                        ...SCHEDULE_CORE_SELECT,
+                    }
+                },
+                members: {
+                    select: {
+                        ...USER_EMPLOYEE_CORE_SELECT,
                     }
                 }
             }
@@ -38,8 +44,10 @@ export class TeamRepository implements ITeam {
         return teams.map(team =>
             new Team({
                 ...team,
-                scheduleId: team.scheduleId ?? undefined,
-                manager: new User({ ...team.manager })
+                schedule: team.schedule ? new Schedule_Core({ ...team.schedule, activeDays: team.schedule.activeDays as number[] }) : null,
+                manager: new UserManager_Core({ ...team.manager }),
+                members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId! })),
+                membersCount: team._count.members,
             })
         );
     }
@@ -55,34 +63,17 @@ export class TeamRepository implements ITeam {
                 },
                 manager: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
+                        ...USER_MANAGER_CORE_SELECT
                     }
                 },
                 members: {
                     select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                        phone: true,
-                        customScheduleId: true,
+                        ...USER_EMPLOYEE_CORE_SELECT
                     }
                 },
                 schedule: {
                     select: {
-                        id: true,
-                        name: true,
-                        startHour: true,
-                        endHour: true,
-                        activeDays: true,
-                        managerId: true,
+                        ...SCHEDULE_CORE_SELECT
                     }
                 }
             }
@@ -93,89 +84,71 @@ export class TeamRepository implements ITeam {
         }
 
         return new Team({
-            ...nullToUndefined(team),
-            manager: new User({ ...team.manager }),
-            members: team.members.map(membre => new User({ ...membre, customSchedule: membre.customScheduleId ? {id : membre.customScheduleId} : undefined })),
-            schedule:team.schedule ? new Schedule({ ...team.schedule }) : undefined
-        });
+            ...team,
+            schedule: team.schedule ? new Schedule_Core({ ...team.schedule, activeDays: team.schedule.activeDays as number[] }) : null,
+            manager: new UserManager_Core({ ...team.manager }),
+            members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId! })),
+            membersCount: team._count.members,
+        })
     }
 
-    async getTeams_ByManagerId(managerId: number): Promise<Team[]> {
+    async getTeams_ByManagerId(managerId: number): Promise<Team_L1[]> {
         const teams = await prisma.team.findMany({
             where: {
                 managerId
             },
             include: {
+                ...TEAM_L1_SELECT,
                 _count: {
-                    select: {
+                    select:{
                         members: true
                     }
-                },
-                manager: {
-                    select: {
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                    }
-                }
+                },              
             }
         })
-        return teams.map(team => new Team({
-            ...nullToUndefined(team),
-            manager: new User({ ...team.manager })
+        return teams.map(team => new Team_L1({
+            ...team,
+            membersCount: team._count.members,
         }));
     }
     // #endregion
 
     // #region Create
-    async createTeam(team: Team): Promise<Team> {
+    async createTeam(team: Team_Core): Promise<Team_Core> {
+        const { id, membersCount, ...rest } = team;
         const teamCreated = await prisma.team.create({
             data: {
-                name: team.name,
-                description: team.description,
-                managerId: team.managerId,
-                scheduleId: team.scheduleId,
+                ...nullToUndefined(rest),
             },
+
             include: {
+                ...TEAM_CORE_SELECT,
                 _count: {
                     select: {
                         members: true
-                    }
-                },
-                manager: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
                     }
                 }
             }
         });
 
-        return new Team({...nullToUndefined(teamCreated),
-            manager: new User({ ...teamCreated.manager })
+        return new Team_Core({
+            ...teamCreated,
+            membersCount: teamCreated._count.members,
         });
     }
     // #endregion
 
     // #region Update
-    async updateTeam_ById(team: Team): Promise<Team> {
+    async updateTeam_ById(team: Team_Core): Promise<Team_Core> {
         if (!team.id) {
             throw new ValidationError("L'équipe doit avoir un ID pour être mise à jour");
         }
 
+        const { id, membersCount, ...rest } = team;
         const teamUpdated = await prisma.team.update({
             where: { id: team.id },
             data: {
-                name: team.name,
-                description: team.description,
-                scheduleId: team.scheduleId,
-                updatedAt: new Date(),
+                ...nullToUndefined(rest),
             },
             include: {
                 _count: {
@@ -183,28 +156,18 @@ export class TeamRepository implements ITeam {
                         members: true
                     }
                 },
-                manager: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                    }
-                }
             }
         });
 
-        return new Team({
-            ...nullToUndefined(teamUpdated),
-            manager: new User({ ...teamUpdated.manager })
+        return new Team_Core({
+            ...teamUpdated,
+            membersCount: teamUpdated._count.members,
         });
     }
     // #endregion
 
     // #region Delete
-    async deleteTeam_ById(id: number): Promise<Team> {
+    async deleteTeam_ById(id: number): Promise<Team_Core> {
         const teamDeleted = await prisma.team.update({
             where: { id },
             data: {
@@ -216,22 +179,12 @@ export class TeamRepository implements ITeam {
                         members: true
                     }
                 },
-                manager: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                        role: true,
-                        isActive: true,
-                    }
-                }
             }
         });
 
-        return new Team({
-            ...nullToUndefined(teamDeleted),
-            manager: new User({ ...teamDeleted.manager })
+        return new Team_Core({
+            ...teamDeleted,
+            membersCount: teamDeleted._count.members,
         });
     }
     // #endregion

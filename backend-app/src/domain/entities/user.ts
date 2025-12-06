@@ -118,7 +118,7 @@ export abstract class User_Core {
 export class UserEmployee_Core extends User_Core {
     public teamId: number | null;
     public managerId: number;
-    public customScheduleId: number | null;
+    public customScheduleId:  null;
 
     constructor(props: UserEmployeeProps_Core) {
         const {teamId, managerId,customScheduleId, ...superProps} = props;
@@ -149,15 +149,8 @@ export class UserEmployee_Core extends User_Core {
  * Représente le minimum métier pour qu'un manager soit valide
  */
 export class UserManager_Core extends User_Core {
-    public teamIds: number[] | null;
-    public employeeIds: number[] | null;
-
     constructor(props: UserManagerProps_Core) {
-        const {teamIds, employeeIds, ...superProps} = props;
-        super({...superProps});
-
-        this.teamIds = teamIds;
-        this.employeeIds = employeeIds;
+        super({...props});
 
         // Validation spécifique manager
         this.validateManager();
@@ -179,7 +172,7 @@ export class UserManager_Core extends User_Core {
 export class UserEmployee_L1 extends UserEmployee_Core {
     public createdAt: Date;
     public updatedAt: Date;
-    public lastLoginAt: Date;
+    public lastLoginAt: Date | null;
     public deletedAt: Date | null;
 
     constructor(props: UserEmployeeProps_L1) {
@@ -225,7 +218,7 @@ export class UserEmployee_L1 extends UserEmployee_Core {
         return {
             createdAt: this.createdAt.toISOString(),
             updatedAt: this.updatedAt.toISOString(),
-            lastLoginAt: this.lastLoginAt.toISOString(),
+            lastLoginAt: this.lastLoginAt ? this.lastLoginAt.toISOString() : null,
             deletedAt: this.deletedAt ? this.deletedAt?.toISOString() : null,
         }
     }
@@ -279,7 +272,7 @@ export class UserEmployee_L1 extends UserEmployee_Core {
 export class UserManager_L1 extends UserManager_Core {
     public createdAt: Date;
     public updatedAt: Date;
-    public lastLoginAt: Date;
+    public lastLoginAt: Date | null;
     public deletedAt: Date | null;
 
     constructor(props: UserManagerProps_L1) {
@@ -325,7 +318,7 @@ export class UserManager_L1 extends UserManager_Core {
         return {
             createdAt: this.createdAt.toISOString(),
             updatedAt: this.updatedAt.toISOString(),
-            lastLoginAt: this.lastLoginAt.toISOString(),
+            lastLoginAt: this.lastLoginAt ? this.lastLoginAt.toISOString() : null,
             deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
         }
     }
@@ -338,8 +331,8 @@ export class UserManager_L1 extends UserManager_Core {
  */
 export class UserEmployee extends UserEmployee_L1 {
     public team: Team_Core | null;
-    public manager: User_Core;
-    public customSchedule: Schedule_Core | null;
+    public manager: UserManager_Core;
+    public customSchedule: null;
 
     constructor(props: UserEmployeeProps) {
         const { team, manager, customSchedule, ...propsL1 } = props;
@@ -356,7 +349,7 @@ export class UserEmployee extends UserEmployee_L1 {
  * Entité complète avec toutes les jointures
  */
 export class UserManager extends UserManager_L1 {
-    public employes: User_Core[];
+    public employes: UserEmployee_Core[];
     public managedTeams: Team_Core[];
 
     constructor(props: UserManagerProps) {

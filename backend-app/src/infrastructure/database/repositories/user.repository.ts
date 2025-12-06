@@ -1,11 +1,14 @@
 import { IAuth } from "@/domain/interfaces/auth.interface";
 import { IUser } from "@/domain/interfaces/user.interface";
-import { User } from "@/domain/entities/user";
+import { User, UserEmployee_Core, UserManager_Core, Schedule_Core, UserEmployee, UserEmployee_L1 } from "@/domain/entities/";
 import { prisma } from "../prisma.service";
 import { NotFoundError } from "@/domain/error/AppError";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
-import { UserFilterDTO } from "@/application/DTOS/user.dto";
-import { connect } from "http2";
+import { SCHEDULE_CORE_SELECT, TEAM_CORE_SELECT, USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs";
+import { Team_Core } from "@/domain/entities/team";
+import { User as PrismaUser } from "@/generated/prisma";
+import { TeamProps_Core, UserManagerProps_Core } from "@/domain/types/entitiyProps";
+
 
 /**
  * Repository pour les opérations User et Auth
@@ -13,58 +16,85 @@ import { connect } from "http2";
  */
 export class UserRepository implements IAuth, IUser {
 
-
-  // #region Read (IUser + IAuth)
-  /**
-   * Récupère tous les utilisateurs avec filtres optionnels
-   * Utilisé par Admin pour lister/filtrer les users
-   */
-  async getAllUsers(filter?: UserFilterDTO): Promise<User[]> {
-    const { role, teamId, isActive, search } = filter || {};
-
-    const users = await prisma.user.findMany({
-      where: {
-        ...(role && { role }),
-        ...(teamId !== undefined && { teamId }),
-        ...(isActive !== undefined && { isActive }),
-        ...(search && {
-          OR: [
-            { firstName: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } }
-          ]
-        }),
-        deletedAt: null // N'afficher que les users non supprimés
-      },
-      include: {
-        team: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
+  private toUserEmployee(user: PrismaUser & {
+    team: (Omit<TeamProps_Core, 'membersCount'> & { _count: { members: number } }) | null,
+    manager: UserManagerProps_Core | null
+  }): UserEmployee {
+    return new UserEmployee({
+      ...user,
+      managerId: user.managerId!,
+      team: user.team ? new Team_Core({
+        ...user.team,
+        membersCount: user.team._count.members
+      }) : null,
+      manager: user.manager ? new UserManager_Core(user.manager) : null as any,
+      customSchedule: null,
+      customScheduleId: null,
     });
-
-    return users.map(user => new User(nullToUndefined(user)));
   }
 
-  async getUser_ById(id: number): Promise<User | null> {
+  // #region GET
+  async getEmployee_ById(id: number): Promise<UserEmployee> {
     try {
-      const user = await prisma.user.findUnique({ where: { id } });
-      if (!user) return null;
-      return new User(nullToUndefined({ ...user, manager: user.managerId ? { id: user.managerId } : undefined, team: user.teamId ? { id: user.teamId } : undefined, customSchedule: user.customScheduleId ? { id: user.customScheduleId } : undefined }));
+      const user = await prisma.user.findUnique({
+        where: { id },
+        include: {
+          team: {
+            select: {
+              ...TEAM_CORE_SELECT,
+              _count: {
+                select: {
+                  members: true
+                }
+              }
+            }
+          },
+          manager: {
+            select: {
+              ...USER_MANAGER_CORE_SELECT
+            }
+          },
+        }
+      });
+      if (!user) throw new NotFoundError(`User with id ${id} not found`);
+      return this.toUserEmployee(user);
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
   }
-  async getUser_ByEmail(email: string): Promise<User | null> {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return null;
-    return new User(nullToUndefined(user));
+
+  async getEmployee_ByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          team: {
+            select: {
+              ...TEAM_CORE_SELECT,
+              _count: {
+                select: {
+                  members: true
+                }
+              }
+            }
+          },
+          manager: {
+            select: {
+              ...USER_MANAGER_CORE_SELECT
+            }
+          },
+          customSchedule: {
+            select: {
+              ...SCHEDULE_CORE_SELECT
+            }
+          }
+        }
+      });
+      if (!user) throw new NotFoundError(`User with email ${email} not found`);
+      return this.toUserEmployee(user);
+    } catch (error) {
+      throw new NotFoundError(`Error fetching user by email: ${error}`);
+    }
   }
 
   /**
@@ -74,7 +104,7 @@ export class UserRepository implements IAuth, IUser {
    * @param managerId - ID du manager
    * @returns Liste des employés appartenant aux équipes du manager
    */
-  async getEmployees_ByManagerId(managerId: number): Promise<User[]> {
+  async getEmployees_ByManagerId(managerId: number): Promise<UserEmployee_Core[]> {
     // Récupérer tous les users qui ont un teamId correspondant aux équipes du manager
     const employees = await prisma.user.findMany({
       where: {
@@ -83,18 +113,8 @@ export class UserRepository implements IAuth, IUser {
         },
         deletedAt: null // Exclure les users supprimés
       },
-      include: {
-        team: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        customSchedule: {
-          select: {
-            id: true,
-          }
-        }
+      select: {
+        ...USER_EMPLOYEE_CORE_SELECT,
       },
       orderBy: [
         { team: { name: 'asc' } }, // Trier par équipe
@@ -102,42 +122,55 @@ export class UserRepository implements IAuth, IUser {
       ]
     });
 
-    return employees.map(employee => new User(nullToUndefined({ ...employee, team: employee.team ?? undefined, customSchedule: employee.customSchedule ?? undefined })));
+    return employees.map(employee => new UserEmployee_Core({
+      ...employee,
+      managerId: employee.managerId!,
+      customScheduleId: null,
+    }));
   }
   // #endregion
   // #region Update (IAuth + IUser)
-  async updateUserProfile_ById(user: User): Promise<User> {
+  async updateEmployeeProfile_ById(user: UserEmployee_Core): Promise<UserEmployee_Core> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
 
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, employes, team, customSchedule, ...updateData } = user
-
+    const { managerId, customScheduleId, teamId, ...updateData } = user
     const updatedUser = await prisma.user.update({
-      where: { id },
+      where: { id: user.id },
       data: {
         ...nullToUndefined(updateData),
-        updatedAt: new Date(Date.now())
+      },
+      select: {
+        ...USER_EMPLOYEE_CORE_SELECT,
       }
     })
-    return new User(nullToUndefined(updatedUser))
+    return new UserEmployee_Core({
+      ...updatedUser,
+      managerId: updatedUser.managerId!,
+      customScheduleId: null,
+    })
   }
 
-  async updateUserTeam_ById(userId: number, teamIdParam: number): Promise<User> {
+  async updateUserTeam_ById(userId: number, teamIdParam: number): Promise<UserEmployee_Core> {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        team: {
-          connect: { id: teamIdParam }
-        },
-        updatedAt: new Date(Date.now())
+        teamId: teamIdParam,
+      },
+      select: {
+        ...USER_EMPLOYEE_CORE_SELECT,
       }
     })
-    const { teamId, ...userData } = updatedUser
-
-    return new User(nullToUndefined({ ...userData, team: teamId ? { id: teamId } : undefined }))
+    return new UserEmployee_Core({
+      ...updatedUser,
+      managerId: updatedUser.managerId!,
+      customScheduleId: null,
+    })
   }
-  async updateUserLogin_byId(user: User): Promise<User> {
+
+  // a revoir
+  async updateEmployeeLogin_byId(user: UserEmployee_L1): Promise<UserEmployee_L1> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
@@ -150,7 +183,11 @@ export class UserRepository implements IAuth, IUser {
         lastLoginAt: lastLoginAt
       }
     })
-    return new User(nullToUndefined(updatedUser))
+    return new UserEmployee_L1({
+      ...updatedUser,
+      managerId: updatedUser.managerId!,
+      customScheduleId: null,
+    })
   }
 
   // #endregion
@@ -162,7 +199,7 @@ export class UserRepository implements IAuth, IUser {
    * @param id - ID de l'utilisateur à supprimer
    * @returns L'utilisateur avec deletedAt défini
    */
-  async deleteUser_ById(id: number): Promise<User> {
+  async deleteUser_ById(id: number): Promise<UserEmployee_L1> {
     const deletedUser = await prisma.user.update({
       where: { id },
       data: {
@@ -170,68 +207,55 @@ export class UserRepository implements IAuth, IUser {
       }
     });
 
-    return new User(nullToUndefined(deletedUser));
+    return new UserEmployee_L1({
+      ...deletedUser,
+      managerId: deletedUser.managerId!,
+      customScheduleId: null,
+    })
   }
   // #endregion
   // #region Auth
-  async registerUser(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
+  async registerEmployee(user: UserEmployee_Core): Promise<UserEmployee_Core> {
+    const { id, ...userData } = user
 
     if (!userData.hashedPassword) {
-      throw new Error('Le mot de passe hashé est requis pour créer un utilisateur');
+      throw new Error('Le mot de passe hashé est requis pour créer un employé');
+    }
+    if (!user.managerId) {
+      throw new Error('Le manager ID est requis pour créer un employé');
     }
 
     const createdUser = await prisma.user.create({
       data: {
         ...userData,
-        managerId: manager?.id!,
-        customScheduleId: customSchedule?.id,
-        teamId: team?.id,
-        hashedPassword: userData.hashedPassword,
       },
     })
 
-    return new User(nullToUndefined(createdUser));
+    return new UserEmployee_Core({
+      ...createdUser,
+      managerId: createdUser.managerId!,
+      customScheduleId: null,
+    })
   }
-  async registerManager(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
+  async registerManager(user: UserManager_Core): Promise<UserManager_Core> {
+    const { id, ...userData } = user
 
     if (!userData.hashedPassword) {
       throw new Error('Le mot de passe hashé est requis pour créer un manager');
     }
 
+
     const createdUser = await prisma.user.create({
       data: {
         ...userData,
-        hashedPassword: userData.hashedPassword,
       },
     })
 
-    return new User(nullToUndefined(createdUser));
-  }
-  async registerEmployee(user: User): Promise<User> {
-    const { id, createdAt, updatedAt, deletedAt, lastLoginAt, manager, customSchedule, team, employes, ...userData } = user
-
-    if (!userData.hashedPassword) {
-      throw new Error('Le mot de passe hashé est requis pour créer un employé');
-    }
-    if (!manager?.id) {
-      throw new Error('Le manager ID est requis pour créer un employé');
-    }
-
-    // A faire = faire un get team et recuperer le scheadule de la team assigner a lemployé
-    const createdUser = await prisma.user.create({
-      data: {
-        ...userData,
-        managerId: manager.id,
-        customScheduleId: customSchedule?.id,
-        teamId: team?.id,
-        hashedPassword: userData.hashedPassword,
-      },
+    return new UserManager_Core({
+      ...createdUser,
     })
-
-    return new User(nullToUndefined(createdUser));
   }
+
   // #endregion
 }
 

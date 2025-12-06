@@ -1,5 +1,5 @@
-import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO, TimesheetCreateParams } from "@/application/DTOS";
-import { Timesheet, Timesheet_Core } from "@/domain/entities/timesheet";
+import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO, TimesheetCreateDTO,  AuthContext } from "@/application/DTOS";
+import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
 import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
 import { TimesheetMapper } from "@/application/mappers/timesheet.mapper";
@@ -26,7 +26,7 @@ export class TimesheetUseCase {
      * @param userId - ID de l'utilisateur connecté
      * @param filter - Filtres optionnels
      */
-    async getTimesheets(userRole: string, userId: number, filter?: TimesheetFilterDTO): Promise<Timesheet[]> {
+    async getTimesheets(userRole: string, userId: number, filter?: TimesheetFilterDTO): Promise<Timesheet_Core[]> {
         let effectiveFilter: TimesheetFilterDTO = { ...filter };
 
         if (userRole !== "admin" && userRole !== "manager") {
@@ -82,18 +82,22 @@ export class TimesheetUseCase {
      * - Auto-détermine clockin/clockout pour les employés
      * - Valide et enregistre le timesheet
      *
-     * @param params - Paramètres de création (type centralisé)
-     * @returns Timesheet complet (après insertion, avec id et jointure employe)
+     * @param dto - Données métier du timesheet à créer
+     * @param auth - Contexte d'authentification (userId, userRole)
+     * @returns Timesheet complet (après insertion, avec employe)
      */
-    async createTimesheet(params: TimesheetCreateParams): Promise<Timesheet_Core> {
-        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId, userRole, userId } = params;
+    async createTimesheet(dto: TimesheetCreateDTO, auth: AuthContext): Promise<Timesheet_Core> {
+        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = dto;
+        const { userRole, userId } = auth;
 
         // Déterminer l'employé cible
-        let employeId: number;
+        let targetEmployeeId: number;
         if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
-            employeId = requestedEmployeId;
+            // Manager/Admin peut créer pour un autre employé
+            targetEmployeeId = requestedEmployeId;
         } else {
-            employeId = userId;
+            // Employé crée pour lui-même
+            targetEmployeeId = userId;
         }
 
         // Déterminer le sens du pointage
@@ -103,7 +107,7 @@ export class TimesheetUseCase {
             clockin = requestedClockin;
         } else {
             // Employee: auto-déterminer selon le dernier timesheet
-            const lastTimesheet = await this.getLastTimesheetByEmployee(employeId);
+            const lastTimesheet = await this.getLastTimesheetByEmployee(targetEmployeeId);
             if (!lastTimesheet) {
                 clockin = true;
             } else {
@@ -113,11 +117,12 @@ export class TimesheetUseCase {
 
         // Instancier l'entité Timesheet_Core
         const timesheet = new Timesheet_Core({
+            id: 0,
             date,
             hour,
             clockin,
             status: status ?? 'normal',
-            employeId,
+            employeId: targetEmployeeId,
         });
 
         // Validation et enregistrement
@@ -134,7 +139,7 @@ export class TimesheetUseCase {
      * - Employé ne peut PAS modifier un timesheet
      * - Admin/manager uniquement
      */
-    async updateTimesheet(id: number, dto: TimesheetUpdateDTO): Promise<Timesheet> {
+    async updateTimesheet(id: number, dto: TimesheetUpdateDTO): Promise<Timesheet_L1> {
         const existing = await this.R_timesheet.getTimesheetById(id);
         if (!existing) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);

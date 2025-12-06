@@ -30,8 +30,7 @@ export interface ScheduleUpdateDTO {
 // #region Read DTO
 /**
  * DTO de retour pour un schedule (GET /schedules/:id)
- * Basé sur ScheduleProps avec transformations Date → string
- * Les hours sont retournées au format "HH:mm"
+ * Basé sur ScheduleProps avec transformations Date → string + relations
  */
 export type ScheduleReadDTO = Omit<Omit<ScheduleProps, 'startHour' | 'endHour' | 'createdAt' | 'updatedAt' |'teams' | 'manager'> & {
     startHour: string;   // Date → string "HH:mm"
@@ -41,6 +40,18 @@ export type ScheduleReadDTO = Omit<Omit<ScheduleProps, 'startHour' | 'endHour' |
     manager: UserReadManagerCoreDTO
     teams: TeamListItemDTO[]
 }, never>
+
+/**
+ * ScheduleReadDTO_L1 : ScheduleReadDTO sans les relations (manager, teams)
+ * Correspond à ScheduleProps_L1 avec transformations Date → string
+ */
+export type ScheduleReadDTO_L1 = Omit<Omit<ScheduleReadDTO, 'manager' | 'teams'>, never>
+
+/**
+ * ScheduleReadDTO_Core : ScheduleReadDTO_L1 sans les timestamps + usersCount
+ * Correspond à ScheduleProps_Core avec transformations Date → string
+ */
+export type ScheduleReadDTO_Core = Omit<Omit<ScheduleReadDTO_L1, 'createdAt' | 'updatedAt' | 'usersCount'>, never>
 
 /**
  * DTO pour un schedule avec la liste des users assignés
@@ -60,10 +71,10 @@ export type ScheduleListItemDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'e
     startHour: string;   // Date → string "HH:mm"
     endHour: string;     // Date → string "HH:mm"
 },never>
-export type ScheduleCoreDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
-    startHour: string;   // Date → string "HH:mm"
-    endHour: string;     // Date → string "HH:mm"
-},never>
+// export type ScheduleCoreDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
+//     startHour: string;   // Date → string "HH:mm"
+//     endHour: string;     // Date → string "HH:mm"
+// },never>
 // #endregion
 
 // #region Filter DTO

@@ -19,24 +19,24 @@ export namespace User_Props {
     type UserEmployeePropsCore = UserProps_Core & {
         teamId: number | null; // null if the employee is not assigned to a team
         managerId: number;
-        customScheduleId: number | null; // null if the employee is not assigned to a custom schedule
+        customScheduleId:  null; // null if the employee is not assigned to a custom schedule
     }
-    type UserManagerPropsCore = UserProps_Core & { teamIds: number[] | null; employeeIds: number[] | null; }
+    type UserManagerPropsCore = UserProps_Core 
     // ENRICHIMENT
     type User_L1 = {
         createdAt: Date;
         updatedAt: Date;
-        lastLoginAt: Date;
+        lastLoginAt: Date | null;
         deletedAt: Date | null;
     }
     // JOINTS
     type UserEmployee_joints = {
         team: Team_Core | null;
-        manager: User_Core;
-        customSchedule: Schedule_Core | null;
+        manager: UserManager_Core;
+        customSchedule: null;
     }
     type UserManager_joints = {
-        employes: User_Core[];
+        employes: UserEmployee_Core[];
         managedTeams: Team_Core[];
     }
     //#endregion
@@ -92,8 +92,8 @@ export namespace Team_Props {
 
     type Team_joints = {
         manager: UserManager_Core;
-        schedule: Schedule_Core;
-        members: UserEmployee_Core[];
+        schedule: Schedule_Core | null;
+        members: UserEmployee_Core[] | null;
     }
 
     // Props Hierarchy

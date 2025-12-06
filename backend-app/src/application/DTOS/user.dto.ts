@@ -14,10 +14,7 @@ import {
 
 
 
-export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'hashedPassword' | 'role'> &{
-        teamId?: number; // null if the employee is not assigned to a team
-        customScheduleId?: number; 
-},never>
+export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'hashedPassword' | 'role'>,never>
 export type UserCreateManagerDTO  = Omit<Omit<UserManagerProps_Core,'id'| 'hashedPassword' | 'role'> &{
     teamIds?: number[] ; 
     employeeIds?: number[];
@@ -67,7 +64,7 @@ export interface UserResetPasswordDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour un employé (GET /users/:id pour role employe)
+ * DTO de retour pour un employé (GET /users/:id pour role employe avec relations)
  * Basé sur UserEmployeeProps avec transformations Date → string
  */
 export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
@@ -78,7 +75,19 @@ export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updated
 }
 
 /**
- * DTO de retour pour un manager (GET /users/:id pour role manager)
+ * UserReadEmployeeDTO_L1 : sans les relations (team, manager, customSchedule)
+ * Correspond à UserEmployeeProps_L1 avec transformations Date → string
+ */
+export type UserReadEmployeeDTO_L1 = Omit<UserReadEmployeeDTO, 'team' | 'manager' | 'customSchedule'>
+
+/**
+ * UserReadEmployeeDTO_Core : sans les timestamps
+ * Correspond à UserEmployeeProps_Core (champs métier uniquement)
+ */
+export type UserReadEmployeeDTO_Core = Omit<UserReadEmployeeDTO_L1, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'>
+
+/**
+ * DTO de retour pour un manager (GET /users/:id pour role manager avec relations)
  * Basé sur UserManagerProps avec transformations Date → string
  */
 export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
@@ -87,6 +96,18 @@ export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt
     lastLoginAt: string;
     deletedAt: string | null;
 }
+
+/**
+ * UserReadManagerDTO_L1 : sans les relations (employes, managedTeams)
+ * Correspond à UserManagerProps_L1 avec transformations Date → string
+ */
+export type UserReadManagerDTO_L1 = Omit<UserReadManagerDTO, 'employes' | 'managedTeams'>
+
+/**
+ * UserReadManagerDTO_Core : sans les timestamps
+ * Correspond à UserManagerProps_Core (champs métier uniquement)
+ */
+export type UserReadManagerDTO_Core = Omit<UserReadManagerDTO_L1, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'>
 
 // #endregion
 
@@ -104,7 +125,6 @@ export type UserReadManagerCoreDTO = UserManagerProps_Core;
  * Query params: GET /users?role=employe&teamId=1&isActive=true
  */
 export interface UserFilterDTO {
-    role?: Role;
     teamId?: number;
     isActive?: boolean;
     search?: string; // Recherche par nom, prénom ou email
