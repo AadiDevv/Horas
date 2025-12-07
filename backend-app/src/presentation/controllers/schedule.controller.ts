@@ -8,6 +8,7 @@ import {
     ScheduleWithUsersDTO,
 } from '@/application/DTOS';
 import { ValidationError, NotFoundError, ForbiddenError } from '@/domain/error/AppError';
+import { ScheduleMapper } from '@/application/mappers/schedule';
 
 export class ScheduleController {
     constructor(private scheduleUseCase: ScheduleUseCase) { }
@@ -28,7 +29,7 @@ export class ScheduleController {
             };
 
             const schedules = await this.scheduleUseCase.getAllSchedules(req.user!, filter);
-            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
+            const schedulesDTO = schedules.map(schedule => ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule));
             res.success(schedulesDTO, "Liste des schedules récupérée avec succès");
        
     }
@@ -44,14 +45,8 @@ export class ScheduleController {
                 throw new ValidationError("ID invalide");
             }
 
-            const includeUsers = req.query.include === 'users';
-            let scheduleDTO: ScheduleReadDTO | ScheduleWithUsersDTO;
-
-            if (includeUsers) {
-                scheduleDTO = (await this.scheduleUseCase.getScheduleWithUsers(id)).toWithUsersDTO();
-            } else {
-                scheduleDTO = (await this.scheduleUseCase.getSchedule_ById(id)).toReadDTO();
-            }
+            const schedule = await this.scheduleUseCase.getSchedule_ById(id);
+            const scheduleDTO = ScheduleMapper.FromEntity.toReadDTO(schedule);
 
             res.success(scheduleDTO, "Schedule récupéré avec succès");
       
@@ -69,7 +64,7 @@ export class ScheduleController {
             }
 
             const schedules = await this.scheduleUseCase.getSchedules_ByTeamId(teamId);
-            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
+            const schedulesDTO = schedules.map(schedule => ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule));
 
             res.success(schedulesDTO, "Schedules récupérés avec succès");
        
@@ -89,7 +84,7 @@ export class ScheduleController {
             const managerId = req.user!.id
 
             const schedule = await this.scheduleUseCase.createSchedule(dto, managerId);
-            const scheduleDTO = schedule.toReadDTO();
+            const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
             res.success(scheduleDTO, "Schedule créé avec succès");
     }
     // #endregion
@@ -109,7 +104,7 @@ export class ScheduleController {
             const dto: ScheduleUpdateDTO = req.body;
 
             const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto, req.user!);
-            const scheduleDTO = schedule.toReadDTO();
+            const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
 
             res.success(scheduleDTO, "Schedule mis à jour avec succès");
     }

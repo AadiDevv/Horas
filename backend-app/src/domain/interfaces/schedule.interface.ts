@@ -16,7 +16,7 @@ export interface ISchedule {
     /**
      * Récupère un schedule par son ID
      */
-    getSchedule_ById(id: number): Promise<Schedule | null>;
+    getSchedule_ById(id: number): Promise<Schedule>;
 
     /**
      * Récupère les schedules utilisés par une équipe spécifique
@@ -28,14 +28,14 @@ export interface ISchedule {
     /**
      * Crée un nouveau schedule
      */
-    createSchedule(schedule: Schedule): Promise<Schedule>;
+    createSchedule(schedule: Schedule_Core): Promise<Schedule_Core>;
     // #endregion
 
     // #region Update
     /**
      * Met à jour un schedule
      */
-    updateSchedule_ById(schedule: Schedule): Promise<Schedule>;
+    updateSchedule_ById(schedule: Schedule_Core): Promise<Schedule_Core>;
     // #endregion
 
     // #region Delete

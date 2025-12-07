@@ -46,7 +46,7 @@ export class TeamRepository implements ITeam {
                 ...team,
                 schedule: team.schedule ? new Schedule_Core({ ...team.schedule, activeDays: team.schedule.activeDays as number[] }) : null,
                 manager: new UserManager_Core({ ...team.manager }),
-                members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId! })),
+                members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId!, customScheduleId: null })),
                 membersCount: team._count.members,
             })
         );
@@ -87,7 +87,7 @@ export class TeamRepository implements ITeam {
             ...team,
             schedule: team.schedule ? new Schedule_Core({ ...team.schedule, activeDays: team.schedule.activeDays as number[] }) : null,
             manager: new UserManager_Core({ ...team.manager }),
-            members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId! })),
+            members: team.members.map(member => new UserEmployee_Core({ ...member, managerId: member.managerId!, customScheduleId: null })),
             membersCount: team._count.members,
         })
     }
@@ -99,11 +99,6 @@ export class TeamRepository implements ITeam {
             },
             include: {
                 ...TEAM_L1_SELECT,
-                _count: {
-                    select:{
-                        members: true
-                    }
-                },              
             }
         })
         return teams.map(team => new Team_L1({
@@ -123,11 +118,6 @@ export class TeamRepository implements ITeam {
 
             include: {
                 ...TEAM_CORE_SELECT,
-                _count: {
-                    select: {
-                        members: true
-                    }
-                }
             }
         });
 

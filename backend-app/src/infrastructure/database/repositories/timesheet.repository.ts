@@ -55,7 +55,7 @@ export class TimesheetRepository implements ITimesheet {
 
         return new Timesheet({
             ...timesheet,
-            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId! })
+            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId!, customScheduleId: null })
         });
     }
 
@@ -77,7 +77,7 @@ export class TimesheetRepository implements ITimesheet {
 
         return timesheets.map(t => new Timesheet({
             ...t,
-            employe: new UserEmployee_Core({ ...t.employe, managerId: t.employe.managerId! })
+            employe: new UserEmployee_Core({ ...t.employe, managerId: t.employe.managerId!, customScheduleId: null })
         }));
     }
 
@@ -102,7 +102,7 @@ export class TimesheetRepository implements ITimesheet {
 
         return new Timesheet({
             ...timesheet,
-            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId! })
+            employe: new UserEmployee_Core({ ...timesheet.employe, managerId: timesheet.employe.managerId!, customScheduleId: null })
         });
     }
 

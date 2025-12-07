@@ -128,13 +128,14 @@ export namespace Schedule_Props {
     type Schedule_L1 = {
         createdAt: Date;
         updatedAt: Date;
-        usersCount: number; // Computed field
 
     }
 
     type Schedule_joints = {
         manager: UserManager_Core;
         teams: Team_Core[];
+        // usersCount: number; // Computed field
+
     }
 
     // Props Hierarchy

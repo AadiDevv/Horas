@@ -117,16 +117,14 @@ export class Schedule_Core {
 export class Schedule_L1 extends Schedule_Core {
     public createdAt: Date;
     public updatedAt: Date;
-    public usersCount: number;
 
 
     constructor(props: ScheduleProps_L1) {
-        const { createdAt, updatedAt,usersCount, ...propsCore } = props;
+        const { createdAt, updatedAt, ...propsCore } = props;
         super({ ...propsCore });
 
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.usersCount = props.usersCount;
 
     }
 }
@@ -139,13 +137,21 @@ export class Schedule_L1 extends Schedule_Core {
 export class Schedule extends Schedule_L1 {
     public manager: UserManager_Core;
     public teams: Team_Core[];
+    public usersCount: number;
+
 
     constructor(props: ScheduleProps) {
         const { manager, teams, ...propsL1 } = props;
         super({ ...propsL1 });
 
         this.manager = manager;
-        this.teams = teams;
+        this.teams = teams;        
+        this.usersCount = this.computeUsersCount();
+
+    }
+
+    private computeUsersCount(): number {
+        return this.teams.reduce((acc, team) => acc + team.membersCount, 0);
     }
 }
 

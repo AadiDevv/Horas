@@ -1,16 +1,9 @@
 import { ISchedule } from "@/domain/interfaces/schedule.interface";
-import { Schedule,Schedule_Core, Team } from "@/domain/entities/";
+import { Schedule, Schedule_Core, Team_Core, UserManager_Core } from "@/domain/entities/";
 import { prismaService } from "../prisma.service";
-import { Schedule as PrismaSchedule } from "@/generated/prisma";
-import { SCHEDULE_CORE_SELECT, SCHEDULE_L1_SELECT,TEAM_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/"
+import { SCHEDULE_CORE_SELECT, SCHEDULE_JOINT_SELECT, TEAM_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/"
+import { NotFoundError } from "@/domain/error/AppError";
 
-// #region Types et constantes pour éviter la répétition
-type ScheduleTeamSelect = {
-    id: number;
-    name: string;
-    managerId: number;
-    createdAt: Date;
-};
 
 // #endregion
 
@@ -36,24 +29,30 @@ export class ScheduleRepository implements ISchedule {
         });
 
         return schedules.map(schedule => (
-            new Schedule_Core({...schedule, activeDays : schedule.activeDays as number[]})
+            new Schedule_Core({ ...schedule, activeDays: schedule.activeDays as number[] })
         ));
     }
     /**
      * Récupère un schedule par son ID
      */
-    async getSchedule_ById(id: number): Promise<Schedule | null> {
+    async getSchedule_ById(id: number): Promise<Schedule> {
         const schedule = await this.prisma.schedule.findUnique({
             where: { id },
             include: {
-                teams: {
-                    ...SCHEDULE_L1_SELECT,
-                    select: TEAM_CORE_SELECT
-                }
+                ...SCHEDULE_JOINT_SELECT,
             }
         });
 
-        return new Schedule({...schedule, activeDays : schedule.activeDays as number[], teams : schedule.teams?.map(team => new Team({...team})) ?? []});
+        if (!schedule) {
+            throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
+        }
+
+        return new Schedule({ 
+            ...schedule,
+             activeDays: schedule.activeDays as number[],
+              teams: schedule?.teams?.map(team => new Team_Core({ ...team, membersCount: team._count.members })) ?? [],
+              manager: new UserManager_Core({ ...schedule.manager }),
+             });
     }
 
 
@@ -71,7 +70,10 @@ export class ScheduleRepository implements ISchedule {
             },
             include: {
                 teams: {
-                    select: TEAM_SELECT_CONFIG
+                    select: TEAM_CORE_SELECT
+                },
+                manager: {
+                    select: USER_MANAGER_CORE_SELECT
                 }
             },
             orderBy: {
@@ -79,7 +81,12 @@ export class ScheduleRepository implements ISchedule {
             }
         });
 
-        return schedules.map(schedule => this.mapPrismaToEntity(schedule));
+        return schedules.map(schedule => new Schedule({
+            ...schedule,
+            activeDays: schedule.activeDays as number[],
+            teams: schedule?.teams?.map(team => new Team_Core({ ...team, membersCount: team._count.members })) ?? [],
+            manager: new UserManager_Core({ ...schedule.manager }),
+        }));
     }
     // #endregion
 
@@ -87,17 +94,22 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Crée un nouveau schedule
      */
-    async createSchedule(schedule: Schedule): Promise<Schedule> {
-        const cleanSchedule = this.cleanScheduleForPrisma(schedule);
-
+    async createSchedule(schedule: Schedule_Core): Promise<Schedule_Core> {
+        const { id, ...scheduleData } = schedule;
 
         const createdSchedule = await this.prisma.schedule.create({
             data: {
-                ...cleanSchedule
+                ...scheduleData
             },
+            select: {
+                ...SCHEDULE_CORE_SELECT,
+            }
         });
 
-        return this.mapPrismaToEntity(createdSchedule);
+        return new Schedule_Core({
+            ...createdSchedule,
+            activeDays: createdSchedule.activeDays as number[],
+        });
     }
     // #endregion
 
@@ -105,19 +117,22 @@ export class ScheduleRepository implements ISchedule {
     /**
      * Met à jour un schedule
      */
-    async updateSchedule_ById(schedule: Schedule): Promise<Schedule> {
+    async updateSchedule_ById(schedule: Schedule_Core): Promise<Schedule_Core> {
 
-        const { managerId, ...cleanSchedule } = this.cleanScheduleForPrisma(schedule);
+        const { id, ...scheduleData } = schedule;
 
         const updatedSchedule = await this.prisma.schedule.update({
             where: { id: schedule.id },
             data: {
-                ...cleanSchedule,
+                ...scheduleData,
                 updatedAt: new Date()
             }
         });
 
-        return this.mapPrismaToEntity(updatedSchedule);
+        return new Schedule_Core({
+            ...updatedSchedule,
+            activeDays: updatedSchedule.activeDays as number[],
+        });
     }
     // #endregion
 
@@ -151,26 +166,7 @@ export class ScheduleRepository implements ISchedule {
     // #endregion
 
     // #region Private Helper Methods
-    /**
-     * Mappe un objet Prisma vers une entité Schedule
-     */
-    private mapPrismaToEntity<T extends PrismaSchedule & { teams?: ScheduleTeamSelect[] }>(prismaSchedule: T): Schedule {
-        const activeDays = Array.isArray(prismaSchedule.activeDays)
-            ? prismaSchedule.activeDays as number[]
-            : [];
-
-        return new Schedule({
-            ...prismaSchedule,
-            activeDays: activeDays,
-            teams: prismaSchedule.teams?.map(team => new Team({ ...team })),
-        });
-    }
-
-    private cleanScheduleForPrisma(schedule: Schedule) {
-        const { users, usersCount, id, teams, createdAt, updatedAt, ...scheduleData } = schedule;
-        return {
-            ...scheduleData,
-        };
-    }
+   
+    
     // #endregion
 }
