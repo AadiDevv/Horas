@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { User } from '@/domain/entities/user';
+import { User_L1 } from '@/domain/entities/user';
 import { UserAuthDTO } from '../DTOS/auth.dto';
 /**
  * Service pour la gestion des tokens JWT et du hachage de mots de passe
@@ -18,7 +18,7 @@ export class JWTService {
   /**
    * Génère un token JWT d'accès
    */
-  public createAccessToken(user: User, expiresDelta?: number): string {
+  public createAccessToken(user: User_L1, expiresDelta?: number): string {
     const payload = user.toJwtPayload() as UserAuthDTO;
 
     const expire = expiresDelta

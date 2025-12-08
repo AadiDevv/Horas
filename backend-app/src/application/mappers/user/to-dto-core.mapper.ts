@@ -30,13 +30,13 @@ export namespace UserMapper {
             }
             throw new Error("Invalid user type");
         }
-        private static toEmployeeReadDTO_Core(employee: UserEmployee_Core): UserReadEmployeeDTO_Core {
+        public static toEmployeeReadDTO_Core(employee: UserEmployee_Core): UserReadEmployeeDTO_Core {
             const {hashedPassword, ...employeeData} = employee;
             return {
                 ...employeeData
             };
         }
-        private static toManagerReadDTO_Core(manager: UserManager_Core): UserReadManagerDTO_Core {
+        public static toManagerReadDTO_Core(manager: UserManager_Core): UserReadManagerDTO_Core {
             const {hashedPassword, ...managerData} = manager;
             return {
                 ...managerData

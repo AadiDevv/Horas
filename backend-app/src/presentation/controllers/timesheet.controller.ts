@@ -2,13 +2,13 @@ import { Request, Response } from 'express';
 import { TimesheetUseCase } from '@/application/usecases';
 import { TimesheetFilterDTO, TimesheetUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
-import { TimesheetMapper } from '@/application/mappers/timesheet.mapper';
+import { TimesheetMapper } from '@/application/mappers/';
 
 /**
  * Contrôleur pour la gestion des pointages (timesheets)
  */
 export class TimesheetController {
-    constructor(private UC_timesheet: TimesheetUseCase) {}
+    constructor(private UC_timesheet: TimesheetUseCase) { }
 
     // #region Read
 
@@ -24,11 +24,11 @@ export class TimesheetController {
             status: req.query.status as any,
             clockin: req.query.clockin ? req.query.clockin === 'true' : undefined,
         };
-        
+
         const userId = req.user!.id;
         const userRole = req.user!.role;
         const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
-        const dto: TimesheetListItemDTO[] = TimesheetMapper.toListItemDTO(timesheets);
+        const dto: TimesheetListItemDTO[] = timesheets.map(timesheet => TimesheetMapper.FromEntityCore.toReadDTO_Core(timesheet));
 
         res.success(dto, "Pointages récupérés avec succès");
     }
@@ -44,7 +44,7 @@ export class TimesheetController {
         const userId = req.user!.id;
         const userRole = req.user!.role;
         const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
-        const dto: TimesheetReadDTO = TimesheetMapper.toReadDTO(timesheet);
+        const dto: TimesheetReadDTO = TimesheetMapper.FromEntity.toReadDTO(timesheet);
 
         res.success(dto, "Pointage récupéré avec succès");
     }
@@ -104,7 +104,7 @@ export class TimesheetController {
         // Déléguer toute la logique métier au usecase (séparation auth/data)
         const savedTimesheet = await this.UC_timesheet.createTimesheet(dto, auth);
 
-        const responseDto = TimesheetMapper.toReadDTO_Core(savedTimesheet);
+        const responseDto = TimesheetMapper.FromEntityCore.toReadDTO_Core(savedTimesheet);
         res.success(responseDto, `Pointage ${savedTimesheet.clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
     }
 
@@ -127,7 +127,7 @@ export class TimesheetController {
 
         dto.hour = new Date(`1970-01-01T${dto.hour}`);
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
-        const updatedDTO = TimesheetMapper.toReadDTO_L1(updated);
+        const updatedDTO = TimesheetMapper.FromEntityL1.toReadDTO_L1(updated);
 
         res.success(updatedDTO, "Pointage modifié avec succès");
     }

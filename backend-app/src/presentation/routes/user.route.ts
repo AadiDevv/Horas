@@ -7,21 +7,6 @@ const router = Router();
 const userController = controllers.UserController();
 
 // #region GET Routes
-/**
- * GET /api/users?role=X&teamId=Y&isActive=true&search=...
- * Liste des utilisateurs avec filtres (Admin uniquement)
- */
-router.get('/',
-    authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOnly,           // 2️⃣ Vérifie que c'est admin
-    async (req, res, next) => {
-        try {
-            await userController.getAllUsers(req, res);
-        } catch (error) {
-            next(error);
-        }
-    }
-);
 
 /**
  * GET /api/users/my-employees
@@ -51,7 +36,7 @@ router.get('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
     async (req, res, next) => {
         try {
-            await userController.getUser_ById(req, res);
+            await userController.getEmployee_ById(req, res);
         } catch (error) {
             next(error);
         }
@@ -89,7 +74,7 @@ router.patch('/assign/team/:id',
     managerOrAdmin,         // 2️⃣ Vérifie que c'est admin OU que c'est son propre profil
     async (req, res, next) => {
         try {
-            await userController.updateUserTeam_ById(req, res);
+            await userController.updateEmployeeTeam_ById(req, res);
         } catch (error) {
             next(error);
         }

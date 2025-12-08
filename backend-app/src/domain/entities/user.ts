@@ -46,11 +46,7 @@ export class User_Core {
     public validate(): void {
         if (!User_Core.validateEmail(this.email)) {
             throw new ValidationError('Format d\'email invalide');
-        }
-
-        if (this.hashedPassword && !User_Core.validatePassword(this.hashedPassword)) {
-            throw new ValidationError('Mot de passe trop faible (minimum 6 caractères)');
-        }
+        }        
 
         if (!User_Core.validateLastName(this.lastName)) {
             throw new ValidationError('Nom invalide (minimum 2 caractères)');
@@ -69,10 +65,6 @@ export class User_Core {
     public static validateEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
-    }
-
-    public static validatePassword(password: string): boolean {
-        return password.length >= 6;
     }
 
     public static validateLastName(lastName: string): boolean {

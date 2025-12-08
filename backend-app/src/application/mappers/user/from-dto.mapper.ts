@@ -12,7 +12,6 @@ import {
     UserUpdateDTO,
 } from "@/application/DTOS/";
 import { Role } from "@/domain/types";
-import { UserMapper as UserMapperUtils } from "./utils.mapper";
 
 export namespace UserMapper {
 

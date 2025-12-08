@@ -2,7 +2,7 @@ import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO, TimesheetCre
 import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
 import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
-import { TimesheetMapper } from "@/application/mappers/timesheet.mapper";
+import { TimesheetMapper } from "@/application/mappers/";
 
 /**
  * Use Case pour la gestion des timesheets
@@ -145,10 +145,10 @@ export class TimesheetUseCase {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
 
-        const updated = TimesheetMapper.fromUpdateDTO(existing, dto);
-        updated.validate();
+        const timeSheetEntityUpdated = TimesheetMapper.FromDTO.Update_ToEntity(existing, dto);
+        timeSheetEntityUpdated.validate();
 
-        return await this.R_timesheet.updateTimesheet_ById(updated);
+        return await this.R_timesheet.updateTimesheet_ById(timeSheetEntityUpdated);
     }
 
     // #endregion

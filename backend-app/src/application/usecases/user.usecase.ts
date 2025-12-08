@@ -198,7 +198,7 @@ export class UserUseCase {
     async updateEmployeeTeam_ById(
         userId: number,
         teamId: number,
-        user: UserEmployee_Core
+        user: UserAuthDTO
     ): Promise<UserEmployee_Core> {
 
         // #region Validation

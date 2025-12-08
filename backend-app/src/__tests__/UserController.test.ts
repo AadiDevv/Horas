@@ -300,7 +300,7 @@ describe('UserController', () => {
         }) as any;
         const res = mockResponse();
 
-        await controller.updateUserTeam_ById(req, res);
+        await controller.updateEmployeeTeam_ById(req, res);
 
         expect(useCaseMock.updateEmployeeTeam_ById).toHaveBeenCalledWith(6, 3, 1, 'admin');
         expect(res.success).toHaveBeenCalledWith(
@@ -321,14 +321,14 @@ describe('UserController', () => {
         const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
         const res = mockResponse();
 
-        await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+        await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
       });
 
       test('should throw ValidationError if teamId is missing', async () => {
         const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
         const res = mockResponse();
 
-        await expect(controller.updateUserTeam_ById(req, res)).rejects.toThrow(ValidationError);
+        await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
       });
     });
 

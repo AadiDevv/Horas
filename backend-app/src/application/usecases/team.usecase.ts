@@ -1,4 +1,4 @@
-import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, UserReadEmployeeDTO_Core } from "@/application/DTOS";
+import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, UserReadEmployeeDTO_Core, UserAuthDTO } from "@/application/DTOS";
 import { Team, Team_Core, Team_L1 } from "@/domain/entities/team";
 import { ITeam, ISchedule } from "@/domain/interfaces/";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
@@ -172,7 +172,7 @@ export class TeamUseCase {
     async updateTeamSchedule_ById(
         teamId: number,
         scheduleId: number,
-        user: UserReadEmployeeDTO_Core
+        user: UserAuthDTO
     ): Promise<Team> {
 
         // #region 1. Validation

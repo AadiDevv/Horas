@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import { TeamUseCase } from '@/application/usecases';
-import { TeamCreateDTO, TeamUpdateDTO, TeamWithMembersDTO, TeamAsignScheduleDTO } from '@/application/DTOS';
+import { TeamCreateDTO, TeamUpdateDTO, TeamAsignScheduleDTO, TeamReadDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
-import { TeamMapper } from '@/application/mappers/team.mapper';
-import { UserMapper } from '@/application/mappers/user.mapper';
+import { TeamMapper } from '@/application/mappers/team';
 import { Team_L1 } from '@/domain/entities/team';
 
 /**
@@ -27,7 +26,7 @@ export class TeamController {
         const managerId = req.query.managerId ? Number(req.query.managerId) : undefined;
 
         const teams: Team_L1[] = await this.UC_team.getTeams(userRole, userId, { managerId });
-        const teamsDTO = TeamMapper.toListL1DTO(teams);
+        const teamsDTO = teams.map(team => TeamMapper.FromEntityL1.toReadDTO_L1(team));
 
         res.success(teamsDTO, "Équipes récupérées avec succès");
     }
@@ -37,7 +36,7 @@ export class TeamController {
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
         const team = await this.UC_team.getTeam_ById(id);
-        const teamWithMembers: TeamWithMembersDTO = TeamMapper.toReadDTO(team);
+        const teamWithMembers: TeamReadDTO = TeamMapper.FromEntity.toReadDTO(team);
 
         res.success(teamWithMembers, "Équipe récupérée avec succès");
     }
@@ -51,7 +50,7 @@ export class TeamController {
         if (!teamDto.managerId) throw new ValidationError("Le managerId est requis");
 
         const team = await this.UC_team.createTeam(teamDto, userId);
-        const teamDTO = TeamMapper.toReadDTO_Core(team);
+        const teamDTO = TeamMapper.FromEntityCore.toReadDTO_Core(team);
 
         res.success(teamDTO, "Équipe créée avec succès");
     }
@@ -68,7 +67,7 @@ export class TeamController {
         }
 
         const team = await this.UC_team.updateTeam(id, teamDto, req.user!.id);
-        const teamDTO = TeamMapper.toReadDTO_Core(team);
+        const teamDTO = TeamMapper.FromEntityCore.toReadDTO_Core(team);
 
         res.success(teamDTO, "Équipe modifiée avec succès");
     }
@@ -81,7 +80,7 @@ export class TeamController {
 
 
         const team = await this.UC_team.updateTeamSchedule_ById(teamId, dto.scheduleId, req.user!);
-        const teamDTO = TeamMapper.toReadDTO_Core(team);
+        const teamDTO = TeamMapper.FromEntity.toReadDTO(team);
 
         res.success(teamDTO, "Équipe assignée à l'équipe avec succès");
     }

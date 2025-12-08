@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { UserCreateEmployeeDTO, UserCreateManagerDTO, UserReadEmployeeDTO_Core, UserReadManagerDTO_Core } from '@/application/DTOS/user.dto';
-import { UserLoginDTO, TokenResponse } from '@/application/DTOS/auth.dto';
+import { UserCreateEmployeeDTO, UserCreateManagerDTO, UserReadEmployeeDTO_Core, UserReadManagerDTO_Core, UserReadDTO_L1, UserReadDTO_Core } from '@/application/DTOS/user.dto';
+import { UserLoginDTO, TokenResponse, UserAuthDTO } from '@/application/DTOS/auth.dto';
 import { ValidationError } from '@/domain/error/AppError';
 import { UserMapper } from '@/application/mappers/user';
 
@@ -12,13 +12,7 @@ import { UserMapper } from '@/application/mappers/user';
 export class AuthController {
     constructor(private UC_auth: AuthUseCase) { }
 
-    // #region Private Helpers
-    private async _registerUser(dto: UserCreateEmployeeDTO | UserCreateManagerDTO): Promise<UserReadEmployeeDTO_Core | UserReadManagerDTO_Core> {
-        const user = await this.UC_auth.registerUser(dto);
-        return UserMapper.FromEntityCore.toReadDTO_Core(user);  
-    }
-    // #endregion
-
+ 
     // #region Register
     /**
      * POST /api/auth/register/employe
@@ -48,12 +42,7 @@ export class AuthController {
      * POST /api/auth/register
      * Auto-inscription publique
      */
-    async register(req: Request, res: Response): Promise<void> {
-        const userRegisterDto: UserCreateEmployeeDTO = req.body;
-        const user: UserReadEmployeeDTO_Core | UserReadManagerDTO_Core = await this._registerUser(userRegisterDto);
-
-        res.success(user, "Utilisateur inscrit avec succès");
-    }
+ 
     // #endregion
 
     // #region Login
@@ -67,7 +56,7 @@ export class AuthController {
 
         if (!user.id) throw new ValidationError("User id is missing");
 
-        const userResponse: UserReadDTO = user.toReadDTO();
+        const userResponse : UserAuthDTO = UserMapper.FromEntityL1.toReadUserAuthDTO_L1(user);
 
         const tokenResponse: TokenResponse = {
             accessToken,

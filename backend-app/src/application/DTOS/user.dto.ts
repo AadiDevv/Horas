@@ -4,7 +4,8 @@ import {
     UserManagerProps,
     UserEmployeeProps_Core,
     UserManagerProps_Core,
-    UserProps_Core
+    UserProps_Core,
+    UserProps_L1
 } from "@/domain/types/entitiyProps";
 
 // #region Create DTO
@@ -15,8 +16,11 @@ import {
 
 
 
-export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'hashedPassword' | 'role'>,never>
+export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'role'>,never> & {
+    password: string;
+}
 export type UserCreateManagerDTO  = Omit<Omit<UserManagerProps_Core,'id'| 'hashedPassword' | 'role'> &{
+    password: string;
     teamIds?: number[] ; 
     employeeIds?: number[];
 },never>
@@ -66,6 +70,12 @@ export interface UserResetPasswordDTO {
 // #region Read DTO
 
 export type UserReadDTO_Core = Omit<UserProps_Core, 'hashedPassword'> 
+export type UserReadDTO_L1 = Omit<UserProps_L1, 'hashedPassword' | 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
+    createdAt: string;
+    updatedAt: string;
+    lastLoginAt: string | null;
+    deletedAt: string | null;
+}
 /**
  * DTO de retour pour un employé (GET /users/:id pour role employe avec relations)
  * Basé sur UserEmployeeProps avec transformations Date → string
@@ -73,7 +83,7 @@ export type UserReadDTO_Core = Omit<UserProps_Core, 'hashedPassword'>
 export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt' | 'hashedPassword' > & {
     createdAt: string;
     updatedAt: string;
-    lastLoginAt: string;
+    lastLoginAt: string | null;
     deletedAt: string | null;
 }
 
@@ -96,7 +106,7 @@ export type UserReadEmployeeDTO_Core = Omit<UserReadEmployeeDTO_L1, 'createdAt' 
 export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt' | 'hashedPassword'> & {
     createdAt: string;
     updatedAt: string;
-    lastLoginAt: string;
+    lastLoginAt: string | null;
     deletedAt: string | null;
 }
 

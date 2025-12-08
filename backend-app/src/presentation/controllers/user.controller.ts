@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO, UserAuthDTO } from '@/application/DTOS/';
+import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO, UserAuthDTO, UserReadEmployeeDTO_Core } from '@/application/DTOS/';
 import { ValidationError } from '@/domain/error/AppError';
 import { UserMapper } from '@/application/mappers/user';
+import { UserEmployee_Core } from '@/domain/entities/user';
 
 /**
  * Contrôleur pour la gestion des utilisateurs (CRUD)
@@ -24,10 +25,10 @@ export class UserController {
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
     const user = await this.UC_user.getEmployee_ById(id);
-    const userDTO = user.toReadDTO();
+    const userDTO = UserMapper.FromEntity.toReadDTO(user);
 
     res.success(userDTO, "Utilisateur récupéré avec succès");
-  } updateEmployeeProfile_ById
+  } 
 
   /**
    * GET /api/users/my-employees
@@ -49,8 +50,9 @@ export class UserController {
       }
     }
 
-    const employees = await this.UC_user.getMyEmployees(managerId, userId, userRole);
-    const employeesDTO = employees.map(employee => employee.toListItemDTO());
+    const employees: UserEmployee_Core[] = await this.UC_user.getMyEmployees(managerId, userId, userRole);
+    
+    const employeesDTO = employees.map(employee => UserMapper.FromEntityCore.toReadDTO_Core(employee));
 
     res.success(employeesDTO, "Liste des employés récupérée avec succès");
   }
@@ -79,7 +81,7 @@ export class UserController {
     const requestingUser: UserAuthDTO = req.user!;
 
     const user = await this.UC_user.updateUserProfile_ById(id, requestingUser, userDto);
-    const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
+    const userDTO = UserMapper.FromEntityCore.toReadUserDTO_Core(user);
 
     res.success(userDTO, "Utilisateur modifié avec succès");
   }
@@ -92,7 +94,7 @@ export class UserController {
    * 
    * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
-  async updateUserTeam_ById(req: Request, res: Response): Promise<void> {
+  async updateEmployeeTeam_ById(req: Request, res: Response): Promise<void> {
     const userId = Number(req.params.id);
     if (isNaN(userId)) throw new ValidationError("ID utilisateur invalide");
 
@@ -100,11 +102,10 @@ export class UserController {
     if (!dto.teamId) throw new ValidationError("Le teamId est requis");
 
     // Récupération des informations de l'utilisateur connecté
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser: UserAuthDTO = req.user!;
 
-    const user = await this.UC_user.updateEmployeeTeam_ById(userId, dto.teamId, requestingUserId, requestingUserRole);
-    const userDTO = user.toReadDTO();
+    const user = await this.UC_user.updateEmployeeTeam_ById(userId, dto.teamId, requestingUser);
+    const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
 
     res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
   }
