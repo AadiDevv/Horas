@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO } from '@/application/DTOS/user.dto';
+import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO, UserAuthDTO } from '@/application/DTOS/';
 import { ValidationError } from '@/domain/error/AppError';
+import { UserMapper } from '@/application/mappers/user';
 
 /**
  * Contrôleur pour la gestion des utilisateurs (CRUD)
@@ -26,7 +27,7 @@ export class UserController {
     const userDTO = user.toReadDTO();
 
     res.success(userDTO, "Utilisateur récupéré avec succès");
-  }
+  } updateEmployeeProfile_ById
 
   /**
    * GET /api/users/my-employees
@@ -75,11 +76,10 @@ export class UserController {
     }
 
     // Récupération des informations de l'utilisateur connecté
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser: UserAuthDTO = req.user!;
 
-    const user = await this.UC_user.updateEmployeeProfile_ById(id, requestingUserId, requestingUserRole, userDto);
-    const userDTO = user.toReadDTO();
+    const user = await this.UC_user.updateUserProfile_ById(id, requestingUser, userDto);
+    const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
 
     res.success(userDTO, "Utilisateur modifié avec succès");
   }
@@ -118,11 +118,10 @@ export class UserController {
    */
   async deleteUser_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser = req.user!;
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    await this.UC_user.deleteUser_ById(id, requestingUserId, requestingUserRole);
+    await this.UC_user.deleteUser_ById(id, requestingUser);
 
     res.success(null, "Utilisateur supprimé avec succès");
   }

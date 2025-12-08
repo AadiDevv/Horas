@@ -1,4 +1,4 @@
-import { User, UserEmployee_Core, UserEmployee_L1, UserManager_Core } from "@/domain/entities/user";
+import { UserEmployee_Core, UserEmployee_L1, UserManager_Core, User_Core, User_L1 } from "@/domain/entities/user";
 
 /**
  * Interface pour les opérations d'authentification
@@ -8,11 +8,11 @@ import { User, UserEmployee_Core, UserEmployee_L1, UserManager_Core } from "@/do
  */
 export interface IAuth {
   // #region Read (pour authentification uniquement)
-  getEmployee_ByEmail(email: string): Promise<User | null>;
+  getUser_ByEmail(email: string): Promise<User_L1 | null>;
   // #endregion
 
   // #region Update (pour auth)
-  updateEmployeeLogin_byId(user: UserEmployee_L1): Promise<UserEmployee_L1>;
+  updateUserLogin_byId(user: User_L1): Promise<User_L1>;
   // #endregion
 
   // #region Auth

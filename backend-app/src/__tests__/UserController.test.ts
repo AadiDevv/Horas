@@ -245,7 +245,7 @@ describe('UserController', () => {
   // ----------------------------------------
   describe('updateUser_ById', () => {
     test('should update user and return DTO', async () => {
-      useCaseMock.updateEmployeeProfile_ById.mockResolvedValue(mockUser6);
+      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockUser6);
 
       const req = mockRequest({
         params: { id: '6' },
@@ -256,7 +256,7 @@ describe('UserController', () => {
 
       await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateEmployeeProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
+      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,

@@ -1,5 +1,5 @@
 import { Role } from "@/domain/types";
-import {UserProps_Core} from "@/domain/types/entitiyProps"
+import {UserProps_Core, UserProps_L1} from "@/domain/types/entitiyProps"
 
 // #region Authentication DTOs
 /**
@@ -38,5 +38,5 @@ export interface TokenResponse {
 /**
  * DTO utilisateur pour la réponse d'authentification (données minimales)
  */
-export type UserAuthDTO = UserProps_Core
+export type UserAuthDTO = Omit<UserProps_L1, 'hashedPassword' | 'createdAt' | 'updatedAt' | 'deletedAt'>
 // #endregion

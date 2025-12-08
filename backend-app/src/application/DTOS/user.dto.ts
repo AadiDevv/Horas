@@ -3,7 +3,8 @@ import {
     UserEmployeeProps,
     UserManagerProps,
     UserEmployeeProps_Core,
-    UserManagerProps_Core
+    UserManagerProps_Core,
+    UserProps_Core
 } from "@/domain/types/entitiyProps";
 
 // #region Create DTO
@@ -63,11 +64,13 @@ export interface UserResetPasswordDTO {
 // #endregion
 
 // #region Read DTO
+
+export type UserReadDTO_Core = Omit<UserProps_Core, 'hashedPassword'> 
 /**
  * DTO de retour pour un employé (GET /users/:id pour role employe avec relations)
  * Basé sur UserEmployeeProps avec transformations Date → string
  */
-export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
+export type UserReadEmployeeDTO = Omit<UserEmployeeProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt' | 'hashedPassword' > & {
     createdAt: string;
     updatedAt: string;
     lastLoginAt: string;
@@ -90,7 +93,7 @@ export type UserReadEmployeeDTO_Core = Omit<UserReadEmployeeDTO_L1, 'createdAt' 
  * DTO de retour pour un manager (GET /users/:id pour role manager avec relations)
  * Basé sur UserManagerProps avec transformations Date → string
  */
-export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'> & {
+export type UserReadManagerDTO = Omit<UserManagerProps, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt' | 'hashedPassword'> & {
     createdAt: string;
     updatedAt: string;
     lastLoginAt: string;
@@ -118,8 +121,7 @@ export type UserReadManagerDTO_Core = Omit<UserReadManagerDTO_L1, 'createdAt' | 
  */
 export type UserEmployeeListItemDTO =  UserEmployeeProps_Core[]
 export type UserManagerListItemDTO =  UserManagerProps_Core[]
-export type UserReadEmployeeCoreDTO = UserEmployeeProps_Core;
-export type UserReadManagerCoreDTO = UserManagerProps_Core;
+
 /**
  * DTO pour filtrer les users
  * Query params: GET /users?role=employe&teamId=1&isActive=true

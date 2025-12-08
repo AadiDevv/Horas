@@ -101,7 +101,7 @@ router.patch('/assign/team/:id',
 /**
  * DELETE /api/users/:id
  * Supprimer un utilisateur (soft delete)
- * Admin uniquement
+ * Manager ou Admin uniquement
  */
 router.delete('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT

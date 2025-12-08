@@ -3,7 +3,8 @@ import {
     UserEmployee,
     UserManager,
     UserEmployee_Core,
-    UserManager_Core
+    UserManager_Core,
+    User_Core
 } from "@/domain/entities/user";
 import {
     UserCreateEmployeeDTO,
@@ -51,6 +52,20 @@ export namespace UserMapper {
             });
         }
     
+        public static UpdateUser_ToEntity(
+            existingUser: User_Core,
+            dto: UserUpdateDTO
+        ): User_Core {
+            return new User_Core({
+                ...existingUser,
+                firstName: dto.firstName ?? existingUser.firstName,
+                lastName: dto.lastName ?? existingUser.lastName,
+                email: dto.email ?? existingUser.email,
+                phone: dto.phone ?? existingUser.phone,
+                role: dto.role ?? existingUser.role,
+                isActive: dto.isActive ?? existingUser.isActive,
+            });
+        }
         /**
          * Met à jour une entité UserEmployee existante avec les données d'un DTO de mise à jour
          * Retourne une nouvelle instance (immutabilité)

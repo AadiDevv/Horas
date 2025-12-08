@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { BaseUserReadDTO, UserCreateDTO, UserCreateEmployeeDTO, UserReadDTO, UserReadEmployeeDTO, UserReadManagerDTO, UserCreateManagerDTO } from '@/application/DTOS/user.dto';
+import { UserCreateEmployeeDTO, UserCreateManagerDTO, UserReadEmployeeDTO_Core, UserReadManagerDTO_Core } from '@/application/DTOS/user.dto';
 import { UserLoginDTO, TokenResponse } from '@/application/DTOS/auth.dto';
 import { ValidationError } from '@/domain/error/AppError';
+import { UserMapper } from '@/application/mappers/user';
 
 /**
  * Contrôleur pour l'authentification
@@ -12,9 +13,9 @@ export class AuthController {
     constructor(private UC_auth: AuthUseCase) { }
 
     // #region Private Helpers
-    private async _registerUser(dto: UserCreateDTO): Promise<BaseUserReadDTO | UserReadEmployeeDTO | UserReadManagerDTO> {
+    private async _registerUser(dto: UserCreateEmployeeDTO | UserCreateManagerDTO): Promise<UserReadEmployeeDTO_Core | UserReadManagerDTO_Core> {
         const user = await this.UC_auth.registerUser(dto);
-        return user.toReadDTO();
+        return UserMapper.FromEntityCore.toReadDTO_Core(user);  
     }
     // #endregion
 
@@ -48,8 +49,8 @@ export class AuthController {
      * Auto-inscription publique
      */
     async register(req: Request, res: Response): Promise<void> {
-        const userRegisterDto: UserCreateDTO = req.body;
-        const user = await this._registerUser(userRegisterDto);
+        const userRegisterDto: UserCreateEmployeeDTO = req.body;
+        const user: UserReadEmployeeDTO_Core | UserReadManagerDTO_Core = await this._registerUser(userRegisterDto);
 
         res.success(user, "Utilisateur inscrit avec succès");
     }

@@ -2,8 +2,21 @@ import {
     UserEmployeeProps_Core,
     UserEmployeeProps_L1,
     UserManagerProps_Core,
-    UserManagerProps_L1
+    UserManagerProps_L1,
+    UserProps_Core
 } from "@/domain/types/entitiyProps";
+
+// User SELECT configs
+export const USER_CORE_SELECT = {
+    id: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    phone: true,
+    hashedPassword: true,
+    role: true,
+    isActive: true,
+} as const satisfies Record<keyof UserProps_Core, true>;
 
 // Employee SELECT configs
 export const USER_EMPLOYEE_CORE_SELECT = {

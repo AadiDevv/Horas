@@ -40,6 +40,10 @@ export namespace User_Props {
         managedTeams: Team_Core[];
     }
     //#endregion
+    export type UserProps = Omit<
+        UserProps_Core
+        & User_L1,
+        never> // Le Omit est juste pour faire du flattening, il fait rien d'autre
 
     export type UserEmployeeProps = Omit<
         UserEmployeePropsCore
@@ -47,11 +51,15 @@ export namespace User_Props {
         & UserEmployee_joints,
         never> // Le Omit est juste pour faire du flattening, il fait rien d'autre
 
-    export type UserManagerProps = Omit<UserManagerPropsCore
+    export type UserManagerProps = Omit<
+        UserManagerPropsCore
         & User_L1
-        & UserManager_joints, never>
+        & UserManager_joints,
+        never> // Le Omit est juste pour faire du flattening, il fait rien d'autre
 
     // UserProps = UserProps_enriched2 + User_joints
+    export type UserProps_L1 = UserProps;
+
     export type UserEmployeeProps_L1 = Omit<UserEmployeeProps, keyof UserEmployee_joints>
     export type UserEmployeeProps_Core = Omit<UserEmployeeProps_L1, keyof User_L1>
 
@@ -62,6 +70,7 @@ export namespace User_Props {
 
 // Aliases top-level pour import direct ailleurs sans préfixe namespace
 export type UserProps_Core = User_Props.UserProps_Core
+export type UserProps_L1 = User_Props.UserProps_L1;
 
 export type UserManagerProps = User_Props.UserManagerProps;
 export type UserManagerProps_L1 = User_Props.UserManagerProps_L1;

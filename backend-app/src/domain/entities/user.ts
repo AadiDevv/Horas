@@ -6,6 +6,7 @@ import {
     UserManagerProps_Core,
     UserManagerProps_L1,
     UserManagerProps,
+    UserProps_L1,
 } from "../types/entitiyProps";
 import { ForbiddenError, ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
@@ -17,7 +18,7 @@ import { Team_Core, Schedule_Core } from "./";
  * User_Core (Abstract)
  * Classe de base contenant les champs communs à tous les utilisateurs
  */
-export abstract class User_Core {
+export class User_Core {
     public readonly id: number;
     public firstName: string;
     public lastName: string;
@@ -224,47 +225,65 @@ export class UserEmployee_L1 extends UserEmployee_Core {
     }
     // #endregion
 
-    // #region Permissions
-    public static validateUpdateProfilePermissions(
-        targetUser: UserEmployee_L1 | UserManager_L1,
-        dto: UserUpdateDTO,
-        requestingUserId: number,
-        requestingUserRole: string,
-    ): void {
-        // Admin peut tout modifier
-        if (requestingUserRole === 'admin') {
-            return;
-        }
-
-        // Manager et Employé : restrictions strictes
-        if (requestingUserRole === 'manager' || requestingUserRole === 'employe') {
-            // Vérifier que c'est leur propre profil
-            if (targetUser.id !== requestingUserId) {
-                throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
-            }
-
-            // Champs interdits pour manager/employé
-            const forbiddenFields: string[] = [];
-
-            if (dto.role !== undefined) {
-                forbiddenFields.push('role');
-            }
-
-            if (dto.isActive !== undefined) {
-                forbiddenFields.push('isActive');
-            }
-
-            if (forbiddenFields.length > 0) {
-                throw new ForbiddenError(
-                    `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
-                    `Seuls les administrateurs peuvent modifier ces informations.`
-                );
-            }
-        }
-    }
-    // #endregion
+   
 }
 
+export class User_L1 extends User_Core {
+    public createdAt: Date;
+    public updatedAt: Date;
+    public lastLoginAt: Date | null;
+    public deletedAt: Date | null;
+
+    constructor(props: UserProps_L1) {
+        const { createdAt, updatedAt, lastLoginAt, deletedAt, ...propsCore } = props;
+        super({ ...props });
+
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastLoginAt = lastLoginAt;
+        this.deletedAt = deletedAt;
+    }
+
+        // #region State Changes (deletedAt)
+        public softDelete(): void {
+            this.deletedAt = new Date();
+        }
+    
+        public restore(): void {
+            this.deletedAt = null;
+        }
+        // #endregion
+    
+        // #region Authentication
+        public toJwtPayload(): Record<string, any> {
+            return {
+                sub: this.id,
+                email: this.email,
+                firstName: this.firstName,
+                lastName: this.lastName,
+                role: this.role,
+                isActive: this.isActive,
+                lastLoginAt: this.lastLoginAt
+            };
+        }
+    
+        public updateLastLogin(): void {
+            this.lastLoginAt = new Date();
+        }
+        // #endregion
+    
+        // #region Date Transformation
+        public dateToISOString(){
+            return {
+                createdAt: this.createdAt.toISOString(),
+                updatedAt: this.updatedAt.toISOString(),
+                lastLoginAt: this.lastLoginAt ? this.lastLoginAt.toISOString() : null,
+                deletedAt: this.deletedAt ? this.deletedAt.toISOString() : null,
+            }
+        }
+        // #endregion
+    
+}
 /**
  * UserManager_L1
  * Enrichissement : ajout des metadata (createdAt, updatedAt, etc.)
@@ -363,3 +382,4 @@ export class UserManager extends UserManager_L1 {
 
 // Type union pour compatibilité
 export type User = UserEmployee | UserManager;
+export type User_EntityCore = UserEmployee_Core | UserManager_Core;
