@@ -43,14 +43,16 @@ export namespace UserMapper {
             }
         }
         private static toEmployeeReadDTO_L1(employee: UserEmployee_L1): UserReadEmployeeDTO_L1 {
+            const {hashedPassword, ...employeeData} = employee;
             return {
-                ...employee,
+                ...employeeData,
                 ...employee.dateToISOString()
             };
         }
         private static toManagerReadDTO_L1(manager: UserManager_L1): UserReadManagerDTO_L1 {
+            const {hashedPassword, ...managerData} = manager;
             return {
-                ...manager,
+                ...managerData,
                 ...manager.dateToISOString()
             };
         }

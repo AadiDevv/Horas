@@ -4,7 +4,7 @@ import {
     ScheduleProps_Core,
     ScheduleProps
 } from "@/domain/types/entitiyProps";
-import {UserReadManagerCoreDTO, TeamListItemDTO, UserEmployeeListItemDTO} from "@/application/DTOS"
+import { TeamListItemDTO, UserReadManagerDTO_Core, UserReadEmployeeDTO_Core} from "@/application/DTOS"
 // #region Create DTO
 /**
  * DTO pour créer un schedule de travail
@@ -31,13 +31,16 @@ export interface ScheduleUpdateDTO {
 /**
  * DTO de retour pour un schedule (GET /schedules/:id)
  * Basé sur ScheduleProps avec transformations Date → string + relations
+ *
+ * Note: Omit<Omit<...>, never> aplatit le type pour IntelliSense (affiche toutes les props au hover)
  */
 export type ScheduleReadDTO = Omit<Omit<ScheduleProps, 'startHour' | 'endHour' | 'createdAt' | 'updatedAt' |'teams' | 'manager'> & {
     startHour: string;   // Date → string "HH:mm"
     endHour: string;     // Date → string "HH:mm"
     createdAt: string;   // Date → string ISO
     updatedAt: string;   // Date → string ISO
-    manager: UserReadManagerCoreDTO
+    usersCount: number;  // Champ calculé (non dans Props)
+    manager: UserReadManagerDTO_Core;
     teams: TeamListItemDTO[]
 }, never>
 
@@ -58,7 +61,7 @@ export type ScheduleReadDTO_Core = Omit<Omit<ScheduleReadDTO_L1, 'createdAt' | '
  * Utilisé pour GET /schedules/:id?include=users
  */
 export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
-    users: UserEmployeeListItemDTO;
+    users: UserReadEmployeeDTO_Core[];
 }
 // #endregion
 
@@ -70,7 +73,7 @@ export interface ScheduleWithUsersDTO extends ScheduleReadDTO {
 export type ScheduleListItemDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
     startHour: string;   // Date → string "HH:mm"
     endHour: string;     // Date → string "HH:mm"
-},never>
+}, never>
 // export type ScheduleCoreDTO = Omit<Omit<ScheduleProps_Core, 'startHour' | 'endHour'> & {
 //     startHour: string;   // Date → string "HH:mm"
 //     endHour: string;     // Date → string "HH:mm"

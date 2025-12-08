@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { controllers } from '@/config';
 import { authMiddleware } from '../middlewares/authMiddleware';
-import { adminOnly, managerOrAdmin } from '../middlewares/role.middleweare';
+import { managerOrAdmin } from '../middlewares/role.middleweare';
 
 const router = Router();
 const teamController = controllers.TeamController();
@@ -47,11 +47,12 @@ router.get('/:id',
 // #region POST Routes
 /**
  * POST /api/teams
- * Créer une nouvelle équipe (Admin uniquement)
+ * Créer une nouvelle équipe
+ * Manager ou Admin uniquement
  */
 router.post('/',
     authMiddleware,
-    managerOrAdmin,           // 3️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await teamController.createTeam(req, res);

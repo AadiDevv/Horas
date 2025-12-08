@@ -71,7 +71,7 @@ router.patch('/:id',
  */
 router.patch('/assign/team/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    managerOrAdmin,         // 2️⃣ Vérifie que c'est admin OU que c'est son propre profil
+    managerOrAdmin,         // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await userController.updateEmployeeTeam_ById(req, res);

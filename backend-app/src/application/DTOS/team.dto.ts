@@ -33,6 +33,8 @@ export interface TeamAsignScheduleDTO {
 /**
  * DTO de retour pour une équipe (GET /teams/:id)
  * Basé sur TeamProps_L1 avec transformations Date → string + relations
+ *
+ * Note: Omit<Omit<...>, never> aplatit le type pour IntelliSense (affiche toutes les props au hover)
  */
 export type TeamReadDTO = Omit<Omit<TeamProps, 'createdAt' | 'updatedAt' | 'deletedAt' | 'members' | 'manager' | 'schedule'> & {
     createdAt: string;
@@ -41,7 +43,7 @@ export type TeamReadDTO = Omit<Omit<TeamProps, 'createdAt' | 'updatedAt' | 'dele
     manager: UserReadManagerDTO_Core;
     schedule: ScheduleReadDTO_Core | null;
     members: UserReadEmployeeDTO_Core[];
-},never>
+}, never>
 
 /**
  * TeamReadDTO_L1 : TeamReadDTO sans les relations (manager, schedule)

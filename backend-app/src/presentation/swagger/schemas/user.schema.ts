@@ -279,7 +279,7 @@ Restrictions métier :
             firstName: {
                 type: 'string',
                 example: 'Jean',
-                description: 'PrélastName'
+                description: 'Prénom'
             },
             lastName: {
                 type: 'string',
@@ -308,12 +308,6 @@ Restrictions métier :
                 nullable: true,
                 example: 5,
                 description: 'ID de l\'équipe'
-            },
-            teamlastName: {
-                type: 'string',
-                nullable: true,
-                example: 'Équipe Production',
-                description: 'lastName de l\'équipe'
             }
         }
     },

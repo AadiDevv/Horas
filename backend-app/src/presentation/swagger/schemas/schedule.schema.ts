@@ -122,7 +122,85 @@ export const scheduleSchemas = {
             usersCount: {
                 type: 'integer',
                 example: 25,
-                description: 'namebre d\'users assignés à cet schedule'
+                description: 'Nombre d\'users assignés à cet schedule'
+            },
+            managerId: {
+                type: 'integer',
+                example: 5,
+                description: 'ID du manager créateur'
+            },
+            manager: {
+                type: 'object',
+                properties: {
+                    id: {
+                        type: 'integer',
+                        example: 5
+                    },
+                    firstName: {
+                        type: 'string',
+                        example: 'Marie'
+                    },
+                    lastName: {
+                        type: 'string',
+                        example: 'Durand'
+                    },
+                    email: {
+                        type: 'string',
+                        format: 'email',
+                        example: 'marie.durand@example.com'
+                    },
+                    phone: {
+                        type: 'string',
+                        nullable: true,
+                        example: '+33 6 12 34 56 78'
+                    },
+                    role: {
+                        type: 'string',
+                        enum: ['manager'],
+                        example: 'manager'
+                    },
+                    isActive: {
+                        type: 'boolean',
+                        example: true
+                    }
+                },
+                description: 'Manager créateur du schedule (UserReadManagerDTO_Core)'
+            },
+            teams: {
+                type: 'array',
+                description: 'Équipes utilisant ce schedule',
+                items: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'integer',
+                            example: 1
+                        },
+                        name: {
+                            type: 'string',
+                            example: 'Équipe Production'
+                        },
+                        description: {
+                            type: 'string',
+                            nullable: true,
+                            example: 'Description équipe'
+                        },
+                        managerId: {
+                            type: 'integer',
+                            example: 5
+                        },
+                        scheduleId: {
+                            type: 'integer',
+                            nullable: true,
+                            example: 1
+                        },
+                        membersCount: {
+                            type: 'integer',
+                            example: 12
+                        }
+                    },
+                    description: 'TeamListItemDTO'
+                }
             }
         }
     },
@@ -158,11 +236,36 @@ export const scheduleSchemas = {
                                     format: 'email',
                                     example: 'pierre.martin@example.com'
                                 },
+                                phone: {
+                                    type: 'string',
+                                    nullable: true,
+                                    example: '+33 6 12 34 56 78'
+                                },
                                 role: {
                                     type: 'string',
+                                    enum: ['employe'],
                                     example: 'employe'
+                                },
+                                isActive: {
+                                    type: 'boolean',
+                                    example: true
+                                },
+                                teamId: {
+                                    type: 'integer',
+                                    nullable: true,
+                                    example: 1
+                                },
+                                managerId: {
+                                    type: 'integer',
+                                    example: 5
+                                },
+                                customScheduleId: {
+                                    type: 'integer',
+                                    nullable: true,
+                                    example: 2
                                 }
-                            }
+                            },
+                            description: 'UserReadEmployeeDTO_Core'
                         }
                     }
                 }

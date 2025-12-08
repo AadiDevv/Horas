@@ -105,9 +105,37 @@ export const timesheetSchemas = {
                         type: 'string',
                         format: 'email',
                         example: 'pierre.martin@example.com'
+                    },
+                    phone: {
+                        type: 'string',
+                        nullable: true,
+                        example: '+33 6 12 34 56 78'
+                    },
+                    role: {
+                        type: 'string',
+                        enum: ['employe'],
+                        example: 'employe'
+                    },
+                    isActive: {
+                        type: 'boolean',
+                        example: true
+                    },
+                    teamId: {
+                        type: 'integer',
+                        nullable: true,
+                        example: 1
+                    },
+                    managerId: {
+                        type: 'integer',
+                        example: 5
+                    },
+                    customScheduleId: {
+                        type: 'integer',
+                        nullable: true,
+                        example: 2
                     }
                 },
-                description: 'Informations de l\'employé (optionnel selon le endpoint)'
+                description: 'Informations de l\'employé (UserReadEmployeeDTO_Core)'
             }
         }
     },
@@ -122,11 +150,6 @@ export const timesheetSchemas = {
             employeId: {
                 type: 'integer',
                 example: 10
-            },
-            employelastName: {
-                type: 'string',
-                example: 'Pierre Martin',
-                description: 'lastName complet de l\'employé (firstName + lastName)'
             },
             date: {
                 type: 'string',

@@ -33,15 +33,16 @@ export namespace UserMapper {
         }
         
         private static toManagerReadDTO(manager: UserManager): UserReadManagerDTO {
+            const { hashedPassword, ...managerData } = manager;
             return {
-                ...manager,
+                ...managerData,
                 ...manager.dateToISOString(),
                 employes: manager.employes?.map(emp => ({
                     id: emp.id,
                     firstName: emp.firstName,
                     lastName: emp.lastName,
                 })) ?? [],
-            } as UserReadManagerDTO;
+            } as unknown as UserReadManagerDTO;
         }
     
       

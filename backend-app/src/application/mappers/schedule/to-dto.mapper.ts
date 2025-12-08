@@ -33,7 +33,7 @@ export namespace ScheduleMapper {
         public static toWithUsersDTO(schedule: Schedule, users: UserEmployee_Core[]): ScheduleWithUsersDTO {
             return {
                 ...this.toReadDTO(schedule),
-                users: users.map(u => UserMapper.FromEntityCore.toReadDTO_Core(u)) as UserReadEmployeeDTO_Core[] ?? [] as UserEmployeeListItemDTO[],
+                users: users.map(u => UserMapper.FromEntityCore.toReadDTO_Core(u)) as UserReadEmployeeDTO_Core[],
             };
         }
     }

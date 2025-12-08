@@ -10,11 +10,11 @@ const scheduleController = controllers.ScheduleController();
 /**
  * GET /api/schedules?name=X&activeDays=1,2,3
  * Liste tous les schedules avec filtres optionnels
- * Admin uniquement
+ * Manager ou Admin uniquement
  */
 router.get('/',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await scheduleController.getAllSchedules(req, res);
@@ -68,7 +68,7 @@ router.get('/team/:teamId',
 /**
  * POST /api/schedules
  * Crée un nouveau schedule
- * Admin uniquement
+ * Manager ou Admin uniquement
  */
 router.post('/',
     authMiddleware,
@@ -87,11 +87,11 @@ router.post('/',
 /**
  * PATCH /api/schedules/:id
  * Met à jour un schedule existant
- * Admin uniquement
+ * Manager ou Admin uniquement
  */
 router.patch('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await scheduleController.updateSchedule_ById(req, res);
@@ -107,12 +107,12 @@ router.patch('/:id',
 /**
  * DELETE /api/schedules/:id
  * Supprime un schedule
- * Admin uniquement
+ * Manager ou Admin uniquement
  * ⚠️ Vérifie qu'aucun utilisateur/équipe n'utilise ce schedule
  */
 router.delete('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    managerOrAdmin,           // 2️⃣ Vérifie que c'est admin
+    managerOrAdmin,           // 2️⃣ Vérifie que c'est manager ou admin
     async (req, res, next) => {
         try {
             await scheduleController.deleteSchedule_ById(req, res);

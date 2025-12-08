@@ -8,14 +8,16 @@ export namespace ScheduleMapper {
         /**
          * Convertit une entité Schedule_L1 en ScheduleReadDTO_L1 (sans relations)
          * Utilisé pour GET /schedules/:id sans includes
+         * Note: usersCount doit être calculé en amont et passé en paramètre
          */
-        public static toReadDTO_L1(schedule: Schedule_L1): ScheduleReadDTO_L1 {
+        public static toReadDTO_L1(schedule: Schedule_L1, usersCount: number = 0): ScheduleReadDTO_L1 {
             return {
                 ...schedule,
                 startHour: Schedule_Core.formatTimeToString(schedule.startHour),
                 endHour: Schedule_Core.formatTimeToString(schedule.endHour),
                 createdAt: schedule.createdAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
                 updatedAt: schedule.updatedAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
+                usersCount,
             };
         }
     }

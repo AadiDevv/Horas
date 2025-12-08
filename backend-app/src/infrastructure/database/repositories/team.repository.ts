@@ -126,6 +126,22 @@ export class TeamRepository implements ITeam {
             membersCount: teamCreated._count.members,
         });
     }
+
+    async updateTeamSchedule_ById(teamId: number, scheduleId: number): Promise<Team_Core> {
+        const teamUpdated = await prisma.team.update({
+            where: { id: teamId },
+            data: {
+                scheduleId: scheduleId,
+            },
+            select:{
+                ...TEAM_CORE_SELECT
+            }
+        });
+        return new Team_Core({
+            ...teamUpdated,
+            membersCount: teamUpdated._count.members,
+        });
+    }
     // #endregion
 
     // #region Update

@@ -5,7 +5,7 @@ import {
     TimesheetProps_L1,
     UserEmployeeProps_Core
 } from "@/domain/types/entitiyProps";
-import { UserReadEmployeeCoreDTO, UserReadEmployeeDTO } from "./user.dto";
+import { UserReadEmployeeDTO_Core, UserReadEmployeeDTO } from "./user.dto";
 
 // #region Common Types
 /**
@@ -52,18 +52,20 @@ export interface TimesheetUpdateDTO {
 /**
  * DTO de retour pour un timesheet (GET /timesheets/:id)
  * Basé sur TimesheetProps_L1 avec transformations Date → string + relation employe
+ *
+ * Note: Omit<Omit<...>, never> aplatit le type pour IntelliSense (affiche toutes les props au hover)
  */
 export type TimesheetReadDTO = Omit<Omit<TimesheetProps, 'date' | 'hour' | 'createdAt' | 'updatedAt'|'employe'> & {
     date: string;      // Date → string "YYYY-MM-DD"
     hour: string;      // Date → string ISO DateTime
     createdAt: string;
     updatedAt: string;
-    employe: UserReadEmployeeCoreDTO;
-},never>
+    employe: UserReadEmployeeDTO_Core;
+}, never>
 
-export type TimesheetReadDTO_L1 = Omit<Omit<TimesheetReadDTO, 'employe'> ,never>
+export type TimesheetReadDTO_L1 = Omit<Omit<TimesheetReadDTO, 'employe'>, never>
 
-export type TimesheetReadDTO_Core = Omit<Omit<TimesheetReadDTO_L1, 'createdAt' | 'updatedAt'> ,never>
+export type TimesheetReadDTO_Core = Omit<Omit<TimesheetReadDTO_L1, 'createdAt' | 'updatedAt'>, never>
 // #endregion
 
 // #region List & Filter DTOs
@@ -86,7 +88,7 @@ export interface TimesheetFilterDTO {
 export type TimesheetListItemDTO = Omit<Omit<TimesheetProps_Core, 'date' | 'hour'> & {
     date: string;      // Date → string "YYYY-MM-DD"
     hour: string;      // Date → string ISO DateTime
-},never>
+}, never>
 // #endregion
 
 // #region Statistics DTO

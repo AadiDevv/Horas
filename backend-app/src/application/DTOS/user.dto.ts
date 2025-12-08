@@ -12,18 +12,21 @@ import {
 /**
  * DTO pour créer un utilisateur (via admin/manager)
  * Différent de UserRegisterDTO (auth.dto.ts) qui est pour l'auto-inscription
+ *
+ * Note: Le pattern Omit<Omit<Type, Keys>, never> est utilisé pour "aplatir" le type.
+ * Cela force TypeScript à résoudre toutes les propriétés lors du hover dans l'IDE,
+ * au lieu d'afficher juste "Omit<...>". Améliore l'IntelliSense.
  */
 
-
-
-export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'role'>,never> & {
+export type UserCreateEmployeeDTO  = Omit<Omit<UserEmployeeProps_Core,'id'| 'role'> & {
     password: string;
-}
-export type UserCreateManagerDTO  = Omit<Omit<UserManagerProps_Core,'id'| 'hashedPassword' | 'role'> &{
+}, never>
+
+export type UserCreateManagerDTO  = Omit<Omit<UserManagerProps_Core,'id'| 'hashedPassword' | 'role'> & {
     password: string;
-    teamIds?: number[] ; 
+    teamIds?: number[] ;
     employeeIds?: number[];
-},never>
+}, never>
 
 // #endregion
 
@@ -98,6 +101,9 @@ export type UserReadEmployeeDTO_L1 = Omit<UserReadEmployeeDTO, 'team' | 'manager
  * Correspond à UserEmployeeProps_Core (champs métier uniquement)
  */
 export type UserReadEmployeeDTO_Core = Omit<UserReadEmployeeDTO_L1, 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'deletedAt'>
+
+// Alias pour compatibilité (à supprimer progressivement)
+export type UserReadEmployeeCoreDTO = UserReadEmployeeDTO_Core;
 
 /**
  * DTO de retour pour un manager (GET /users/:id pour role manager avec relations)
