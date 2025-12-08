@@ -182,7 +182,7 @@ function DayTimeline({
                 return (
                   <div
                     key={idx}
-                    className="absolute text-white shadow-lg rounded-lg z-10 border-2"
+                    className="absolute text-white shadow-lg rounded-lg z-10 border-2 transition-all duration-200 hover:z-50 hover:shadow-2xl group cursor-pointer"
                     style={{
                       backgroundColor: '#333333',
                       borderColor: '#1a1a1a',
@@ -195,7 +195,7 @@ function DayTimeline({
                   >
                     {isShortBlock ? (
                       // Affichage compact pour blocs < 15 min
-                      <div className="px-2 py-0.5 text-[10px] font-semibold flex items-center justify-center h-full whitespace-nowrap overflow-hidden">
+                      <div className="px-2 py-0.5 text-[10px] font-semibold flex items-center justify-center h-full whitespace-nowrap overflow-hidden group-hover:scale-110 transition-transform">
                         {log.start} → {log.end}
                       </div>
                     ) : (
