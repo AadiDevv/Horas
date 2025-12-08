@@ -80,7 +80,7 @@ export class TeamController {
 
 
         const team = await this.UC_team.updateTeamSchedule_ById(teamId, dto.scheduleId, req.user!);
-        const teamDTO = TeamMapper.FromEntity.toReadDTO(team);
+        const teamDTO = TeamMapper.FromEntityCore.toReadDTO_Core(team);
 
         res.success(teamDTO, "Équipe assignée à l'équipe avec succès");
     }

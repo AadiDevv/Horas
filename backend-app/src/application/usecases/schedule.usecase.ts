@@ -192,6 +192,8 @@ export class ScheduleUseCase {
         await this.scheduleRepository.deleteSchedule_ById(id);
     }
     // #endregion
+    
+    // #region Validation
     private validateScheduleData(data: Schedule_Core): void {
         this.validateScheduleFields({
             name: data.name,

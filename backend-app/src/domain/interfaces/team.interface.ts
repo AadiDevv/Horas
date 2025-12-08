@@ -36,6 +36,11 @@ export interface ITeam {
      * Met à jour une équipe
      */
     updateTeam_ById(team: Team_Core): Promise<Team_Core>;
+
+    /**
+     * Met à jour la schedule d'une équipe
+     */
+    updateTeamSchedule_ById(teamId: number, scheduleId: number): Promise<Team_Core>;
     // #endregion
 
     // #region Delete

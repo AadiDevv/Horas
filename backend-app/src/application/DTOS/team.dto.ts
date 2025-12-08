@@ -49,7 +49,7 @@ export type TeamReadDTO = Omit<Omit<TeamProps, 'createdAt' | 'updatedAt' | 'dele
  * TeamReadDTO_L1 : TeamReadDTO sans les relations (manager, schedule)
  * Correspond à TeamProps_L1 avec transformations Date → string
  */
-export type TeamReadDTO_L1 = Omit<Omit<TeamReadDTO, 'manager' | 'schedule'>, never>
+export type TeamReadDTO_L1 = Omit<Omit<TeamReadDTO, 'manager' | 'schedule'|'members'>, never>
 
 /**
  * TeamReadDTO_Core : TeamReadDTO_L1 sans les timestamps

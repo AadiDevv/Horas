@@ -1,6 +1,4 @@
 import {
-    User,
-    UserEmployee,
     UserManager,
     UserEmployee_Core,
     UserManager_Core,

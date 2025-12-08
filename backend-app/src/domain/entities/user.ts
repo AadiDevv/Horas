@@ -8,11 +8,10 @@ import {
     UserManagerProps,
     UserProps_L1,
 } from "../types/entitiyProps";
-import { ForbiddenError, ValidationError } from "../error/AppError";
+import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
-import { UserUpdateDTO } from "@/application/DTOS/";
 import { Role } from "../types";
-import { Team_Core, Schedule_Core } from "./";
+import { Team_Core } from "./";
 
 /**
  * User_Core (Abstract)
@@ -227,13 +226,12 @@ export class User_L1 extends User_Core {
     public deletedAt: Date | null;
 
     constructor(props: UserProps_L1) {
-        const { createdAt, updatedAt, lastLoginAt, deletedAt, ...propsCore } = props;
         super({ ...props });
 
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.lastLoginAt = lastLoginAt;
-        this.deletedAt = deletedAt;
+        this.createdAt = props.createdAt;
+        this.updatedAt = props.updatedAt;
+        this.lastLoginAt = props.lastLoginAt;
+        this.deletedAt = props.deletedAt;
     }
 
         // #region State Changes (deletedAt)

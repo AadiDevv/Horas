@@ -3,7 +3,7 @@ import { ScheduleReadDTO, ScheduleWithUsersDTO } from "@/application/DTOS/schedu
 import { TeamMapper } from "@/application/mappers/team";
 import { UserMapper } from "@/application/mappers/user";
 import { UserEmployee_Core } from "@/domain/entities";
-import { UserEmployeeListItemDTO, UserReadEmployeeDTO_Core, UserReadManagerDTO_Core } from "@/application/DTOS";
+import { UserReadEmployeeDTO_Core } from "@/application/DTOS";
 
 export namespace ScheduleMapper {
 
@@ -22,7 +22,7 @@ export namespace ScheduleMapper {
                 updatedAt: schedule.updatedAt.toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }),
                 usersCount: schedule.usersCount,
                 teams: schedule.teams.map(t => TeamMapper.FromEntityCore.toReadDTO_Core(t)),
-                manager: UserMapper.FromEntityCore.toReadDTO_Core(schedule.manager) as UserReadManagerDTO_Core,
+                manager: UserMapper.FromEntityCore.toReadDTO_Core(schedule.manager) ,
             };
         }
 

@@ -159,8 +159,8 @@ export class TeamUseCase {
  * Assigne un utilisateur à une équipe
  * 
  * Règles métier :
- * - Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
- * - Manager : peut uniquement assigner ses propres employés à ses équipes
+ * @Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
+ * @Manager : peut uniquement assigner ses propres employés à ses équipes
  * 
  * @param scheduleId - ID de l'utilisateur à assigner
  * @param teamId - ID de l'équipe de destination
@@ -173,7 +173,7 @@ export class TeamUseCase {
         teamId: number,
         scheduleId: number,
         user: UserAuthDTO
-    ): Promise<Team> {
+    ): Promise<Team_Core> {
 
         // #region 1. Validation
         const targetTeam = await this.R_team.getTeam_ById(teamId)
@@ -190,7 +190,7 @@ export class TeamUseCase {
 
         //#endregion
         const teamEntityUpdated = await this.R_team.updateTeamSchedule_ById(teamId, scheduleId);
-        return new Team(teamEntityUpdated);
+        return new Team_Core(teamEntityUpdated);
     }
     // #endregion
 

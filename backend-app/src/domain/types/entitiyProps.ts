@@ -143,8 +143,6 @@ export namespace Schedule_Props {
     type Schedule_joints = {
         manager: UserManager_Core;
         teams: Team_Core[];
-        // usersCount: number; // Computed field
-
     }
 
     // Props Hierarchy

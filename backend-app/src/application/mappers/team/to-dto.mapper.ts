@@ -2,7 +2,7 @@ import { Team } from "@/domain/entities/team";
 import { TeamReadDTO } from "@/application/DTOS/team.dto";
 import { UserMapper } from "@/application/mappers/user";
 import { ScheduleMapper } from "@/application/mappers/schedule";
-import { UserReadEmployeeDTO_Core, UserReadManagerDTO_Core } from "@/application/DTOS";
+import { UserReadManagerDTO_Core } from "@/application/DTOS";
 
 export namespace TeamMapper {
 

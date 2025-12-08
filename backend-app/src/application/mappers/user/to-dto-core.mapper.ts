@@ -1,5 +1,4 @@
 import {
-    User,
     User_Core,
     UserEmployee_Core,
     UserManager_Core
@@ -9,7 +8,6 @@ import {
     UserReadManagerDTO_Core,
     UserReadDTO_Core,
 } from "@/application/DTOS/";
-import { } from "@/application/DTOS/team.dto";
 import { UserMapper as UserMapperUtils } from "./utils.mapper";
 
 export namespace UserMapper {
