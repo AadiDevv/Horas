@@ -21,7 +21,6 @@ import { formatDate } from "./utils/dateUtils";
 export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Custom hooks
   const { userData, setUserData, formData, setFormData, loadUserData } =
@@ -89,8 +88,6 @@ export default function Page() {
       <div className="min-h-screen bg-white">
         <Navbar
           onOpenSettings={handleOpenSettings}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
         />
 
         {/* Settings Modal */}

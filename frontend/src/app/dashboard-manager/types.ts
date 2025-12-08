@@ -43,6 +43,7 @@ export interface Equipe {
   nom: string;
   description?: string;
   managerId?: number;
+  scheduleId?: number;
   agentCount: number;
   createdAt: string;
   deletedAt?: string;

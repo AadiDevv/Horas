@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Calendar, Edit2, Trash2, Plus, Clock } from 'lucide-react';
-import { Agent } from '../types';
+import { Agent, Equipe } from '../types';
 import {
   getEmployeeWeekTimesheets,
   Timesheet,
@@ -11,13 +11,15 @@ import {
 import WeeklyTimeline from './WeeklyTimeline';
 import BlockModal, { BlockData } from './BlockModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { getEquipeName } from './AgentList';
 
 interface PointagesManagementProps {
   agents: Agent[];
+  equipes: Equipe[];
   onRefresh: () => void;
 }
 
-export default function PointagesManagement({ agents, onRefresh }: PointagesManagementProps) {
+export default function PointagesManagement({ agents, equipes, onRefresh }: PointagesManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
@@ -270,7 +272,7 @@ export default function PointagesManagement({ agents, onRefresh }: PointagesMana
               >
                 <div className="font-semibold">{agent.prenom} {agent.nom}</div>
                 <div className={`text-sm ${selectedAgent?.id === agent.id ? 'text-gray-300' : 'text-gray-500'}`}>
-                  {agent.equipeNom || 'Sans équipe'}
+                  {getEquipeName(equipes, agent.equipeId) || 'Sans équipe'}
                 </div>
               </button>
             ))}

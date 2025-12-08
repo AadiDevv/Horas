@@ -251,6 +251,59 @@ export function useEquipeManager() {
         console.log('ℹ️ Aucun nouvel agent à assigner');
       }
 
+      // Gérer les horaires : créer ou mettre à jour un schedule si des horaires sont définis
+      if (formData.horaires && formData.horaires.length > 0) {
+        console.log('⏰ Gestion du schedule pour l\'équipe', editingEquipe.id);
+        console.log('📋 Horaires:', formData.horaires);
+
+        // Convertir les horaires du format frontend vers le format schedule backend
+        // On prend le premier horaire comme référence (startHour, endHour)
+        // et on collecte tous les jours actifs
+        const joursMap: { [key: string]: number } = {
+          'Lundi': 1,
+          'Mardi': 2,
+          'Mercredi': 3,
+          'Jeudi': 4,
+          'Vendredi': 5,
+          'Samedi': 6,
+          'Dimanche': 7
+        };
+
+        const activeDays = formData.horaires.map(h => joursMap[h.jour]).filter(Boolean);
+        const firstHoraire = formData.horaires[0];
+
+        const scheduleData = {
+          name: `Horaire ${formData.nom}`,
+          startHour: firstHoraire.heureDebut,
+          endHour: firstHoraire.heureFin,
+          activeDays: activeDays
+        };
+
+        try {
+          // Vérifier si l'équipe a déjà un schedule
+          if (editingEquipe.scheduleId) {
+            // Mettre à jour le schedule existant
+            console.log('🔄 Mise à jour du schedule existant ID:', editingEquipe.scheduleId);
+            await api.updateSchedule(editingEquipe.scheduleId, scheduleData);
+            console.log('✅ Schedule mis à jour');
+          } else {
+            // Créer un nouveau schedule
+            console.log('➕ Création d\'un nouveau schedule');
+            const scheduleResult = await api.createSchedule(scheduleData);
+
+            if (scheduleResult.success && scheduleResult.data) {
+              console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
+
+              // Assigner le schedule à l'équipe
+              await api.assignScheduleToTeam(editingEquipe.id, scheduleResult.data.id);
+              console.log('✅ Schedule assigné à l\'équipe');
+            }
+          }
+        } catch (error) {
+          console.error('❌ Erreur lors de la gestion du schedule:', error);
+        }
+      }
+
       await loadEquipes();
       setShowModal(false);
       setEditingEquipe(null);
@@ -266,13 +319,57 @@ export function useEquipeManager() {
     }
   };
 
-  const openEditModal = (equipe: Equipe) => {
+  const openEditModal = async (equipe: Equipe) => {
     setEditingEquipe(equipe);
+
+    // Charger le schedule si l'équipe en a un
+    let horaires: any[] = [];
+    if (equipe.scheduleId) {
+      try {
+        console.log('⏰ Chargement du schedule ID:', equipe.scheduleId);
+        const scheduleResult = await api.getScheduleById(equipe.scheduleId);
+
+        if (scheduleResult.success && scheduleResult.data) {
+          const schedule = scheduleResult.data;
+          console.log('✅ Schedule chargé:', schedule);
+
+          // Convertir le schedule backend vers le format horaires frontend
+          const joursMap: { [key: number]: string } = {
+            1: 'Lundi',
+            2: 'Mardi',
+            3: 'Mercredi',
+            4: 'Jeudi',
+            5: 'Vendredi',
+            6: 'Samedi',
+            7: 'Dimanche'
+          };
+
+          // Convertir activeDays en horaires
+          // Extraire seulement HH:mm depuis le format Time (qui peut être HH:mm:ss)
+          const formatTime = (time: string) => {
+            if (!time) return '09:00';
+            // Si le format est HH:mm:ss, on prend seulement HH:mm
+            return time.substring(0, 5);
+          };
+
+          horaires = (schedule.activeDays || []).map((day: number) => ({
+            jour: joursMap[day],
+            heureDebut: formatTime(schedule.startHour),
+            heureFin: formatTime(schedule.endHour)
+          }));
+
+          console.log('📋 Horaires convertis:', horaires);
+        }
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement du schedule:', error);
+      }
+    }
+
     setFormData({
       nom: equipe.nom,
       description: equipe.description || '',
       agents: equipe.agents?.map(a => a.id) || [],
-      horaires: equipe.horaires || []
+      horaires: horaires
     });
     setShowModal(true);
   };

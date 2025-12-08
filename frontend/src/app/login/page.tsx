@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { API_CONFIG } from "@/constants/config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,7 +34,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post<LoginResponse>("/api/auth/login", {
+      const response = await axios.post<LoginResponse>(`${API_CONFIG.BASE_URL}/api/auth/login`, {
         email,
         password,
       });

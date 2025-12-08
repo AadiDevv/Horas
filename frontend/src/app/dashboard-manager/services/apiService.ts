@@ -99,6 +99,7 @@ const transformEquipeFromBackend = (data: any): Equipe => ({
   nom: data.name,
   description: data.description,
   managerId: data.managerId,
+  scheduleId: data.scheduleId, // Ajout du scheduleId
   agentCount: data.membersCount || 0,
   createdAt: data.createdAt,
   deletedAt: data.deletedAt,
@@ -679,6 +680,117 @@ export async function deleteEquipe(id: number): Promise<ApiResponse<void>> {
 
   return {
     success: response.success,
+    message: response.message
+  };
+}
+
+// SCHEDULES
+export async function createSchedule(schedule: { name: string; startHour: string; endHour: string; activeDays: number[] }): Promise<ApiResponse<any>> {
+  console.log('🚀 Envoi de la requête POST /api/schedules');
+  console.log('📦 Données envoyées:', schedule);
+
+  const res = await fetch(`${API_BASE_URL}/api/schedules`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(schedule)
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Schedule créé:', response);
+
+  return {
+    success: response.success,
+    data: response.data,
+    message: response.message
+  };
+}
+
+export async function assignScheduleToTeam(teamId: number, scheduleId: number): Promise<ApiResponse<Equipe>> {
+  console.log('🚀 Envoi de la requête PATCH /api/teams/' + teamId);
+  console.log('📦 Données envoyées:', { scheduleId });
+
+  const res = await fetch(`${API_BASE_URL}/api/teams/${teamId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ scheduleId })
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Schedule assigné à l\'équipe:', response);
+
+  return {
+    success: response.success,
+    data: transformEquipeFromBackend(response.data),
+    message: response.message
+  };
+}
+
+export async function getScheduleById(scheduleId: number): Promise<ApiResponse<any>> {
+  console.log('🚀 Envoi de la requête GET /api/schedules/' + scheduleId);
+
+  const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Schedule récupéré:', response);
+
+  return {
+    success: response.success,
+    data: response.data,
+    message: response.message
+  };
+}
+
+export async function updateSchedule(scheduleId: number, updates: { name?: string; startHour?: string; endHour?: string; activeDays?: number[] }): Promise<ApiResponse<any>> {
+  console.log('🚀 Envoi de la requête PATCH /api/schedules/' + scheduleId);
+  console.log('📦 Données envoyées:', updates);
+
+  const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updates)
+  });
+
+  console.log('📡 Statut de la réponse:', res.status, res.statusText);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error('❌ Erreur du serveur:', errorText);
+    throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
+  }
+
+  const response = await res.json();
+  console.log('✅ Schedule mis à jour:', response);
+
+  return {
+    success: response.success,
+    data: response.data,
     message: response.message
   };
 }
