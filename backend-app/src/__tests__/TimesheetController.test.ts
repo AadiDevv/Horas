@@ -117,8 +117,7 @@ describe('TimesheetController', () => {
           id: 1,
           clockin: true,
           employeId: 5,
-          date: expect.any(String),
-          hour: expect.any(String),
+          timestamp: expect.any(String),
           employe: expect.objectContaining({
             id: 5,
             firstName: 'Alice',
