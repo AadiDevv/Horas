@@ -18,17 +18,18 @@ export default function WeeklyTimeline({
 }: WeeklyTimelineProps) {
   const hours = Array.from({ length: 17 }, (_, i) => i + 6); // 6h à 22h
 
-  // Grouper les timesheets par date
+  // Grouper les timesheets par date (extraite du timestamp)
   const timesheetsByDate = timesheets.reduce((acc, ts) => {
-    if (!acc[ts.date]) acc[ts.date] = [];
-    acc[ts.date].push(ts);
+    const date = ts.timestamp.substring(0, 10); // "YYYY-MM-DD"
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(ts);
     return acc;
   }, {} as Record<string, Timesheet[]>);
 
   // Créer des paires entrée/sortie ET pointages individuels
   const getTimesheetPairs = (date: string): Array<{ entry: Timesheet; exit?: Timesheet }> => {
     const dayTimesheets = timesheetsByDate[date] || [];
-    const sorted = [...dayTimesheets].sort((a, b) => a.hour.localeCompare(b.hour));
+    const sorted = [...dayTimesheets].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     const pairs: Array<{ entry: Timesheet; exit?: Timesheet }> = [];
     const used = new Set<number>();
 
@@ -147,13 +148,13 @@ export default function WeeklyTimeline({
 
                 {/* Blocs de pointages */}
                 {pairs.map((pair, pairIndex) => {
-                  const startDate = new Date(pair.entry.hour);
-                  const startPos = getTimePosition(pair.entry.hour);
+                  const startDate = new Date(pair.entry.timestamp);
+                  const startPos = getTimePosition(pair.entry.timestamp);
 
                   if (pair.exit) {
                     // Paire complète : afficher un bloc
-                    const endDate = new Date(pair.exit.hour);
-                    const endPos = getTimePosition(pair.exit.hour);
+                    const endDate = new Date(pair.exit.timestamp);
+                    const endPos = getTimePosition(pair.exit.timestamp);
                     const height = endPos - startPos;
 
                     return (

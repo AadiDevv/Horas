@@ -10,9 +10,7 @@ const API_BASE_URL = "http://localhost:8080";
 export interface Timesheet {
   id: number;
   employeId: number;
-  date: string; // Format: YYYY-MM-DD
-  hour: string; // Format: ISO DateTime "2025-10-24T08:30:00.000Z"
-  heure?: string; // Rétrocompatibilité (ancien format)
+  timestamp: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
   clockin: boolean; // true = entrée, false = sortie
   status: 'normal' | 'retard' | 'absence';
   createdAt: string;
@@ -40,25 +38,18 @@ export interface ApiResponse<T> {
  * POST /api/timesheets/
  * Pointer automatiquement (entrée ou sortie)
  * L'API détermine automatiquement si c'est un clock-in ou clock-out
+ * Payload vide : timestamp, clockin et employeId sont auto-générés par le backend
  */
 export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
   try {
     const token = localStorage.getItem('token');
 
-    // Générer la date et l'heure actuelles selon le format Swagger
-    const now = new Date();
-    const date = now.toISOString().split('T')[0]; // "2025-10-24"
-    const hour = now.toISOString(); // "2025-10-24T15:30:00.000Z"
-
-    const body = {
-      date: date,
-      hour: hour,
-      status: "normal"
-    };
+    // Payload vide ou minimal - tout est auto-généré côté backend
+    const body = { };
 
     console.log('🔄 POST /api/timesheets/ - Tentative de pointage...');
     console.log('📝 Token présent:', !!token);
-    console.log('📅 Body:', body);
+    console.log('📅 Body (minimal):', body);
 
     const res = await fetch(`${API_BASE_URL}/api/timesheets/`, {
       method: 'POST',
@@ -208,7 +199,7 @@ export async function getTimesheet(id: number): Promise<ApiResponse<Timesheet>> 
  */
 export async function updateTimesheet(
   id: number,
-  updates: Partial<Pick<Timesheet, 'date' | 'heure' | 'clockin' | 'status'>>
+  updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
 ): Promise<ApiResponse<Timesheet>> {
   try {
     const token = localStorage.getItem('token');
@@ -395,9 +386,9 @@ export async function isCurrentlyClockedIn(): Promise<boolean> {
     return false;
   }
 
-  // Trier par heure pour avoir le dernier pointage
+  // Trier par timestamp pour avoir le dernier pointage
   const sorted = [...response.data].sort((a, b) =>
-    a.heure.localeCompare(b.heure)
+    a.timestamp.localeCompare(b.timestamp)
   );
 
   const lastTimesheet = sorted[sorted.length - 1];

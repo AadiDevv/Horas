@@ -78,11 +78,12 @@ export function useTimesheet() {
     let heuresSemaine = 0;
     let retardsMois = 0;
 
-    // Grouper par date
+    // Grouper par date (extraite du timestamp)
     const byDate: Record<string, Timesheet[]> = {};
     timesheets.forEach(t => {
-      if (!byDate[t.date]) byDate[t.date] = [];
-      byDate[t.date].push(t);
+      const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
+      if (!byDate[date]) byDate[date] = [];
+      byDate[date].push(t);
     });
 
     console.log('📊 Calcul des stats pour les dates:', Object.keys(byDate));
@@ -91,9 +92,7 @@ export function useTimesheet() {
     // Calculer les heures pour chaque jour
     Object.entries(byDate).forEach(([date, dayTimesheets]) => {
       const sorted = [...dayTimesheets].sort((a, b) => {
-        const aHour = a.hour || a.heure || '';
-        const bHour = b.hour || b.heure || '';
-        return aHour.localeCompare(bHour);
+        return a.timestamp.localeCompare(b.timestamp);
       });
 
       let dayHours = 0;
@@ -104,14 +103,14 @@ export function useTimesheet() {
         if (ts.clockin === true) {
           const nextTs = sorted[i + 1];
           if (nextTs && nextTs.clockin === false) {
-            const hours = calculateHours(ts.hour || ts.heure || '', nextTs.hour || nextTs.heure || '');
-            console.log(`  ⏱️ ${date} - Paire ${ts.hour} → ${nextTs.hour} = ${hours.toFixed(2)}h`);
+            const hours = calculateHours(ts.timestamp, nextTs.timestamp);
+            console.log(`  ⏱️ ${date} - Paire ${ts.timestamp} → ${nextTs.timestamp} = ${hours.toFixed(2)}h`);
             dayHours += hours;
             i++; // Sauter le prochain
           } else if (date === today) {
             // Clock-in actif aujourd'hui, calculer jusqu'à maintenant
-            const hours = calculateHours(ts.hour || ts.heure || '', now.toISOString());
-            console.log(`  ⏱️ ${date} - Clock-in actif ${ts.hour} → maintenant = ${hours.toFixed(2)}h`);
+            const hours = calculateHours(ts.timestamp, now.toISOString());
+            console.log(`  ⏱️ ${date} - Clock-in actif ${ts.timestamp} → maintenant = ${hours.toFixed(2)}h`);
             dayHours += hours;
           }
         }
@@ -217,13 +216,14 @@ export function useTimesheet() {
         Sun: []
       };
 
-      // Grouper les timesheets par date
+      // Grouper les timesheets par date (extraite du timestamp)
       const timesheetsByDate: Record<string, Timesheet[]> = {};
       weekTimesheets.forEach(t => {
-        if (!timesheetsByDate[t.date]) {
-          timesheetsByDate[t.date] = [];
+        const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
+        if (!timesheetsByDate[date]) {
+          timesheetsByDate[date] = [];
         }
-        timesheetsByDate[t.date].push(t);
+        timesheetsByDate[date].push(t);
       });
 
       console.log('📊 Timesheets groupés par date:', timesheetsByDate);
@@ -233,11 +233,9 @@ export function useTimesheet() {
         const dayKey = dateToDayKey(date);
         const dayLogs: TimeLog[] = [];
 
-        // Trier par heure (utiliser hour ou heure pour rétrocompatibilité)
+        // Trier par timestamp
         const sortedTimesheets = [...timesheets].sort((a, b) => {
-          const aHour = a.hour || a.heure || '';
-          const bHour = b.hour || b.heure || '';
-          return aHour.localeCompare(bHour);
+          return a.timestamp.localeCompare(b.timestamp);
         });
 
         console.log(`🔍 Traitement du ${date} (${dayKey}):`, sortedTimesheets);
@@ -250,16 +248,14 @@ export function useTimesheet() {
             // C'est une entrée, chercher la sortie correspondante
             const nextTimesheet = sortedTimesheets[i + 1];
 
-            // Extraire l'heure du format ISO "2025-10-24T08:30:00.000Z" -> "08:30"
-            const hourISO = timesheet.hour || timesheet.heure;
-            const start = hourISO ? new Date(hourISO).toTimeString().substring(0, 5) : '00:00';
+            // Extraire l'heure du format ISO "2025-12-13T08:30:00.000Z" -> "08:30"
+            const start = timesheet.timestamp ? new Date(timesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
 
             console.log(`  ➡️ Entrée trouvée à ${start}`);
 
             if (nextTimesheet && nextTimesheet.clockin === false) {
               // Paire complète
-              const nextHourISO = nextTimesheet.hour || nextTimesheet.heure;
-              const end = nextHourISO ? new Date(nextHourISO).toTimeString().substring(0, 5) : '00:00';
+              const end = nextTimesheet.timestamp ? new Date(nextTimesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
               dayLogs.push({ start, end });
               console.log(`  ✅ Paire complète: ${start} - ${end}`);
               i++; // Sauter le prochain timesheet car déjà traité
@@ -324,11 +320,9 @@ export function useTimesheet() {
 
       // Trouver le DERNIER timesheet pour déterminer l'état actuel
       if (todayTimesheets.length > 0) {
-        // Trier par heure pour avoir le dernier timesheet
+        // Trier par timestamp pour avoir le dernier timesheet
         const sortedTimesheets = [...todayTimesheets].sort((a, b) => {
-          const aHour = a.hour || a.heure || '';
-          const bHour = b.hour || b.heure || '';
-          return aHour.localeCompare(bHour);
+          return a.timestamp.localeCompare(b.timestamp);
         });
         const lastTimesheet = sortedTimesheets[sortedTimesheets.length - 1];
 
@@ -336,8 +330,7 @@ export function useTimesheet() {
         if (lastTimesheet.clockin === true) {
           setLastClockIn(lastTimesheet);
           setIsClockingIn(true);
-          const hourISO = lastTimesheet.hour || lastTimesheet.heure;
-          const time = hourISO ? new Date(hourISO).toTimeString().substring(0, 5) : '00:00';
+          const time = lastTimesheet.timestamp ? new Date(lastTimesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
           setCurrentDayLogs({ start: time });
           console.log('✅ Statut: pointé depuis', time);
         } else {
@@ -394,9 +387,8 @@ export function useTimesheet() {
       if (response.success && response.data) {
         console.log('✅ Data reçue:', response.data);
 
-        // L'API retourne 'hour' au format ISO "2025-10-24T15:30:00.000Z"
-        const hourISO = response.data.hour || response.data.heure;
-        const time = hourISO ? new Date(hourISO).toTimeString().substring(0, 5) : '00:00';
+        // L'API retourne 'timestamp' au format ISO "2025-12-13T15:30:00.000Z"
+        const time = response.data.timestamp ? new Date(response.data.timestamp).toTimeString().substring(0, 5) : '00:00';
 
         console.log(`⏰ Heure extraite: ${time}, clockin: ${response.data.clockin}`);
 

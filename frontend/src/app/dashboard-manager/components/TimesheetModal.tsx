@@ -16,9 +16,7 @@ interface TimesheetModalProps {
 export interface TimesheetData {
   id?: number;
   employeId: number;
-  date: string;
-  hour: string;
-  clockin: boolean;
+  timestamp: string; // ISO DateTime
   status: 'normal' | 'retard' | 'absence';
 }
 
@@ -36,9 +34,7 @@ export default function TimesheetModal({
 
   const [formData, setFormData] = useState<TimesheetData>({
     employeId: 0,
-    date: '',
-    hour: '',
-    clockin: true,
+    timestamp: '',
     status: 'normal'
   });
   const [saving, setSaving] = useState(false);
@@ -51,21 +47,16 @@ export default function TimesheetModal({
       setFormData({
         id: timesheet.id,
         employeId: timesheet.employeId,
-        date: timesheet.date,
-        hour: timesheet.hour,
-        clockin: timesheet.clockin,
+        timestamp: timesheet.timestamp,
         status: timesheet.status
       });
     } else {
       // Mode création
-      const date = initialDate || new Date().toISOString().split('T')[0];
-      const hour = initialHour || new Date().toISOString();
+      const timestamp = initialHour || new Date().toISOString();
 
       setFormData({
         employeId: employeeId,
-        date,
-        hour,
-        clockin: true,
+        timestamp,
         status: 'normal'
       });
     }
@@ -87,21 +78,21 @@ export default function TimesheetModal({
     }
   };
 
-  // Convertir hour ISO en date et heure séparées pour les inputs
-  const getDateFromHour = () => {
-    if (!formData.hour) return '';
-    return formData.hour.split('T')[0];
+  // Convertir timestamp ISO en date et heure séparées pour les inputs
+  const getDateFromTimestamp = () => {
+    if (!formData.timestamp) return '';
+    return formData.timestamp.split('T')[0];
   };
 
-  const getTimeFromHour = () => {
-    if (!formData.hour) return '';
-    const date = new Date(formData.hour);
+  const getTimeFromTimestamp = () => {
+    if (!formData.timestamp) return '';
+    const date = new Date(formData.timestamp);
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
   const updateDateTime = (dateStr?: string, timeStr?: string) => {
-    const currentDate = dateStr || getDateFromHour();
-    const currentTime = timeStr || getTimeFromHour();
+    const currentDate = dateStr || getDateFromTimestamp();
+    const currentTime = timeStr || getTimeFromTimestamp();
 
     const [hours, minutes] = currentTime.split(':');
     const isoDate = new Date(currentDate);
@@ -109,8 +100,7 @@ export default function TimesheetModal({
 
     setFormData(prev => ({
       ...prev,
-      date: currentDate,
-      hour: isoDate.toISOString()
+      timestamp: isoDate.toISOString()
     }));
   };
 
@@ -142,37 +132,8 @@ export default function TimesheetModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Type de pointage */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Type de pointage
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, clockin: true }))}
-                className={`p-3 rounded-xl font-medium transition-all ${
-                  formData.clockin
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Entrée
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, clockin: false }))}
-                className={`p-3 rounded-xl font-medium transition-all ${
-                  !formData.clockin
-                    ? 'bg-black text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Sortie
-              </button>
-            </div>
-          </div>
-
+          {/* Note: clockin est auto-déterminé par le backend */}
+          
           {/* Date */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -181,7 +142,7 @@ export default function TimesheetModal({
             </label>
             <input
               type="date"
-              value={getDateFromHour()}
+              value={getDateFromTimestamp()}
               onChange={(e) => updateDateTime(e.target.value, undefined)}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               required
@@ -196,7 +157,7 @@ export default function TimesheetModal({
             </label>
             <input
               type="time"
-              value={getTimeFromHour()}
+              value={getTimeFromTimestamp()}
               onChange={(e) => updateDateTime(undefined, e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               required

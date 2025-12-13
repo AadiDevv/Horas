@@ -249,11 +249,9 @@ export interface ScheduleListItemDTO {
 // #region Timesheet DTOs
 
 export interface TimesheetCreateDTO {
-    employeId: number;
-    date: string;      // Format: "YYYY-MM-DD"
-    hour: string;     // Format: "HH:mm:ss"
-    clockin: boolean;  // true = entrée, false = sortie
+    timestamp?: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z" (optionnel)
     status?: TimesheetStatus;
+    employeId?: number; // Optionnel (OBLIGATOIRE pour Manager/Admin, interdit pour Employé)
 }
 
 export interface TimesheetQuickDTO {
@@ -261,8 +259,7 @@ export interface TimesheetQuickDTO {
 }
 
 export interface TimesheetUpdateDTO {
-    date?: string;
-    hour?: string;
+    timestamp?: string; // Format: ISO DateTime
     clockin?: boolean;
     status?: TimesheetStatus;
 }
@@ -270,8 +267,7 @@ export interface TimesheetUpdateDTO {
 export interface TimesheetReadDTO {
     id: number;
     employeId: number;
-    date: string;
-    hour: string;
+    timestamp: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
     clockin: boolean;
     status: TimesheetStatus;
     createdAt: string;
@@ -288,16 +284,15 @@ export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
     employelastName: string;
-    date: string;
-    hour: string;
+    timestamp: string; // Format: ISO DateTime
     clockin: boolean;
     status: TimesheetStatus;
 }
 
 export interface TimesheetFilterDTO {
     employeId?: number;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string;  // Format: "YYYY-MM-DD" (pour filtrer par timestamp)
+    endDate?: string;    // Format: "YYYY-MM-DD" (pour filtrer par timestamp)
     status?: TimesheetStatus;
     clockin?: boolean;
 }
