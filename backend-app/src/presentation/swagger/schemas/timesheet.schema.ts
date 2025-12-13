@@ -1,36 +1,29 @@
 // #region Timesheet Schemas
 export const timesheetSchemas = {
     // #region Request DTOs
-    // Note: Pas de DTO de création car le timesheet est entièrement géré côté serveur
-    // - employeId extrait du JWT
-    // - date et hour automatiques au moment de la requête
-    // - status calculé automatiquement selon l'schedule de l'employé
+    // Note: TimesheetCreateDTO est défini inline dans les paths
+    // - Employé : payload minimal (auto timestamp, auto clockin)
+    // - Manager/Admin : employeId obligatoire, timestamp optionnel, clockin auto-déterminé
 
     TimesheetUpdateDTO: {
         type: 'object',
         properties: {
-            date: {
+            timestamp: {
                 type: 'string',
-                format: 'date',
-                example: '2025-10-12',
-                description: 'Nouvelle date du timesheet'
-            },
-            hour: {
-                type: 'string',
-                format: 'time',
-                example: '09:00:00',
-                description: 'Nouvelle heure du timesheet'
+                format: 'date-time',
+                example: '2025-12-13T09:00:00.000Z',
+                description: 'Nouveau timestamp du pointage (date + heure, optionnel)'
             },
             clockin: {
                 type: 'boolean',
                 example: true,
-                description: 'Modifier le type (entrée/sortie)'
+                description: 'Modifier le type (entrée/sortie, optionnel)'
             },
             status: {
                 type: 'string',
                 enum: ['normal', 'delay', 'absence', 'incomplete'],
                 example: 'normal',
-                description: 'Nouveau statut'
+                description: 'Nouveau statut (optionnel)'
             }
         },
         description: 'Tous les champs sont optionnels (PATCH). Utilisé uniquement pour les corrections manuelles par admin/manager.'
@@ -51,17 +44,11 @@ export const timesheetSchemas = {
                 example: 10,
                 description: 'ID de l\'employé'
             },
-            date: {
-                type: 'string',
-                format: 'date',
-                example: '2025-10-12',
-                description: 'Date du timesheet'
-            },
-            hour: {
+            timestamp: {
                 type: 'string',
                 format: 'date-time',
-                example: '2025-10-12T09:05:30.000Z',
-                description: 'Hour du timesheet (ISO DateTime)'
+                example: '2025-12-13T09:05:30.000Z',
+                description: 'Date et heure du pointage (ISO DateTime)'
             },
             clockin: {
                 type: 'boolean',
@@ -105,9 +92,37 @@ export const timesheetSchemas = {
                         type: 'string',
                         format: 'email',
                         example: 'pierre.martin@example.com'
+                    },
+                    phone: {
+                        type: 'string',
+                        nullable: true,
+                        example: '+33 6 12 34 56 78'
+                    },
+                    role: {
+                        type: 'string',
+                        enum: ['employe'],
+                        example: 'employe'
+                    },
+                    isActive: {
+                        type: 'boolean',
+                        example: true
+                    },
+                    teamId: {
+                        type: 'integer',
+                        nullable: true,
+                        example: 1
+                    },
+                    managerId: {
+                        type: 'integer',
+                        example: 5
+                    },
+                    customScheduleId: {
+                        type: 'integer',
+                        nullable: true,
+                        example: 2
                     }
                 },
-                description: 'Informations de l\'employé (optionnel selon le endpoint)'
+                description: 'Informations de l\'employé (UserReadEmployeeDTO_Core)'
             }
         }
     },
@@ -123,19 +138,10 @@ export const timesheetSchemas = {
                 type: 'integer',
                 example: 10
             },
-            employelastName: {
+            timestamp: {
                 type: 'string',
-                example: 'Pierre Martin',
-                description: 'lastName complet de l\'employé (firstName + lastName)'
-            },
-            date: {
-                type: 'string',
-                format: 'date',
-                example: '2025-10-12'
-            },
-            hour: {
-                type: 'string',
-                example: '09:05:30'
+                format: 'date-time',
+                example: '2025-12-13T09:05:30.000Z'
             },
             clockin: {
                 type: 'boolean',

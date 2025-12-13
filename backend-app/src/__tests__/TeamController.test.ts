@@ -1,7 +1,8 @@
 import { TeamController } from '@/presentation/controllers/team.controller';
 import { TeamUseCase } from '@/application/usecases';
 import { ValidationError } from '@/domain/error/AppError';
-import { Team } from '@/domain/entities/team';
+import { Team_L1, Team_Core, Team } from '@/domain/entities/team';
+import { UserManager_Core, UserEmployee_Core } from '@/domain/entities/user';
 
 // -----------------------------
 // Mock Express
@@ -18,72 +19,79 @@ const mockResponse = () => {
 };
 
 // -----------------------------
-// Mock Teams
+// Mock Entities
 // -----------------------------
-const mockTeam1 = new Team({
+// Team_L1 for getTeams (returns TeamReadDTO_L1)
+const mockTeam1_L1: Team_L1 = {
   id: 1,
   name: 'Dev Team',
+  description: null,
   managerId: 10,
-});
-mockTeam1.toListItemDTO = jest.fn(() => ({
-  id: 1,
-  name: 'Dev Team',
-  managerId: 10,
-  managerlastName: 'Dupont',
+  scheduleId: null,
   membersCount: 4,
-  createdAt: new Date().toISOString(),
-}));
+  createdAt: new Date('2025-01-01T10:00:00Z'),
+  updatedAt: new Date('2025-01-01T10:00:00Z'),
+  deletedAt: null,
+} as Team_L1;
 
-const mockTeam2 = new Team({
+// Team_Core for createTeam/updateTeam (returns TeamReadDTO_Core)
+const mockTeam3_Core: Team_Core = {
+  id: 3,
+  name: 'Sales Team',
+  description: null,
+  managerId: 8,
+  scheduleId: null,
+  membersCount: 0,
+} as Team_Core;
+
+// Full Team for getTeam_ById (returns TeamReadDTO with relations)
+const mockTeam2_Full: Team = {
   id: 2,
   name: 'Marketing Team',
+  description: null,
   managerId: 12,
-});
-mockTeam2.toWithMembersDTO = jest.fn(() => ({
-  id: 2,
-  name: 'Marketing Team',
-  managerId: 12,
-  managerlastName: 'Martin',
+  scheduleId: null,
+  membersCount: 2,
+  createdAt: new Date('2025-01-01T10:00:00Z'),
+  updatedAt: new Date('2025-01-01T10:00:00Z'),
+  deletedAt: null,
+  manager: {
+    id: 12,
+    firstName: 'Jean',
+    lastName: 'Martin',
+    email: 'jean.martin@mail.com',
+    phone: '+33 6 12 34 56 78',
+    role: 'manager',
+    isActive: true,
+  } as UserManager_Core,
+  schedule: null,
   members: [
     {
       id: 1,
       firstName: 'Alice',
       lastName: 'Smith',
       email: 'alice@mail.com',
+      phone: '+33 6 11 11 11 11',
       role: 'employe',
       isActive: true,
-    },
+      teamId: 2,
+      managerId: 12,
+      customScheduleId: null,
+    } as UserEmployee_Core,
     {
       id: 2,
       firstName: 'Bob',
       lastName: 'Marley',
       email: 'bob@mail.com',
+      phone: '+33 6 22 22 22 22',
       role: 'employe',
       isActive: true,
-    },
+      teamId: 2,
+      managerId: 12,
+      customScheduleId: null,
+    } as UserEmployee_Core,
   ],
-  createdAt: new Date().toISOString(),
-}));
-mockTeam2.toReadDTO = jest.fn(() => ({
-  id: 2,
-  name: 'Marketing Team',
-  managerId: 12,
-  managerlastName: 'Martin',
-  createdAt: new Date().toISOString(),
-}));
-
-const mockTeam3 = new Team({
-  id: 3,
-  name: 'Sales Team',
-  managerId: 8,
-});
-mockTeam3.toReadDTO = jest.fn(() => ({
-  id: 3,
-  name: 'Sales Team',
-  managerId: 8,
-  managerlastName: 'Durand',
-  createdAt: new Date().toISOString(),
-}));
+} as Team;
 
 // -----------------------------
 // Tests
@@ -107,7 +115,7 @@ describe('TeamController', () => {
   // ----------------------------------------
   describe('getTeams', () => {
     test('should return list of teams with success', async () => {
-      useCaseMock.getTeams.mockResolvedValue([mockTeam1]);
+      useCaseMock.getTeams.mockResolvedValue([mockTeam1_L1]);
 
       const req = mockRequest({ query: {} }) as any;
       const res = mockResponse();
@@ -120,10 +128,13 @@ describe('TeamController', () => {
           {
             id: 1,
             name: 'Dev Team',
+            description: null,
             managerId: 10,
-            managerlastName: 'Dupont',
+            scheduleId: null,
             membersCount: 4,
             createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+            deletedAt: null,
           },
         ],
         'Équipes récupérées avec succès'
@@ -131,7 +142,7 @@ describe('TeamController', () => {
     });
 
     test('should parse managerId from query', async () => {
-      useCaseMock.getTeams.mockResolvedValue([mockTeam1]);
+      useCaseMock.getTeams.mockResolvedValue([mockTeam1_L1]);
 
       const req = mockRequest({ query: { managerId: '5' }, user: { id: 2, role: 'manager' } }) as any;
       const res = mockResponse();
@@ -146,7 +157,7 @@ describe('TeamController', () => {
   // ----------------------------------------
   describe('getTeam_ById', () => {
     test('should return team with members', async () => {
-      useCaseMock.getTeam_ById.mockResolvedValue(mockTeam2);
+      useCaseMock.getTeam_ById.mockResolvedValue(mockTeam2_Full);
 
       const req = mockRequest({ params: { id: '2' } }) as any;
       const res = mockResponse();
@@ -158,18 +169,37 @@ describe('TeamController', () => {
         expect.objectContaining({
           id: 2,
           name: 'Marketing Team',
+          description: null,
           managerId: 12,
+          scheduleId: null,
+          membersCount: 2,
+          manager: expect.objectContaining({
+            id: 12,
+            firstName: 'Jean',
+            lastName: 'Martin',
+            email: 'jean.martin@mail.com',
+            phone: '+33 6 12 34 56 78',
+            role: 'manager',
+            isActive: true,
+          }),
+          schedule: null,
           members: expect.arrayContaining([
             expect.objectContaining({
               id: 1,
               firstName: 'Alice',
               lastName: 'Smith',
               email: 'alice@mail.com',
+              phone: '+33 6 11 11 11 11',
               role: 'employe',
               isActive: true,
+              teamId: 2,
+              managerId: 12,
+              customScheduleId: null,
             }),
           ]),
           createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          deletedAt: null,
         }),
         'Équipe récupérée avec succès'
       );
@@ -186,7 +216,7 @@ describe('TeamController', () => {
   // ----------------------------------------
   describe('createTeam', () => {
     test('should create a team and return DTO', async () => {
-      useCaseMock.createTeam.mockResolvedValue(mockTeam3);
+      useCaseMock.createTeam.mockResolvedValue(mockTeam3_Core);
 
       const req = mockRequest({
         body: { name: 'Sales Team', managerId: 8 },
@@ -201,8 +231,10 @@ describe('TeamController', () => {
         expect.objectContaining({
           id: 3,
           name: 'Sales Team',
+          description: null,
           managerId: 8,
-          createdAt: expect.any(String),
+          scheduleId: null,
+          membersCount: 0,
         }),
         'Équipe créée avec succès'
       );
@@ -215,18 +247,36 @@ describe('TeamController', () => {
       await expect(controller.createTeam(req, res)).rejects.toThrow(ValidationError);
     });
 
-    test('should throw ValidationError if managerId is missing', async () => {
-      const req = mockRequest({ body: { name: 'NoManager' } }) as any;
+    test('should use authenticated user as managerId', async () => {
+      useCaseMock.createTeam.mockResolvedValue(mockTeam3_Core);
+
+      const req = mockRequest({
+        body: { name: 'New Team' },
+        user: { id: 15, role: 'manager' }
+      }) as any;
       const res = mockResponse();
 
-      await expect(controller.createTeam(req, res)).rejects.toThrow(TypeError);
+      await controller.createTeam(req, res);
+
+      // Le managerId doit être pris depuis l'utilisateur authentifié
+      expect(useCaseMock.createTeam).toHaveBeenCalledWith(
+        { name: 'New Team', managerId: 15 },
+        15
+      );
+      expect(res.success).toHaveBeenCalled();
     });
   });
 
   // ----------------------------------------
   describe('updateTeam', () => {
     test('should update team successfully', async () => {
-      useCaseMock.updateTeam.mockResolvedValue(mockTeam2);
+      const updatedTeamCore: Team_Core = {
+        ...mockTeam3_Core,
+        id: 2,
+        name: 'Updated Team',
+        managerId: 12,
+      } as Team_Core;
+      useCaseMock.updateTeam.mockResolvedValue(updatedTeamCore);
 
       const req = mockRequest({
         params: { id: '2' },
@@ -241,8 +291,8 @@ describe('TeamController', () => {
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 2,
-          name: 'Marketing Team',
-          createdAt: expect.any(String),
+          name: 'Updated Team',
+          managerId: 12,
         }),
         'Équipe modifiée avec succès'
       );

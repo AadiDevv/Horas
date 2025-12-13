@@ -1,25 +1,36 @@
 import { ISchedule } from "@/domain/interfaces/schedule.interface";
-import { Schedule } from "@/domain/entities/schedule";
+import { Schedule, Schedule_Core } from "@/domain/entities/schedule";
 import {
     ScheduleCreateDTO,
     ScheduleUpdateDTO,
-    ScheduleReadDTO,
-    ScheduleListItemDTO,
-    ScheduleWithUsersDTO,
     ScheduleFilterDTO,
-    UserReadDTO
+    UserAuthDTO,
 } from "@/application/DTOS";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
+import { ScheduleMapper } from "../mappers/schedule/from-dto.mapper";
+
+type ScheduleValidateData = Partial<
+    Omit<ScheduleCreateDTO, 'startHour' | 'endHour'> & 
+    {startHour: string, endHour: string}
+>;
 
 export class ScheduleUseCase {
     constructor(private scheduleRepository: ISchedule) { }
 
-    // #region Read Operations
+    // #region GET
+
     /**
      * Récupère tous les schedules avec filtres optionnels
-     * Accessible par Admin uniquement
+     * 
+     * @access_admin ✅ Peut voir TOUS les schedules (pas de restriction)
+     * @access_manager ✅ Peut voir UNIQUEMENT ses propres schedules (managerId auto-filtré)
+     * @access_employe ❌ Accès interdit (géré par middleware)
+     * 
+     * @param user - Utilisateur authentifié (rôle vérifié par middleware)
+     * @param filter - Filtres optionnels (name, activeDays)
+     * @returns Liste des schedules selon les permissions
      */
-    async getAllSchedules(user: UserReadDTO,filter?: ScheduleFilterDTO): Promise<Schedule[]> {
+    async getAllSchedules(user: UserAuthDTO,filter?: ScheduleFilterDTO): Promise<Schedule_Core[]> {
         const where: any = {};
         // #region Filter
         if (filter?.name) {
@@ -49,7 +60,7 @@ export class ScheduleUseCase {
      * Accessible par tous les utilisateurs authentifiés
      */
     async getSchedule_ById(id: number): Promise<Schedule> {
-        const schedule = await this.scheduleRepository.getSchedule_ById(id);
+        const schedule: Schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!schedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
@@ -59,6 +70,9 @@ export class ScheduleUseCase {
     /**
      * Récupère un schedule avec la liste des utilisateurs
      * Accessible par Admin et Manager uniquement
+     */
+    /**
+     * @deprecated getScheduleWithUsers est dépréciée, utilisez une autre méthode
      */
     async getScheduleWithUsers(id: number): Promise<Schedule> {
         const schedule = await this.scheduleRepository.getSchedule_ById(id);
@@ -78,27 +92,33 @@ export class ScheduleUseCase {
     }
     // #endregion
 
-    // #region Create Operations
+    // #region POST
     /**
      * Crée un nouveau schedule
-     * Accessible par Admin uniquement
+     * 
+     * @access_admin ✅ Peut créer TOUS les schedules (pas de restriction)
+     * @access_manager ✅ Peut créer ses propres schedules
+     * 
+     * @param dto - Données du schedule à créer
+     * @param managerId - ID du manager qui crée le schedule
+     * @returns Le schedule créé
      */
-    async createSchedule(dto: ScheduleCreateDTO, managerId: number): Promise<Schedule> {
+    async createSchedule(dto: ScheduleCreateDTO, managerId: number): Promise<Schedule_Core> {
+        
         // Validation des données
         this.validateScheduleData(dto);
+        
+        // Création de l'entité
+        const scheduleEntity: Schedule_Core = ScheduleMapper.FromDTO.Create_ToEntityCore(dto, managerId);
 
         // Vérifier qu'un schedule avec le même nom n'existe pas déjà
-        const existingSchedules = await this.scheduleRepository.getAllSchedules({ name: dto.name });
+        const existingSchedules = await this.scheduleRepository.getAllSchedules({ name: dto.name, managerId: managerId });
         if (existingSchedules.length > 0) {
             throw new ValidationError(`Un schedule avec le nom "${dto.name}" existe déjà`);
         }
 
-        // Créer l'entité
-        const schedule = Schedule.fromCreateDTO({...dto, managerId});
-
         // Sauvegarder
-        const createdSchedule = await this.scheduleRepository.createSchedule(schedule);
-
+        const createdSchedule: Schedule_Core = await this.scheduleRepository.createSchedule(scheduleEntity);
         return createdSchedule
     }
     // #endregion
@@ -106,41 +126,46 @@ export class ScheduleUseCase {
     // #region Update Operations
     /**
      * Met à jour un schedule existant
-     * Accessible par Admin uniquement
+     * 
+     * @access_admin ✅ Peut mettre à jour TOUS les schedules (pas de restriction)
+     * @access_manager ✅ Peut mettre à jour ses propres schedules
+     * 
+     * @param id - ID du schedule à mettre à jour
+     * @param dto - Données du schedule à mettre à jour
+     * @param user - Utilisateur authentifié (rôle vérifié par middleware)
+     * @returns Le schedule mis à jour
+     * @throws ValidationError si les données sont invalides
      */
-    async updateSchedule_ById(id: number, dto: ScheduleUpdateDTO, user: UserReadDTO): Promise<Schedule> {
+    async updateSchedule_ById(id: number, dto: ScheduleUpdateDTO, user: UserAuthDTO): Promise<Schedule_Core> {
         
 
         // Vérifier que le schedule existe
-        const existingSchedule = await this.scheduleRepository.getSchedule_ById(id);
+        const existingSchedule: Schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!existingSchedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-        if (user.role !== 'admin') {
-            if(user.role === 'employe') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour mettre à jour un schedule");
-            else if (user.role !== 'manager') {
-                if (existingSchedule.managerId!== user.id) throw new ForbiddenError("Vous essayez de mettre à jour un schedule qui ne vous appartient pas");
-            }
-        }
+        if (user.role !== 'admin' && user.role !== 'manager') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour mettre à jour un schedule");
+        
         // Validation des données si fournies
-            this.validateScheduleUpdateData(dto);
+        this.validateScheduleUpdateData(dto);
 
         // Vérifier l'unicité du nom si modifié
         if (dto.name && dto.name !== existingSchedule.name) {
-            const existingSchedules = await this.scheduleRepository.getAllSchedules({ name: dto.name });
+            const existingSchedules = await this.scheduleRepository.getAllSchedules({ name: dto.name , managerId: existingSchedule.managerId });
             if (existingSchedules.length > 0) {
                 throw new ValidationError(`Un schedule avec le nom "${dto.name}" existe déjà`);
             }
         }
 
         // Mettre à jour l'entité
-        const updatedSchedule = existingSchedule.updateFromDTO(dto);
+        const updatedSchedule: Schedule = ScheduleMapper.FromDTO.Update_ToEntity(existingSchedule, dto);
 
         // Sauvegarder
-        const savedSchedule = await this.scheduleRepository.updateSchedule_ById(updatedSchedule);
+        const savedSchedule: Schedule_Core = await this.scheduleRepository.updateSchedule_ById(new Schedule_Core({...updatedSchedule}));
 
         return savedSchedule;
     }
+    
     // #endregion
 
     // #region Delete Operations
@@ -149,18 +174,14 @@ export class ScheduleUseCase {
      * Accessible par Admin uniquement
      * Vérifie qu'aucun utilisateur/équipe n'utilise ce schedule
      */
-    async deleteSchedule_ById(id: number, user: UserReadDTO): Promise<void> {
+    async deleteSchedule_ById(id: number, user: UserAuthDTO): Promise<void> {
         // Vérifier que le schedule existe
         const schedule = await this.scheduleRepository.getSchedule_ById(id);
         if (!schedule) {
             throw new NotFoundError(`Schedule avec l'ID ${id} non trouvé`);
         }
-        if (user.role !== 'admin') {
-            if(user.role === 'employe') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour supprimer un schedule");
-            else if (user.role !== 'manager') {
-                if (schedule.managerId!== user.id) throw new ForbiddenError("Vous essayez de supprimer un schedule qui ne vous appartient pas");
-            }
-        }
+        if (user.role !== 'admin' && user.role !== 'manager') throw new ForbiddenError("Vous n'avez pas les permissions nécessaires pour mettre à jour un schedule");
+
         // Vérifier qu'il n'est pas en cours d'utilisation
         const isInUseByTeams = schedule.teams? schedule.teams.length > 0 : false;
         const isInUseByUsers = await this.scheduleRepository.getScheduleUsersCount(id)
@@ -172,13 +193,10 @@ export class ScheduleUseCase {
         await this.scheduleRepository.deleteSchedule_ById(id);
     }
     // #endregion
+    
+    // #region Validation
     private validateScheduleData(data: ScheduleCreateDTO): void {
-        this.validateScheduleFields({
-            name: data.name,
-            startHour: data.startHour,
-            endHour: data.endHour,
-            activeDays: data.activeDays
-        });
+        this.validateScheduleFields(data);
     }
 
     /**
@@ -193,7 +211,10 @@ export class ScheduleUseCase {
      * Validation générique des champs de schedule
      * Valide uniquement les champs fournis (non-undefined)
      */
-    private validateScheduleFields(data: Partial<ScheduleCreateDTO>): void {
+
+    
+
+    private validateScheduleFields(data: ScheduleValidateData): void {
         if(Object.entries(data).length === 0) throw new ValidationError("Aucun fourni pour la validation des champs du schedule");
         // Validation du nom (si fourni)
         if (data.name !== undefined) {

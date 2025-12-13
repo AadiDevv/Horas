@@ -1,4 +1,4 @@
-import { User } from "@/domain/entities/user";
+import { UserEmployee_Core, UserEmployee_L1, UserManager_Core, User_Core, User_L1 } from "@/domain/entities/user";
 
 /**
  * Interface pour les opérations d'authentification
@@ -8,16 +8,15 @@ import { User } from "@/domain/entities/user";
  */
 export interface IAuth {
   // #region Read (pour authentification uniquement)
-  getUser_ByEmail(email: string): Promise<User | null>;
+  getUser_ByEmail(email: string): Promise<User_L1 | null>;
   // #endregion
 
   // #region Update (pour auth)
-  updateUserLogin_byId(user: User): Promise<User>;
+  updateUserLogin_byId(user: User_L1): Promise<User_L1>;
   // #endregion
 
   // #region Auth
-  registerUser(user: User): Promise<User>;
-  registerEmployee(user: User): Promise<User>;
-  registerManager(user: User): Promise<User>;
+  registerEmployee(user: UserEmployee_Core): Promise<UserEmployee_Core>;
+  registerManager(user: UserManager_Core): Promise<UserManager_Core>;
   // #endregion
 }   

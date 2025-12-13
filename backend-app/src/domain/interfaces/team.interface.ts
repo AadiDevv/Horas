@@ -1,4 +1,4 @@
-import { Team } from "@/domain/entities/team";
+import { Team, Team_Core, Team_L1 } from "@/domain/entities/team";
 import { TeamFilterDTO } from "@/application/DTOS";
 
 /**
@@ -11,7 +11,7 @@ export interface ITeam {
      * Récupère toutes les équipes (Admin) ou filtre par managerId
      * @param filter - Filtres optionnels (managerId)
      */
-    getAllTeams(filter?: TeamFilterDTO): Promise<Team[]>;
+    getAllTeams(filter?: TeamFilterDTO): Promise<Team_Core[]>;
 
     /**
      * Récupère une équipe par son ID
@@ -21,28 +21,33 @@ export interface ITeam {
     /**
      * Récupère les équipes d'un manager spécifique
      */
-    getTeams_ByManagerId(managerId: number): Promise<Team[]>;
+    getTeams_ByManagerId(managerId: number): Promise<Team_L1[]>;
     // #endregion
 
     // #region Create
     /**
      * Crée une nouvelle équipe
      */
-    createTeam(team: Team): Promise<Team>;
+    createTeam(team: Team_Core): Promise<Team_Core>;
     // #endregion
 
     // #region Update
     /**
      * Met à jour une équipe
      */
-    updateTeam_ById(team: Team): Promise<Team>;
+    updateTeam_ById(team: Team_Core): Promise<Team_Core>;
+
+    /**
+     * Met à jour la schedule d'une équipe
+     */
+    updateTeamSchedule_ById(teamId: number, scheduleId: number): Promise<Team_Core>;
     // #endregion
 
     // #region Delete
     /**
      * Suppression logique d'une équipe (soft delete)
      */
-    deleteTeam_ById(id: number): Promise<Team>;
+    deleteTeam_ById(id: number): Promise<Team_Core>;
     // #endregion
 }
 

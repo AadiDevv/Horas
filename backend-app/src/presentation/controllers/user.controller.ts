@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO } from '@/application/DTOS/user.dto';
+import { UserUpdateDTO, UserAsignTeamDTO, UserAuthDTO } from '@/application/DTOS/';
 import { ValidationError } from '@/domain/error/AppError';
+import { UserMapper } from '@/application/mappers/user';
+import { UserEmployee_Core } from '@/domain/entities/user';
 
 /**
  * Contrôleur pour la gestion des utilisateurs (CRUD)
@@ -13,38 +15,20 @@ export class UserController {
   constructor(private UC_user: UserUseCase) { }
 
   // #region Read
-  /**
-   * GET /api/users?role=X&teamId=Y&isActive=true&search=...
-   * Récupère la liste de tous les utilisateurs avec filtres optionnels
-   * Admin uniquement
-   */
-  async getAllUsers(req: Request, res: Response): Promise<void> {
-    const filter: UserFilterDTO = {
-      role: req.query.role as any,
-      teamId: req.query.teamId ? Number(req.query.teamId) : undefined,
-      isActive: req.query.isActive ? req.query.isActive === 'true' : undefined,
-      search: req.query.search as string
-    };
-
-    const users = await this.UC_user.getAllUsers(filter);
-    const usersDTO = users.map(user => user.toListItemDTO());
-
-    res.success(usersDTO, "Liste des utilisateurs récupérée avec succès");
-  }
 
   /**
    * GET /api/users/:id
    * Récupère un utilisateur par son ID
    */
-  async getUser_ById(req: Request, res: Response): Promise<void> {
+  async getEmployee_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    const user = await this.UC_user.getUser_ById(id);
-    const userDTO = user.toReadDTO();
+    const user = await this.UC_user.getEmployee_ById(id);
+    const userDTO = UserMapper.FromEntity.toReadDTO(user);
 
     res.success(userDTO, "Utilisateur récupéré avec succès");
-  }
+  } 
 
   /**
    * GET /api/users/my-employees
@@ -66,8 +50,9 @@ export class UserController {
       }
     }
 
-    const employees = await this.UC_user.getMyEmployees(managerId, userId, userRole);
-    const employeesDTO = employees.map(employee => employee.toListItemDTO());
+    const employees: UserEmployee_Core[] = await this.UC_user.getMyEmployees(managerId, userId, userRole);
+    
+    const employeesDTO = employees.map(employee => UserMapper.FromEntityCore.toReadDTO_Core(employee));
 
     res.success(employeesDTO, "Liste des employés récupérée avec succès");
   }
@@ -93,11 +78,10 @@ export class UserController {
     }
 
     // Récupération des informations de l'utilisateur connecté
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser: UserAuthDTO = req.user!;
 
-    const user = await this.UC_user.updateUserProfile_ById(id, requestingUserId, requestingUserRole, userDto);
-    const userDTO = user.toReadDTO();
+    const user = await this.UC_user.updateUserProfile_ById(id, requestingUser, userDto);
+    const userDTO = UserMapper.FromEntityCore.toReadUserDTO_Core(user);
 
     res.success(userDTO, "Utilisateur modifié avec succès");
   }
@@ -110,7 +94,7 @@ export class UserController {
    * 
    * Note : Les permissions sont vérifiées par le middleware adminOrSelf + logique métier
    */
-  async updateUserTeam_ById(req: Request, res: Response): Promise<void> {
+  async updateEmployeeTeam_ById(req: Request, res: Response): Promise<void> {
     const userId = Number(req.params.id);
     if (isNaN(userId)) throw new ValidationError("ID utilisateur invalide");
 
@@ -118,11 +102,10 @@ export class UserController {
     if (!dto.teamId) throw new ValidationError("Le teamId est requis");
 
     // Récupération des informations de l'utilisateur connecté
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser: UserAuthDTO = req.user!;
 
-    const user = await this.UC_user.updateUserTeam_ById(userId, dto.teamId, requestingUserId, requestingUserRole);
-    const userDTO = user.toReadDTO();
+    const user = await this.UC_user.updateEmployeeTeam_ById(userId, dto.teamId, requestingUser);
+    const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
 
     res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
   }
@@ -136,11 +119,10 @@ export class UserController {
    */
   async deleteUser_ById(req: Request, res: Response): Promise<void> {
     const id = Number(req.params.id);
-    const requestingUserId = req.user!.id;
-    const requestingUserRole = req.user!.role;
+    const requestingUser = req.user!;
     if (isNaN(id)) throw new ValidationError("ID invalide");
 
-    await this.UC_user.deleteUser_ById(id, requestingUserId, requestingUserRole);
+    await this.UC_user.deleteUser_ById(id, requestingUser);
 
     res.success(null, "Utilisateur supprimé avec succès");
   }

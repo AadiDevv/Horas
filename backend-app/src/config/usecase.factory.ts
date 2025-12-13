@@ -28,7 +28,8 @@ class ApplicationFactory {
     public static getTeamUseCase(): TeamUseCase {
         if (!this.teamUseCase) {
             const teamRepo = infra.getTeamRepo();
-            this.teamUseCase = new TeamUseCase(teamRepo);
+            const scheduleRepo = infra.getScheduleRepo();
+            this.teamUseCase = new TeamUseCase(teamRepo, scheduleRepo);
         }
         return this.teamUseCase;
     }
@@ -36,7 +37,8 @@ class ApplicationFactory {
     public static getTimesheetUseCase(): TimesheetUseCase {
         if (!this.timesheetUseCase) {
             const timesheetRepo = infra.getTimesheetRepo();
-            this.timesheetUseCase = new TimesheetUseCase(timesheetRepo);
+            const userRepo = infra.getUserRepoAsIUser();
+            this.timesheetUseCase = new TimesheetUseCase(timesheetRepo, userRepo);
         }
         return this.timesheetUseCase;
     }

@@ -6,14 +6,6 @@ import { adminOnly, managerOrAdmin } from '../middlewares/role.middleweare';
 const router = Router();
 const authController = controllers.AuthController()
 
-// Auto-inscription publique (employé uniquement)
-router.post('/register', async (req, res, next) => {
-    try {
-        await authController.register(req, res)
-    } catch (error) {
-        next(error)
-    }
-});
 
 // Création d'employé (manager ou admin uniquement)
 router.post('/register/employe',

@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { BaseUserReadDTO, UserCreateDTO, UserCreateEmployeeDTO, UserReadDTO, UserReadEmployeeDTO, UserReadManagerDTO, UserCreateManagerDTO } from '@/application/DTOS/user.dto';
-import { UserLoginDTO, TokenResponse } from '@/application/DTOS/auth.dto';
+import { UserCreateEmployeeDTO, UserCreateManagerDTO } from '@/application/DTOS/user.dto';
+import { UserLoginDTO, TokenResponse, UserAuthDTO } from '@/application/DTOS/auth.dto';
 import { ValidationError } from '@/domain/error/AppError';
+import { UserMapper } from '@/application/mappers/user';
 
 /**
  * Contrôleur pour l'authentification
@@ -11,13 +12,7 @@ import { ValidationError } from '@/domain/error/AppError';
 export class AuthController {
     constructor(private UC_auth: AuthUseCase) { }
 
-    // #region Private Helpers
-    private async _registerUser(dto: UserCreateDTO): Promise<BaseUserReadDTO | UserReadEmployeeDTO | UserReadManagerDTO> {
-        const user = await this.UC_auth.registerUser(dto);
-        return user.toReadDTO();
-    }
-    // #endregion
-
+ 
     // #region Register
     /**
      * POST /api/auth/register/employe
@@ -25,7 +20,7 @@ export class AuthController {
      */
     async registerEmploye(req: Request, res: Response): Promise<void> {
         req.body.role = 'employe';
-        req.body.managerId = req.user?.id;
+        req.body.managerId = req.user?.id; 
         const userRegisterDto: UserCreateEmployeeDTO = req.body;
 
         const userResponse = await this.UC_auth.registerEmployee(userRegisterDto);
@@ -47,12 +42,7 @@ export class AuthController {
      * POST /api/auth/register
      * Auto-inscription publique
      */
-    async register(req: Request, res: Response): Promise<void> {
-        const userRegisterDto: UserCreateDTO = req.body;
-        const user = await this._registerUser(userRegisterDto);
-
-        res.success(user, "Utilisateur inscrit avec succès");
-    }
+ 
     // #endregion
 
     // #region Login
@@ -66,7 +56,7 @@ export class AuthController {
 
         if (!user.id) throw new ValidationError("User id is missing");
 
-        const userResponse: UserReadDTO = user.toReadDTO();
+        const userResponse : UserAuthDTO = UserMapper.FromEntityL1.toReadUserAuthDTO_L1(user);
 
         const tokenResponse: TokenResponse = {
             accessToken,
