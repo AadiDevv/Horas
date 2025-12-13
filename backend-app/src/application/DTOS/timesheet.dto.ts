@@ -2,8 +2,6 @@ import { TimesheetStatus } from "@/domain/types";
 import {
     TimesheetProps,
     TimesheetProps_Core,
-    TimesheetProps_L1,
-    UserEmployeeProps_Core
 } from "@/domain/types/entitiyProps";
 import { UserReadEmployeeDTO_Core, UserReadEmployeeDTO } from "./user.dto";
 
@@ -23,14 +21,28 @@ export interface AuthContext {
 // #region Create DTO
 /**
  * DTO pour créer un timesheet
- * Données métier uniquement (pas d'auth - fournie séparément via AuthContext)
+ * 
+ * EMPLOYÉ :
+ * - Payload vide ou juste { status?: ... }
+ * - employeId = extrait du token
+ * - timestamp = temps réel (auto)
+ * - clockin = auto-déterminé (inverse du dernier)
+ * 
+ * MANAGER/ADMIN :
+ * - employeId OBLIGATOIRE
+ * - timestamp OPTIONNEL (si absent = temps réel, si fourni = doit être après le dernier)
+ * - clockin = auto-déterminé (inverse du dernier)
  */
 export interface TimesheetCreateDTO {
-    date: Date;
-    hour: Date;
+    /** 
+     * Timestamp du pointage (optionnel)
+     * - Employé : généré automatiquement (temps réel)
+     * - Manager/Admin : peut spécifier un timestamp personnalisé (correction)
+     *   MAIS il doit être postérieur au dernier timesheet existant
+     */
+    timestamp?: string;  // Format: ISO DateTime "2025-12-29T08:30:00.000Z"
     status?: TimesheetStatus;
-    clockin?: boolean;
-    /** ID de l'employé cible (optionnel - si absent, = userId de l'AuthContext) */
+    /** ID de l'employé cible (OBLIGATOIRE pour Manager/Admin, ignoré pour Employé) */
     employeId?: number;
 }
 // #endregion
@@ -41,8 +53,7 @@ export interface TimesheetCreateDTO {
  * Tous les champs sont optionnels (PATCH) pour flexibilité
  */
 export interface TimesheetUpdateDTO {
-    date?: Date;    // Format: "YYYY-MM-DD"
-    hour?: Date;   // Format: "HH:mm:ss" ou ISO DateTime
+    timestamp?: string;  // Format: ISO DateTime
     clockin?: boolean;
     status?: TimesheetStatus;
 }
@@ -55,9 +66,8 @@ export interface TimesheetUpdateDTO {
  *
  * Note: Omit<Omit<...>, never> aplatit le type pour IntelliSense (affiche toutes les props au hover)
  */
-export type TimesheetReadDTO = Omit<Omit<TimesheetProps, 'date' | 'hour' | 'createdAt' | 'updatedAt'|'employe'> & {
-    date: string;      // Date → string "YYYY-MM-DD"
-    hour: string;      // Date → string ISO DateTime
+export type TimesheetReadDTO = Omit<Omit<TimesheetProps, 'timestamp' | 'createdAt' | 'updatedAt'|'employe'> & {
+    timestamp: string;  // Date → string ISO DateTime
     createdAt: string;
     updatedAt: string;
     employe: UserReadEmployeeDTO_Core;
@@ -75,19 +85,18 @@ export type TimesheetReadDTO_Core = Omit<Omit<TimesheetReadDTO_L1, 'createdAt' |
  */
 export interface TimesheetFilterDTO {
     employeId?: number;
-    startDate?: string; // Format: "YYYY-MM-DD"
-    endDate?: string;   // Format: "YYYY-MM-DD"
+    startDate?: string; // Format: "YYYY-MM-DD" - filtre sur timestamp
+    endDate?: string;   // Format: "YYYY-MM-DD" - filtre sur timestamp
     status?: TimesheetStatus;
     clockin?: boolean;
 }
 
 /**
  * DTO pour la liste des timesheets (version simplifiée)
- * Basé sur TimesheetProps_Core avec transformations Date → string + employeeName dénormalisé
+ * Basé sur TimesheetProps_Core avec transformations Date → string
  */
-export type TimesheetListItemDTO = Omit<Omit<TimesheetProps_Core, 'date' | 'hour'> & {
-    date: string;      // Date → string "YYYY-MM-DD"
-    hour: string;      // Date → string ISO DateTime
+export type TimesheetListItemDTO = Omit<Omit<TimesheetProps_Core, 'timestamp'> & {
+    timestamp: string;  // Date → string ISO DateTime
 }, never>
 // #endregion
 

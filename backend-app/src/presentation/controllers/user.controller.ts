@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserFilterDTO, UserAsignTeamDTO, UserAuthDTO, UserReadEmployeeDTO_Core } from '@/application/DTOS/';
+import { UserUpdateDTO, UserAsignTeamDTO, UserAuthDTO } from '@/application/DTOS/';
 import { ValidationError } from '@/domain/error/AppError';
 import { UserMapper } from '@/application/mappers/user';
 import { UserEmployee_Core } from '@/domain/entities/user';

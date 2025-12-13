@@ -11,7 +11,10 @@ import { TeamListItemDTO, UserReadManagerDTO_Core, UserReadEmployeeDTO_Core} fro
  * Les hours sont au format "HH:mm" (ex: "09:00", "17:30")
  * activeDays est un tableau de nombres représentant les jours (1=Lundi, 7=Dimanche)
  */
-export type ScheduleCreateDTO = Omit<ScheduleProps_Core,'id'>
+export type ScheduleCreateDTO = Omit< Omit<ScheduleProps_Core,'id' | 'startHour' | 'endHour' | 'managerId'> &{
+    startHour: string; // Format: "HH:mm"
+    endHour: string;   // Format: "HH:mm"
+},never>
 // #endregion
 
 // #region Update DTO

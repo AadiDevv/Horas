@@ -13,6 +13,8 @@ export namespace ScheduleMapper {
             return new Schedule_Core({
                 id: 0, // Sera généré par Prisma
                 ...dto,
+                startHour: Schedule_Core.parseTimeString(dto.startHour),
+                endHour: Schedule_Core.parseTimeString(dto.endHour),
                 managerId: managerId,
             });
         }

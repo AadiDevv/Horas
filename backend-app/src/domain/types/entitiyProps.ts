@@ -168,8 +168,7 @@ export namespace Timesheet_Props {
     type Timesheet_Core = {
         id: number;
         employeId: number;
-        date: Date;
-        hour: Date;
+        timestamp: Date;
         clockin: boolean;
         status: TimesheetStatus;
     }

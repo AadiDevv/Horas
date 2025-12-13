@@ -1,8 +1,9 @@
 import { TimesheetUpdateDTO, TimesheetFilterDTO, TimesheetStatsDTO, TimesheetCreateDTO,  AuthContext } from "@/application/DTOS";
 import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { ITimesheet } from "@/domain/interfaces/timesheet.interface";
-import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
+import { NotFoundError, ForbiddenError, ValidationError } from "@/domain/error/AppError";
 import { TimesheetMapper } from "@/application/mappers/";
+import { IUser } from "@/domain/interfaces/user.interface";
 
 /**
  * Use Case pour la gestion des timesheets
@@ -10,7 +11,7 @@ import { TimesheetMapper } from "@/application/mappers/";
  */
 export class TimesheetUseCase {
 
-    constructor(private readonly R_timesheet: ITimesheet) { }
+    constructor(private readonly R_timesheet: ITimesheet, private readonly R_user: IUser) { }
 
     // #region Read
 
@@ -87,41 +88,58 @@ export class TimesheetUseCase {
      * @returns Timesheet complet (après insertion, avec employe)
      */
     async createTimesheet(dto: TimesheetCreateDTO, auth: AuthContext): Promise<Timesheet_Core> {
-        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = dto;
         const { userRole, userId } = auth;
 
         // Déterminer l'employé cible
         let targetEmployeeId: number;
-        if ((userRole === 'manager' || userRole === 'admin') && requestedEmployeId) {
+        if ((userRole === 'manager' || userRole === 'admin')) {
             // Manager/Admin peut créer pour un autre employé
-            targetEmployeeId = requestedEmployeId;
+            if( dto.employeId){
+                const employee = await this.R_user.getEmployee_ById(dto.employeId);
+                if (!employee) {
+                    throw new NotFoundError(`Employé avec l'ID ${dto.employeId} introuvable`);
+                }
+                if(userRole === 'manager' && employee.managerId !== userId) {
+                    throw new ForbiddenError("Vous ne pouvez pas créer un pointage pour un employé qui n'est pas dans votre équipe");
+                }
+                targetEmployeeId = dto.employeId;
+            } else {
+                throw new ValidationError("L'employé cible est requis");
+            }
         } else {
             // Employé crée pour lui-même
             targetEmployeeId = userId;
         }
 
-        // Déterminer le sens du pointage
-        let clockin: boolean;
-        if ((userRole === 'manager' || userRole === 'admin') && requestedClockin !== undefined) {
-            // Manager/Admin peut spécifier explicitement clockin
-            clockin = requestedClockin;
+        // Déterminer le timestamp
+        let timestamp: Date;
+        if (userRole === 'employe') {
+            // Employé : timestamp automatique (temps réel)
+            timestamp = new Date();
         } else {
-            // Employee: auto-déterminer selon le dernier timesheet
-            const lastTimesheet = await this.getLastTimesheetByEmployee(targetEmployeeId);
-            if (!lastTimesheet) {
-                clockin = true;
-            } else {
-                clockin = !lastTimesheet.clockin;
-            }
+            // Manager/Admin : peut spécifier ou auto
+            timestamp = dto.timestamp ? new Date(dto.timestamp) : new Date();
         }
+
+        // Récupérer le dernier timesheet pour validation et auto-détermination du clockin
+        const lastTimesheet = await this.getLastTimesheetByEmployee(targetEmployeeId);
+
+        // Validation : le nouveau timestamp doit être après le dernier
+        if (lastTimesheet && timestamp <= lastTimesheet.timestamp) {
+            throw new ValidationError(
+                `Le timestamp doit être postérieur au dernier pointage (${lastTimesheet.timestamp.toISOString()})`
+            );
+        }
+
+        // Auto-déterminer le sens du pointage (toujours auto, pas de choix)
+        const clockin: boolean = !lastTimesheet ? true : !lastTimesheet.clockin;
 
         // Instancier l'entité Timesheet_Core
         const timesheet = new Timesheet_Core({
             id: 0,
-            date,
-            hour,
+            timestamp,
             clockin,
-            status: status ?? 'normal',
+            status: dto.status ?? 'normal',
             employeId: targetEmployeeId,
         });
 

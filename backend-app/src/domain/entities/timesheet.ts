@@ -1,7 +1,7 @@
 import { TimesheetStatus } from "@/domain/types";
 import { ValidationError } from "../error/AppError";
-import { User_Core , UserEmployee_Core} from "./user";
-import {  TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../types/entitiyProps";
+import { UserEmployee_Core } from "./user";
+import { TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../types/entitiyProps";
 
 /**
  * Timesheet_Core
@@ -11,16 +11,14 @@ import {  TimesheetProps, TimesheetProps_Core, TimesheetProps_L1 } from "../type
 export class Timesheet_Core {
     public id: number;
     public employeId: number;
-    public date: Date;
-    public hour: Date;
+    public timestamp: Date;
     public clockin: boolean;
     public status: TimesheetStatus;
 
     constructor(props: TimesheetProps_Core) {
         this.id = props.id;
         this.employeId = props.employeId;
-        this.date = props.date;
-        this.hour = props.hour;
+        this.timestamp = props.timestamp;
         this.clockin = props.clockin;
         this.status = props.status;
 
@@ -34,12 +32,8 @@ export class Timesheet_Core {
             throw new ValidationError("Le timesheet doit être lié à un employé valide.");
         }
 
-        if (!(this.date instanceof Date) || isNaN(this.date.getTime())) {
-            throw new ValidationError("La date du timesheet est invalide.");
-        }
-
-        if (!(this.hour instanceof Date) || isNaN(this.hour.getTime())) {
-            throw new ValidationError("L'heure du timesheet est invalide.");
+        if (!(this.timestamp instanceof Date) || isNaN(this.timestamp.getTime())) {
+            throw new ValidationError("Le timestamp du timesheet est invalide.");
         }
     }
     // #endregion
@@ -65,7 +59,11 @@ export class Timesheet_L1 extends Timesheet_Core {
 
     // #region Business Methods
     public getDisplayDate(): string {
-        return this.date.toLocaleDateString("fr-FR");
+        return this.timestamp.toLocaleDateString("fr-FR");
+    }
+    
+    public getDisplayTime(): string {
+        return this.timestamp.toLocaleTimeString("fr-FR");
     }
     // #endregion
 }

@@ -106,10 +106,8 @@ export class UserRepository implements IAuth, IUser {
 
   async getUser_ByEmail(email: string): Promise<User_L1 | null> {
     try {
-      const user = await prisma.user.findUnique({
-        where: { email }
-      });
-      if (!user) throw new NotFoundError(`User with email ${email} not found`);
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) return null;
       return new User_L1({
         ...user,
       });
@@ -188,7 +186,7 @@ export class UserRepository implements IAuth, IUser {
   }
 
   // a revoir
-  async updateUserLogin_byId(user: UserEmployee_L1): Promise<UserEmployee_L1> {
+  async updateUserLogin_byId(user: User_L1): Promise<User_L1> {
     if (!user.id) {
       throw new Error('Cannot update user without ID');
     }
@@ -201,10 +199,8 @@ export class UserRepository implements IAuth, IUser {
         lastLoginAt: lastLoginAt
       }
     })
-    return new UserEmployee_L1({
+    return new User_L1({
       ...updatedUser,
-      managerId: updatedUser.managerId!,
-      customScheduleId: null,
     })
   }
 

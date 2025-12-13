@@ -109,8 +109,7 @@ model Schedule {
 model Timesheet {
   id           Int             @id @default(autoincrement())
   employeId    Int
-  date         DateTime         @db.Date
-  hour         DateTime         @db.Time
+  timestamp    DateTime
   clockin      Boolean
   status       TimesheetStatus  @default(normal)
   createdAt    DateTime         @default(now())
@@ -120,9 +119,9 @@ model Timesheet {
   employe     User             @relation(fields: [employeId], references: [id], onDelete: Cascade)
 
   @@index([employeId])
-  @@index([date])
+  @@index([timestamp])
   @@index([status])
-  @@index([employeId, date])
+  @@index([employeId, timestamp])
 }
 
 model Report {

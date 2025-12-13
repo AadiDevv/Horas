@@ -37,7 +37,8 @@ class ApplicationFactory {
     public static getTimesheetUseCase(): TimesheetUseCase {
         if (!this.timesheetUseCase) {
             const timesheetRepo = infra.getTimesheetRepo();
-            this.timesheetUseCase = new TimesheetUseCase(timesheetRepo);
+            const userRepo = infra.getUserRepoAsIUser();
+            this.timesheetUseCase = new TimesheetUseCase(timesheetRepo, userRepo);
         }
         return this.timesheetUseCase;
     }

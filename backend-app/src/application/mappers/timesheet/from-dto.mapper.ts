@@ -13,8 +13,7 @@ export namespace TimesheetMapper {
         public static Update_ToEntity(existing: Timesheet, dto: TimesheetUpdateDTO): Timesheet_L1 {
             return new Timesheet_L1({
                 ...existing,
-                date: dto.date ? new Date(dto.date) : existing.date,
-                hour: dto.hour ? new Date(dto.hour) : existing.hour,
+                timestamp: dto.timestamp ? new Date(dto.timestamp) : existing.timestamp,
                 clockin: dto.clockin ?? existing.clockin,
                 status: dto.status ?? existing.status,
                 updatedAt: new Date(Date.now()),

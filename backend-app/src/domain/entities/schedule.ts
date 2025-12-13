@@ -60,10 +60,10 @@ export class Schedule_Core {
     // #endregion
 
     // #region Business Methods
-    public hoursToISOString() {
+    public hoursToString() {
         return {
-            startHour: this.startHour.toISOString(),
-            endHour: this.endHour.toISOString(),
+            startHour: Schedule_Core.formatTimeToString(this.startHour),
+            endHour: Schedule_Core.formatTimeToString(this.endHour),
         }
     }
     public getDisplayName(): string {

@@ -13,8 +13,7 @@ export namespace TimesheetMapper {
         public static toReadDTO(timesheet: Timesheet): TimesheetReadDTO {
             return {
                 ...timesheet,
-                date: timesheet.date.toISOString().split("T")[0], // YYYY-MM-DD
-                hour: timesheet.hour.toISOString(),
+                timestamp: timesheet.timestamp.toISOString(),
                 createdAt: timesheet.createdAt.toISOString(),
                 updatedAt: timesheet.updatedAt.toISOString(),
                 employe: UserMapper.FromEntityCore.toReadDTO_Core(timesheet.employe) as UserReadEmployeeDTO_Core,

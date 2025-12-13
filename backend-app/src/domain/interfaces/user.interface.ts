@@ -1,5 +1,4 @@
-import { User, UserEmployee, UserEmployee_Core, UserEmployee_L1, UserManager, UserManager_Core, User_Core, User_L1 } from "@/domain/entities/user";
-import { UserFilterDTO } from "@/application/DTOS/user.dto";
+import {  UserEmployee, UserEmployee_Core, UserManager, User_Core, User_L1 } from "@/domain/entities/user";
 
 /**
  * Interface du repository User

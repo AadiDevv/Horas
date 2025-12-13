@@ -1,119 +1,120 @@
 import { UserController } from '@/presentation/controllers/user.controller';
 import { UserUseCase } from '@/application/usecases';
-import { User } from '@/domain/entities/user';
+import { UserEmployee_Core, UserEmployee, UserManager_Core } from '@/domain/entities/user';
+import { Team_Core } from '@/domain/entities/team';
 import { ValidationError } from '@/domain/error/AppError';
 
+// -----------------------------
 // Mock Express
+// -----------------------------
 const mockRequest = (data: any) => ({
   ...data,
   user: data.user || { id: 1, role: 'admin' },
 });
+
 const mockResponse = () => {
   const res: any = {};
   res.success = jest.fn();
   return res;
 };
 
-// Pré-définition des utilisateurs mocks pour tests
-const mockUser1 = new User({
-  id: 1,
-  firstName: 'Alice',
-  lastName: 'Smith',
-  email: 'alice@mail.com',
-  role: 'employe',
-  isActive: true,
-});
-mockUser1.toListItemDTO = jest.fn(() => ({
-  id: 1,
-  firstName: 'Alice',
-  lastName: 'Smith',
-  email: 'alice@mail.com',
-  role: 'employe',
-  isActive: true,
-}));
-
-const mockUser2 = new User({
-  id: 2,
-  firstName: 'Bob',
-  lastName: 'Marley',
-  email: 'bob@mail.com',
-  role: 'employe',
-  isActive: true,
-});
-mockUser2.toReadDTO = jest.fn(() => ({
-  id: 2,
-  firstName: 'Bob',
-  lastName: 'Marley',
-  email: 'bob@mail.com',
-  role: 'employe',
-  isActive: true,
-  createdAt: new Date().toISOString(),
-}));
-
-const mockUser3 = new User({
+// -----------------------------
+// Mock Entities
+// -----------------------------
+// UserEmployee_Core for getMyEmployees (returns UserReadEmployeeDTO_Core)
+const mockEmployee3_Core = new UserEmployee_Core({
   id: 3,
   firstName: 'Carl',
   lastName: 'Johnson',
   email: 'carl@mail.com',
+  phone: '+33 6 33 33 33 33',
+  hashedPassword: 'hashed',
   role: 'employe',
   isActive: true,
+  teamId: 1,
+  managerId: 10,
+  customScheduleId: null,
 });
-mockUser3.toListItemDTO = jest.fn(() => ({
-  id: 3,
-  firstName: 'Carl',
-  lastName: 'Johnson',
-  email: 'carl@mail.com',
-  role: 'employe',
-  isActive: true,
-}));
 
-const mockUser4 = new User({
+const mockEmployee4_Core = new UserEmployee_Core({
   id: 4,
   firstName: 'Admin',
   lastName: 'One',
   email: 'admin@mail.com',
+  phone: '+33 6 44 44 44 44',
+  hashedPassword: 'hashed',
   role: 'employe',
   isActive: true,
+  teamId: null,
+  managerId: 5,
+  customScheduleId: null,
 });
-mockUser4.toListItemDTO = jest.fn(() => ({
-  id: 4,
-  firstName: 'Admin',
-  lastName: 'One',
-  email: 'admin@mail.com',
-  role: 'employe',
-  isActive: true,
-}));
 
-const mockUser6 = new User({
+const mockEmployee6_Core = new UserEmployee_Core({
   id: 6,
   firstName: 'Eve',
   lastName: 'Jackson',
   email: 'eve@mail.com',
+  phone: '+33 6 66 66 66 66',
+  hashedPassword: 'hashed',
   role: 'employe',
   isActive: true,
+  teamId: 3,
+  managerId: 10,
+  customScheduleId: null,
 });
-mockUser6.toReadDTO = jest.fn(() => ({
-  id: 6,
-  firstName: 'Eve',
-  lastName: 'Jackson',
-  email: 'eve@mail.com',
+
+// Full UserEmployee for getEmployee_ById (returns UserReadEmployeeDTO with relations)
+const mockEmployee2_Full = new UserEmployee({
+  id: 2,
+  firstName: 'Bob',
+  lastName: 'Marley',
+  email: 'bob@mail.com',
+  phone: '+33 6 22 22 22 22',
+  hashedPassword: 'hashed',
   role: 'employe',
   isActive: true,
-  createdAt: new Date().toISOString(),
-}));
+  teamId: 2,
+  managerId: 10,
+  customScheduleId: null,
+  createdAt: new Date('2025-01-01T10:00:00Z'),
+  updatedAt: new Date('2025-01-01T11:00:00Z'),
+  lastLoginAt: new Date('2025-01-01T12:00:00Z'),
+  deletedAt: null,
+  team: new Team_Core({
+    id: 2,
+    name: 'Marketing Team',
+    description: null,
+    managerId: 10,
+    scheduleId: null,
+    membersCount: 3,
+  }),
+  manager: new UserManager_Core({
+    id: 10,
+    firstName: 'Manager',
+    lastName: 'Boss',
+    email: 'manager@mail.com',
+    phone: '+33 6 10 10 10 10',
+    hashedPassword: 'hashed',
+    role: 'manager',
+    isActive: true,
+  }),
+  customSchedule: null,
+});
 
+// -----------------------------
+// Tests
+// -----------------------------
 describe('UserController', () => {
   let useCaseMock: jest.Mocked<UserUseCase>;
   let controller: UserController;
 
   beforeEach(() => {
     useCaseMock = {
-      getAllUsers: jest.fn(),
-      getUser_ById: jest.fn(),
+      getEmployee_ById: jest.fn(),
       getMyEmployees: jest.fn(),
-      updateUser_ById: jest.fn(),
       updateUserProfile_ById: jest.fn(),
-      updateUserTeam_ById: jest.fn(),
+      updateEmployeeTeam_ById: jest.fn(),
       deleteUser_ById: jest.fn(),
     } as unknown as jest.Mocked<UserUseCase>;
 
@@ -121,59 +122,51 @@ describe('UserController', () => {
   });
 
   // ----------------------------------------
-  describe('getAllUsers', () => {
-    test('should return list of users with success', async () => {
-      useCaseMock.getAllEmployes.mockResolvedValue([mockUser1]);
-
-      const req = mockRequest({ query: {} }) as any;
-      const res = mockResponse();
-
-      await controller.getAllUsers(req, res);
-
-      expect(useCaseMock.getAllEmployes).toHaveBeenCalledWith({
-        role: undefined,
-        teamId: undefined,
-        isActive: undefined,
-        search: undefined,
-      });
-
-      expect(res.success).toHaveBeenCalledWith(
-        [
-          {
-            id: 1,
-            firstName: 'Alice',
-            lastName: 'Smith',
-            email: 'alice@mail.com',
-            role: 'employe',
-            isActive: true,
-          },
-        ],
-        'Liste des utilisateurs récupérée avec succès'
-      );
-    });
-  });
-
-  // ----------------------------------------
-  describe('getUser_ById', () => {
-    test('should return user by id', async () => {
-      useCaseMock.getUser_ById.mockResolvedValue(mockUser2);
+  describe('getEmployee_ById', () => {
+    test('should return user by id with relations', async () => {
+      useCaseMock.getEmployee_ById.mockResolvedValue(mockEmployee2_Full);
 
       const req = mockRequest({ params: { id: '2' } }) as any;
       const res = mockResponse();
 
-      await controller.getUser_ById(req, res);
+      await controller.getEmployee_ById(req, res);
 
-      expect(useCaseMock.getUser_ById).toHaveBeenCalledWith(2);
+      expect(useCaseMock.getEmployee_ById).toHaveBeenCalledWith(2);
       expect(res.success).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           id: 2,
           firstName: 'Bob',
           lastName: 'Marley',
           email: 'bob@mail.com',
+          phone: '+33 6 22 22 22 22',
           role: 'employe',
           isActive: true,
+          teamId: 2,
+          managerId: 10,
+          customScheduleId: null,
           createdAt: expect.any(String),
-        },
+          updatedAt: expect.any(String),
+          lastLoginAt: expect.any(String),
+          deletedAt: null,
+          team: expect.objectContaining({
+            id: 2,
+            name: 'Marketing Team',
+            description: null,
+            managerId: 10,
+            scheduleId: null,
+            membersCount: 3,
+          }),
+          manager: expect.objectContaining({
+            id: 10,
+            firstName: 'Manager',
+            lastName: 'Boss',
+            email: 'manager@mail.com',
+            phone: '+33 6 10 10 10 10',
+            role: 'manager',
+            isActive: true,
+          }),
+          customSchedule: null,
+        }),
         'Utilisateur récupéré avec succès'
       );
     });
@@ -181,14 +174,14 @@ describe('UserController', () => {
     test('should throw ValidationError for invalid id', async () => {
       const req = mockRequest({ params: { id: 'abc' } }) as any;
       const res = mockResponse();
-      await expect(controller.getUser_ById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.getEmployee_ById(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
   describe('getMyEmployees', () => {
     test('should return employees for manager', async () => {
-      useCaseMock.getMyEmployees.mockResolvedValue([mockUser3]);
+      useCaseMock.getMyEmployees.mockResolvedValue([mockEmployee3_Core]);
 
       const req = mockRequest({ user: { id: 10, role: 'manager' }, query: {} }) as any;
       const res = mockResponse();
@@ -203,8 +196,12 @@ describe('UserController', () => {
             firstName: 'Carl',
             lastName: 'Johnson',
             email: 'carl@mail.com',
+            phone: '+33 6 33 33 33 33',
             role: 'employe',
             isActive: true,
+            teamId: 1,
+            managerId: 10,
+            customScheduleId: null,
           },
         ],
         'Liste des employés récupérée avec succès'
@@ -212,7 +209,7 @@ describe('UserController', () => {
     });
 
     test('should use managerId from query if role is admin', async () => {
-      useCaseMock.getMyEmployees.mockResolvedValue([mockUser4]);
+      useCaseMock.getMyEmployees.mockResolvedValue([mockEmployee4_Core]);
 
       const req = mockRequest({ user: { id: 1, role: 'admin' }, query: { managerId: '5' } }) as any;
       const res = mockResponse();
@@ -227,8 +224,12 @@ describe('UserController', () => {
             firstName: 'Admin',
             lastName: 'One',
             email: 'admin@mail.com',
+            phone: '+33 6 44 44 44 44',
             role: 'employe',
             isActive: true,
+            teamId: null,
+            managerId: 5,
+            customScheduleId: null,
           },
         ],
         'Liste des employés récupérée avec succès'
@@ -243,9 +244,9 @@ describe('UserController', () => {
   });
 
   // ----------------------------------------
-  describe('updateUser_ById', () => {
-    test('should update user and return DTO', async () => {
-      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockUser6);
+  describe('updateUserProfile_ById', () => {
+    test('should update user and return DTO_Core', async () => {
+      useCaseMock.updateUserProfile_ById.mockResolvedValue(mockEmployee6_Core);
 
       const req = mockRequest({
         params: { id: '6' },
@@ -256,23 +257,30 @@ describe('UserController', () => {
 
       await controller.updateUserProfile_ById(req, res);
 
-      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(6, 6, 'employe', { firstName: 'Eve' });
+      expect(useCaseMock.updateUserProfile_ById).toHaveBeenCalledWith(
+        6,
+        { id: 6, role: 'employe' },
+        { firstName: 'Eve' }
+      );
       expect(res.success).toHaveBeenCalledWith(
         {
           id: 6,
           firstName: 'Eve',
           lastName: 'Jackson',
           email: 'eve@mail.com',
+          phone: '+33 6 66 66 66 66',
           role: 'employe',
           isActive: true,
-          createdAt: expect.any(String),
+          teamId: 3,
+          managerId: 10,
+          customScheduleId: null,
         },
         'Utilisateur modifié avec succès'
       );
     });
 
     test('should throw ValidationError if id is invalid', async () => {
-      const req = mockRequest({ params: { id: 'bad' }, body: {} }) as any;
+      const req = mockRequest({ params: { id: 'bad' }, body: { firstName: 'test' } }) as any;
       const res = mockResponse();
 
       await expect(controller.updateUserProfile_ById(req, res)).rejects.toThrow(ValidationError);
@@ -287,58 +295,70 @@ describe('UserController', () => {
   });
 
   // ----------------------------------------
-  describe('deleteUser_ById', () => {
-    // ----------------------------------------
-    describe('updateUserTeam_ById', () => {
-      test('should assign user to team successfully', async () => {
-        useCaseMock.updateEmployeeTeam_ById.mockResolvedValue(mockUser6);
+  describe('updateEmployeeTeam_ById', () => {
+    test('should assign user to team successfully', async () => {
+      useCaseMock.updateEmployeeTeam_ById.mockResolvedValue(mockEmployee6_Core);
 
-        const req = mockRequest({
-          params: { id: '6' },
-          body: { teamId: 3 },
-          user: { id: 1, role: 'admin' },
-        }) as any;
-        const res = mockResponse();
+      const req = mockRequest({
+        params: { id: '6' },
+        body: { teamId: 3 },
+        user: { id: 1, role: 'admin' },
+      }) as any;
+      const res = mockResponse();
 
-        await controller.updateEmployeeTeam_ById(req, res);
+      await controller.updateEmployeeTeam_ById(req, res);
 
-        expect(useCaseMock.updateEmployeeTeam_ById).toHaveBeenCalledWith(6, 3, 1, 'admin');
-        expect(res.success).toHaveBeenCalledWith(
-          {
-            id: 6,
-            firstName: 'Eve',
-            lastName: 'Jackson',
-            email: 'eve@mail.com',
-            role: 'employe',
-            isActive: true,
-            createdAt: expect.any(String),
-          },
-          'Utilisateur assigné à l\'équipe avec succès'
-        );
-      });
-
-      test('should throw ValidationError for invalid userId', async () => {
-        const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
-        const res = mockResponse();
-
-        await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
-      });
-
-      test('should throw ValidationError if teamId is missing', async () => {
-        const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
-        const res = mockResponse();
-
-        await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
-      });
+      expect(useCaseMock.updateEmployeeTeam_ById).toHaveBeenCalledWith(
+        6,
+        3,
+        { id: 1, role: 'admin' }
+      );
+      expect(res.success).toHaveBeenCalledWith(
+        {
+          id: 6,
+          firstName: 'Eve',
+          lastName: 'Jackson',
+          email: 'eve@mail.com',
+          phone: '+33 6 66 66 66 66',
+          role: 'employe',
+          isActive: true,
+          teamId: 3,
+          managerId: 10,
+          customScheduleId: null,
+        },
+        'Utilisateur assigné à l\'équipe avec succès'
+      );
     });
 
+    test('should throw ValidationError for invalid userId', async () => {
+      const req = mockRequest({ params: { id: 'bad' }, body: { teamId: 3 } }) as any;
+      const res = mockResponse();
+
+      await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
+    });
+
+    test('should throw ValidationError if teamId is missing', async () => {
+      const req = mockRequest({ params: { id: '6' }, body: {} }) as any;
+      const res = mockResponse();
+
+      await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  // ----------------------------------------
+  describe('deleteUser_ById', () => {
     test('should delete user and return success', async () => {
-      const req = mockRequest({ params: { id: '7' } }) as any;
+      useCaseMock.deleteUser_ById.mockResolvedValue(undefined);
+
+      const req = mockRequest({
+        params: { id: '7' },
+        user: { id: 1, role: 'admin' }
+      }) as any;
       const res = mockResponse();
 
       await controller.deleteUser_ById(req, res);
 
-      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7, 1, 'admin');
+      expect(useCaseMock.deleteUser_ById).toHaveBeenCalledWith(7, { id: 1, role: 'admin' });
       expect(res.success).toHaveBeenCalledWith(null, 'Utilisateur supprimé avec succès');
     });
 

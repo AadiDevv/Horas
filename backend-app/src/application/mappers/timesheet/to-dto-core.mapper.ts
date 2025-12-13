@@ -12,8 +12,7 @@ export namespace TimesheetMapper {
         public static toReadDTO_Core(timesheet: Timesheet_Core): TimesheetReadDTO_Core {
             return {
                 ...timesheet,
-                date: timesheet.date.toISOString().split("T")[0],
-                hour: timesheet.hour.toISOString(),
+                timestamp: timesheet.timestamp.toISOString(),
             };
         }
     }

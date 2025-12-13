@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TimesheetUseCase } from '@/application/usecases';
-import { TimesheetFilterDTO, TimesheetUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
+import { TimesheetFilterDTO, TimesheetCreateDTO,TimesheetUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
 import { TimesheetMapper } from '@/application/mappers/';
 
@@ -79,26 +79,17 @@ export class TimesheetController {
      * - Manager/Admin: peut créer pour un employé spécifique avec clockin explicite
      */
     async createTimesheet(req: Request, res: Response): Promise<void> {
-        const { date, hour, status, clockin, employeId } = req.body;
+        const dto: TimesheetCreateDTO = req.body;
 
-        // Validation basique des champs date / hour
-        if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
-            throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
+        // Validation basique du timestamp si fourni
+        if (dto.timestamp && isNaN(new Date(dto.timestamp).getTime())) {
+            throw new ValidationError("Le champ 'timestamp' doit être une date valide");
         }
 
         // Extraction du contexte d'authentification
         const auth = {
             userId: req.user!.id,
             userRole: req.user!.role,
-        };
-
-        // Préparation du DTO métier
-        const dto = {
-            date: new Date(date),
-            hour: new Date(hour),
-            status,
-            clockin,
-            employeId,
         };
 
         // Déléguer toute la logique métier au usecase (séparation auth/data)
@@ -125,7 +116,6 @@ export class TimesheetController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
-        dto.hour = new Date(`1970-01-01T${dto.hour}`);
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
         const updatedDTO = TimesheetMapper.FromEntityL1.toReadDTO_L1(updated);
 

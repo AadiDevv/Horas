@@ -32,7 +32,7 @@ export class TeamUseCase {
      */
     async getTeams(userRole: string, userId: number, filter?: TeamFilterDTO): Promise<Team_L1[]> {
         let managerId: number;
-
+        console.log("IN USECASE : filter : ", filter);
         // #region - Détermination du managerId selon le rôle et les filtres
         if (userRole === "manager") {
             // CAS MANAGER

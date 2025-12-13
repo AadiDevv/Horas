@@ -97,7 +97,7 @@ export class TeamRepository implements ITeam {
             where: {
                 managerId
             },
-            include: {
+            select: {
                 ...TEAM_L1_SELECT,
             }
         })
@@ -116,7 +116,7 @@ export class TeamRepository implements ITeam {
                 ...nullToUndefined(rest),
             },
 
-            include: {
+            select: {
                 ...TEAM_CORE_SELECT,
             }
         });

@@ -12,7 +12,7 @@ export namespace ScheduleMapper {
         public static toReadDTO_Core(schedule: Schedule_Core): ScheduleReadDTO_Core {
             return {
                 ...schedule,
-                ...schedule.hoursToISOString()
+                ...schedule.hoursToString()
             };
         }
 

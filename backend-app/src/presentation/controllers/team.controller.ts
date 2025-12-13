@@ -23,8 +23,8 @@ export class TeamController {
     async getTeams(req: Request, res: Response): Promise<void> {
         const userRole = req.user!.role;
         const userId = req.user!.id;
-        const managerId = req.query.managerId ? Number(req.query.managerId) : undefined;
-
+        const managerId = (req.query.managerId && req.query.managerId !== "0") ? Number(req.query.managerId) : undefined;
+        
         const teams: Team_L1[] = await this.UC_team.getTeams(userRole, userId, { managerId });
         const teamsDTO = teams.map(team => TeamMapper.FromEntityL1.toReadDTO_L1(team));
 

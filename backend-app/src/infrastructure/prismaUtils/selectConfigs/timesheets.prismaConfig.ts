@@ -3,8 +3,7 @@ import { TimesheetProps_Core, TimesheetProps_L1 } from "@/domain/types/entitiyPr
 export const TIMESHEET_CORE_SELECT = {
     id: true,
     employeId: true,
-    date: true,
-    hour: true,
+    timestamp: true,
     clockin: true,
     status: true,
 } as const satisfies Record<keyof TimesheetProps_Core, true>;

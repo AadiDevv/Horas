@@ -21,7 +21,7 @@ const mockResponse = () => {
 // -----------------------------
 // Mock Entities
 // -----------------------------
-const mockEmploye: UserEmployee_Core = {
+const mockEmploye = new UserEmployee_Core({
   id: 5,
   firstName: 'Alice',
   lastName: 'Dupont',
@@ -33,39 +33,28 @@ const mockEmploye: UserEmployee_Core = {
   teamId: 1,
   managerId: 10,
   customScheduleId: null,
-} as UserEmployee_Core;
+});
 
 // Timesheet_Core for getTimesheets (returns TimesheetListItemDTO)
-const mockTimesheet1_Core: Timesheet_Core = {
+const mockTimesheet1_Core = new Timesheet_Core({
   id: 1,
-  date: new Date('2025-05-10'),
-  hour: new Date('2025-05-10T08:00:00'),
+  timestamp: new Date('2025-05-10T08:00:00'),
   clockin: true,
   status: 'normal',
   employeId: 5,
-} as Timesheet_Core;
-
-const mockTimesheet2_Core: Timesheet_Core = {
-  id: 2,
-  date: new Date('2025-05-10'),
-  hour: new Date('2025-05-10T17:00:00'),
-  clockin: false,
-  status: 'normal',
-  employeId: 5,
-} as Timesheet_Core;
+});
 
 // Full Timesheet for getTimesheetById (returns TimesheetReadDTO with relations)
-const mockTimesheet1_Full: Timesheet = {
+const mockTimesheet1_Full = new Timesheet({
   id: 1,
-  date: new Date('2025-05-10'),
-  hour: new Date('2025-05-10T08:00:00'),
+  timestamp: new Date('2025-05-10T08:00:00'),
   clockin: true,
   status: 'normal',
   employeId: 5,
   createdAt: new Date('2025-05-10T08:00:00'),
   updatedAt: new Date('2025-05-10T08:00:00'),
   employe: mockEmploye,
-} as Timesheet;
+});
 
 // -----------------------------
 // Test Suite
@@ -197,31 +186,31 @@ describe('TimesheetController', () => {
       useCaseMock.createTimesheet.mockResolvedValue(mockTimesheet1_Full);
 
       const req = mockRequest({
-        body: { date: '2025-05-10', hour: '2025-05-10T08:00:00', status: 'normal' },
+        body: { status: 'normal' }, // Pas de timestamp = auto pour employé
         user: { id: 5, role: 'employe' },
       }) as any;
       const res = mockResponse();
 
       await controller.createTimesheet(req, res);
 
-      expect(useCaseMock.createTimesheet).toHaveBeenCalledWith({
-        date: new Date('2025-05-10'),
-        hour: new Date('2025-05-10T08:00:00'),
-        status: 'normal',
-        clockin: undefined,
-        employeId: undefined,
-        userRole: 'employe',
-        userId: 5,
-      });
+      expect(useCaseMock.createTimesheet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'normal',
+        }),
+        expect.objectContaining({
+          userRole: 'employe',
+          userId: 5,
+        })
+      );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ clockin: true, employeId: 5 }),
         'Pointage entrée enregistré avec succès'
       );
     });
 
-    test('should throw ValidationError if invalid date/hour', async () => {
+    test('should throw ValidationError if invalid timestamp', async () => {
       const req = mockRequest({
-        body: { date: 'bad-date', hour: 'bad-hour' },
+        body: { timestamp: 'bad-timestamp' },
       }) as any;
       const res = mockResponse();
 
@@ -236,7 +225,7 @@ describe('TimesheetController', () => {
 
       const req = mockRequest({
         params: { id: '2' },
-        body: { hour: '10:00', status: 'normal' },
+        body: { timestamp: '2025-05-10T10:00:00.000Z', status: 'normal' },
       }) as any;
       const res = mockResponse();
 
@@ -244,7 +233,7 @@ describe('TimesheetController', () => {
 
       expect(useCaseMock.updateTimesheet).toHaveBeenCalledWith(
         2,
-        expect.objectContaining({ hour: expect.any(Date) })
+        expect.objectContaining({ timestamp: '2025-05-10T10:00:00.000Z' })
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ id: 1, clockin: true }),
@@ -253,7 +242,7 @@ describe('TimesheetController', () => {
     });
 
     test('should throw ValidationError for invalid id', async () => {
-      const req = mockRequest({ params: { id: 'abc' }, body: { hour: '10:00' } }) as any;
+      const req = mockRequest({ params: { id: 'abc' }, body: { timestamp: '2025-05-10T10:00:00.000Z' } }) as any;
       const res = mockResponse();
 
       await expect(controller.updateTimesheet(req, res)).rejects.toThrow(ValidationError);

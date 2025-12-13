@@ -38,7 +38,7 @@ export class ScheduleRepository implements ISchedule {
     async getSchedule_ById(id: number): Promise<Schedule> {
         const schedule = await this.prisma.schedule.findUnique({
             where: { id },
-            include: {
+            select: {
                 ...SCHEDULE_JOINT_SELECT,
             }
         });

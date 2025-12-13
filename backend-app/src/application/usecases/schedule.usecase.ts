@@ -7,7 +7,6 @@ import {
     UserAuthDTO,
 } from "@/application/DTOS";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
-import { deprecate } from "util";
 import { ScheduleMapper } from "../mappers/schedule/from-dto.mapper";
 
 type ScheduleValidateData = Partial<
@@ -105,10 +104,12 @@ export class ScheduleUseCase {
      * @returns Le schedule créé
      */
     async createSchedule(dto: ScheduleCreateDTO, managerId: number): Promise<Schedule_Core> {
-
-        const scheduleEntity: Schedule_Core = ScheduleMapper.FromDTO.Create_ToEntityCore(dto, managerId);
+        
         // Validation des données
-        this.validateScheduleData(scheduleEntity);
+        this.validateScheduleData(dto);
+        
+        // Création de l'entité
+        const scheduleEntity: Schedule_Core = ScheduleMapper.FromDTO.Create_ToEntityCore(dto, managerId);
 
         // Vérifier qu'un schedule avec le même nom n'existe pas déjà
         const existingSchedules = await this.scheduleRepository.getAllSchedules({ name: dto.name, managerId: managerId });
@@ -194,13 +195,8 @@ export class ScheduleUseCase {
     // #endregion
     
     // #region Validation
-    private validateScheduleData(data: Schedule_Core): void {
-        this.validateScheduleFields({
-            name: data.name,
-            startHour: data.hoursToISOString().startHour,
-            endHour: data.hoursToISOString().endHour,
-            activeDays: data.activeDays
-        });
+    private validateScheduleData(data: ScheduleCreateDTO): void {
+        this.validateScheduleFields(data);
     }
 
     /**
