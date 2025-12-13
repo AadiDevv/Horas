@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '@/application/usecases';
-import { UserCreateEmployeeDTO, UserCreateManagerDTO, UserReadEmployeeDTO_Core, UserReadManagerDTO_Core, UserReadDTO_L1, UserReadDTO_Core } from '@/application/DTOS/user.dto';
+import { UserCreateEmployeeDTO, UserCreateManagerDTO } from '@/application/DTOS/user.dto';
 import { UserLoginDTO, TokenResponse, UserAuthDTO } from '@/application/DTOS/auth.dto';
 import { ValidationError } from '@/domain/error/AppError';
 import { UserMapper } from '@/application/mappers/user';
@@ -20,7 +20,7 @@ export class AuthController {
      */
     async registerEmploye(req: Request, res: Response): Promise<void> {
         req.body.role = 'employe';
-        req.body.managerId = req.user?.id;
+        req.body.managerId = req.user?.id; 
         const userRegisterDto: UserCreateEmployeeDTO = req.body;
 
         const userResponse = await this.UC_auth.registerEmployee(userRegisterDto);
