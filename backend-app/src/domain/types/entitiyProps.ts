@@ -19,7 +19,7 @@ export namespace User_Props {
     type UserEmployeePropsCore = UserProps_Core & {
         teamId: number | null; // null if the employee is not assigned to a team
         managerId: number;
-        customScheduleId:  null; // null if the employee is not assigned to a custom schedule
+        customScheduleId: number | null; // null if the employee is not assigned to a custom schedule
     }
     type UserManagerPropsCore = UserProps_Core 
     // ENRICHIMENT
@@ -33,7 +33,7 @@ export namespace User_Props {
     type UserEmployee_joints = {
         team: Team_Core | null;
         manager: UserManager_Core;
-        customSchedule: null;
+        customSchedule: Schedule_Core | null;
     }
     type UserManager_joints = {
         employes: UserEmployee_Core[];

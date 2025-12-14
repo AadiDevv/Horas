@@ -551,6 +551,155 @@ Ces attributs seront gérés par des routes admin dédiées dans une version fut
         }
     },
 
+    '/api/users/assign/schedule/{id}': {
+        patch: {
+            tags: ['Users'],
+            summary: "Attribuer un custom schedule à un employé",
+            description: `Attribue un horaire personnalisé (custom schedule) à un employé, ou le retire.
+
+**Permissions :**
+- **Admin** : peut attribuer n'importe quel schedule à n'importe quel employé
+- **Manager** : peut attribuer ses propres schedules à ses propres employés uniquement
+
+**Règles métier :**
+- L'employé doit exister et avoir le rôle "employe"
+- Si scheduleId est \`null\`, retire le custom schedule (l'employé revient au schedule de son équipe)
+- Un manager ne peut attribuer que les schedules qu'il a créés (schedule.managerId === user.id)
+
+**Priorité des horaires :**
+1. Custom schedule (si défini)
+2. Schedule de l'équipe (si l'employé est dans une équipe)
+3. Aucun horaire (employé nouvellement créé)`,
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'id',
+                    in: 'path',
+                    required: true,
+                    description: "ID de l'employé",
+                    schema: { type: 'integer', example: 10 }
+                }
+            ],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            required: ['scheduleId'],
+                            properties: {
+                                scheduleId: {
+                                    type: 'integer',
+                                    nullable: true,
+                                    description: "ID du schedule à attribuer (null pour retirer le custom schedule)",
+                                    example: 3
+                                }
+                            }
+                        },
+                        examples: {
+                            attribuer: {
+                                summary: "Attribuer un custom schedule",
+                                value: { scheduleId: 3 }
+                            },
+                            retirer: {
+                                summary: "Retirer le custom schedule",
+                                value: { scheduleId: null }
+                            }
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: "Custom schedule attribué/retiré avec succès",
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    data: { $ref: '#/components/schemas/UserReadEmployeeDTO_Core' },
+                                    message: { type: 'string', example: "Custom schedule attribué avec succès" },
+                                    timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            }
+                        }
+                    }
+                },
+                400: {
+                    description: "Données invalides (scheduleId invalide)",
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            example: {
+                                success: false,
+                                error: "Le scheduleId doit être un nombre ou null",
+                                code: "VALIDATION_ERROR",
+                                timestamp: '2025-10-16T12:00:00.000Z'
+                            }
+                        }
+                    }
+                },
+                403: {
+                    description: "Permissions insuffisantes",
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                notOwnEmployee: {
+                                    summary: "Employé ne fait pas partie de vos employés",
+                                    value: {
+                                        success: false,
+                                        error: "Vous ne pouvez attribuer un custom schedule qu'à vos propres employés",
+                                        code: "FORBIDDEN",
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                notOwnSchedule: {
+                                    summary: "Schedule ne vous appartient pas",
+                                    value: {
+                                        success: false,
+                                        error: "Impossible d'attribuer ce schedule. Vous n'êtes pas le manager de ce schedule",
+                                        code: "FORBIDDEN",
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                404: {
+                    description: "Employé ou schedule introuvable",
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                employeeNotFound: {
+                                    summary: "Employé introuvable",
+                                    value: {
+                                        success: false,
+                                        error: "L'employé avec l'ID 10 introuvable",
+                                        code: "NOT_FOUND",
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                },
+                                scheduleNotFound: {
+                                    summary: "Schedule introuvable",
+                                    value: {
+                                        success: false,
+                                        error: "Le schedule avec l'ID 3 introuvable",
+                                        code: "NOT_FOUND",
+                                        timestamp: '2025-10-16T12:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     '/api/users/{id}/password': {
         patch: {
             summary: 'Changer le mot de passe',

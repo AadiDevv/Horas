@@ -80,6 +80,24 @@ router.patch('/assign/team/:id',
         }
     }
 );
+
+/**
+ * PATCH /api/users/assign/schedule/:id
+ * Attribuer un custom schedule à un employé
+ * - Admin : peut attribuer n'importe quel schedule
+ * - Manager : peut attribuer ses propres schedules à ses propres employés
+ */
+router.patch('/assign/schedule/:id',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    managerOrAdmin,      // 2️⃣ Vérifie que c'est manager ou admin
+    async (req, res, next) => {
+        try {
+            await userController.updateUserCustomSchedule_ById(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
 // #endregion
 
 // #region DELETE Routes

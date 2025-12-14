@@ -7,7 +7,8 @@ import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 import { SCHEDULE_CORE_SELECT, TEAM_CORE_SELECT, USER_CORE_SELECT, USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs";
 import { Team_Core } from "@/domain/entities/team";
 import { User as PrismaUser } from "@/generated/prisma";
-import { TeamProps_Core, UserManagerProps_Core } from "@/domain/types/entitiyProps";
+import { ScheduleProps_Core, TeamProps_Core, UserManagerProps_Core } from "@/domain/types/entitiyProps";
+import { JsonValue } from "@prisma/client/runtime/library";
 
 
 /**
@@ -18,7 +19,8 @@ export class UserRepository implements IAuth, IUser {
 
   private toUserEmployee(user: PrismaUser & {
     team: (Omit<TeamProps_Core, 'membersCount'> & { _count: { members: number } }) | null,
-    manager: UserManagerProps_Core | null
+    manager: UserManagerProps_Core,
+    customSchedule: (Omit<ScheduleProps_Core, 'activeDays'> & { activeDays: JsonValue }) | null,
   }): UserEmployee {
     return new UserEmployee({
       ...user,
@@ -27,9 +29,9 @@ export class UserRepository implements IAuth, IUser {
         ...user.team,
         membersCount: user.team._count.members
       }) : null,
-      manager: user.manager ? new UserManager_Core(user.manager) : null as any,
-      customSchedule: null,
-      customScheduleId: null,
+      manager: new UserManager_Core(user.manager),
+      customSchedule: user.customSchedule ? new Schedule_Core({ ...user.customSchedule , activeDays: user.customSchedule.activeDays as number[] }) : null,
+      customScheduleId: user.customScheduleId,
     });
   }
 
@@ -54,10 +56,16 @@ export class UserRepository implements IAuth, IUser {
               ...USER_MANAGER_CORE_SELECT
             }
           },
+          customSchedule: {
+            select: {
+              ...SCHEDULE_CORE_SELECT
+            }
+          }
         }
       });
       if (!user) throw new NotFoundError(`User with id ${id} not found`);
-      return this.toUserEmployee(user);
+      if (!user.manager) throw new NotFoundError(`Manager not found for employee with id ${id}`);
+      return this.toUserEmployee(user as typeof user & { manager: UserManagerProps_Core });
     } catch (error) {
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
@@ -83,7 +91,7 @@ export class UserRepository implements IAuth, IUser {
       if (!user) throw new NotFoundError(`User with id ${id} not found`);
       return new UserManager({
         ...user,
-        employes: user.employes.map(employee => new UserEmployee_Core({ ...employee, managerId: employee.managerId!, customScheduleId: null })),
+        employes: user.employes.map(employee => new UserEmployee_Core({ ...employee, managerId: employee.managerId!, customScheduleId: employee.customScheduleId })),
         managedTeams: user.managedTeams.map(team => new Team_Core({ ...team, membersCount: team._count.members })),
       });
     }
@@ -144,7 +152,6 @@ export class UserRepository implements IAuth, IUser {
     return employees.map(employee => new UserEmployee_Core({
       ...employee,
       managerId: employee.managerId!,
-      customScheduleId: null,
     }));
   }
   // #endregion
@@ -181,8 +188,24 @@ export class UserRepository implements IAuth, IUser {
     return new UserEmployee_Core({
       ...updatedUser,
       managerId: updatedUser.managerId!,
-      customScheduleId: null,
     })
+  }
+
+  async updateUserCustomSchedule_ById(userId: number, scheduleId: number | null): Promise<UserEmployee_Core> {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        customScheduleId: scheduleId,
+      },
+      select: {
+        ...USER_EMPLOYEE_CORE_SELECT,
+      }
+    });
+    
+    return new UserEmployee_Core({
+      ...updatedUser,
+      managerId: updatedUser.managerId!,
+    });
   }
 
   // a revoir
@@ -246,7 +269,6 @@ export class UserRepository implements IAuth, IUser {
     return new UserEmployee_Core({
       ...createdUser,
       managerId: createdUser.managerId!,
-      customScheduleId: null,
     })
   }
   async registerManager(user: UserManager_Core): Promise<UserManager_Core> {

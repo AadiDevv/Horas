@@ -20,6 +20,8 @@ export interface IUser {
 
     updateUserTeam_ById(userId: number, teamId: number): Promise<UserEmployee_Core>;
 
+    updateUserCustomSchedule_ById(userId: number, scheduleId: number | null): Promise<UserEmployee_Core>;
+
     deleteUser_ById(id: number): Promise<User_L1>;
 }
 

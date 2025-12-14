@@ -11,7 +11,7 @@ import {
 import { ValidationError } from "../error/AppError";
 import * as bcrypt from "bcrypt";
 import { Role } from "../types";
-import { Team_Core } from "./";
+import { Schedule_Core, Team_Core } from "./";
 
 /**
  * User_Core (Abstract)
@@ -110,7 +110,7 @@ export class User_Core {
 export class UserEmployee_Core extends User_Core {
     public teamId: number | null;
     public managerId: number;
-    public customScheduleId:  null;
+    public customScheduleId: number | null;
 
     constructor(props: UserEmployeeProps_Core) {
         const {teamId, managerId,customScheduleId, ...superProps} = props;
@@ -341,7 +341,7 @@ export class UserManager_L1 extends UserManager_Core {
 export class UserEmployee extends UserEmployee_L1 {
     public team: Team_Core | null;
     public manager: UserManager_Core;
-    public customSchedule: null;
+    public customSchedule: Schedule_Core | null;
 
     constructor(props: UserEmployeeProps) {
         const { team, manager, customSchedule, ...propsL1 } = props;

@@ -53,6 +53,10 @@ export interface UserAsignTeamDTO {
     teamId: number;
 }
 
+export interface UserAssignScheduleDTO {
+    scheduleId: number | null;
+}
+
 /**
  * DTO pour changer le mot de passe
  * Route séparée: PATCH /users/:id/password
