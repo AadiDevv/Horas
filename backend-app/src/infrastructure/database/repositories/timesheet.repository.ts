@@ -13,14 +13,14 @@ export class TimesheetRepository implements ITimesheet {
     async getAllTimesheets(filter?: TimesheetFilterDTO): Promise<Timesheet[]> {
         const { employeId, startDate, endDate, status, clockin } = filter || {};
 
-        const dateFilter: any = {};
-        if (startDate) dateFilter.gte = new Date(startDate);
-        if (endDate) dateFilter.lte = new Date(endDate);
+        const timestampFilter: any = {};
+        if (startDate) timestampFilter.gte = new Date(startDate);
+        if (endDate) timestampFilter.lte = new Date(endDate);
 
         const timesheets = await prisma.timesheet.findMany({
             where: {
                 ...(employeId && { employeId }),
-                ...(Object.keys(dateFilter).length && { date: dateFilter }),
+                ...(Object.keys(timestampFilter).length && { timestamp: timestampFilter }),
                 ...(status && { status }),
                 ...(clockin !== undefined && { clockin }),
             },
@@ -35,7 +35,7 @@ export class TimesheetRepository implements ITimesheet {
                 }
             },
             orderBy: {
-                date: 'desc'
+                timestamp: 'desc'
             }
         });
 
@@ -82,7 +82,7 @@ export class TimesheetRepository implements ITimesheet {
                 }
             },
             orderBy: {
-                date: "desc"
+                timestamp: "desc"
             }
         });
 
@@ -105,10 +105,9 @@ export class TimesheetRepository implements ITimesheet {
                     }
                 }
             },
-            orderBy: [
-                { date: 'desc' },
-                { hour: 'desc' },
-            ],
+            orderBy: {
+                timestamp: 'desc'
+            },
         });
 
         if (!timesheet) return null;
@@ -126,7 +125,7 @@ export class TimesheetRepository implements ITimesheet {
         const timesheets = await prisma.timesheet.findMany({
             where: {
                 employeId,
-                date: {
+                timestamp: {
                     gte: periodStart,
                     lte: periodEnd
                 }
@@ -143,7 +142,7 @@ export class TimesheetRepository implements ITimesheet {
             timesheetsNormal: timesheets.filter(t => t.status === "normal").length,
             timesheetsDelay: timesheets.filter(t => t.status === "delay").length,
             timesheetsIncomplete: timesheets.filter(t => t.status === "incomplete").length,
-            clockedDays: new Set(timesheets.map(t => t.date.toDateString())).size,
+            clockedDays: new Set(timesheets.map(t => t.timestamp.toDateString())).size,
         };
 
         return stats;
@@ -157,8 +156,7 @@ export class TimesheetRepository implements ITimesheet {
         const created = await prisma.timesheet.create({
             data: {
                 employeId: timesheet.employeId,
-                date: timesheet.date,
-                hour: timesheet.hour,
+                timestamp: timesheet.timestamp,
                 clockin: timesheet.clockin,
                 status: timesheet.status ?? "normal",
             },
@@ -192,8 +190,7 @@ export class TimesheetRepository implements ITimesheet {
         const updated = await prisma.timesheet.update({
             where: { id: timesheet.id },
             data: {
-                date: timesheet.date,
-                hour: timesheet.hour,
+                timestamp: timesheet.timestamp,
                 clockin: timesheet.clockin,
                 status: timesheet.status,
                 updatedAt: new Date()
