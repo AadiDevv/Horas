@@ -246,33 +246,35 @@ export interface HoraireListItemDTO {
 // 4. POINTAGE
 // =========================================
 
-// #region Pointage DTOs
+// #region Timesheet DTOs (anciennement Pointage)
 
-export interface PointageCreateDTO {
+/**
+ * DTO pour créer un timesheet (Manager/Admin uniquement)
+ * Pour les employés, utiliser POST /api/timesheets/ avec payload vide
+ */
+export interface TimesheetCreateDTO {
     employeId: number;
-    date: string;      // Format: "YYYY-MM-DD"
-    heure: string;     // Format: "HH:mm:ss"
-    clockin: boolean;  // true = entrée, false = sortie
+    timestamp: string;  // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
     status?: PointageStatus;
 }
 
-export interface PointageQuickDTO {
-    clockin: boolean;
-}
-
-export interface PointageUpdateDTO {
-    date?: string;
-    heure?: string;
+/**
+ * DTO pour mise à jour d'un timesheet
+ */
+export interface TimesheetUpdateDTO {
+    timestamp?: string;  // Format: ISO DateTime
     clockin?: boolean;
     status?: PointageStatus;
 }
 
-export interface PointageReadDTO {
+/**
+ * DTO de lecture d'un timesheet
+ */
+export interface TimesheetReadDTO {
     id: number;
     employeId: number;
-    date: string;
-    heure: string;
-    clockin: boolean;
+    timestamp: string;  // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
+    clockin: boolean;   // true = entrée, false = sortie
     status: PointageStatus;
     createdAt: string;
     updatedAt: string;
@@ -284,25 +286,43 @@ export interface PointageReadDTO {
     };
 }
 
-export interface PointageListItemDTO {
+/**
+ * DTO pour liste de timesheets
+ */
+export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
     employeNom: string;
-    date: string;
-    heure: string;
+    timestamp: string;  // Format: ISO DateTime
     clockin: boolean;
     status: PointageStatus;
 }
 
-export interface PointageFilterDTO {
+// Aliases pour compatibilité (à supprimer progressivement)
+/** @deprecated Utiliser TimesheetCreateDTO */
+export type PointageCreateDTO = TimesheetCreateDTO;
+/** @deprecated Utiliser TimesheetUpdateDTO */
+export type PointageUpdateDTO = TimesheetUpdateDTO;
+/** @deprecated Utiliser TimesheetReadDTO */
+export type PointageReadDTO = TimesheetReadDTO;
+/** @deprecated Utiliser TimesheetListItemDTO */
+export type PointageListItemDTO = TimesheetListItemDTO;
+
+/**
+ * DTO pour filtrer les timesheets
+ */
+export interface TimesheetFilterDTO {
     employeId?: number;
-    startDate?: string;
-    endDate?: string;
+    startDate?: string;  // Format: "YYYY-MM-DD"
+    endDate?: string;    // Format: "YYYY-MM-DD"
     status?: PointageStatus;
     clockin?: boolean;
 }
 
-export interface PointageStatsDTO {
+/**
+ * DTO pour les statistiques de timesheets
+ */
+export interface TimesheetStatsDTO {
     employeId: number;
     periodeDebut: string;
     periodeFin: string;
@@ -314,6 +334,12 @@ export interface PointageStatsDTO {
     pointagesIncomplete: number;
     clockedDays: number;
 }
+
+// Aliases pour compatibilité
+/** @deprecated Utiliser TimesheetFilterDTO */
+export type PointageFilterDTO = TimesheetFilterDTO;
+/** @deprecated Utiliser TimesheetStatsDTO */
+export type PointageStatsDTO = TimesheetStatsDTO;
 
 // #endregion
 
