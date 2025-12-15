@@ -5,7 +5,8 @@ import { TimesheetStatus } from "@/domain/types";
  * DTO pour corriger un timesheet (admin/manager uniquement)
  */
 export interface TimesheetUpdateDTO {
-    timestamp?: Date;   // ISO DateTime
+    date?: Date;    // Format: "YYYY-MM-DD"
+    hour?: Date;   // Format: "HH:mm:ss" ou ISO DateTime
     clockin?: boolean;
     status?: TimesheetStatus;
 }
