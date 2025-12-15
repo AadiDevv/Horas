@@ -28,6 +28,29 @@ router.get('/my-employees',
 );
 
 /**
+ * GET /api/users/:id/schedule
+ * Récupère le schedule effectif d'un utilisateur
+ * Retourne le customSchedule si défini, sinon le schedule de l'équipe
+ * 
+ * Permissions :
+ * - Employé : peut voir son propre schedule uniquement
+ * - Manager : peut voir son schedule et celui de ses employés
+ * - Admin : peut voir tous les schedules
+ * 
+ * ⚠️ IMPORTANT : Cette route DOIT être avant /:id pour éviter que "schedule" soit interprété comme un ID
+ */
+router.get('/:id/schedule',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    async (req, res, next) => {
+        try {
+            await userController.getUserSchedule(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
  * GET /api/users/:id
  * Détail d'un utilisateur par ID
  * Tous les utilisateurs authentifiés (peuvent voir les profils)

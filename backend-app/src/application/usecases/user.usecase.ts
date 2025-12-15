@@ -1,5 +1,6 @@
 import { UserAuthDTO, UserUpdateDTO } from "@/application/DTOS/";
 import { UserEmployee, UserEmployee_Core, UserManager, User_Core } from "@/domain/entities/user";
+import { Schedule_Core } from "@/domain/entities/schedule";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/domain/error/AppError";
 import { ITeam, ISchedule } from "@/domain/interfaces/";
@@ -73,6 +74,63 @@ export class UserUseCase {
 
         const employees = await this.R_user.getEmployees_ByManagerId(managerId);
         return employees.map(employee => new UserEmployee_Core({ ...employee }));
+    }
+
+    /**
+     * Récupère le schedule effectif d'un utilisateur
+     * 
+     * Logique :
+     * 1. Si l'utilisateur a un customSchedule → retourner customSchedule
+     * 2. Sinon, si l'utilisateur a une team avec un schedule → retourner team.schedule
+     * 3. Sinon → null (pas de schedule défini)
+     * 
+     * Règles métier :
+     * - Employé : peut voir son propre schedule
+     * - Manager : peut voir les schedules de ses propres employés
+     * - Admin : peut voir tous les schedules
+     * 
+     * @param userId - ID de l'utilisateur dont on veut le schedule
+     * @param requestingUser - Utilisateur qui fait la requête (depuis JWT)
+     * @returns Le schedule effectif de l'utilisateur (customSchedule ou team.schedule)
+     * @throws NotFoundError si l'utilisateur n'existe pas
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
+     */
+    async getEffectiveSchedule_ByUserId(
+        userId: number,
+        requestingUser: UserAuthDTO
+    ): Promise<Schedule_Core | null> {
+        // Récupération de l'utilisateur avec ses relations (team, customSchedule)
+        const employee = await this.getEmployee_ById(userId);
+
+        // Vérification des permissions
+        if (requestingUser.role === 'employe') {
+            // Un employé ne peut voir que son propre schedule
+            if (requestingUser.id !== userId) {
+                throw new ForbiddenError("Vous ne pouvez consulter que votre propre schedule");
+            }
+        } else if (requestingUser.role === 'manager') {
+            // Un manager peut voir ses employés ou son propre schedule
+            if (requestingUser.id !== userId && employee.managerId !== requestingUser.id) {
+                throw new ForbiddenError("Vous ne pouvez consulter que votre schedule ou celui de vos employés");
+            }
+        }
+        // Admin : pas de restriction
+
+        // Logique de priorité : customSchedule > team.schedule > null
+        if (employee.customSchedule) {
+            return new Schedule_Core({ ...employee.customSchedule });
+        }
+
+        if (employee.team?.scheduleId) {
+            // Si la team a un scheduleId, il faut le récupérer via le repository
+            const teamSchedule = await this.R_schedule.getSchedule_ById(employee.team.scheduleId);
+            if (teamSchedule) {
+                return new Schedule_Core({ ...teamSchedule });
+            }
+        }
+
+        // Aucun schedule défini
+        return null;
     }
     // #endregion
 
@@ -248,7 +306,7 @@ export class UserUseCase {
 
         // #region Validation
         const targetUser = await this.getEmployeeCore_ById(userId);
-        
+
         // Vérification que l'utilisateur existe et est bien un employé
         if (!targetUser) throw new NotFoundError(`L'employé avec l'ID ${userId} introuvable`);
         if (targetUser.role === 'admin' || targetUser.role === 'manager') {

@@ -2,6 +2,7 @@ import { UserController } from '@/presentation/controllers/user.controller';
 import { UserUseCase } from '@/application/usecases';
 import { UserEmployee_Core, UserEmployee, UserManager_Core } from '@/domain/entities/user';
 import { Team_Core } from '@/domain/entities/team';
+import { Schedule_Core } from '@/domain/entities/schedule';
 import { ValidationError } from '@/domain/error/AppError';
 
 // -----------------------------
@@ -115,6 +116,8 @@ describe('UserController', () => {
       getMyEmployees: jest.fn(),
       updateUserProfile_ById: jest.fn(),
       updateEmployeeTeam_ById: jest.fn(),
+      updateUserCustomSchedule_ById: jest.fn(),
+      getEffectiveSchedule_ByUserId: jest.fn(),
       deleteUser_ById: jest.fn(),
     } as unknown as jest.Mocked<UserUseCase>;
 
@@ -342,6 +345,113 @@ describe('UserController', () => {
       const res = mockResponse();
 
       await expect(controller.updateEmployeeTeam_ById(req, res)).rejects.toThrow(ValidationError);
+    });
+  });
+
+  // ----------------------------------------
+  describe('getUserSchedule', () => {
+    const mockSchedule = new Schedule_Core({
+      id: 1,
+      name: 'Horaires Standard',
+      startHour: new Date('2025-01-01T08:00:00.000Z'),
+      endHour: new Date('2025-01-01T17:00:00.000Z'),
+      activeDays: [1, 2, 3, 4, 5],
+      managerId: 5
+    });
+
+    test('should return schedule for employee viewing own schedule', async () => {
+      useCaseMock.getEffectiveSchedule_ByUserId.mockResolvedValue(mockSchedule);
+
+      const req = mockRequest({
+        params: { id: '10' },
+        user: { id: 10, role: 'employe' }
+      }) as any;
+      const res = mockResponse();
+
+      await controller.getUserSchedule(req, res);
+
+      expect(useCaseMock.getEffectiveSchedule_ByUserId).toHaveBeenCalledWith(
+        10,
+        { id: 10, role: 'employe' }
+      );
+      expect(res.success).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 1,
+          name: 'Horaires Standard',
+          startHour: expect.any(String),
+          endHour: expect.any(String),
+          activeDays: [1, 2, 3, 4, 5],
+          managerId: 5
+        }),
+        'Schedule récupéré avec succès'
+      );
+    });
+
+    test('should return schedule for manager viewing employee schedule', async () => {
+      useCaseMock.getEffectiveSchedule_ByUserId.mockResolvedValue(mockSchedule);
+
+      const req = mockRequest({
+        params: { id: '10' },
+        user: { id: 5, role: 'manager' }
+      }) as any;
+      const res = mockResponse();
+
+      await controller.getUserSchedule(req, res);
+
+      expect(useCaseMock.getEffectiveSchedule_ByUserId).toHaveBeenCalledWith(
+        10,
+        { id: 5, role: 'manager' }
+      );
+      expect(res.success).toHaveBeenCalled();
+    });
+
+    test('should return schedule for admin viewing any schedule', async () => {
+      useCaseMock.getEffectiveSchedule_ByUserId.mockResolvedValue(mockSchedule);
+
+      const req = mockRequest({
+        params: { id: '10' },
+        user: { id: 1, role: 'admin' }
+      }) as any;
+      const res = mockResponse();
+
+      await controller.getUserSchedule(req, res);
+
+      expect(useCaseMock.getEffectiveSchedule_ByUserId).toHaveBeenCalledWith(
+        10,
+        { id: 1, role: 'admin' }
+      );
+      expect(res.success).toHaveBeenCalled();
+    });
+
+    test('should return null when no schedule is defined', async () => {
+      useCaseMock.getEffectiveSchedule_ByUserId.mockResolvedValue(null);
+
+      const req = mockRequest({
+        params: { id: '10' },
+        user: { id: 10, role: 'employe' }
+      }) as any;
+      const res = mockResponse();
+
+      await controller.getUserSchedule(req, res);
+
+      expect(useCaseMock.getEffectiveSchedule_ByUserId).toHaveBeenCalledWith(
+        10,
+        { id: 10, role: 'employe' }
+      );
+      expect(res.success).toHaveBeenCalledWith(
+        null,
+        'Aucun schedule défini pour cet utilisateur'
+      );
+    });
+
+    test('should throw ValidationError for invalid id', async () => {
+      const req = mockRequest({
+        params: { id: 'invalid' },
+        user: { id: 10, role: 'employe' }
+      }) as any;
+      const res = mockResponse();
+
+      await expect(controller.getUserSchedule(req, res)).rejects.toThrow(ValidationError);
     });
   });
 

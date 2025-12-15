@@ -173,6 +173,142 @@ WHERE teams.managerId = :managerId
         }
     },
 
+    '/api/users/{id}/schedule': {
+        get: {
+            summary: 'Schedule effectif d\'un utilisateur',
+            description: `Récupère le schedule effectif d'un utilisateur (customSchedule ou team.schedule).
+
+**Logique de priorité :**
+1. Si l'utilisateur a un \`customSchedule\` → retourne le customSchedule
+2. Sinon, si l'utilisateur a une équipe avec un \`schedule\` → retourne le schedule de l'équipe
+3. Sinon → retourne \`null\` (aucun schedule défini)
+
+**Permissions :**
+- **Employé** : peut voir uniquement son propre schedule
+- **Manager** : peut voir son schedule et celui de ses employés
+- **Admin** : peut voir tous les schedules
+
+**Cas d'usage :**
+- Afficher les horaires de travail d'un employé
+- Vérifier si un employé a un horaire personnalisé
+- Déterminer les heures de pointage attendues`,
+            tags: ['Users'],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'id',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de l\'utilisateur',
+                    example: 10
+                }
+            ],
+            responses: {
+                200: {
+                    description: 'Schedule récupéré avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    data: {
+                                        oneOf: [
+                                            { $ref: '#/components/schemas/ScheduleReadDTO_Core' },
+                                            { type: 'null' }
+                                        ]
+                                    },
+                                    message: { type: 'string' },
+                                    timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            },
+                            examples: {
+                                withCustomSchedule: {
+                                    summary: 'Employé avec custom schedule',
+                                    value: {
+                                        success: true,
+                                        data: {
+                                            id: 3,
+                                            name: 'Horaires Flexibles',
+                                            startHour: '09:00',
+                                            endHour: '18:00',
+                                            activeDays: [1, 2, 3, 4, 5],
+                                            managerId: 5
+                                        },
+                                        message: 'Schedule récupéré avec succès',
+                                        timestamp: '2025-12-15T10:00:00.000Z'
+                                    }
+                                },
+                                withTeamSchedule: {
+                                    summary: 'Employé avec schedule d\'équipe',
+                                    value: {
+                                        success: true,
+                                        data: {
+                                            id: 1,
+                                            name: 'Horaires Standard',
+                                            startHour: '08:00',
+                                            endHour: '17:00',
+                                            activeDays: [1, 2, 3, 4, 5],
+                                            managerId: 5
+                                        },
+                                        message: 'Schedule récupéré avec succès',
+                                        timestamp: '2025-12-15T10:00:00.000Z'
+                                    }
+                                },
+                                noSchedule: {
+                                    summary: 'Aucun schedule défini',
+                                    value: {
+                                        success: true,
+                                        data: null,
+                                        message: 'Aucun schedule défini pour cet utilisateur',
+                                        timestamp: '2025-12-15T10:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Permissions insuffisantes',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' },
+                            examples: {
+                                notOwnSchedule: {
+                                    summary: 'Employé tentant de voir le schedule d\'un autre',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez consulter que votre propre schedule',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-12-15T10:00:00.000Z'
+                                    }
+                                },
+                                managerNotOwnEmployee: {
+                                    summary: 'Manager tentant de voir un employé qui n\'est pas le sien',
+                                    value: {
+                                        success: false,
+                                        error: 'Vous ne pouvez consulter que votre schedule ou celui de vos employés',
+                                        code: 'FORBIDDEN',
+                                        timestamp: '2025-12-15T10:00:00.000Z'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                404: {
+                    description: 'Utilisateur non trouvé',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     '/api/users/{id}': {
         get: {
             summary: 'Détail d\'un utilisateur',

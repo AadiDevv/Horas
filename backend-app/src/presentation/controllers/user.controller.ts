@@ -56,6 +56,37 @@ export class UserController {
 
     res.success(employeesDTO, "Liste des employés récupérée avec succès");
   }
+
+  /**
+   * GET /api/users/:id/schedule
+   * Récupère le schedule effectif d'un utilisateur
+   * 
+   * Retourne le customSchedule si défini, sinon le schedule de l'équipe
+   * 
+   * Permissions :
+   * - Employé : peut voir son propre schedule uniquement
+   * - Manager : peut voir son schedule et celui de ses employés
+   * - Admin : peut voir tous les schedules
+   */
+  async getUserSchedule(req: Request, res: Response): Promise<void> {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) throw new ValidationError("ID invalide");
+
+    const requestingUser = req.user!;
+
+    const schedule = await this.UC_user.getEffectiveSchedule_ByUserId(userId, requestingUser);
+
+    if (!schedule) {
+      res.success(null, "Aucun schedule défini pour cet utilisateur");
+      return;
+    }
+
+    // Utiliser le mapper Schedule pour transformer en DTO
+    const { ScheduleMapper } = await import('@/application/mappers/schedule');
+    const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
+
+    res.success(scheduleDTO, "Schedule récupéré avec succès");
+  }
   // #endregion
 
   // #region Update
