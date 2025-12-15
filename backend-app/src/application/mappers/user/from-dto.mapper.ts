@@ -26,7 +26,7 @@ export namespace UserMapper {
                 hashedPassword,
                 isActive: true,
                 teamId: dto.teamId ?? null,
-                customScheduleId: null,
+                customScheduleId: dto.customScheduleId ?? null,
                 role
             });
         }

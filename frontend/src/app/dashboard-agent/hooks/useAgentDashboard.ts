@@ -243,13 +243,14 @@ export function useTimeClock() {
         Sun: []
       };
 
-      // Grouper les pointages par date
+      // Grouper les pointages par date (extraite du timestamp)
       const pointagesByDate: Record<string, typeof weekPointages> = {};
       weekPointages.forEach(p => {
-        if (!pointagesByDate[p.date]) {
-          pointagesByDate[p.date] = [];
+        const date = p.timestamp.substring(0, 10); // "YYYY-MM-DD"
+        if (!pointagesByDate[date]) {
+          pointagesByDate[date] = [];
         }
-        pointagesByDate[p.date].push(p);
+        pointagesByDate[date].push(p);
       });
 
       console.log('📊 Pointages groupés par date:', pointagesByDate);

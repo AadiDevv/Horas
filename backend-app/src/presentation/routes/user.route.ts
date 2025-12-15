@@ -28,6 +28,29 @@ router.get('/my-employees',
 );
 
 /**
+ * GET /api/users/:id/schedule
+ * Récupère le schedule effectif d'un utilisateur
+ * Retourne le customSchedule si défini, sinon le schedule de l'équipe
+ * 
+ * Permissions :
+ * - Employé : peut voir son propre schedule uniquement
+ * - Manager : peut voir son schedule et celui de ses employés
+ * - Admin : peut voir tous les schedules
+ * 
+ * ⚠️ IMPORTANT : Cette route DOIT être avant /:id pour éviter que "schedule" soit interprété comme un ID
+ */
+router.get('/:id/schedule',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    async (req, res, next) => {
+        try {
+            await userController.getUserSchedule(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
  * GET /api/users/:id
  * Détail d'un utilisateur par ID
  * Tous les utilisateurs authentifiés (peuvent voir les profils)
@@ -75,6 +98,24 @@ router.patch('/assign/team/:id',
     async (req, res, next) => {
         try {
             await userController.updateEmployeeTeam_ById(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
+ * PATCH /api/users/assign/schedule/:id
+ * Attribuer un custom schedule à un employé
+ * - Admin : peut attribuer n'importe quel schedule
+ * - Manager : peut attribuer ses propres schedules à ses propres employés
+ */
+router.patch('/assign/schedule/:id',
+    authMiddleware,      // 1️⃣ Vérifie le JWT
+    managerOrAdmin,      // 2️⃣ Vérifie que c'est manager ou admin
+    async (req, res, next) => {
+        try {
+            await userController.updateUserCustomSchedule_ById(req, res);
         } catch (error) {
             next(error);
         }

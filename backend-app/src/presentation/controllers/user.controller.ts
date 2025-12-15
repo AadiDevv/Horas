@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { UserUseCase } from '@/application/usecases';
-import { UserUpdateDTO, UserAsignTeamDTO, UserAuthDTO } from '@/application/DTOS/';
+import { UserUpdateDTO, UserAsignTeamDTO, UserAssignScheduleDTO, UserAuthDTO } from '@/application/DTOS/';
 import { ValidationError } from '@/domain/error/AppError';
 import { UserMapper } from '@/application/mappers/user';
 import { UserEmployee_Core } from '@/domain/entities/user';
@@ -56,6 +56,37 @@ export class UserController {
 
     res.success(employeesDTO, "Liste des employés récupérée avec succès");
   }
+
+  /**
+   * GET /api/users/:id/schedule
+   * Récupère le schedule effectif d'un utilisateur
+   * 
+   * Retourne le customSchedule si défini, sinon le schedule de l'équipe
+   * 
+   * Permissions :
+   * - Employé : peut voir son propre schedule uniquement
+   * - Manager : peut voir son schedule et celui de ses employés
+   * - Admin : peut voir tous les schedules
+   */
+  async getUserSchedule(req: Request, res: Response): Promise<void> {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) throw new ValidationError("ID invalide");
+
+    const requestingUser = req.user!;
+
+    const schedule = await this.UC_user.getEffectiveSchedule_ByUserId(userId, requestingUser);
+
+    if (!schedule) {
+      res.success(null, "Aucun schedule défini pour cet utilisateur");
+      return;
+    }
+
+    // Utiliser le mapper Schedule pour transformer en DTO
+    const { ScheduleMapper } = await import('@/application/mappers/schedule');
+    const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
+
+    res.success(scheduleDTO, "Schedule récupéré avec succès");
+  }
   // #endregion
 
   // #region Update
@@ -108,6 +139,38 @@ export class UserController {
     const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
 
     res.success(userDTO, "Utilisateur assigné à l'équipe avec succès");
+  }
+
+  /**
+   * PATCH /api/users/assign/schedule/:id
+   * Attribuer un custom schedule à un employé
+   * - Admin : peut attribuer n'importe quel schedule à n'importe quel employé
+   * - Manager : peut attribuer ses propres schedules à ses propres employés
+   * 
+   * Note : Les permissions sont vérifiées par le middleware managerOrAdmin + logique métier
+   */
+  async updateUserCustomSchedule_ById(req: Request, res: Response): Promise<void> {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) throw new ValidationError("ID utilisateur invalide");
+
+    const dto: UserAssignScheduleDTO = req.body;
+    
+    // Validation : scheduleId doit être un nombre ou null
+    if (dto.scheduleId !== null && (typeof dto.scheduleId !== 'number' || isNaN(dto.scheduleId))) {
+      throw new ValidationError("Le scheduleId doit être un nombre ou null");
+    }
+
+    // Récupération des informations de l'utilisateur connecté
+    const requestingUser: UserAuthDTO = req.user!;
+
+    const user = await this.UC_user.updateUserCustomSchedule_ById(userId, dto.scheduleId, requestingUser);
+    const userDTO = UserMapper.FromEntityCore.toReadDTO_Core(user);
+
+    const message = dto.scheduleId === null 
+      ? "Custom schedule retiré avec succès" 
+      : "Custom schedule attribué avec succès";
+    
+    res.success(userDTO, message);
   }
   // #endregion
 

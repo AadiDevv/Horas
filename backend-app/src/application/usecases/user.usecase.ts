@@ -1,10 +1,10 @@
 import { UserAuthDTO, UserUpdateDTO } from "@/application/DTOS/";
-import { User, UserEmployee, UserEmployee_Core, UserManager, UserManager_Core, User_Core } from "@/domain/entities/user";
+import { UserEmployee, UserEmployee_Core, UserManager, User_Core } from "@/domain/entities/user";
+import { Schedule_Core } from "@/domain/entities/schedule";
 import { IUser } from "@/domain/interfaces/user.interface";
-import { NotFoundError, ForbiddenError } from "@/domain/error/AppError";
-import { ITeam } from "@/domain/interfaces/team.interface";
+import { NotFoundError, ForbiddenError, ValidationError } from "@/domain/error/AppError";
+import { ITeam, ISchedule } from "@/domain/interfaces/";
 import { UserMapper } from "../mappers/user";
-import { UserEmployee_L1 } from "@/domain/entities/user";
 /**
  * Use Case pour la gestion des utilisateurs (CRUD)
  * Contient la logique métier et les règles de gestion
@@ -13,7 +13,11 @@ import { UserEmployee_L1 } from "@/domain/entities/user";
  */
 export class UserUseCase {
 
-    constructor(private readonly R_user: IUser, private readonly R_team: ITeam) { }
+    constructor(
+        private readonly R_user: IUser,
+        private readonly R_team: ITeam,
+        private readonly R_schedule: ISchedule
+    ) { }
 
     // #region Read
 
@@ -70,6 +74,63 @@ export class UserUseCase {
 
         const employees = await this.R_user.getEmployees_ByManagerId(managerId);
         return employees.map(employee => new UserEmployee_Core({ ...employee }));
+    }
+
+    /**
+     * Récupère le schedule effectif d'un utilisateur
+     * 
+     * Logique :
+     * 1. Si l'utilisateur a un customSchedule → retourner customSchedule
+     * 2. Sinon, si l'utilisateur a une team avec un schedule → retourner team.schedule
+     * 3. Sinon → null (pas de schedule défini)
+     * 
+     * Règles métier :
+     * - Employé : peut voir son propre schedule
+     * - Manager : peut voir les schedules de ses propres employés
+     * - Admin : peut voir tous les schedules
+     * 
+     * @param userId - ID de l'utilisateur dont on veut le schedule
+     * @param requestingUser - Utilisateur qui fait la requête (depuis JWT)
+     * @returns Le schedule effectif de l'utilisateur (customSchedule ou team.schedule)
+     * @throws NotFoundError si l'utilisateur n'existe pas
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
+     */
+    async getEffectiveSchedule_ByUserId(
+        userId: number,
+        requestingUser: UserAuthDTO
+    ): Promise<Schedule_Core | null> {
+        // Récupération de l'utilisateur avec ses relations (team, customSchedule)
+        const employee = await this.getEmployee_ById(userId);
+
+        // Vérification des permissions
+        if (requestingUser.role === 'employe') {
+            // Un employé ne peut voir que son propre schedule
+            if (requestingUser.id !== userId) {
+                throw new ForbiddenError("Vous ne pouvez consulter que votre propre schedule");
+            }
+        } else if (requestingUser.role === 'manager') {
+            // Un manager peut voir ses employés ou son propre schedule
+            if (requestingUser.id !== userId && employee.managerId !== requestingUser.id) {
+                throw new ForbiddenError("Vous ne pouvez consulter que votre schedule ou celui de vos employés");
+            }
+        }
+        // Admin : pas de restriction
+
+        // Logique de priorité : customSchedule > team.schedule > null
+        if (employee.customSchedule) {
+            return new Schedule_Core({ ...employee.customSchedule });
+        }
+
+        if (employee.team?.scheduleId) {
+            // Si la team a un scheduleId, il faut le récupérer via le repository
+            const teamSchedule = await this.R_schedule.getSchedule_ById(employee.team.scheduleId);
+            if (teamSchedule) {
+                return new Schedule_Core({ ...teamSchedule });
+            }
+        }
+
+        // Aucun schedule défini
+        return null;
     }
     // #endregion
 
@@ -218,6 +279,78 @@ export class UserUseCase {
         }
         //#endregion
         const userEntityUpdated = await this.R_user.updateUserTeam_ById(userId, teamId);
+        return new UserEmployee_Core({ ...userEntityUpdated });
+    }
+
+    /**
+     * Assigne un custom schedule à un employé
+     *
+     * Règles métier :
+     * - Admin : peut attribuer n'importe quel schedule à n'importe quel employé
+     * - Manager : peut attribuer ses propres schedules à ses propres employés uniquement
+     * - scheduleId null : retire le custom schedule (l'employé revient au schedule de son équipe)
+     *
+     * @param userId - ID de l'employé à qui attribuer le schedule
+     * @param scheduleId - ID du schedule à attribuer (null pour retirer)
+     * @param user - Utilisateur authentifié qui fait la requête (contient id et role)
+     * @returns L'employé mis à jour
+     * @throws NotFoundError si l'employé ou le schedule n'existe pas
+     * @throws ForbiddenError si l'utilisateur n'a pas les droits
+     * @throws ValidationError si l'employé n'est pas un employé (role manager/admin)
+     */
+    async updateUserCustomSchedule_ById(
+        userId: number,
+        scheduleId: number | null,
+        user: UserAuthDTO
+    ): Promise<UserEmployee_Core> {
+
+        // #region Validation
+        const targetUser = await this.getEmployeeCore_ById(userId);
+
+        // Vérification que l'utilisateur existe et est bien un employé
+        if (!targetUser) throw new NotFoundError(`L'employé avec l'ID ${userId} introuvable`);
+        if (targetUser.role === 'admin' || targetUser.role === 'manager') {
+            throw new ValidationError("Vous ne pouvez attribuer un custom schedule qu'à des employés");
+        }
+
+        // Si scheduleId est null, on retire le custom schedule (pas de validation du schedule)
+        if (scheduleId !== null) {
+            // Vérification que le schedule existe
+            const targetSchedule = await this.R_schedule.getSchedule_ById(scheduleId);
+            if (!targetSchedule) throw new NotFoundError(`Le schedule avec l'ID ${scheduleId} introuvable`);
+
+            // Vérification que le schedule n'est pas déjà le custom schedule de l'employé
+            if (targetUser.customScheduleId === scheduleId) {
+                throw new ValidationError("L'employé a déjà ce custom schedule");
+            }
+
+            // En tant que manager, l'utilisateur ne peut attribuer que ses propres schedules à ses propres employés
+            if (user.role !== 'admin') {
+                // Vérifier que c'est son employé
+                if (targetUser.managerId !== user.id) {
+                    throw new ForbiddenError(
+                        `Vous ne pouvez attribuer un custom schedule qu'à vos propres employés\n` +
+                        `targetUser.managerId : ${targetUser.managerId}\n` +
+                        `requestingUserId : ${user.id}`
+                    );
+                }
+                // Vérifier que c'est son schedule
+                if (targetSchedule.managerId !== user.id) {
+                    throw new ForbiddenError(
+                        `Impossible d'attribuer ce schedule. Vous n'êtes pas le manager de ce schedule`
+                    );
+                }
+            }
+        } else {
+            // Si scheduleId est null, on retire le custom schedule
+            // Vérifier que le manager a les droits sur cet employé
+            if (user.role !== 'admin' && targetUser.managerId !== user.id) {
+                throw new ForbiddenError("Vous ne pouvez retirer le custom schedule que de vos propres employés");
+            }
+        }
+        // #endregion
+
+        const userEntityUpdated = await this.R_user.updateUserCustomSchedule_ById(userId, scheduleId);
         return new UserEmployee_Core({ ...userEntityUpdated });
     }
     // #endregion
