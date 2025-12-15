@@ -126,13 +126,12 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
   };
 
   const handleSaveBlock = async (data: BlockData) => {
-    // Créer les dates complètes pour l'entrée et la sortie
-    const entryDateTime = new Date(`${data.date}T${data.startTime}:00`);
-    const exitDateTime = new Date(`${data.date}T${data.endTime}:00`);
+    // Créer les timestamps complets pour l'entrée et la sortie
+    const entryTimestamp = new Date(`${data.date}T${data.startTime}:00`).toISOString();
+    const exitTimestamp = new Date(`${data.date}T${data.endTime}:00`).toISOString();
 
     if (data.entryId && data.exitId) {
       // Mode édition - Stratégie: supprimer les anciens et recréer
-      // Car le backend PATCH a un bug avec la transformation de date
 
       // 1. Supprimer les anciens timesheets
       const deleteEntryResponse = await deleteTimesheet(data.entryId);
@@ -145,12 +144,11 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
         throw new Error(deleteExitResponse.error || 'Erreur lors de la suppression de la sortie');
       }
 
-      // 2. Recréer les nouveaux timesheets avec les nouvelles heures
+      // 2. Recréer les nouveaux timesheets avec les nouveaux timestamps
+      // clockin est auto-déterminé par le backend
       const entryResponse = await createTimesheet({
         employeId: data.employeId,
-        date: data.date,
-        hour: entryDateTime.toISOString(),
-        clockin: true,
+        timestamp: entryTimestamp,
         status: data.status
       });
 
@@ -160,9 +158,7 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
       const exitResponse = await createTimesheet({
         employeId: data.employeId,
-        date: data.date,
-        hour: exitDateTime.toISOString(),
-        clockin: false,
+        timestamp: exitTimestamp,
         status: data.status
       });
 
@@ -170,12 +166,11 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
         throw new Error(exitResponse.error || 'Erreur lors de la recréation de la sortie');
       }
     } else {
-      // Mode création - créer une paire entrée/sortie (ISO format pour POST)
+      // Mode création - créer une paire entrée/sortie
+      // clockin est auto-déterminé par le backend (inverse du dernier)
       const entryResponse = await createTimesheet({
         employeId: data.employeId,
-        date: data.date,
-        hour: entryDateTime.toISOString(),
-        clockin: true,
+        timestamp: entryTimestamp,
         status: data.status
       });
 
@@ -185,9 +180,7 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
       const exitResponse = await createTimesheet({
         employeId: data.employeId,
-        date: data.date,
-        hour: exitDateTime.toISOString(),
-        clockin: false,
+        timestamp: exitTimestamp,
         status: data.status
       });
 

@@ -1,5 +1,4 @@
-import { User } from "@/domain/entities/user";
-import { UserFilterDTO } from "@/application/DTOS/user.dto";
+import {  UserEmployee, UserEmployee_Core, UserManager, User_Core, User_L1 } from "@/domain/entities/user";
 
 /**
  * Interface du repository User
@@ -8,45 +7,21 @@ import { UserFilterDTO } from "@/application/DTOS/user.dto";
  * Note : Les opérations d'authentification (register/login) restent dans IAuth
  */
 export interface IUser {
-    // #region Read
-    /**
-     * Récupère tous les utilisateurs avec filtres optionnels
-     * @param filter - Filtres (role, teamId, isActive, search)
-     */
-    getAllUsers(filter?: UserFilterDTO): Promise<User[]>;
+    
+    getEmployee_ById(id: number): Promise<UserEmployee>;
 
-    /**
-     * Récupère un utilisateur par son ID
-     */
-    getUser_ById(id: number): Promise<User | null>;
+    getUser_ById(id: number): Promise<User_Core>;
 
-    /**
-     * Récupère tous les employés d'un manager spécifique
-     * (JOIN sur les équipes : Team.managerId → Team.members)
-     */
-    getEmployees_ByManagerId(managerId: number): Promise<User[]>;
-    // #endregion
+    getManager_ById(id: number): Promise<UserManager>;
 
-    // #region Update
-    /**
-     * Met à jour un utilisateur
-     * @param user - L'entité utilisateur mise à jour (avec son ID)
-     */
-    updateUserProfile_ById(user: User): Promise<User>;
-    /**
-     * Met à jour un utilisateur
-     * @param userId - ID de l'utilisateur à mettre à jour
-     * @param teamId - ID de l'équipe à assigner
-     */
-    updateUserTeam_ById(userId: number, teamId: number): Promise<User>;
+    getEmployees_ByManagerId(managerId: number): Promise<UserEmployee_Core[]>;
 
-    // #endregion
+    updateUserProfile_ById(user: User_Core): Promise<User_Core>;
 
-    // #region Delete
-    /**
-     * Suppression logique d'un utilisateur (soft delete)
-     */
-    deleteUser_ById(id: number): Promise<User>;
-    // #endregion
+    updateUserTeam_ById(userId: number, teamId: number): Promise<UserEmployee_Core>;
+
+    updateUserCustomSchedule_ById(userId: number, scheduleId: number | null): Promise<UserEmployee_Core>;
+
+    deleteUser_ById(id: number): Promise<User_L1>;
 }
 

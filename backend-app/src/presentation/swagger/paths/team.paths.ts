@@ -2,12 +2,13 @@
 /**
  * Routes de gestion des équipes
  * Tag: Équipes (À venir)
- * 
+ *
  * Permissions :
- * - GET /teams : Tous les users authentifiés
- * - POST /teams : Admin uniquement
- * - PATCH /teams/:id : Admin uniquement
- * - DELETE /teams/:id : Admin uniquement
+ * - GET /teams : Manager ou Admin
+ * - POST /teams : Manager ou Admin
+ * - PATCH /teams/:id : Manager ou Admin
+ * - PATCH /teams/assign/schedule/:id : Manager ou Admin
+ * - DELETE /teams/:id : Manager ou Admin
  */
 export const teamPaths = {
     '/api/teams': {
@@ -281,7 +282,7 @@ export const teamPaths = {
 
         patch: {
             summary: 'Modifier une équipe',
-            description: 'Met à jour les informations d\'une équipe (name, description, scheduleId). Le managerId ne peut PAS être modifié. Admin uniquement.',
+            description: 'Met à jour les informations d\'une équipe (name, description, scheduleId). Le managerId ne peut PAS être modifié. Manager ou Admin uniquement.',
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -319,7 +320,7 @@ export const teamPaths = {
                     }
                 },
                 403: {
-                    description: 'Permissions insuffisantes (Admin uniquement)',
+                    description: 'Permissions insuffisantes (Manager/Admin uniquement)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -331,8 +332,8 @@ export const teamPaths = {
 
         delete: {
             summary: 'Supprimer une équipe',
-            description: `Suppression logique (soft delete) d\'une équipe. Admin uniquement.
-            
+            description: `Suppression logique (soft delete) d\'une équipe. Manager ou Admin uniquement.
+
 **Règle métier :** Une équipe contenant des members ne peut PAS être supprimée. Les members doivent d'abord être déplacés ou retirés.`,
             tags: ['Équipes'],
             security: [{ bearerAuth: [] }],
@@ -381,7 +382,7 @@ export const teamPaths = {
                     }
                 },
                 403: {
-                    description: 'Permissions insuffisantes (Admin uniquement)',
+                    description: 'Permissions insuffisantes (Manager/Admin uniquement)',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -390,6 +391,74 @@ export const teamPaths = {
                 },
                 404: {
                     description: 'Équipe non trouvée',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    '/api/teams/assign/schedule/{id}': {
+        patch: {
+            summary: 'Assigner un schedule à une équipe',
+            description: `Assigne un schedule à une équipe spécifique.
+
+**Permissions :**
+- **Admin** : Peut assigner n'importe quel schedule à n'importe quelle équipe
+- **Manager** : Peut uniquement assigner ses propres schedules à ses propres équipes`,
+            tags: ['Équipes'],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'id',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de l\'équipe',
+                    example: 1
+                }
+            ],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: { $ref: '#/components/schemas/TeamAsignScheduleDTO' },
+                        example: {
+                            scheduleId: 2
+                        }
+                    }
+                }
+            },
+            responses: {
+                200: {
+                    description: 'Schedule assigné avec succès',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    data: { $ref: '#/components/schemas/TeamReadDTO' },
+                                    message: { type: 'string', example: 'Schedule assigné à l\'équipe avec succès' },
+                                    timestamp: { type: 'string', format: 'date-time' }
+                                }
+                            }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Permissions insuffisantes (Manager/Admin uniquement)',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                },
+                404: {
+                    description: 'Équipe ou Schedule non trouvé',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }

@@ -1,10 +1,10 @@
 import { Role } from './valueType';
-import { UserReadDTO } from '@/application/DTOS';
+import { UserAuthDTO } from '@/application/DTOS';
 
 declare global {
     namespace Express {
         interface Request {
-            user?: UserReadDTO
+            user?: UserAuthDTO
         }
     }
 }

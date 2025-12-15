@@ -1,6 +1,6 @@
 import { AuthController } from '@/presentation/controllers/auth.controller';
 import { AuthUseCase } from '@/application/usecases';
-import { User } from '@/domain/entities/user';
+import { UserEmployee_Core, User_L1, UserManager_Core } from '@/domain/entities/user';
 import { ValidationError } from '@/domain/error/AppError';
 
 // -----------------------------
@@ -18,79 +18,66 @@ const mockResponse = () => {
 };
 
 // -----------------------------
-// Mock Users
+// Mock Entities
 // -----------------------------
-const mockEmployeeUser = new User({
+// UserEmployee_Core for registerEmployee (returns UserReadEmployeeDTO_Core)
+const mockEmployeeUser_Core = new UserEmployee_Core({
   id: 10,
   firstName: 'John',
   lastName: 'Employee',
   email: 'john.employee@mail.com',
+  phone: '+33 6 10 10 10 10',
+  hashedPassword: 'hashed',
   role: 'employe',
   isActive: true,
+  teamId: null,
+  managerId: 5,
+  customScheduleId: null,
 });
-mockEmployeeUser.toReadDTO = jest.fn(() => ({
-  id: 10,
-  firstName: 'John',
-  lastName: 'Employee',
-  email: 'john.employee@mail.com',
-  role: 'employe',
-  isActive: true,
-  createdAt: new Date().toISOString(),
-}));
 
-const mockManagerUser = new User({
+// UserManager_Core for registerManager (returns UserReadManagerDTO_Core)
+const mockManagerUser_Core = new UserManager_Core({
   id: 11,
   firstName: 'Jane',
   lastName: 'Manager',
   email: 'jane.manager@mail.com',
+  phone: '+33 6 11 11 11 11',
+  hashedPassword: 'hashed',
   role: 'manager',
   isActive: true,
 });
-mockManagerUser.toReadDTO = jest.fn(() => ({
-  id: 11,
-  firstName: 'Jane',
-  lastName: 'Manager',
-  email: 'jane.manager@mail.com',
-  role: 'manager',
-  isActive: true,
-  createdAt: new Date().toISOString(),
-}));
 
-const mockRegularUser = new User({
-  id: 12,
-  firstName: 'Bob',
-  lastName: 'User',
-  email: 'bob.user@mail.com',
-  role: 'employe',
-  isActive: true,
-});
-mockRegularUser.toReadDTO = jest.fn(() => ({
-  id: 12,
-  firstName: 'Bob',
-  lastName: 'User',
-  email: 'bob.user@mail.com',
-  role: 'employe',
-  isActive: true,
-  createdAt: new Date().toISOString(),
-}));
-
-const mockLoginUser = new User({
+// User_L1 for login (returns UserAuthDTO via toReadUserAuthDTO_L1)
+const mockLoginUser_L1 = new User_L1({
   id: 13,
   firstName: 'Alice',
   lastName: 'Login',
   email: 'alice.login@mail.com',
+  phone: '+33 6 13 13 13 13',
+  hashedPassword: 'hashed',
   role: 'admin',
   isActive: true,
+  createdAt: new Date('2025-01-01T10:00:00Z'),
+  updatedAt: new Date('2025-01-01T11:00:00Z'),
+  lastLoginAt: new Date('2025-01-01T12:00:00Z'),
+  deletedAt: null,
 });
-mockLoginUser.toReadDTO = jest.fn(() => ({
-  id: 13,
-  firstName: 'Alice',
-  lastName: 'Login',
-  email: 'alice.login@mail.com',
-  role: 'admin',
+
+// User without id for validation error test
+const mockUserWithoutId_L1 = new User_L1({
+  id: undefined as any,
+  firstName: 'No',
+  lastName: 'Id',
+  email: 'noid@mail.com',
+  phone: '+33 6 00 00 00 00',
+  hashedPassword: 'hashed',
+  role: 'employe',
   isActive: true,
-  createdAt: new Date().toISOString(),
-}));
+  createdAt: new Date('2025-01-01T10:00:00Z'),
+  updatedAt: new Date('2025-01-01T11:00:00Z'),
+  lastLoginAt: new Date('2025-01-01T12:00:00Z'),
+  deletedAt: null,
+});
 
 // -----------------------------
 // Tests
@@ -103,7 +90,6 @@ describe('AuthController', () => {
     useCaseMock = {
       registerEmployee: jest.fn(),
       registerManager: jest.fn(),
-      registerUser: jest.fn(),
       loginUser: jest.fn(),
     } as unknown as jest.Mocked<AuthUseCase>;
 
@@ -113,7 +99,7 @@ describe('AuthController', () => {
   // ----------------------------------------
   describe('registerEmploye', () => {
     test('should register employee successfully', async () => {
-      useCaseMock.registerEmployee.mockResolvedValue(mockEmployeeUser.toReadDTO() as any);
+      useCaseMock.registerEmployee.mockResolvedValue(mockEmployeeUser_Core);
 
       const req = mockRequest({
         body: {
@@ -140,19 +126,25 @@ describe('AuthController', () => {
         })
       );
       expect(res.success).toHaveBeenCalledWith(
-        expect.objectContaining({
+        {
           id: 10,
           firstName: 'John',
           lastName: 'Employee',
           email: 'john.employee@mail.com',
+          phone: '+33 6 10 10 10 10',
+          hashedPassword: 'hashed',
           role: 'employe',
-        }),
+          isActive: true,
+          teamId: null,
+          managerId: 5,
+          customScheduleId: null,
+        },
         'Utilisateur inscrit avec succès'
       );
     });
 
     test('should use manager id from authenticated user', async () => {
-      useCaseMock.registerEmployee.mockResolvedValue(mockEmployeeUser.toReadDTO() as any);
+      useCaseMock.registerEmployee.mockResolvedValue(mockEmployeeUser_Core);
 
       const req = mockRequest({
         body: {
@@ -180,7 +172,7 @@ describe('AuthController', () => {
   // ----------------------------------------
   describe('registerManager', () => {
     test('should register manager successfully', async () => {
-      useCaseMock.registerManager.mockResolvedValue(mockManagerUser.toReadDTO() as any);
+      useCaseMock.registerManager.mockResolvedValue(mockManagerUser_Core);
 
       const req = mockRequest({
         body: {
@@ -205,19 +197,22 @@ describe('AuthController', () => {
         })
       );
       expect(res.success).toHaveBeenCalledWith(
-        expect.objectContaining({
+        {
           id: 11,
           firstName: 'Jane',
           lastName: 'Manager',
           email: 'jane.manager@mail.com',
+          phone: '+33 6 11 11 11 11',
+          hashedPassword: 'hashed',
           role: 'manager',
-        }),
+          isActive: true,
+        },
         'Utilisateur inscrit avec succès'
       );
     });
 
     test('should set role to manager in request body', async () => {
-      useCaseMock.registerManager.mockResolvedValue(mockManagerUser.toReadDTO() as any);
+      useCaseMock.registerManager.mockResolvedValue(mockManagerUser_Core);
 
       const req = mockRequest({
         body: {
@@ -237,69 +232,10 @@ describe('AuthController', () => {
   });
 
   // ----------------------------------------
-  describe('register', () => {
-    test('should register user successfully', async () => {
-      useCaseMock.registerUser.mockResolvedValue(mockRegularUser);
-
-      const req = mockRequest({
-        body: {
-          firstName: 'Bob',
-          lastName: 'User',
-          email: 'bob.user@mail.com',
-          password: 'password123',
-          role: 'employe',
-        },
-      }) as any;
-      const res = mockResponse();
-
-      await controller.register(req, res);
-
-      expect(useCaseMock.registerUser).toHaveBeenCalledWith({
-        firstName: 'Bob',
-        lastName: 'User',
-        email: 'bob.user@mail.com',
-        password: 'password123',
-        role: 'employe',
-      });
-      expect(res.success).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 12,
-          firstName: 'Bob',
-          lastName: 'User',
-          email: 'bob.user@mail.com',
-          role: 'employe',
-        }),
-        'Utilisateur inscrit avec succès'
-      );
-    });
-
-    test('should call registerUser with complete DTO', async () => {
-      useCaseMock.registerUser.mockResolvedValue(mockRegularUser);
-
-      const completeUserData = {
-        firstName: 'Test',
-        lastName: 'Complete',
-        email: 'test.complete@mail.com',
-        password: 'securepass',
-        role: 'employe',
-      };
-
-      const req = mockRequest({
-        body: completeUserData,
-      }) as any;
-      const res = mockResponse();
-
-      await controller.register(req, res);
-
-      expect(useCaseMock.registerUser).toHaveBeenCalledWith(completeUserData);
-    });
-  });
-
-  // ----------------------------------------
   describe('login', () => {
     test('should login user successfully and return token response', async () => {
       const mockAccessToken = 'mock.jwt.token';
-      useCaseMock.loginUser.mockResolvedValue([mockLoginUser, mockAccessToken]);
+      useCaseMock.loginUser.mockResolvedValue([mockLoginUser_L1, mockAccessToken]);
 
       const req = mockRequest({
         body: {
@@ -317,41 +253,28 @@ describe('AuthController', () => {
       });
 
       expect(res.success).toHaveBeenCalledWith(
-        expect.objectContaining({
+        {
           accessToken: 'mock.jwt.token',
           tokenType: 'bearer',
           expiresIn: 1800,
-          user: expect.objectContaining({
+          user: {
             id: 13,
             firstName: 'Alice',
             lastName: 'Login',
             email: 'alice.login@mail.com',
+            phone: '+33 6 13 13 13 13',
             role: 'admin',
-          }),
+            isActive: true,
+            lastLoginAt: new Date('2025-01-01T12:00:00Z'),
+          },
           role: 'admin',
-        }),
+        },
         'Connexion réussie'
       );
     });
 
     test('should throw ValidationError if user id is missing', async () => {
-      const userWithoutId = new User({
-        firstName: 'No',
-        lastName: 'Id',
-        email: 'noid@mail.com',
-        role: 'employe',
-        isActive: true,
-      });
-      userWithoutId.toReadDTO = jest.fn(() => ({
-        firstName: 'No',
-        lastName: 'Id',
-        email: 'noid@mail.com',
-        role: 'employe',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      })) as any;
-
-      useCaseMock.loginUser.mockResolvedValue([userWithoutId, 'token']);
+      useCaseMock.loginUser.mockResolvedValue([mockUserWithoutId_L1, 'token']);
 
       const req = mockRequest({
         body: {
@@ -367,7 +290,7 @@ describe('AuthController', () => {
 
     test('should include correct token metadata in response', async () => {
       const mockAccessToken = 'another.mock.token';
-      useCaseMock.loginUser.mockResolvedValue([mockLoginUser, mockAccessToken]);
+      useCaseMock.loginUser.mockResolvedValue([mockLoginUser_L1, mockAccessToken]);
 
       const req = mockRequest({
         body: {

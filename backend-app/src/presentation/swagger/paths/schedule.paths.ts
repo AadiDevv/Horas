@@ -2,12 +2,14 @@
 /**
  * Routes de gestion des schedules de travail
  * Tag: Schedules (À venir)
- * 
+ *
  * Permissions :
- * - GET /schedules : Tous les users authentifiés
- * - POST /schedules : Admin ou Manager
- * - PATCH /schedules/:id : Admin ou Manager
- * - DELETE /schedules/:id : Admin uniquement
+ * - GET /schedules : Manager ou Admin
+ * - GET /schedules/:id : Manager ou Admin
+ * - GET /schedules/team/:teamId : Manager ou Admin
+ * - POST /schedules : Manager ou Admin
+ * - PATCH /schedules/:id : Manager ou Admin
+ * - DELETE /schedules/:id : Manager ou Admin
  */
 export const schedulePaths = {
     '/api/schedules': {
@@ -50,7 +52,7 @@ export const schedulePaths = {
                             journee: {
                                 summary: 'Schedule de journée (Lun-Ven)',
                                 value: {
-                                    lastName: 'Schedule de journée',
+                                    name: 'Schedule de journée',
                                     startHour: '09:00',
                                     endHour: '17:30',
                                     activeDays: [1, 2, 3, 4, 5]
@@ -59,7 +61,7 @@ export const schedulePaths = {
                             nuit: {
                                 summary: 'Schedule de nuit (tous les jours)',
                                 value: {
-                                    lastName: 'Schedule de nuit',
+                                    name: 'Schedule de nuit',
                                     startHour: '22:00',
                                     endHour: '06:00',
                                     activeDays: [1, 2, 3, 4, 5, 6, 7]
@@ -224,7 +226,7 @@ export const schedulePaths = {
 
         delete: {
             summary: 'Supprimer un schedule',
-            description: 'Supprime un schedule. Admin uniquement. Attention : les users assignés à cet schedule seront dissociés.',
+            description: 'Supprime un schedule. Manager ou Admin uniquement. Attention : les users assignés à cet schedule seront dissociés.',
             tags: ['Schedules (À venir)'],
             security: [{ bearerAuth: [] }],
             parameters: [
@@ -253,7 +255,56 @@ export const schedulePaths = {
                     }
                 },
                 403: {
-                    description: 'Permissions insuffisantes (Admin uniquement)',
+                    description: 'Permissions insuffisantes (Manager/Admin uniquement)',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    '/api/schedules/team/{teamId}': {
+        get: {
+            summary: 'Récupère les schedules d\'une équipe',
+            description: `Récupère les schedules associés à une équipe spécifique.
+
+**Permissions :**
+- **Manager** : Peut voir les schedules de ses équipes uniquement
+- **Admin** : Peut voir les schedules de n'importe quelle équipe`,
+            tags: ['Schedules (À venir)'],
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'teamId',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de l\'équipe',
+                    example: 1
+                }
+            ],
+            responses: {
+                200: {
+                    description: 'Schedules de l\'équipe récupérés avec succès',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ScheduleListResponse' }
+                        }
+                    }
+                },
+                403: {
+                    description: 'Permissions insuffisantes (Manager/Admin uniquement)',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/Error' }
+                        }
+                    }
+                },
+                404: {
+                    description: 'Équipe non trouvée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }

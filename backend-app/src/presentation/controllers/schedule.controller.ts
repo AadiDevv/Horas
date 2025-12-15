@@ -4,10 +4,9 @@ import {
     ScheduleCreateDTO,
     ScheduleUpdateDTO,
     ScheduleFilterDTO,
-    ScheduleReadDTO,
-    ScheduleWithUsersDTO
 } from '@/application/DTOS';
-import { ValidationError, NotFoundError, ForbiddenError } from '@/domain/error/AppError';
+import { ValidationError } from '@/domain/error/AppError';
+import { ScheduleMapper } from '@/application/mappers/schedule';
 
 export class ScheduleController {
     constructor(private scheduleUseCase: ScheduleUseCase) { }
@@ -19,18 +18,18 @@ export class ScheduleController {
      * Admin uniquement
      */
     async getAllSchedules(req: Request, res: Response): Promise<void> {
-  
-            const filter: ScheduleFilterDTO = {
-                name: req.query.name as string,
-                activeDays: req.query.activeDays ?
-                    (req.query.activeDays as string).split(',').map(Number) :
-                    undefined
-            };
 
-            const schedules = await this.scheduleUseCase.getAllSchedules(req.user!, filter);
-            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
-            res.success(schedulesDTO, "Liste des schedules récupérée avec succès");
-       
+        const filter: ScheduleFilterDTO = {
+            name: req.query.name as string,
+            activeDays: req.query.activeDays ?
+                (req.query.activeDays as string).split(',').map(Number) :
+                undefined
+        };
+
+        const schedules = await this.scheduleUseCase.getAllSchedules(req.user!, filter);
+        const schedulesDTO = schedules.map(schedule => ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule));
+        res.success(schedulesDTO, "Liste des schedules récupérée avec succès");
+
     }
 
     /**
@@ -39,22 +38,16 @@ export class ScheduleController {
      * Tous les utilisateurs authentifiés
      */
     async getSchedule_ById(req: Request, res: Response): Promise<void> {
-            const id = Number(req.params.id);
-            if (isNaN(id)) {
-                throw new ValidationError("ID invalide");
-            }
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            throw new ValidationError("ID invalide");
+        }
 
-            const includeUsers = req.query.include === 'users';
-            let scheduleDTO: ScheduleReadDTO | ScheduleWithUsersDTO;
+        const schedule = await this.scheduleUseCase.getSchedule_ById(id);
+        const scheduleDTO = ScheduleMapper.FromEntity.toReadDTO(schedule);
 
-            if (includeUsers) {
-                scheduleDTO = (await this.scheduleUseCase.getScheduleWithUsers(id)).toWithUsersDTO();
-            } else {
-                scheduleDTO = (await this.scheduleUseCase.getSchedule_ById(id)).toReadDTO();
-            }
+        res.success(scheduleDTO, "Schedule récupéré avec succès");
 
-            res.success(scheduleDTO, "Schedule récupéré avec succès");
-      
     }
 
     /**
@@ -63,16 +56,16 @@ export class ScheduleController {
      * Manager de l'équipe ou admin
      */
     async getSchedules_ByTeamId(req: Request, res: Response): Promise<void> {
-            const teamId = Number(req.params.teamId);
-            if (isNaN(teamId)) {
-                throw new ValidationError("ID équipe invalide");
-            }
+        const teamId = Number(req.params.teamId);
+        if (isNaN(teamId)) {
+            throw new ValidationError("ID équipe invalide");
+        }
 
-            const schedules = await this.scheduleUseCase.getSchedules_ByTeamId(teamId);
-            const schedulesDTO = schedules.map(schedule => schedule.toListItemDTO());
+        const schedules = await this.scheduleUseCase.getSchedules_ByTeamId(teamId);
+        const schedulesDTO = schedules.map(schedule => ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule));
 
-            res.success(schedulesDTO, "Schedules récupérés avec succès");
-       
+        res.success(schedulesDTO, "Schedules récupérés avec succès");
+
     }
 
 
@@ -85,12 +78,12 @@ export class ScheduleController {
      * Admin uniquement
      */
     async createSchedule(req: Request, res: Response): Promise<void> {
-            const dto: ScheduleCreateDTO = req.body;
-            const managerId = req.user!.id
+        const dto: ScheduleCreateDTO = req.body;
+        const managerId = req.user!.id
 
-            const schedule = await this.scheduleUseCase.createSchedule(dto, managerId);
-            const scheduleDTO = schedule.toReadDTO();
-            res.success(scheduleDTO, "Schedule créé avec succès");
+        const schedule = await this.scheduleUseCase.createSchedule(dto, managerId);
+        const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
+        res.success(scheduleDTO, "Schedule créé avec succès");
     }
     // #endregion
 
@@ -101,18 +94,20 @@ export class ScheduleController {
      * Admin uniquement
      */
     async updateSchedule_ById(req: Request, res: Response): Promise<void> {
-            const id = Number(req.params.id);
-            if (isNaN(id)) {
-                throw new ValidationError("ID invalide");
-            }
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            throw new ValidationError("ID invalide");
+        }
 
-            const dto: ScheduleUpdateDTO = req.body;
+        const dto: ScheduleUpdateDTO = req.body;
 
-            const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto, req.user!);
-            const scheduleDTO = schedule.toReadDTO();
+        const schedule = await this.scheduleUseCase.updateSchedule_ById(id, dto, req.user!);
+        const scheduleDTO = ScheduleMapper.FromEntityCore.toReadDTO_Core(schedule);
 
-            res.success(scheduleDTO, "Schedule mis à jour avec succès");
+        res.success(scheduleDTO, "Schedule mis à jour avec succès");
     }
+
+
     // #endregion
 
     // #region DELETE Routes
@@ -122,14 +117,14 @@ export class ScheduleController {
      * Admin uniquement
      */
     async deleteSchedule_ById(req: Request, res: Response): Promise<void> {
-            const id = Number(req.params.id);
-            if (isNaN(id)) {
-                throw new ValidationError("ID invalide");
-            }
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            throw new ValidationError("ID invalide");
+        }
 
-            await this.scheduleUseCase.deleteSchedule_ById(id, req.user!);
+        await this.scheduleUseCase.deleteSchedule_ById(id, req.user!);
 
-            res.success("Schedule supprimé avec succès");
+        res.success("Schedule supprimé avec succès");
     }
     // #endregion
 }
