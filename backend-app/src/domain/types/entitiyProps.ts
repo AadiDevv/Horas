@@ -68,8 +68,7 @@ export type ScheduleProps = {
 export interface TimesheetProps {
     id?: number;
     employeId: number;
-    date: Date;
-    hour: Date;
+    timestamp: Date;
     clockin: boolean;
     status?: TimesheetStatus;
     createdAt?: Date;

@@ -81,7 +81,7 @@ export class TimesheetController {
     async createTimesheet(req: Request, res: Response): Promise<void> {
         const userRole = req.user!.role;
         const userId = req.user!.id;
-        const { date, hour, status, clockin: requestedClockin, employeId: requestedEmployeId } = req.body;
+        const { timestamp, status, clockin: requestedClockin, employeId: requestedEmployeId } = req.body;
 
         // Déterminer l'employé cible
         let employeId: number;
@@ -91,9 +91,10 @@ export class TimesheetController {
             employeId = userId;
         }
 
-        // Validation basique des champs date / hour
-        if (isNaN(new Date(date).getTime()) || isNaN(new Date(hour).getTime())) {
-            throw new ValidationError("Les champs 'date' et 'hour' doivent être des dates valides");
+        // Validation du timestamp (utiliser timestamp ou maintenant par défaut)
+        const timestampDate = timestamp ? new Date(timestamp) : new Date();
+        if (isNaN(timestampDate.getTime())) {
+            throw new ValidationError("Le champ 'timestamp' doit être une date valide");
         }
 
         // Déterminer le sens du pointage
@@ -115,8 +116,7 @@ export class TimesheetController {
 
         // Créer l'entité Timesheet
         const timesheet = new Timesheet({
-            date: new Date(date),
-            hour: new Date(hour),
+            timestamp: timestampDate,
             clockin,
             status: status ?? 'normal',
             employeId,
@@ -145,7 +145,11 @@ export class TimesheetController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
-        dto.hour = new Date(`1970-01-01T${dto.hour}`);
+        // Convertir timestamp si fourni
+        if (dto.timestamp) {
+            dto.timestamp = new Date(dto.timestamp);
+        }
+
         const updated = await this.UC_timesheet.updateTimesheet(id, dto);
         const updatedDTO = updated.toReadDTO();
 
