@@ -1,91 +1,133 @@
-import { PointageReadDTO, PointageCreateDTO } from '../../types/backend-generated';
+/**
+ * @deprecated Ce service est obsolète. Utiliser timesheetService.ts à la place.
+ * Les pointages sont maintenant appelés "timesheets" dans la nouvelle API.
+ */
+
+import { TimesheetReadDTO } from '../../types/backend-generated';
 
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = true;
 
 export type ClockResponse = {
   success: boolean;
-  data?: PointageReadDTO;
+  data?: TimesheetReadDTO;
   message?: string;
   error?: string;
   timestamp?: string;
 };
 
-// Mock Data pour les pointages
-export const mockPointages: PointageReadDTO[] = [];
+// Mock Data pour les timesheets
+export const mockPointages: TimesheetReadDTO[] = [];
 
 /**
  * API clock in/out - UNE SEULE ROUTE QUI TOGGLE AUTOMATIQUEMENT
- * Si le dernier pointage est un clock in, cette route fera un clock out
- * Si le dernier pointage est un clock out (ou s'il n'y a pas de pointage), cette route fera un clock in
+ * Si le dernier timesheet est un clock in, cette route fera un clock out
+ * Si le dernier timesheet est un clock out (ou s'il n'y a pas de timesheet), cette route fera un clock in
  */
 export async function clockIn(): Promise<ClockResponse> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    const today = new Date().toISOString().split('T')[0];
-    const todayPointages = mockPointages.filter(p => p.date === today);
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const todayTimesheets = mockPointages.filter(p => {
+      const pDate = new Date(p.timestamp);
+      return pDate >= todayStart;
+    });
 
-    // Déterminer si c'est un clock in ou clock out en fonction du dernier pointage
+    // Déterminer si c'est un clock in ou clock out en fonction du dernier timesheet
     let isClockIn = true;
-    if (todayPointages.length > 0) {
-      const lastPointage = todayPointages[todayPointages.length - 1];
+    if (todayTimesheets.length > 0) {
+      const lastTimesheet = todayTimesheets[todayTimesheets.length - 1];
       // Si le dernier est un clock in (true), alors celui-ci sera un clock out (false)
-      isClockIn = !lastPointage.clockin;
+      isClockIn = !lastTimesheet.clockin;
     }
 
-    const newPointage: PointageReadDTO = {
+    const newTimesheet: TimesheetReadDTO = {
       id: mockPointages.length + 1,
       employeId: 1,
-      date: today,
-      heure: new Date().toTimeString().split(' ')[0],
+      timestamp: now.toISOString(),
       clockin: isClockIn,
       status: 'normal',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString()
     };
 
-    mockPointages.push(newPointage);
+    mockPointages.push(newTimesheet);
 
     const action = isClockIn ? 'entrée' : 'sortie';
-    console.log(`✅ Mock POST /api/pointages/clockin (${action})`);
-    console.log('📝 Nouveau pointage:', newPointage);
+    console.log(`✅ Mock POST /api/timesheets/ (${action})`);
+    console.log('📝 Nouveau timesheet:', newTimesheet);
 
     return {
       success: true,
-      data: newPointage,
+      data: newTimesheet,
       message: `Pointage ${action} enregistré avec succès`,
-      timestamp: new Date().toISOString()
+      timestamp: now.toISOString()
     };
   }
 
-  // MODE PRODUCTION : Une seule route qui toggle automatiquement
-  const res = await fetch(`${API_BASE_URL}/api/pointages/clockin`, {
+  // MODE PRODUCTION : Utiliser la nouvelle API /api/timesheets/
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE_URL}/api/timesheets/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    },
+    body: JSON.stringify({}) // Payload vide pour employé
   });
-  return await res.json();
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    return {
+      success: false,
+      error: errorData.message || `HTTP ${res.status}`,
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  const data = await res.json();
+  return {
+    success: true,
+    data: data.data || data,
+    message: data.message,
+    timestamp: new Date().toISOString()
+  };
 }
 
 /**
- * Récupère les pointages du jour pour déterminer l'état actuel
+ * Récupère les timesheets du jour pour déterminer l'état actuel
  */
-export async function getTodayPointages(): Promise<PointageReadDTO[]> {
+export async function getTodayPointages(): Promise<TimesheetReadDTO[]> {
   if (USE_MOCK) {
-    const today = new Date().toISOString().split('T')[0];
-    return mockPointages.filter(p => p.date === today);
+    const now = new Date();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    
+    return mockPointages.filter(p => {
+      const pDate = new Date(p.timestamp);
+      return pDate >= todayStart;
+    });
   }
 
   const today = new Date().toISOString().split('T')[0];
-  const res = await fetch(`${API_BASE_URL}/api/pointages?date=${today}`);
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE_URL}/api/timesheets?startDate=${today}&endDate=${today}`, {
+    headers: {
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    }
+  });
   const response = await res.json();
   return response.data || [];
 }
 
 /**
- * Récupère les pointages de la semaine en cours
+ * Récupère les timesheets de la semaine en cours
  */
-export async function getWeekPointages(): Promise<PointageReadDTO[]> {
+export async function getWeekPointages(): Promise<TimesheetReadDTO[]> {
   if (USE_MOCK) {
     // Calculer le lundi de la semaine en cours
     const today = new Date();
@@ -100,15 +142,15 @@ export async function getWeekPointages(): Promise<PointageReadDTO[]> {
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
-    const mondayStr = monday.toISOString().split('T')[0];
-    const sundayStr = sunday.toISOString().split('T')[0];
+    console.log(`🔍 Récupération des timesheets de ${monday.toISOString()} à ${sunday.toISOString()}`);
 
-    console.log(`🔍 Récupération des pointages de ${mondayStr} à ${sundayStr}`);
+    const weekTimesheets = mockPointages.filter(p => {
+      const pDate = new Date(p.timestamp);
+      return pDate >= monday && pDate <= sunday;
+    });
+    console.log(`✅ ${weekTimesheets.length} timesheets trouvés pour la semaine`);
 
-    const weekPointages = mockPointages.filter(p => p.date >= mondayStr && p.date <= sundayStr);
-    console.log(`✅ ${weekPointages.length} pointages trouvés pour la semaine`);
-
-    return weekPointages;
+    return weekTimesheets;
   }
 
   // Calculer les dates de début et fin de semaine
@@ -124,7 +166,12 @@ export async function getWeekPointages(): Promise<PointageReadDTO[]> {
   const dateDebut = monday.toISOString().split('T')[0];
   const dateFin = sunday.toISOString().split('T')[0];
 
-  const res = await fetch(`${API_BASE_URL}/api/pointages?dateDebut=${dateDebut}&dateFin=${dateFin}`);
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_BASE_URL}/api/timesheets?startDate=${dateDebut}&endDate=${dateFin}`, {
+    headers: {
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    }
+  });
   const response = await res.json();
   return response.data || [];
 }

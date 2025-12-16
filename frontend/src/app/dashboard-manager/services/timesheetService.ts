@@ -8,8 +8,7 @@ const API_BASE_URL = "http://localhost:8080";
 export interface Timesheet {
   id: number;
   employeId: number;
-  date: string; // Format: YYYY-MM-DD
-  hour: string; // Format: ISO DateTime "2025-10-24T08:30:00.000Z"
+  timestamp: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
   clockin: boolean; // true = entrée, false = sortie
   status: 'normal' | 'retard' | 'absence';
   createdAt: string;
@@ -82,7 +81,7 @@ export async function getTimesheets(params: {
  */
 export async function updateTimesheet(
   id: number,
-  updates: Partial<Pick<Timesheet, 'date' | 'hour' | 'clockin' | 'status'>>
+  updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
 ): Promise<ApiResponse<Timesheet>> {
   try {
     const token = localStorage.getItem('token');
@@ -159,12 +158,11 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
 /**
  * POST /api/timesheets/
  * Crée un nouveau timesheet (pour un employé)
+ * Manager peut spécifier timestamp (optionnel), clockin est auto-déterminé
  */
 export async function createTimesheet(timesheet: {
   employeId: number;
-  date: string;
-  hour: string;
-  clockin: boolean;
+  timestamp: string; // ISO DateTime
   status?: 'normal' | 'retard' | 'absence';
 }): Promise<ApiResponse<Timesheet>> {
   try {
@@ -176,7 +174,8 @@ export async function createTimesheet(timesheet: {
         ...(token && { 'Authorization': `Bearer ${token}` })
       },
       body: JSON.stringify({
-        ...timesheet,
+        employeId: timesheet.employeId,
+        timestamp: timesheet.timestamp,
         status: timesheet.status || 'normal'
       })
     });

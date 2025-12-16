@@ -59,7 +59,7 @@ model User {
   managedTeams       Team[]       @relation("ManagerTeams")
   timesheets         Timesheet[]
   reports            Report[]     @relation("ReportManager")
-  customSchedule     CustomSchedule?     @relation("MyCustomSchedule",fields: [customScheduleId], references: [id], onDelete: SetNull)
+  customSchedule     Schedule?    @relation("UserCustomSchedule", fields: [customScheduleId], references: [id], onDelete: SetNull)
 
   @@index([email])
   @@index([role])
@@ -98,9 +98,9 @@ model Schedule {
   updatedAt    DateTime  @default(now())
   
   // Relations
-  manager      User     @relation("ManagerSchedules", fields: [managerId], references: [id], onDelete: Restrict) 
-  teams        Team[]    @relation("TeamSchedule")
-  exceptions   CustomSchedule[]
+  manager         User     @relation("ManagerSchedules", fields: [managerId], references: [id], onDelete: Restrict) 
+  teams           Team[]   @relation("TeamSchedule")
+  usersWithCustom User[]   @relation("UserCustomSchedule")
 
   // Index
   @@index([managerId])
@@ -108,9 +108,8 @@ model Schedule {
 
 model Timesheet {
   id           Int             @id @default(autoincrement())
-  employeId   Int
-  date         DateTime         @db.Date
-  hour         DateTime         @db.Time
+  employeId    Int
+  timestamp    DateTime
   clockin      Boolean
   status       TimesheetStatus  @default(normal)
   createdAt    DateTime         @default(now())
@@ -120,9 +119,9 @@ model Timesheet {
   employe     User             @relation(fields: [employeId], references: [id], onDelete: Cascade)
 
   @@index([employeId])
-  @@index([date])
+  @@index([timestamp])
   @@index([status])
-  @@index([employeId, date])
+  @@index([employeId, timestamp])
 }
 
 model Report {
@@ -144,17 +143,4 @@ model Report {
   @@index([teamId])
   @@index([kpiType])
   @@index([periodStart, periodEnd])
-}
-
-model CustomSchedule {
-  id             Int       @id @default(autoincrement())
-  date           DateTime  @db.Date
-  scheduleId     Int
-  createdAt      DateTime  @default(now())
-
-  // Relations
-  schedule      Schedule  @relation(fields: [scheduleId], references: [id])
-  employes      User[]    @relation("MyCustomSchedule")
-  @@index([date])
-  @@index([scheduleId])
 }

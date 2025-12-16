@@ -147,13 +147,14 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     const monday = getMonday(today);
 
     // 1. Retards aujourd'hui
-    const retardsToday = timesheets.filter(
-      t => t.date === todayStr && t.status === 'retard' && t.clockin === true
-    );
+    const retardsToday = timesheets.filter(t => {
+      const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
+      return date === todayStr && t.status === 'retard' && t.clockin === true;
+    });
 
     const retardsDetail: RetardInfo[] = retardsToday.map(t => {
       const agent = agents.find(a => a.id === t.employeId);
-      const heure = new Date(t.hour).toTimeString().substring(0, 5);
+      const heure = t.timestamp.substring(11, 16); // "HH:MM"
 
       // Calculer le nombre de minutes de retard (fictif pour l'instant, à affiner avec le schedule)
       const minutes = Math.floor(Math.random() * 20) + 5; // TODO: calculer réellement avec le schedule
@@ -177,7 +178,8 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       // Grouper par employé et date
       const heuresByEmployeDate: Record<string, Timesheet[]> = {};
       timesheetsEquipe.forEach(t => {
-        const key = `${t.employeId}-${t.date}`;
+        const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
+        const key = `${t.employeId}-${date}`;
         if (!heuresByEmployeDate[key]) heuresByEmployeDate[key] = [];
         heuresByEmployeDate[key].push(t);
       });
@@ -186,14 +188,14 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
 
       // Calculer les heures pour chaque employé/jour
       Object.values(heuresByEmployeDate).forEach(dayTimesheets => {
-        const sorted = [...dayTimesheets].sort((a, b) => a.hour.localeCompare(b.hour));
+        const sorted = [...dayTimesheets].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
         for (let i = 0; i < sorted.length; i++) {
           const ts = sorted[i];
           if (ts.clockin === true) {
             const nextTs = sorted[i + 1];
             if (nextTs && nextTs.clockin === false) {
-              totalHeures += calculateHours(ts.hour, nextTs.hour);
+              totalHeures += calculateHours(ts.timestamp, nextTs.timestamp);
               i++; // Skip next
             }
           }
@@ -217,9 +219,10 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const dateStr = date.toISOString().split('T')[0];
       const jourIndex = date.getDay();
 
-      const retardsJour = timesheets.filter(
-        t => t.date === dateStr && t.status === 'retard' && t.clockin === true
-      );
+      const retardsJour = timesheets.filter(t => {
+        const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
+        return date === dateStr && t.status === 'retard' && t.clockin === true;
+      });
 
       retardsParJour.push({
         jour: jours[jourIndex],

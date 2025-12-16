@@ -1,15 +1,16 @@
-import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, TeamWithMembersDTO } from "@/application/DTOS";
-import { Team } from "@/domain/entities/team";
-import { ITeam } from "@/domain/interfaces/team.interface";
+import { TeamCreateDTO, TeamUpdateDTO, TeamFilterDTO, UserReadEmployeeDTO_Core, UserAuthDTO } from "@/application/DTOS";
+import { Team, Team_Core, Team_L1 } from "@/domain/entities/team";
+import { ITeam, ISchedule } from "@/domain/interfaces/";
 import { NotFoundError, ValidationError, ForbiddenError } from "@/domain/error/AppError";
-
+import { } from "@/domain/interfaces/schedule.interface";
+import { TeamMapper } from "@/application/mappers";
 /**
  * Use Case pour la gestion des équipes
  * Contient la logique métier et les règles de gestion
  */
 export class TeamUseCase {
 
-    constructor(private readonly R_team: ITeam) { }
+    constructor(private readonly R_team: ITeam, private readonly R_schedule: ISchedule) { }
 
     // #region Read
     /**
@@ -29,9 +30,9 @@ export class TeamUseCase {
      * @param filter - Filtres optionnels (managerId)
      * @returns Liste des équipes du manager spécifié
      */
-    async getTeams(userRole: string, userId: number, filter?: TeamFilterDTO): Promise<Team[]> {
+    async getTeams(userRole: string, userId: number, filter?: TeamFilterDTO): Promise<Team_L1[]> {
         let managerId: number;
-
+        console.log("IN USECASE : filter : ", filter);
         // #region - Détermination du managerId selon le rôle et les filtres
         if (userRole === "manager") {
             // CAS MANAGER
@@ -64,9 +65,8 @@ export class TeamUseCase {
 
         // #region - Récupération des équipes via le repository
         // À ce stade, on a toujours un managerId défini
-        const teams = await this.R_team.getTeams_ByManagerId(managerId);
-        const teamEntities: Team[] = teams.map(team => new Team({ ...team }));
-        return teamEntities;
+        const teamL1s: Team_L1[] = await this.R_team.getTeams_ByManagerId(managerId);
+        return teamL1s;
         // #endregion
     }
 
@@ -101,16 +101,16 @@ export class TeamUseCase {
      * @returns L'équipe créée
      * @throws ValidationError si les données sont invalides
      */
-    async createTeam(dto: TeamCreateDTO, userId: number): Promise<Team> {
+    async createTeam(dto: TeamCreateDTO, userId: number): Promise<Team_Core> {
         console.log("managerId from dto : ", dto.managerId);
         console.log("userId from jwt : ", userId);
         if (dto.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui de l'utilisateur connecté");
         }
         // Création de l'entité depuis le DTO
-        const team = Team.fromCreateDTO(dto);
+        const team: Team_Core = TeamMapper.FromDTO.Create_ToEntityCore(dto);
         // Sauvegarde dans le repository
-        const teamCreated = await this.R_team.createTeam(team);
+        const teamCreated: Team_Core = await this.R_team.createTeam(team);
 
         return teamCreated;
     }
@@ -130,13 +130,13 @@ export class TeamUseCase {
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si tentative de modification du managerId
      */
-    async updateTeam(id: number, dto: TeamUpdateDTO, userId: number): Promise<Team> {
+    async updateTeam(id: number, dto: TeamUpdateDTO, userId: number): Promise<Team_Core> {
         // Vérification : interdiction de changer le manager
 
         // Récupération de l'équipe existante
-        const existingTeam = await this.getTeam_ById(id);
+        const existingTeam: Team = await this.getTeam_ById(id);
 
-        const teamManagerId = existingTeam?.managerId;
+        const teamManagerId: number = existingTeam?.managerId ?? 0;
 
         if (teamManagerId !== userId) {
             console.log("dto.managerId : ", teamManagerId);
@@ -145,15 +145,52 @@ export class TeamUseCase {
         }
 
         // Mise à jour via la factory method
-        const updatedTeam = Team.fromUpdateDTO(existingTeam, dto);
+        const updatedTeam: Team_L1 = TeamMapper.FromDTO.Update_ToEntity(existingTeam, dto)
 
         // Validation métier
         updatedTeam.validate();
 
         // Sauvegarde via le repository
-        const teamUpdated = await this.R_team.updateTeam_ById(updatedTeam);
+        const teamUpdated: Team_Core = await this.R_team.updateTeam_ById(updatedTeam);
 
         return teamUpdated;
+    }
+    /**
+ * Assigne un utilisateur à une équipe
+ * 
+ * Règles métier :
+ * @Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
+ * @Manager : peut uniquement assigner ses propres employés à ses équipes
+ * 
+ * @param scheduleId - ID de l'utilisateur à assigner
+ * @param teamId - ID de l'équipe de destination
+ * 
+ * @returns L'utilisateur mis à jour
+ * @throws NotFoundError si l'utilisateur n'existe pas
+ * @throws ForbiddenError si l'utilisateur n'a pas les droits
+ */
+    async updateTeamSchedule_ById(
+        teamId: number,
+        scheduleId: number,
+        user: UserAuthDTO
+    ): Promise<Team_Core> {
+
+        // #region 1. Validation
+        const targetTeam = await this.R_team.getTeam_ById(teamId)
+        const targetSchedule = await this.R_schedule.getSchedule_ById(scheduleId)
+        // 1.1 Vérification que l'équipe et l'utilisateur existent
+        if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
+        if (!targetSchedule) throw new NotFoundError(`L'utilisateur avec l'ID ${scheduleId} introuvable`);
+        if (targetTeam.schedule?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+        // 1.2 En tant que manager, l'utilisateur ne peut assigner que ses propres schedules que pour ses propres équipes
+        if (user.role !== 'admin') {
+            if (targetTeam.manager?.id !== user.id) throw new ForbiddenError(`Vous ne pouvez assigner un schedule que pour vos propres équipes \n targetTeam.manager?.id : ${targetTeam.manager?.id} \n user.id : ${user.id}`);
+            if (targetSchedule.managerId != user.id) throw new ForbiddenError(`Impossible d'assigner un schedule. Vous n'êtes pas le manager de ce schedule`);
+        }
+
+        //#endregion
+        const teamEntityUpdated = await this.R_team.updateTeamSchedule_ById(teamId, scheduleId);
+        return new Team_Core(teamEntityUpdated);
     }
     // #endregion
 

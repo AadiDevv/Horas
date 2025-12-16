@@ -21,19 +21,30 @@
 export const timesheetPaths = {
     '/api/timesheets/': {
     post: {
-        summary: 'Pointer automatiquement (entrée ou sortie)',
-        description: 'Crée un nouveau pointage pour l\'employé connecté.',
+        summary: 'Créer un pointage',
+        description: 'Crée un nouveau pointage avec auto-détermination du type (entrée/sortie).\n\n' +
+            '**EMPLOYÉ** :\n' +
+            '- Payload : vide ou `{ status?: "normal" }`\n' +
+            '- `employeId` : extrait automatiquement du token JWT\n' +
+            '- `timestamp` : heure actuelle (temps réel)\n' +
+            '- `clockin` : auto-déterminé (inverse du dernier pointage)\n\n' +
+            '**MANAGER/ADMIN** :\n' +
+            '- Payload : `{ employeId: number, timestamp?: string, status?: string }`\n' +
+            '- `employeId` : **OBLIGATOIRE** (spécifier quel employé)\n' +
+            '- `timestamp` : **OPTIONNEL** (si absent = temps réel, si fourni = doit être postérieur au dernier pointage)\n' +
+            '- `clockin` : auto-déterminé (inverse du dernier pointage)\n\n' +
+            '⚠️ Le `clockin` est TOUJOURS calculé automatiquement selon la logique métier.',
             tags: ['Timesheets'],
             requestBody: {
-            required: false,
+            required: true,
             content: {
                 'application/json': {
                 schema: {
                     type: 'object',
                     properties: {
-                    date: { type: 'string', format: 'date-time', example: '2025-10-24' },
-                    hour: { type: 'string', format: 'date-time', example: '2025-10-24T08:30:00.000Z' },
-                    status: { type: 'string', enum: ['normal', 'delay', 'incomplete'], example: 'normal' }
+                    timestamp: { type: 'string', format: 'date-time', example: '2025-12-13T08:30:00.000Z', description: 'Date et heure du pointage (optionnel). Si absent, utilise l\'heure actuelle. Pour Manager/Admin uniquement : peut spécifier un timestamp passé pour correction, mais il doit être postérieur au dernier pointage.' },
+                    status: { type: 'string', enum: ['normal', 'delay', 'incomplete'], example: 'normal', description: 'Statut du pointage (optionnel)' },
+                    employeId: { type: 'integer', example: 10, description: 'ID de l\'employé pour qui créer le pointage. OBLIGATOIRE pour Manager/Admin. INTERDIT pour Employé (pointe uniquement pour lui-même)' }
                     }
                 }
                 }
@@ -54,12 +65,11 @@ export const timesheetPaths = {
                         data: {
                             id: 1,
                             employeId: 10,
-                            date: '2025-10-24',
-                            hour: '2025-10-24T08:30:00.000Z',
+                            timestamp: '2025-12-13T08:30:00.000Z',
                             clockin: true,
                             status: 'normal',
-                            createdAt: '2025-10-24T08:30:05.000Z',
-                            updatedAt: '2025-10-24T08:30:05.000Z',
+                            createdAt: '2025-12-13T08:30:05.000Z',
+                            updatedAt: '2025-12-13T08:30:05.000Z',
                             employe: {
                             id: 10,
                             firstName: 'Pierre',
@@ -78,12 +88,11 @@ export const timesheetPaths = {
                         data: {
                             id: 2,
                             employeId: 10,
-                            date: '2025-10-24',
-                            hour: '2025-10-24T17:02:10.000Z',
+                            timestamp: '2025-12-13T17:02:10.000Z',
                             clockin: false,
                             status: 'normal',
-                            createdAt: '2025-10-24T17:02:12.000Z',
-                            updatedAt: '2025-10-24T17:02:12.000Z',
+                            createdAt: '2025-12-13T17:02:12.000Z',
+                            updatedAt: '2025-12-13T17:02:12.000Z',
                             employe: {
                             id: 10,
                             firstName: 'Pierre',
