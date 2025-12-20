@@ -198,3 +198,47 @@ export type TimesheetProps = Timesheet_Props.TimesheetProps;
 export type TimesheetProps_L1 = Timesheet_Props.TimesheetProps_enriched1;
 export type TimesheetProps_Core = Timesheet_Props.TimesheetProps_Core;
 //#endregion
+
+//#region Exception hierarchy types
+export namespace Exception_Props {
+    // Data enrichment types
+    type Exception_Core = {
+        id: number;
+        employeId: number;
+        type: import("./index").ExceptionType;
+        status: import("./index").ExceptionStatus;
+        startDateTime: Date;
+        endDateTime: Date;
+        isFullDay: boolean;
+        validatedBy: number | null;
+        validatedAt: Date | null;
+        comments: string | null;
+    }
+
+    type Exception_L1 = {
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }
+
+    type Exception_joints = {
+        employe: UserEmployee_Core;
+        validator: UserManager_Core | null;
+    }
+
+    // Props Hierarchy
+    export type ExceptionProps = Omit<
+        Exception_Core
+        & Exception_L1
+        & Exception_joints, never>
+
+    // ExceptionProps = ExceptionProps_enriched1 + Exception_joints
+    export type ExceptionProps_enriched1 = Omit<ExceptionProps, keyof Exception_joints>
+    export type ExceptionProps_Core = Omit<ExceptionProps_enriched1, keyof Exception_L1>
+}
+
+// Aliases top-level pour import direct ailleurs sans préfixe namespace
+export type ExceptionProps = Exception_Props.ExceptionProps;
+export type ExceptionProps_L1 = Exception_Props.ExceptionProps_enriched1;
+export type ExceptionProps_Core = Exception_Props.ExceptionProps_Core;
+//#endregion

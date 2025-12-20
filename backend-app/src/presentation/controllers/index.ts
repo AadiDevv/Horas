@@ -5,3 +5,4 @@ export { ApiController } from './ApiController';
 export { TeamController } from './team.controller';
 export { TimesheetController } from './timesheet.controller';
 export { ScheduleController } from './schedule.controller';
+export { ExceptionController } from './exception.controller';

@@ -1,13 +1,14 @@
-import { IAuth, IUser, ITeam, ITimesheet } from "@/domain/interfaces";
+import { IAuth, IUser, ITeam, ITimesheet, IException } from "@/domain/interfaces";
 import { ISchedule } from "@/domain/interfaces/schedule.interface";
 import { prismaService } from "@/infrastructure/database/prisma.service";
-import { UserRepository, TeamRepository, TimesheetRepository, ScheduleRepository } from "@/infrastructure/database/repositories/"
+import { UserRepository, TeamRepository, TimesheetRepository, ScheduleRepository, ExceptionRepository } from "@/infrastructure/database/repositories/"
 
 class InfrastructureFactory {
     private static userRepository: UserRepository | null;
     private static teamRepository: ITeam | null;
     private static timesheetRepository: ITimesheet | null;
     private static scheduleRepository: ISchedule | null;
+    private static exceptionRepository: IException | null;
 
     public static initializeDatabase(): void {
         prismaService.getInstance();
@@ -54,12 +55,20 @@ class InfrastructureFactory {
         return this.scheduleRepository
     }
 
+    public static getExceptionRepository(): IException {
+        if (!this.exceptionRepository) {
+            this.exceptionRepository = new ExceptionRepository()
+        }
+        return this.exceptionRepository
+    }
+
     public static async disconnect(): Promise<void> {
         await prismaService.disconnect();
         this.userRepository = null
         this.teamRepository = null
         this.timesheetRepository = null
         this.scheduleRepository = null
+        this.exceptionRepository = null
     }
 
 
@@ -71,6 +80,7 @@ export const infra = {
     getTeamRepo: () => (InfrastructureFactory.getTeamRepository()),
     getTimesheetRepo: () => (InfrastructureFactory.getTimesheetRepository()),
     getScheduleRepo: () => (InfrastructureFactory.getScheduleRepository()),
+    getExceptionRepo: () => (InfrastructureFactory.getExceptionRepository()),
     disconnect: () => { InfrastructureFactory.disconnect() }
 
 }

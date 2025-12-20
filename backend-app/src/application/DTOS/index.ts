@@ -14,3 +14,7 @@ export * from './schedule.dto';
 // #region Timesheet DTOs
 export * from './timesheet.dto';
 // #endregion
+
+// #region Exception DTOs
+export * from './exception.dto';
+// #endregion

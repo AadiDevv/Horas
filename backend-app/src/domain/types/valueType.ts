@@ -9,3 +9,5 @@ export type ScheduleMinute = 0 | 15 | 30 | 45;
 export type ScheduleSeconde = 0 | 15 | 30 | 45;
 export type ScheduleMilliseconde = 0 | 15 | 30 | 45;
 export type ScheduleMicroseconde = 0 | 15 | 30 | 45;
+export type ExceptionType = 'conges_payes' | 'conges_sans_solde' | 'maladie' | 'formation' | 'teletravail' | 'autre';
+export type ExceptionStatus = 'en_attente' | 'approuve' | 'refuse' | 'annule';
