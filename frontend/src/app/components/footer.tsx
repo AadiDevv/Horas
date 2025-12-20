@@ -2,7 +2,7 @@
 
 export default function Footer() {
   return (
-    <footer className="bg-[#171717] text-gray-300 py-10 px-8">
+    <footer className="bg-[#171717] text-gray-300 py-10 px-6 md:px-8">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <h2 className="text-white font-semibold text-lg">Horas.</h2>
 

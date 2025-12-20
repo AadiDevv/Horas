@@ -107,29 +107,31 @@ export default function Page() {
 
         {/* Main Content */}
         <div className="flex">
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-4 md:p-8 w-full overflow-hidden">
             {/* Header with Clock Button */}
-            <div className="flex items-center justify-between mb-12">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-6 md:gap-0">
               <div>
-                <h2 className="text-4xl font-semibold mb-2">Aujourd'hui</h2>
+                <h2 className="text-3xl md:text-4xl font-semibold mb-2">Aujourd'hui</h2>
                 <p className="text-gray-600">
                   {mounted && currentTime
                     ? formatDate(currentTime)
                     : "Chargement..."}
                 </p>
               </div>
-              <ClockButton
-                isClockingIn={isClockingIn}
-                onClockIn={handleClockToggle}
-                onClockOut={handleClockToggle}
-                pointageLoading={pointageLoading}
-                successMessage={successMessage}
-                errorMessage={errorMessage}
-              />
+              <div className="w-full md:w-auto flex justify-center md:justify-end">
+                <ClockButton
+                  isClockingIn={isClockingIn}
+                  onClockIn={handleClockToggle}
+                  onClockOut={handleClockToggle}
+                  pointageLoading={pointageLoading}
+                  successMessage={successMessage}
+                  errorMessage={errorMessage}
+                />
+              </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-12">
               <StatCard
                 title="Travaillé ce jour"
                 value={`${stats.heuresJour.toFixed(2)}h`}
@@ -148,24 +150,24 @@ export default function Page() {
             </div>
 
             {/* Weekly Calendar Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-semibold">Planning de la semaine</h3>
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+              <h3 className="text-xl md:text-2xl font-semibold">Planning de la semaine</h3>
+              <div className="flex items-center gap-2 self-start md:self-auto overflow-x-auto max-w-full pb-1">
                 <button
                   onClick={previousWeek}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                  className="px-3 py-2 md:px-4 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
                 >
                   ← Précédent
                 </button>
                 <button
                   onClick={currentWeek}
-                  className="px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors"
+                  className="px-3 py-2 md:px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
                 >
                   Aujourd'hui
                 </button>
                 <button
                   onClick={nextWeek}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                  className="px-3 py-2 md:px-4 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
                 >
                   Suivant →
                 </button>
@@ -178,20 +180,24 @@ export default function Page() {
               <span className="font-medium">{formatWeekRange()}</span>
             </div>
 
-            {/* Weekly Calendar */}
-            <WeeklyCalendar
-              timeLogs={timeLogs}
-              isClockingIn={isClockingIn}
-              currentDayLogs={currentDayLogs}
-              currentDayKey={getDayKey()}
-              onRefresh={() => {
-                setCurrentTime(new Date());
-                loadTeamSchedule();
-                loadWeekTimesheets();
-              }}
-              teamSchedule={teamSchedule}
-              weekDays={weekDays}
-            />
+            {/* Weekly Calendar Container - Scrollable on mobile */}
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+               <div className="min-w-[800px] md:min-w-0">
+                  <WeeklyCalendar
+                    timeLogs={timeLogs}
+                    isClockingIn={isClockingIn}
+                    currentDayLogs={currentDayLogs}
+                    currentDayKey={getDayKey()}
+                    onRefresh={() => {
+                      setCurrentTime(new Date());
+                      loadTeamSchedule();
+                      loadWeekTimesheets();
+                    }}
+                    teamSchedule={teamSchedule}
+                    weekDays={weekDays}
+                  />
+               </div>
+            </div>
           </main>
         </div>
       </div>

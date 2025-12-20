@@ -52,7 +52,7 @@ export default function Hero() {
     }
   };
   return (
-    <section className="bg-white min-h-screen flex items-center px-6 sm:px-16 font-sans">
+    <section className="bg-white min-h-screen flex items-center px-6 py-12 sm:px-16 sm:py-0 font-sans">
       <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full max-w-7xl mx-auto gap-10">
         {/* Texte + CTA à gauche */}
         <div className="w-full lg:w-1/2 text-center lg:text-left">

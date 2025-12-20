@@ -33,6 +33,23 @@ function ManagerDashboard() {
   const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Close sidebar by default on smaller screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Settings hook
   const {
     userData,
@@ -157,38 +174,57 @@ function ManagerDashboard() {
           />
         )}
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <Sidebar
-            isOpen={sidebarOpen}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-          />
+        <div className="flex flex-1 overflow-hidden relative">
+          <div className="hidden lg:block h-full">
+            <Sidebar
+              isOpen={sidebarOpen}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+
+          <div className={`lg:hidden fixed inset-y-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+             <Sidebar
+               isOpen={true}
+               currentPage={currentPage}
+               onPageChange={(page) => {
+                 setCurrentPage(page);
+                 setSidebarOpen(false);
+               }}
+             />
+          </div>
+
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
           {/* Main Content */}
-          <main className="flex-1 p-8 overflow-y-auto">
+          <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
             {/* DASHBOARD PAGE */}
             {currentPage === "dashboard" && (
               <>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-10">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-10 gap-4">
                   <div>
-                    <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    <h2 className="text-3xl md:text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                       Aujourd'hui
                     </h2>
                     <p className="text-gray-600 font-medium">{formattedDate}</p>
                   </div>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                     <button
                       onClick={openEquipeModal}
-                      className="flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow"
+                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow"
                     >
                       <Users size={20} strokeWidth={2} />
                       Créer une équipe
                     </button>
                     <button
                       onClick={openAgentModal}
-                      className="flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20"
+                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20"
                     >
                       <UserPlus size={20} strokeWidth={2} />
                       Ajouter un agent
@@ -197,7 +233,7 @@ function ManagerDashboard() {
                 </div>
 
                 {/* KPIs en haut */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   <KpiCard
                     title="Employés en ligne"
                     value={agents.filter((a) => a.isActive).length}
@@ -221,7 +257,7 @@ function ManagerDashboard() {
 
                 {/* Section graphiques - Données réelles */}
                 {enrichedEquipes.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <HeuresChart
                       equipes={stats.heuresParEquipe}
                     />
@@ -234,7 +270,7 @@ function ManagerDashboard() {
 
                 {/* Section stats retards et ponctualité - Données réelles */}
                 {enrichedEquipes.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <RetardsWeekChart
                       data={stats.retardsParJour}
                       total={stats.totalRetardsSemaine}
