@@ -26,7 +26,7 @@ export default function Features() {
   ];
 
   return (
-    <section className="w-full bg-white py-24 px-6 sm:px-12 flex flex-col items-center">
+    <section className="w-full bg-white py-12 md:py-24 px-6 sm:px-12 flex flex-col items-center">
       {/* IMAGE CENTRÉE */}
       <div className="relative w-full max-w-5xl mx-auto">
         <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-lg">

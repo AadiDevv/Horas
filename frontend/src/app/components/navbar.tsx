@@ -88,11 +88,11 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
   };
 
   return (
-    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 px-8 py-6 flex items-center justify-between">
-      <div className="flex items-center gap-6">
+    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 px-4 py-4 md:px-8 md:py-6 flex items-center justify-between transition-all duration-300">
+      <div className="flex items-center gap-3 md:gap-6">
         <h1
           onClick={() => router.push("/")}
-          className="text-2xl font-bold tracking-tight cursor-pointer"
+          className="text-xl md:text-2xl font-bold tracking-tight cursor-pointer"
         >
           Horas.
         </h1>
@@ -107,7 +107,7 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {isAuthenticated && user && (
           <>
             <div className="relative dropdown-container">
@@ -156,14 +156,14 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            <div className="text-right">
+            <div className="text-right hidden md:block">
               <p className="text-sm font-semibold">
                 {user.firstName} {user.lastName}
               </p>
               <p className="text-xs text-gray-500 capitalize">{user.role}</p>
             </div>
 
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base">
               {user.firstName.charAt(0).toUpperCase()}
               {user.lastName.charAt(0).toUpperCase()}
             </div>
@@ -173,7 +173,7 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
         {!isAuthenticated && (
           <button
             onClick={() => router.push("/login")}
-            className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
+            className="bg-gray-900 text-white px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base rounded-lg hover:bg-gray-700 transition"
           >
             Connexion
           </button>

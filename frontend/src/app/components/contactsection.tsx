@@ -2,7 +2,7 @@
 
 export default function ContactSection() {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between gap-12 px-8 py-24 max-w-6xl mx-auto">
+    <section className="flex flex-col md:flex-row items-center justify-between gap-12 px-4 py-12 md:px-8 md:py-24 max-w-6xl mx-auto">
       {/* Bloc texte à gauche */}
       <div className="flex-1 text-left">
         <h2 className="text-4xl font-semibold text-[#333333] mb-4">
