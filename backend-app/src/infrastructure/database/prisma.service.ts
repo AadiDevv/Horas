@@ -1,5 +1,5 @@
 // Singleton Prisma Client pour éviter les multiples instances en développement
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 
 
 export class PrismaService {

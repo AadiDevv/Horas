@@ -4,7 +4,7 @@ import { User, Schedule, Team, Team_Core, Schedule_Core, UserEmployee_Core, User
 import { ValidationError } from "@/domain/error/AppError";
 import { TeamFilterDTO } from "@/application/DTOS";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
-import { Schedule as PrismaSchedule, Team as PrismaTeam, User as PrismaUser } from "@/generated/prisma";
+import { Schedule as PrismaSchedule, Team as PrismaTeam, User as PrismaUser } from "@prisma/client";
 import { SCHEDULE_CORE_SELECT, TEAM_CORE_SELECT, TEAM_L1_SELECT, USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs";
 
 export class TeamRepository implements ITeam {

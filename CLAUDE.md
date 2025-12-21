@@ -15,11 +15,16 @@ Horas est une application de gestion du temps (timesheet) permettant aux employ�
 ```
 Horas/
 ├── backend-app/          # Backend Express + TypeScript (Clean Architecture)
+│   ├── Dockerfile        # Production (multi-stage, optimisé)
+│   └── Dockerfile.dev    # Développement (hot-reload, tests)
 ├── frontend/             # Frontend Next.js + TypeScript
+│   ├── Dockerfile        # Développement
+│   └── Dockerfile.prod   # Production (multi-stage, optimisé)
 ├── nginx/                # Configuration reverse proxy
-├── compose.yml           # Orchestration Docker Compose
+├── compose.yml           # Docker Compose développement
+├── compose.prod.yml      # Docker Compose production
 ├── TECHNICAL_SPECS.md    # Spécifications techniques détaillées
-└── claude.md             # Ce fichier
+└── CLAUDE.md             # Ce fichier
 ```
 
 ### Contexte spécifique par dossier
@@ -56,10 +61,32 @@ Horas/
 ### Développement avec Docker
 ```bash
 docker-compose up
+# OU
+docker-compose -f compose.yml up
 ```
 - Frontend : http://localhost:3000
 - Backend : http://localhost:5000
 - Nginx : http://localhost:8080
+
+### Production avec Docker
+```bash
+docker-compose -f compose.prod.yml up -d
+```
+- Mode optimisé (multi-stage builds, sans volumes)
+- Pas de hot-reload
+- Images légères (production dependencies seulement)
+
+### Tests dans Docker
+```bash
+# Lancer les tests backend
+docker-compose run --rm backend npm test
+
+# Tests en mode watch
+docker-compose run --rm backend npm run test:watch
+
+# Coverage
+docker-compose run --rm backend npm run test:coverage
+```
 
 ### Backend seul
 ```bash
@@ -70,12 +97,17 @@ npm run db:push          # Pousser le schéma vers la DB
 npm run db:migrate       # Créer une migration
 npm run db:seed          # Seed la base de données
 npm run db:studio        # Ouvrir Prisma Studio
+npm test                 # Lancer les tests
+npm run test:watch       # Mode watch
+npm run test:coverage    # Avec couverture
 ```
 
 ### Frontend seul
 ```bash
 cd frontend
 npm run dev              # Démarrer Next.js
+npm run build            # Build production
+npm start                # Démarrer en mode production
 ```
 
 ## Workflow Git
