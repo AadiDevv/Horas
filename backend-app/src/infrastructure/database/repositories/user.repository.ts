@@ -6,7 +6,7 @@ import { NotFoundError } from "@/domain/error/AppError";
 import { nullToUndefined } from "@/shared/utils/prisma.helpers";
 import { SCHEDULE_CORE_SELECT, TEAM_CORE_SELECT, USER_CORE_SELECT, USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs";
 import { Team_Core } from "@/domain/entities/team";
-import { User as PrismaUser } from "@/generated/prisma";
+import { User as PrismaUser } from "@prisma/client";
 import { ScheduleProps_Core, TeamProps_Core, UserManagerProps_Core } from "@/domain/types/entitiyProps";
 import { JsonValue } from "@prisma/client/runtime/library";
 
