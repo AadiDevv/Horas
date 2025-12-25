@@ -2,4 +2,4 @@ export * from "./schedule";
 export * from "./team";
 export * from "./user";
 export * from "./timesheet";
-export * from "./exception";
+export * from "./absence";

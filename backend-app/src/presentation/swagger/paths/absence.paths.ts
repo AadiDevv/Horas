@@ -1,23 +1,23 @@
-// #region Exception Paths
+// #region Absence Paths
 /**
- * Routes de gestion des exceptions (absences, congés, etc.)
- * Tag: Exceptions
+ * Routes de gestion des absences (absences, congés, etc.)
+ * Tag: Absences
  *
  * Permissions :
- * - POST /exceptions : Employé (pour lui-même), Manager (pour ses employés)
- * - GET /exceptions : Employé (ses exceptions), Manager (son équipe), Admin (tous)
- * - GET /exceptions/pending : Manager ou Admin uniquement
- * - GET /exceptions/:id : Tous (avec vérification ownership)
- * - PATCH /exceptions/:id : Employé (si en_attente), Manager (son équipe), Admin (tous)
- * - PATCH /exceptions/:id/validate : Manager ou Admin uniquement
- * - DELETE /exceptions/:id : Employé (si en_attente), Manager (son équipe), Admin (tous)
+ * - POST /absences : Employé (pour lui-même), Manager (pour ses employés)
+ * - GET /absences : Employé (ses absences), Manager (son équipe), Admin (tous)
+ * - GET /absences/pending : Manager ou Admin uniquement
+ * - GET /absences/:id : Tous (avec vérification ownership)
+ * - PATCH /absences/:id : Employé (si en_attente), Manager (son équipe), Admin (tous)
+ * - PATCH /absences/:id/validate : Manager ou Admin uniquement
+ * - DELETE /absences/:id : Employé (si en_attente), Manager (son équipe), Admin (tous)
  */
-export const exceptionPaths = {
-    '/api/exceptions': {
+export const absencePaths = {
+    '/api/absences': {
         get: {
-            summary: 'Liste des exceptions',
-            description: 'Récupère les exceptions avec filtres optionnels. Un employé ne voit que ses propres exceptions. Un manager voit celles de son équipe. Un admin voit toutes les exceptions.',
-            tags: ['Exceptions'],
+            summary: 'Liste des absences',
+            description: 'Récupère les absences avec filtres optionnels. Un employé ne voit que ses propres absences. Un manager voit celles de son équipe. Un admin voit toutes les absences.',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -58,13 +58,13 @@ export const exceptionPaths = {
             ],
             responses: {
                 200: {
-                    description: 'Liste des exceptions récupérée avec succès',
+                    description: 'Liste des absences récupérée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/ExceptionListResponse' },
+                            schema: { $ref: '#/components/schemas/AbsenceListResponse' },
                             examples: {
                                 success: {
-                                    summary: 'Liste avec plusieurs exceptions',
+                                    summary: 'Liste avec plusieurs absences',
                                     value: {
                                         success: true,
                                         data: [
@@ -87,7 +87,7 @@ export const exceptionPaths = {
                                                 isFullDay: true
                                             }
                                         ],
-                                        message: 'Liste des exceptions récupérée avec succès',
+                                        message: 'Liste des absences récupérée avec succès',
                                         timestamp: '2025-12-20T10:00:00.000Z'
                                     }
                                 }
@@ -107,8 +107,8 @@ export const exceptionPaths = {
         },
 
         post: {
-            summary: 'Créer une exception',
-            description: 'Crée une nouvelle exception (congé, absence, etc.).\n\n' +
+            summary: 'Créer une absence',
+            description: 'Crée une nouvelle absence (congé, absence, etc.).\n\n' +
                 '**EMPLOYÉ** :\n' +
                 '- Crée uniquement pour lui-même (employeId extrait du JWT)\n' +
                 '- Status fixé automatiquement à "en_attente"\n\n' +
@@ -118,13 +118,13 @@ export const exceptionPaths = {
                 '**ADMIN** :\n' +
                 '- Peut créer pour n\'importe quel employé\n' +
                 '- Peut spécifier le status initial',
-            tags: ['Exceptions'],
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/ExceptionCreateDTO' },
+                        schema: { $ref: '#/components/schemas/AbsenceCreateDTO' },
                         examples: {
                             employeeVacation: {
                                 summary: 'Employé demande des congés',
@@ -133,7 +133,7 @@ export const exceptionPaths = {
                                     startDateTime: '2025-12-23T00:00:00.000Z',
                                     endDateTime: '2025-12-27T23:59:59.000Z',
                                     isFullDay: true,
-                                    comments: 'Vacances de Noël'
+                                    comments: 'Vacances'
                                 }
                             },
                             managerSickLeave: {
@@ -164,10 +164,10 @@ export const exceptionPaths = {
             },
             responses: {
                 201: {
-                    description: 'Exception créée avec succès',
+                    description: 'Absence créée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/ExceptionCreatedResponse' }
+                            schema: { $ref: '#/components/schemas/AbsenceCreatedResponse' }
                         }
                     }
                 },
@@ -199,15 +199,15 @@ export const exceptionPaths = {
         }
     },
 
-    '/api/exceptions/pending': {
+    '/api/absences/pending': {
         get: {
-            summary: 'Exceptions en attente de validation',
-            description: 'Récupère toutes les exceptions en attente pour les employés du manager. Manager ou Admin uniquement.',
-            tags: ['Exceptions'],
+            summary: 'Absences en attente de validation',
+            description: 'Récupère toutes les absences en attente pour les employés du manager. Manager ou Admin uniquement.',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             responses: {
                 200: {
-                    description: 'Liste des exceptions en attente',
+                    description: 'Liste des absences en attente',
                     content: {
                         'application/json': {
                             schema: {
@@ -216,9 +216,9 @@ export const exceptionPaths = {
                                     success: { type: 'boolean', example: true },
                                     data: {
                                         type: 'array',
-                                        items: { $ref: '#/components/schemas/ExceptionReadDTO' }
+                                        items: { $ref: '#/components/schemas/AbsenceReadDTO' }
                                     },
-                                    message: { type: 'string', example: 'Exceptions en attente récupérées avec succès' },
+                                    message: { type: 'string', example: 'Absences en attente récupérées avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -245,11 +245,11 @@ export const exceptionPaths = {
         }
     },
 
-    '/api/exceptions/{id}': {
+    '/api/absences/{id}': {
         get: {
-            summary: 'Détail d\'une exception',
-            description: 'Récupère les informations détaillées d\'une exception avec les relations (employé, validateur)',
-            tags: ['Exceptions'],
+            summary: 'Détail d\'une absence',
+            description: 'Récupère les informations détaillées d\'une absence avec les relations (employé, validateur)',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -257,21 +257,21 @@ export const exceptionPaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'exception',
+                    description: 'ID de l\'absence',
                     example: 1
                 }
             ],
             responses: {
                 200: {
-                    description: 'Exception récupérée avec succès',
+                    description: 'Absence récupérée avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    data: { $ref: '#/components/schemas/ExceptionReadDTO' },
-                                    message: { type: 'string', example: 'Exception récupérée avec succès' },
+                                    data: { $ref: '#/components/schemas/AbsenceReadDTO' },
+                                    message: { type: 'string', example: 'Absence récupérée avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -287,7 +287,7 @@ export const exceptionPaths = {
                     }
                 },
                 403: {
-                    description: 'Non autorisé à voir cette exception',
+                    description: 'Non autorisé à voir cette absence',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -295,7 +295,7 @@ export const exceptionPaths = {
                     }
                 },
                 404: {
-                    description: 'Exception non trouvée',
+                    description: 'Absence non trouvée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -306,9 +306,9 @@ export const exceptionPaths = {
         },
 
         patch: {
-            summary: 'Modifier une exception',
-            description: 'Modifie une exception existante. L\'employé peut modifier ses exceptions en attente. Le manager peut modifier les exceptions de son équipe.',
-            tags: ['Exceptions'],
+            summary: 'Modifier une absence',
+            description: 'Modifie une absence existante. L\'employé peut modifier ses absences en attente. Le manager peut modifier les absences de son équipe.',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -316,7 +316,7 @@ export const exceptionPaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'exception',
+                    description: 'ID de l\'absence',
                     example: 1
                 }
             ],
@@ -324,7 +324,7 @@ export const exceptionPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/ExceptionUpdateDTO' },
+                        schema: { $ref: '#/components/schemas/AbsenceUpdateDTO' },
                         examples: {
                             extendDates: {
                                 summary: 'Prolonger la période',
@@ -339,8 +339,8 @@ export const exceptionPaths = {
                                     comments: 'Changement de type de congé'
                                 }
                             },
-                            cancelException: {
-                                summary: 'Annuler l\'exception',
+                            cancelAbsence: {
+                                summary: 'Annuler l\'absence',
                                 value: {
                                     status: 'annule',
                                     comments: 'Annulation de la demande'
@@ -352,10 +352,10 @@ export const exceptionPaths = {
             },
             responses: {
                 200: {
-                    description: 'Exception modifiée avec succès',
+                    description: 'Absence modifiée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/ExceptionUpdatedResponse' }
+                            schema: { $ref: '#/components/schemas/AbsenceUpdatedResponse' }
                         }
                     }
                 },
@@ -368,7 +368,7 @@ export const exceptionPaths = {
                     }
                 },
                 403: {
-                    description: 'Non autorisé à modifier cette exception',
+                    description: 'Non autorisé à modifier cette absence',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -376,7 +376,7 @@ export const exceptionPaths = {
                     }
                 },
                 404: {
-                    description: 'Exception non trouvée',
+                    description: 'Absence non trouvée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -387,9 +387,9 @@ export const exceptionPaths = {
         },
 
         delete: {
-            summary: 'Supprimer une exception',
-            description: 'Supprime une exception. L\'employé peut supprimer ses exceptions en attente. Le manager peut supprimer les exceptions de son équipe.',
-            tags: ['Exceptions'],
+            summary: 'Supprimer une absence',
+            description: 'Supprime une absence. L\'employé peut supprimer ses absences en attente. Le manager peut supprimer les absences de son équipe.',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -397,20 +397,20 @@ export const exceptionPaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'exception',
+                    description: 'ID de l\'absence',
                     example: 1
                 }
             ],
             responses: {
                 200: {
-                    description: 'Exception supprimée avec succès',
+                    description: 'Absence supprimée avec succès',
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
                                 properties: {
                                     success: { type: 'boolean', example: true },
-                                    message: { type: 'string', example: 'Exception supprimée avec succès' },
+                                    message: { type: 'string', example: 'Absence supprimée avec succès' },
                                     timestamp: { type: 'string', format: 'date-time' }
                                 }
                             }
@@ -418,7 +418,7 @@ export const exceptionPaths = {
                     }
                 },
                 403: {
-                    description: 'Non autorisé à supprimer cette exception',
+                    description: 'Non autorisé à supprimer cette absence',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -426,7 +426,7 @@ export const exceptionPaths = {
                     }
                 },
                 404: {
-                    description: 'Exception non trouvée',
+                    description: 'Absence non trouvée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -437,11 +437,11 @@ export const exceptionPaths = {
         }
     },
 
-    '/api/exceptions/{id}/validate': {
+    '/api/absences/{id}/validate': {
         patch: {
-            summary: 'Valider ou refuser une exception',
-            description: 'Permet au manager de valider ou refuser une exception en attente pour ses employés. Manager ou Admin uniquement.',
-            tags: ['Exceptions'],
+            summary: 'Valider ou refuser une absence',
+            description: 'Permet au manager de valider ou refuser une absence en attente pour ses employés. Manager ou Admin uniquement.',
+            tags: ['Absences'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 {
@@ -449,7 +449,7 @@ export const exceptionPaths = {
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'exception',
+                    description: 'ID de l\'absence',
                     example: 1
                 }
             ],
@@ -457,7 +457,7 @@ export const exceptionPaths = {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/ExceptionValidateDTO' },
+                        schema: { $ref: '#/components/schemas/AbsenceValidateDTO' },
                         examples: {
                             approve: {
                                 summary: 'Approuver une demande',
@@ -479,15 +479,15 @@ export const exceptionPaths = {
             },
             responses: {
                 200: {
-                    description: 'Exception validée avec succès',
+                    description: 'Absence validée avec succès',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/ExceptionValidatedResponse' }
+                            schema: { $ref: '#/components/schemas/AbsenceValidatedResponse' }
                         }
                     }
                 },
                 400: {
-                    description: 'Données invalides ou exception déjà validée',
+                    description: 'Données invalides ou absence déjà validée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }
@@ -503,7 +503,7 @@ export const exceptionPaths = {
                     }
                 },
                 404: {
-                    description: 'Exception non trouvée',
+                    description: 'Absence non trouvée',
                     content: {
                         'application/json': {
                             schema: { $ref: '#/components/schemas/Error' }

@@ -199,14 +199,14 @@ export type TimesheetProps_L1 = Timesheet_Props.TimesheetProps_enriched1;
 export type TimesheetProps_Core = Timesheet_Props.TimesheetProps_Core;
 //#endregion
 
-//#region Exception hierarchy types
-export namespace Exception_Props {
+//#region Absence hierarchy types
+export namespace Absence_Props {
     // Data enrichment types
-    type Exception_Core = {
+    type Absence_Core = {
         id: number;
         employeId: number;
-        type: import("./index").ExceptionType;
-        status: import("./index").ExceptionStatus;
+        type: import("./index").AbsenceType;
+        status: import("./index").AbsenceStatus;
         startDateTime: Date;
         endDateTime: Date;
         isFullDay: boolean;
@@ -215,30 +215,30 @@ export namespace Exception_Props {
         comments: string | null;
     }
 
-    type Exception_L1 = {
+    type Absence_L1 = {
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
     }
 
-    type Exception_joints = {
+    type Absence_joints = {
         employe: UserEmployee_Core;
         validator: UserManager_Core | null;
     }
 
     // Props Hierarchy
-    export type ExceptionProps = Omit<
-        Exception_Core
-        & Exception_L1
-        & Exception_joints, never>
+    export type AbsenceProps = Omit<
+        Absence_Core
+        & Absence_L1
+        & Absence_joints, never>
 
-    // ExceptionProps = ExceptionProps_enriched1 + Exception_joints
-    export type ExceptionProps_enriched1 = Omit<ExceptionProps, keyof Exception_joints>
-    export type ExceptionProps_Core = Omit<ExceptionProps_enriched1, keyof Exception_L1>
+    // AbsenceProps = AbsenceProps_enriched1 + Absence_joints
+    export type AbsenceProps_enriched1 = Omit<AbsenceProps, keyof Absence_joints>
+    export type AbsenceProps_Core = Omit<AbsenceProps_enriched1, keyof Absence_L1>
 }
 
 // Aliases top-level pour import direct ailleurs sans préfixe namespace
-export type ExceptionProps = Exception_Props.ExceptionProps;
-export type ExceptionProps_L1 = Exception_Props.ExceptionProps_enriched1;
-export type ExceptionProps_Core = Exception_Props.ExceptionProps_Core;
+export type AbsenceProps = Absence_Props.AbsenceProps;
+export type AbsenceProps_L1 = Absence_Props.AbsenceProps_enriched1;
+export type AbsenceProps_Core = Absence_Props.AbsenceProps_Core;
 //#endregion

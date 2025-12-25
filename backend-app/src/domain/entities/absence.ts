@@ -1,18 +1,18 @@
-import { ExceptionType, ExceptionStatus } from "@/domain/types";
+import { AbsenceType, AbsenceStatus } from "@/domain/types";
 import { ValidationError } from "../error/AppError";
 import { UserEmployee_Core, UserManager_Core } from "./user";
-import { ExceptionProps, ExceptionProps_Core, ExceptionProps_L1 } from "../types/entitiyProps";
+import { AbsenceProps, AbsenceProps_Core, AbsenceProps_L1 } from "../types/entitiyProps";
 
 /**
- * Exception_Core
- * Représente le minimum métier pour qu'une exception soit valide
+ * Absence_Core
+ * Représente le minimum métier pour qu'une absence soit valide
  * Utilisé avant l'insertion en base de données
  */
-export class Exception_Core {
+export class Absence_Core {
     public id: number;
     public employeId: number;
-    public type: ExceptionType;
-    public status: ExceptionStatus;
+    public type: AbsenceType;
+    public status: AbsenceStatus;
     public startDateTime: Date;
     public endDateTime: Date;
     public isFullDay: boolean;
@@ -20,7 +20,7 @@ export class Exception_Core {
     public validatedAt: Date | null;
     public comments: string | null;
 
-    constructor(props: ExceptionProps_Core) {
+    constructor(props: AbsenceProps_Core) {
         this.id = props.id;
         this.employeId = props.employeId;
         this.type = props.type;
@@ -39,15 +39,15 @@ export class Exception_Core {
     // #region Validation
     public validate(): void {
         if (!this.employeId || this.employeId <= 0) {
-            throw new ValidationError("L'exception doit être liée à un employé valide.");
+            throw new ValidationError("L'absence doit être liée à un employé valide.");
         }
 
         if (!(this.startDateTime instanceof Date) || isNaN(this.startDateTime.getTime())) {
-            throw new ValidationError("La date de début de l'exception est invalide.");
+            throw new ValidationError("La date de début de l'absence est invalide.");
         }
 
         if (!(this.endDateTime instanceof Date) || isNaN(this.endDateTime.getTime())) {
-            throw new ValidationError("La date de fin de l'exception est invalide.");
+            throw new ValidationError("La date de fin de l'absence est invalide.");
         }
 
         if (this.endDateTime < this.startDateTime) {
@@ -58,16 +58,16 @@ export class Exception_Core {
 }
 
 /**
- * Exception_L1
+ * Absence_L1
  * Enrichissement : ajout des metadata (timestamps)
  * Utilisé après récupération de la DB sans jointures
  */
-export class Exception_L1 extends Exception_Core {
+export class Absence_L1 extends Absence_Core {
     public createdAt: Date;
     public updatedAt: Date;
     public deletedAt: Date | null;
 
-    constructor(props: ExceptionProps_L1) {
+    constructor(props: AbsenceProps_L1) {
         const { createdAt, updatedAt, deletedAt, ...propsCore } = props;
         super({ ...propsCore });
 
@@ -101,15 +101,15 @@ export class Exception_L1 extends Exception_Core {
 }
 
 /**
- * Exception
+ * Absence
  * Entité complète avec toutes les jointures
- * Représente la réalité complète d'une exception
+ * Représente la réalité complète d'une absence
  */
-export class Exception extends Exception_L1 {
+export class Absence extends Absence_L1 {
     public employe: UserEmployee_Core;
     public validator: UserManager_Core | null;
 
-    constructor(props: ExceptionProps) {
+    constructor(props: AbsenceProps) {
         const { employe, validator, ...propsL1 } = props;
         super({ ...propsL1 });
 

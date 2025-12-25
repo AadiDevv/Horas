@@ -5,7 +5,7 @@ import userRoutes from './user.route';
 import teamRoutes from './team.route';
 import timesheetRoutes from './timesheet.route';
 import scheduleRoutes from './schedule.route';
-import exceptionRoutes from './exception.route';
+import absenceRoutes from './absence.route';
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.use('/users', userRoutes);
 router.use('/teams', teamRoutes);
 router.use('/timesheets', timesheetRoutes);
 router.use('/schedules', scheduleRoutes);
-router.use('/exceptions', exceptionRoutes);
+router.use('/absences', absenceRoutes);
 
 export default router;

@@ -1,31 +1,31 @@
-// #region Exception Schemas
-export const exceptionSchemas = {
+// #region Absence Schemas
+export const absenceSchemas = {
     // #region Request DTOs
-    ExceptionCreateDTO: {
+    AbsenceCreateDTO: {
         type: 'object',
         properties: {
             type: {
                 type: 'string',
                 enum: ['conges_payes', 'conges_sans_solde', 'maladie', 'formation', 'teletravail', 'autre'],
                 example: 'conges_payes',
-                description: 'Type d\'exception'
+                description: 'Type d\'absence'
             },
             startDateTime: {
                 type: 'string',
                 format: 'date-time',
                 example: '2025-12-20T09:00:00.000Z',
-                description: 'Date et heure de début de l\'exception'
+                description: 'Date et heure de début de l\'absence'
             },
             endDateTime: {
                 type: 'string',
                 format: 'date-time',
                 example: '2025-12-22T17:00:00.000Z',
-                description: 'Date et heure de fin de l\'exception'
+                description: 'Date et heure de fin de l\'absence'
             },
             isFullDay: {
                 type: 'boolean',
                 example: true,
-                description: 'Indique si l\'exception concerne des journées complètes (optionnel, par défaut true)'
+                description: 'Indique si l\'absence concerne des journées complètes (optionnel, par défaut true)'
             },
             comments: {
                 type: 'string',
@@ -45,17 +45,17 @@ export const exceptionSchemas = {
             }
         },
         required: ['type', 'startDateTime', 'endDateTime'],
-        description: 'DTO de création d\'exception. L\'employé crée toujours avec status "en_attente". Le manager peut créer pour ses employés.'
+        description: 'DTO de création d\'absence. L\'employé crée toujours avec status "en_attente". Le manager peut créer pour ses employés.'
     },
 
-    ExceptionUpdateDTO: {
+    AbsenceUpdateDTO: {
         type: 'object',
         properties: {
             type: {
                 type: 'string',
                 enum: ['conges_payes', 'conges_sans_solde', 'maladie', 'formation', 'teletravail', 'autre'],
                 example: 'conges_payes',
-                description: 'Nouveau type d\'exception (optionnel)'
+                description: 'Nouveau type d\'absence (optionnel)'
             },
             startDateTime: {
                 type: 'string',
@@ -86,10 +86,10 @@ export const exceptionSchemas = {
                 description: 'Nouveau statut (optionnel)'
             }
         },
-        description: 'Tous les champs sont optionnels (PATCH). Utilisé pour modifier une exception existante.'
+        description: 'Tous les champs sont optionnels (PATCH). Utilisé pour modifier une absence existante.'
     },
 
-    ExceptionValidateDTO: {
+    AbsenceValidateDTO: {
         type: 'object',
         properties: {
             status: {
@@ -105,18 +105,18 @@ export const exceptionSchemas = {
             }
         },
         required: ['status'],
-        description: 'DTO pour valider/refuser une exception en attente. Manager uniquement.'
+        description: 'DTO pour valider/refuser une absence en attente. Manager uniquement.'
     },
     // #endregion
 
     // #region Response DTOs
-    ExceptionReadDTO: {
+    AbsenceReadDTO: {
         type: 'object',
         properties: {
             id: {
                 type: 'integer',
                 example: 1,
-                description: 'ID de l\'exception'
+                description: 'ID de l\'absence'
             },
             employeId: {
                 type: 'integer',
@@ -127,13 +127,13 @@ export const exceptionSchemas = {
                 type: 'string',
                 enum: ['conges_payes', 'conges_sans_solde', 'maladie', 'formation', 'teletravail', 'autre'],
                 example: 'conges_payes',
-                description: 'Type d\'exception'
+                description: 'Type d\'absence'
             },
             status: {
                 type: 'string',
                 enum: ['en_attente', 'approuve', 'refuse', 'annule'],
                 example: 'approuve',
-                description: 'Statut de l\'exception'
+                description: 'Statut de l\'absence'
             },
             startDateTime: {
                 type: 'string',
@@ -150,7 +150,7 @@ export const exceptionSchemas = {
             isFullDay: {
                 type: 'boolean',
                 example: true,
-                description: 'Indique si l\'exception concerne des journées complètes'
+                description: 'Indique si l\'absence concerne des journées complètes'
             },
             validatedBy: {
                 type: 'integer',
@@ -280,7 +280,7 @@ export const exceptionSchemas = {
         }
     },
 
-    ExceptionListItemDTO: {
+    AbsenceListItemDTO: {
         type: 'object',
         properties: {
             id: {
@@ -320,7 +320,7 @@ export const exceptionSchemas = {
     // #endregion
 
     // #region Filter DTOs (Query Params)
-    ExceptionFilterDTO: {
+    AbsenceFilterDTO: {
         type: 'object',
         properties: {
             employeId: {
@@ -353,12 +353,12 @@ export const exceptionSchemas = {
                 description: 'Date de fin de la période de recherche (YYYY-MM-DD)'
             }
         },
-        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /exceptions?employeId=10&status=en_attente'
+        description: 'Tous les champs sont optionnels. Utilisés comme query params: GET /absences?employeId=10&status=en_attente'
     },
     // #endregion
 
     // #region Standard Responses
-    ExceptionCreatedResponse: {
+    AbsenceCreatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -366,21 +366,21 @@ export const exceptionSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/ExceptionReadDTO'
+                $ref: '#/components/schemas/AbsenceReadDTO'
             },
             message: {
                 type: 'string',
-                example: 'Exception créée avec succès'
+                example: 'Absence créée avec succès'
             },
             timestamp: {
                 type: 'string',
                 format: 'date-time'
             }
         },
-        description: 'Réponse après création d\'une exception'
+        description: 'Réponse après création d\'une absence'
     },
 
-    ExceptionListResponse: {
+    AbsenceListResponse: {
         type: 'object',
         properties: {
             success: {
@@ -390,12 +390,12 @@ export const exceptionSchemas = {
             data: {
                 type: 'array',
                 items: {
-                    $ref: '#/components/schemas/ExceptionListItemDTO'
+                    $ref: '#/components/schemas/AbsenceListItemDTO'
                 }
             },
             message: {
                 type: 'string',
-                example: 'Liste des exceptions récupérée avec succès'
+                example: 'Liste des absences récupérée avec succès'
             },
             timestamp: {
                 type: 'string',
@@ -404,7 +404,7 @@ export const exceptionSchemas = {
         }
     },
 
-    ExceptionUpdatedResponse: {
+    AbsenceUpdatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -412,11 +412,11 @@ export const exceptionSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/ExceptionReadDTO'
+                $ref: '#/components/schemas/AbsenceReadDTO'
             },
             message: {
                 type: 'string',
-                example: 'Exception mise à jour avec succès'
+                example: 'Absence mise à jour avec succès'
             },
             timestamp: {
                 type: 'string',
@@ -425,7 +425,7 @@ export const exceptionSchemas = {
         }
     },
 
-    ExceptionValidatedResponse: {
+    AbsenceValidatedResponse: {
         type: 'object',
         properties: {
             success: {
@@ -433,11 +433,11 @@ export const exceptionSchemas = {
                 example: true
             },
             data: {
-                $ref: '#/components/schemas/ExceptionReadDTO'
+                $ref: '#/components/schemas/AbsenceReadDTO'
             },
             message: {
                 type: 'string',
-                example: 'Exception validée avec succès'
+                example: 'Absence validée avec succès'
             },
             timestamp: {
                 type: 'string',

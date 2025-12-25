@@ -1,14 +1,14 @@
-import { IAuth, IUser, ITeam, ITimesheet, IException } from "@/domain/interfaces";
+import { IAuth, IUser, ITeam, ITimesheet, IAbsence } from "@/domain/interfaces";
 import { ISchedule } from "@/domain/interfaces/schedule.interface";
 import { prismaService } from "@/infrastructure/database/prisma.service";
-import { UserRepository, TeamRepository, TimesheetRepository, ScheduleRepository, ExceptionRepository } from "@/infrastructure/database/repositories/"
+import { UserRepository, TeamRepository, TimesheetRepository, ScheduleRepository, AbsenceRepository } from "@/infrastructure/database/repositories/"
 
 class InfrastructureFactory {
     private static userRepository: UserRepository | null;
     private static teamRepository: ITeam | null;
     private static timesheetRepository: ITimesheet | null;
     private static scheduleRepository: ISchedule | null;
-    private static exceptionRepository: IException | null;
+    private static absenceRepository: IAbsence | null;
 
     public static initializeDatabase(): void {
         prismaService.getInstance();
@@ -55,11 +55,11 @@ class InfrastructureFactory {
         return this.scheduleRepository
     }
 
-    public static getExceptionRepository(): IException {
-        if (!this.exceptionRepository) {
-            this.exceptionRepository = new ExceptionRepository()
+    public static getAbsenceRepository(): IAbsence {
+        if (!this.absenceRepository) {
+            this.absenceRepository = new AbsenceRepository()
         }
-        return this.exceptionRepository
+        return this.absenceRepository
     }
 
     public static async disconnect(): Promise<void> {
@@ -68,7 +68,7 @@ class InfrastructureFactory {
         this.teamRepository = null
         this.timesheetRepository = null
         this.scheduleRepository = null
-        this.exceptionRepository = null
+        this.absenceRepository = null
     }
 
 
@@ -80,7 +80,7 @@ export const infra = {
     getTeamRepo: () => (InfrastructureFactory.getTeamRepository()),
     getTimesheetRepo: () => (InfrastructureFactory.getTimesheetRepository()),
     getScheduleRepo: () => (InfrastructureFactory.getScheduleRepository()),
-    getExceptionRepo: () => (InfrastructureFactory.getExceptionRepository()),
+    getAbsenceRepo: () => (InfrastructureFactory.getAbsenceRepository()),
     disconnect: () => { InfrastructureFactory.disconnect() }
 
 }

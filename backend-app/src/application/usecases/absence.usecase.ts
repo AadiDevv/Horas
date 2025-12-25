@@ -1,45 +1,45 @@
 import {
-    ExceptionCreateDTO,
-    ExceptionUpdateDTO,
-    ExceptionValidateDTO,
-    ExceptionFilterDTO,
+    AbsenceCreateDTO,
+    AbsenceUpdateDTO,
+    AbsenceValidateDTO,
+    AbsenceFilterDTO,
     AuthContext
 } from "@/application/DTOS";
-import { Exception, Exception_Core, Exception_L1 } from "@/domain/entities/exception";
-import { IException } from "@/domain/interfaces/exception.interface";
+import { Absence, Absence_Core, Absence_L1 } from "@/domain/entities/absence";
+import { IAbsence } from "@/domain/interfaces/absence.interface";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/domain/error/AppError";
 
 /**
- * Use Case pour la gestion des exceptions (congés, absences, etc.)
+ * Use Case pour la gestion des absences (congés, absences, etc.)
  * Contient la logique métier et les règles de gestion
  *
  * Note: Les restrictions d'accès par rôle (ex: "manager uniquement") sont gérées
  * par les middlewares dans les routes. Ici, on gère uniquement la logique métier
  * (ex: un manager ne peut voir QUE ses employés).
  */
-export class ExceptionUseCase {
+export class AbsenceUseCase {
 
     constructor(
-        private readonly R_exception: IException,
+        private readonly R_absence: IAbsence,
         private readonly R_user: IUser
     ) { }
 
     // #region Read
 
     /**
-     * Récupère les exceptions selon le rôle de l'utilisateur
+     * Récupère les absences selon le rôle de l'utilisateur
      *
      * Logique métier :
-     * - Admin : peut filtrer toutes les exceptions
-     * - Manager : peut filtrer uniquement les exceptions de SES employés
-     * - Employé : ne peut voir que ses propres exceptions
+     * - Admin : peut filtrer toutes les absences
+     * - Manager : peut filtrer uniquement les absences de SES employés
+     * - Employé : ne peut voir que ses propres absences
      */
-    async getExceptions(userRole: string, userId: number, filter?: ExceptionFilterDTO): Promise<Exception_Core[]> {
-        let effectiveFilter: ExceptionFilterDTO = { ...filter };
+    async getAbsences(userRole: string, userId: number, filter?: AbsenceFilterDTO): Promise<Absence_Core[]> {
+        let effectiveFilter: AbsenceFilterDTO = { ...filter };
 
         if (userRole === "employe") {
-            // L'employé ne peut voir que ses propres exceptions
+            // L'employé ne peut voir que ses propres absences
             effectiveFilter.employeId = userId;
         } else if (userRole === "manager") {
             // Si un employeId est spécifié, vérifier qu'il appartient au manager
@@ -49,52 +49,52 @@ export class ExceptionUseCase {
                     throw new NotFoundError(`Employé avec l'ID ${effectiveFilter.employeId} introuvable`);
                 }
                 if (employee.managerId !== userId) {
-                    throw new ForbiddenError("Vous ne pouvez pas accéder aux exceptions de cet employé");
+                    throw new ForbiddenError("Vous ne pouvez pas accéder aux absences de cet employé");
                 }
             }
-            // Sinon, on retourne toutes les exceptions des employés du manager (géré côté filtre)
+            // Sinon, on retourne toutes les absences des employés du manager (géré côté filtre)
         }
 
-        return await this.R_exception.getAllExceptions(effectiveFilter);
+        return await this.R_absence.getAllAbsences(effectiveFilter);
     }
 
     /**
-     * Récupère une exception par son ID
+     * Récupère une absence par son ID
      *
      * Logique métier :
-     * - Employé : uniquement ses propres exceptions
-     * - Manager : uniquement exceptions de SES employés
-     * - Admin : toutes les exceptions
+     * - Employé : uniquement ses propres absences
+     * - Manager : uniquement absences de SES employés
+     * - Admin : toutes les absences
      */
-    async getExceptionById(id: number, userRole: string, userId: number): Promise<Exception> {
-        const exception = await this.R_exception.getException_ById(id);
+    async getAbsenceById(id: number, userRole: string, userId: number): Promise<Absence> {
+        const absence = await this.R_absence.getAbsence_ById(id);
 
-        if (!exception) {
-            throw new NotFoundError(`Exception avec l'ID ${id} introuvable`);
+        if (!absence) {
+            throw new NotFoundError(`Absence avec l'ID ${id} introuvable`);
         }
 
         // Vérification des permissions selon la logique métier
-        if (userRole === "employe" && exception.employeId !== userId) {
-            throw new ForbiddenError("Accès interdit à cette exception");
+        if (userRole === "employe" && absence.employeId !== userId) {
+            throw new ForbiddenError("Accès interdit à cette absence");
         }
 
         if (userRole === "manager") {
-            // Le manager ne peut voir que les exceptions de SES employés
-            const employee = await this.R_user.getEmployee_ById(exception.employeId);
+            // Le manager ne peut voir que les absences de SES employés
+            const employee = await this.R_user.getEmployee_ById(absence.employeId);
             if (!employee || employee.managerId !== userId) {
-                throw new ForbiddenError("Accès interdit à cette exception");
+                throw new ForbiddenError("Accès interdit à cette absence");
             }
         }
 
-        return exception;
+        return absence;
     }
 
     /**
-     * Récupère toutes les exceptions en attente pour un manager
+     * Récupère toutes les absences en attente pour un manager
      * (Route protégée par middleware manager/admin)
      */
-    async getPendingExceptionsForManager(managerId: number): Promise<Exception[]> {
-        return await this.R_exception.getPendingExceptions_ByManagerId(managerId);
+    async getPendingAbsencesForManager(managerId: number): Promise<Absence[]> {
+        return await this.R_absence.getPendingAbsences_ByManagerId(managerId);
     }
 
     // #endregion
@@ -102,14 +102,14 @@ export class ExceptionUseCase {
     // #region Create
 
     /**
-     * Crée une nouvelle exception avec logique métier
+     * Crée une nouvelle absence avec logique métier
      *
      * Logique métier :
      * - Employé : crée pour lui-même, status = 'en_attente' forcé
      * - Manager : peut créer pour SES employés, peut définir le statut
      * - Admin : peut créer pour n'importe qui
      */
-    async createException(dto: ExceptionCreateDTO, auth: AuthContext): Promise<Exception_Core> {
+    async createAbsence(dto: AbsenceCreateDTO, auth: AuthContext): Promise<Absence_Core> {
         const { userRole, userId } = auth;
 
         // Déterminer l'employé cible
@@ -122,7 +122,7 @@ export class ExceptionUseCase {
                 }
                 // Le manager ne peut créer que pour SES employés
                 if (userRole === 'manager' && employee.managerId !== userId) {
-                    throw new ForbiddenError("Vous ne pouvez pas créer une exception pour un employé qui n'est pas dans votre équipe");
+                    throw new ForbiddenError("Vous ne pouvez pas créer une absence pour un employé qui n'est pas dans votre équipe");
                 }
                 targetEmployeeId = dto.employeId;
             } else {
@@ -152,8 +152,8 @@ export class ExceptionUseCase {
             status = 'en_attente';
         }
 
-        // Instancier l'entité Exception_Core
-        const exception = new Exception_Core({
+        // Instancier l'entité Absence_Core
+        const absence = new Absence_Core({
             id: 0,
             employeId: targetEmployeeId,
             type: dto.type,
@@ -167,8 +167,8 @@ export class ExceptionUseCase {
         });
 
         // Validation et enregistrement
-        exception.validate();
-        return await this.R_exception.createException(exception);
+        absence.validate();
+        return await this.R_absence.createAbsence(absence);
     }
 
     // #endregion
@@ -176,39 +176,39 @@ export class ExceptionUseCase {
     // #region Update
 
     /**
-     * Met à jour une exception
+     * Met à jour une absence
      *
      * Logique métier :
-     * - Employé : peut modifier ses propres exceptions en statut 'en_attente' uniquement
-     * - Manager : peut modifier les exceptions de SES employés en statut 'en_attente'
+     * - Employé : peut modifier ses propres absences en statut 'en_attente' uniquement
+     * - Manager : peut modifier les absences de SES employés en statut 'en_attente'
      * - Admin : peut tout modifier
      */
-    async updateException(id: number, dto: ExceptionUpdateDTO, auth: AuthContext): Promise<Exception_L1> {
+    async updateAbsence(id: number, dto: AbsenceUpdateDTO, auth: AuthContext): Promise<Absence_L1> {
         const { userRole, userId } = auth;
 
-        // Récupérer l'exception existante
-        const existing = await this.R_exception.getException_ById(id);
+        // Récupérer l'absence existante
+        const existing = await this.R_absence.getAbsence_ById(id);
         if (!existing) {
-            throw new NotFoundError(`Exception avec l'ID ${id} introuvable`);
+            throw new NotFoundError(`Absence avec l'ID ${id} introuvable`);
         }
 
         // Vérifications de permissions selon la logique métier
         if (userRole === "employe") {
             if (existing.employeId !== userId) {
-                throw new ForbiddenError("Vous ne pouvez modifier que vos propres exceptions");
+                throw new ForbiddenError("Vous ne pouvez modifier que vos propres absences");
             }
             if (existing.status !== 'en_attente') {
-                throw new ForbiddenError("Vous ne pouvez modifier que les exceptions en attente");
+                throw new ForbiddenError("Vous ne pouvez modifier que les absences en attente");
             }
         }
 
         if (userRole === "manager") {
             const employee = await this.R_user.getEmployee_ById(existing.employeId);
             if (!employee || employee.managerId !== userId) {
-                throw new ForbiddenError("Vous ne pouvez modifier que les exceptions de vos employés");
+                throw new ForbiddenError("Vous ne pouvez modifier que les absences de vos employés");
             }
             if (existing.status !== 'en_attente') {
-                throw new ForbiddenError("Vous ne pouvez modifier que les exceptions en attente");
+                throw new ForbiddenError("Vous ne pouvez modifier que les absences en attente");
             }
         }
 
@@ -235,7 +235,7 @@ export class ExceptionUseCase {
         }
 
         // Créer l'entité mise à jour
-        const updatedException = new Exception_L1({
+        const updatedAbsence = new Absence_L1({
             ...existing,
             type: dto.type ?? existing.type,
             startDateTime,
@@ -244,41 +244,41 @@ export class ExceptionUseCase {
             comments: dto.comments ?? existing.comments,
         });
 
-        updatedException.validate();
-        return await this.R_exception.updateException_ById(updatedException);
+        updatedAbsence.validate();
+        return await this.R_absence.updateAbsence_ById(updatedAbsence);
     }
 
     /**
-     * Valide ou refuse une exception
+     * Valide ou refuse une absence
      * (Route protégée par middleware manager/admin)
      *
      * Logique métier :
-     * - Manager : peut valider uniquement les exceptions de SES employés
-     * - Admin : peut valider toutes les exceptions
+     * - Manager : peut valider uniquement les absences de SES employés
+     * - Admin : peut valider toutes les absences
      */
-    async validateException(id: number, dto: ExceptionValidateDTO, auth: AuthContext): Promise<Exception_L1> {
+    async validateAbsence(id: number, dto: AbsenceValidateDTO, auth: AuthContext): Promise<Absence_L1> {
         const { userRole, userId } = auth;
 
-        // Récupérer l'exception
-        const exception = await this.R_exception.getException_ById(id);
-        if (!exception) {
-            throw new NotFoundError(`Exception avec l'ID ${id} introuvable`);
+        // Récupérer l'absence
+        const absence = await this.R_absence.getAbsence_ById(id);
+        if (!absence) {
+            throw new NotFoundError(`Absence avec l'ID ${id} introuvable`);
         }
 
         // Vérifier que le manager est bien le manager de l'employé
         if (userRole === 'manager') {
-            const employee = await this.R_user.getEmployee_ById(exception.employeId);
+            const employee = await this.R_user.getEmployee_ById(absence.employeId);
             if (!employee || employee.managerId !== userId) {
-                throw new ForbiddenError("Vous ne pouvez valider que les exceptions de vos employés");
+                throw new ForbiddenError("Vous ne pouvez valider que les absences de vos employés");
             }
         }
 
-        // Vérifier que l'exception est en attente
-        if (exception.status !== 'en_attente') {
-            throw new ValidationError("Cette exception a déjà été traitée");
+        // Vérifier que l'absence est en attente
+        if (absence.status !== 'en_attente') {
+            throw new ValidationError("Cette absence a déjà été traitée");
         }
 
-        return await this.R_exception.validateException(
+        return await this.R_absence.validateAbsence(
             id,
             userId,
             dto.status,
@@ -291,42 +291,42 @@ export class ExceptionUseCase {
     // #region Delete
 
     /**
-     * Supprime une exception (soft delete)
+     * Supprime une absence (soft delete)
      *
      * Logique métier :
-     * - Employé : peut supprimer ses propres exceptions en statut 'en_attente'
-     * - Manager : peut supprimer les exceptions de SES employés en statut 'en_attente'
+     * - Employé : peut supprimer ses propres absences en statut 'en_attente'
+     * - Manager : peut supprimer les absences de SES employés en statut 'en_attente'
      * - Admin : peut tout supprimer
      */
-    async deleteException(id: number, auth: AuthContext): Promise<void> {
+    async deleteAbsence(id: number, auth: AuthContext): Promise<void> {
         const { userRole, userId } = auth;
 
-        const exception = await this.R_exception.getException_ById(id);
-        if (!exception) {
-            throw new NotFoundError(`Exception avec l'ID ${id} introuvable`);
+        const absence = await this.R_absence.getAbsence_ById(id);
+        if (!absence) {
+            throw new NotFoundError(`Absence avec l'ID ${id} introuvable`);
         }
 
         // Vérifications selon la logique métier
         if (userRole === "employe") {
-            if (exception.employeId !== userId) {
-                throw new ForbiddenError("Vous ne pouvez supprimer que vos propres exceptions");
+            if (absence.employeId !== userId) {
+                throw new ForbiddenError("Vous ne pouvez supprimer que vos propres absences");
             }
-            if (exception.status !== 'en_attente') {
-                throw new ForbiddenError("Vous ne pouvez supprimer que les exceptions en attente");
+            if (absence.status !== 'en_attente') {
+                throw new ForbiddenError("Vous ne pouvez supprimer que les absences en attente");
             }
         }
 
         if (userRole === "manager") {
-            const employee = await this.R_user.getEmployee_ById(exception.employeId);
+            const employee = await this.R_user.getEmployee_ById(absence.employeId);
             if (!employee || employee.managerId !== userId) {
-                throw new ForbiddenError("Vous ne pouvez supprimer que les exceptions de vos employés");
+                throw new ForbiddenError("Vous ne pouvez supprimer que les absences de vos employés");
             }
-            if (exception.status !== 'en_attente') {
-                throw new ForbiddenError("Vous ne pouvez supprimer que les exceptions en attente");
+            if (absence.status !== 'en_attente') {
+                throw new ForbiddenError("Vous ne pouvez supprimer que les absences en attente");
             }
         }
 
-        await this.R_exception.deleteException_ById(id);
+        await this.R_absence.deleteAbsence_ById(id);
     }
 
     // #endregion

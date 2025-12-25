@@ -4,21 +4,21 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 import { managerOrAdmin } from '../middlewares/role.middleweare';
 
 const router = Router();
-const exceptionController = controllers.ExceptionController();
+const absenceController = controllers.AbsenceController();
 
 // #region GET Routes
 /**
- * GET /api/exceptions
- * Liste des exceptions avec filtres optionnels
- * - Employé : ses propres exceptions uniquement
- * - Manager : exceptions de ses employés
- * - Admin : toutes les exceptions
+ * GET /api/absences
+ * Liste des absences avec filtres optionnels
+ * - Employé : ses propres absences uniquement
+ * - Manager : absences de ses employés
+ * - Admin : toutes les absences
  */
 router.get('/',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await exceptionController.getExceptions(req, res);
+            await absenceController.getAbsences(req, res);
         } catch (error) {
             next(error);
         }
@@ -26,8 +26,8 @@ router.get('/',
 );
 
 /**
- * GET /api/exceptions/pending
- * Liste des exceptions en attente pour le manager connecté
+ * GET /api/absences/pending
+ * Liste des absences en attente pour le manager connecté
  * - Manager/Admin uniquement
  */
 router.get('/pending',
@@ -35,7 +35,7 @@ router.get('/pending',
     managerOrAdmin,
     async (req, res, next) => {
         try {
-            await exceptionController.getPendingExceptions(req, res);
+            await absenceController.getPendingAbsences(req, res);
         } catch (error) {
             next(error);
         }
@@ -43,17 +43,17 @@ router.get('/pending',
 );
 
 /**
- * GET /api/exceptions/:id
- * Détail d'une exception par ID
- * - Employé : ses propres exceptions uniquement
- * - Manager : exceptions de ses employés
- * - Admin : toutes les exceptions
+ * GET /api/absences/:id
+ * Détail d'une absence par ID
+ * - Employé : ses propres absences uniquement
+ * - Manager : absences de ses employés
+ * - Admin : toutes les absences
  */
 router.get('/:id',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await exceptionController.getExceptionById(req, res);
+            await absenceController.getAbsenceById(req, res);
         } catch (error) {
             next(error);
         }
@@ -63,8 +63,8 @@ router.get('/:id',
 
 // #region POST Routes
 /**
- * POST /api/exceptions
- * Crée une nouvelle exception
+ * POST /api/absences
+ * Crée une nouvelle absence
  * - Employé : crée pour lui-même (status = 'en_attente')
  * - Manager : peut créer pour ses employés
  * - Admin : peut créer pour n'importe qui
@@ -73,7 +73,7 @@ router.post('/',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await exceptionController.createException(req, res);
+            await absenceController.createAbsence(req, res);
         } catch (error) {
             next(error);
         }
@@ -83,17 +83,17 @@ router.post('/',
 
 // #region PATCH Routes
 /**
- * PATCH /api/exceptions/:id
- * Met à jour une exception (statut 'en_attente' uniquement)
- * - Employé : peut modifier ses propres exceptions en attente
- * - Manager : peut modifier les exceptions de ses employés en attente
+ * PATCH /api/absences/:id
+ * Met à jour une absence (statut 'en_attente' uniquement)
+ * - Employé : peut modifier ses propres absences en attente
+ * - Manager : peut modifier les absences de ses employés en attente
  * - Admin : peut tout modifier
  */
 router.patch('/:id',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await exceptionController.updateException(req, res);
+            await absenceController.updateAbsence(req, res);
         } catch (error) {
             next(error);
         }
@@ -101,8 +101,8 @@ router.patch('/:id',
 );
 
 /**
- * PATCH /api/exceptions/:id/validate
- * Valide ou refuse une exception
+ * PATCH /api/absences/:id/validate
+ * Valide ou refuse une absence
  * - Manager/Admin uniquement
  */
 router.patch('/:id/validate',
@@ -110,7 +110,7 @@ router.patch('/:id/validate',
     managerOrAdmin,
     async (req, res, next) => {
         try {
-            await exceptionController.validateException(req, res);
+            await absenceController.validateAbsence(req, res);
         } catch (error) {
             next(error);
         }
@@ -120,17 +120,17 @@ router.patch('/:id/validate',
 
 // #region DELETE Routes
 /**
- * DELETE /api/exceptions/:id
- * Supprime une exception (soft delete, statut 'en_attente' uniquement)
- * - Employé : peut supprimer ses propres exceptions en attente
- * - Manager : peut supprimer les exceptions de ses employés en attente
+ * DELETE /api/absences/:id
+ * Supprime une absence (soft delete, statut 'en_attente' uniquement)
+ * - Employé : peut supprimer ses propres absences en attente
+ * - Manager : peut supprimer les absences de ses employés en attente
  * - Admin : peut tout supprimer
  */
 router.delete('/:id',
     authMiddleware,
     async (req, res, next) => {
         try {
-            await exceptionController.deleteException(req, res);
+            await absenceController.deleteAbsence(req, res);
         } catch (error) {
             next(error);
         }

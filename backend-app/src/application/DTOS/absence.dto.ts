@@ -1,15 +1,15 @@
-import { ExceptionType, ExceptionStatus } from "@/domain/types";
+import { AbsenceType, AbsenceStatus } from "@/domain/types";
 import {
-    ExceptionProps,
-    ExceptionProps_Core,
-    ExceptionProps_L1,
+    AbsenceProps,
+    AbsenceProps_Core,
+    AbsenceProps_L1,
 } from "@/domain/types/entitiyProps";
 import { UserReadEmployeeDTO_Core, UserReadManagerDTO_Core } from "./user.dto";
 import { AuthContext } from "./timesheet.dto";
 
 // #region Create DTO
 /**
- * DTO pour créer une exception
+ * DTO pour créer une absence
  *
  * EMPLOYÉ :
  * - employeId = extrait du token
@@ -19,9 +19,9 @@ import { AuthContext } from "./timesheet.dto";
  * - Peut créer pour n'importe quel employé
  * - Peut définir le statut directement
  */
-export interface ExceptionCreateDTO {
-    /** Type de l'exception */
-    type: ExceptionType;
+export interface AbsenceCreateDTO {
+    /** Type de l'absence */
+    type: AbsenceType;
     /** Date et heure de début */
     startDateTime: string;  // Format: ISO DateTime "2025-12-29T08:30:00.000Z"
     /** Date et heure de fin */
@@ -33,17 +33,17 @@ export interface ExceptionCreateDTO {
     /** ID de l'employé (OBLIGATOIRE pour Manager/Admin, ignoré pour Employé) */
     employeId?: number;
     /** Statut (optionnel, par défaut 'en_attente') */
-    status?: ExceptionStatus;
+    status?: AbsenceStatus;
 }
 // #endregion
 
 // #region Update DTO
 /**
- * DTO pour modifier une exception (employé peut modifier sa propre exception en_attente)
+ * DTO pour modifier une absence (employé peut modifier sa propre absence en_attente)
  * Tous les champs sont optionnels (PATCH)
  */
-export interface ExceptionUpdateDTO {
-    type?: ExceptionType;
+export interface AbsenceUpdateDTO {
+    type?: AbsenceType;
     startDateTime?: string;  // Format: ISO DateTime
     endDateTime?: string;    // Format: ISO DateTime
     isFullDay?: boolean;
@@ -53,9 +53,9 @@ export interface ExceptionUpdateDTO {
 
 // #region Validate DTO
 /**
- * DTO pour valider/refuser une exception (manager uniquement)
+ * DTO pour valider/refuser une absence (manager uniquement)
  */
-export interface ExceptionValidateDTO {
+export interface AbsenceValidateDTO {
     /** Statut de validation (approuve ou refuse) */
     status: 'approuve' | 'refuse';
     /** Commentaires du manager (optionnels) */
@@ -65,10 +65,10 @@ export interface ExceptionValidateDTO {
 
 // #region Read DTO
 /**
- * DTO de retour pour une exception (GET /exceptions/:id)
- * Basé sur ExceptionProps avec transformations Date → string + relations
+ * DTO de retour pour une absence (GET /absences/:id)
+ * Basé sur AbsenceProps avec transformations Date → string + relations
  */
-export type ExceptionReadDTO = Omit<Omit<ExceptionProps,
+export type AbsenceReadDTO = Omit<Omit<AbsenceProps,
     'startDateTime' | 'endDateTime' | 'validatedAt' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'employe' | 'validator'> & {
     startDateTime: string;      // Date → string ISO DateTime
     endDateTime: string;        // Date → string ISO DateTime
@@ -80,29 +80,29 @@ export type ExceptionReadDTO = Omit<Omit<ExceptionProps,
     validator: UserReadManagerDTO_Core | null;
 }, never>
 
-export type ExceptionReadDTO_L1 = Omit<Omit<ExceptionReadDTO, 'employe' | 'validator'>, never>
+export type AbsenceReadDTO_L1 = Omit<Omit<AbsenceReadDTO, 'employe' | 'validator'>, never>
 
-export type ExceptionReadDTO_Core = Omit<Omit<ExceptionReadDTO_L1, 'createdAt' | 'updatedAt' | 'deletedAt'>, never>
+export type AbsenceReadDTO_Core = Omit<Omit<AbsenceReadDTO_L1, 'createdAt' | 'updatedAt' | 'deletedAt'>, never>
 // #endregion
 
 // #region List & Filter DTOs
 /**
- * DTO pour filtrer les exceptions
- * Query params: GET /exceptions?employeId=1&status=en_attente&type=conges_payes
+ * DTO pour filtrer les absences
+ * Query params: GET /absences?employeId=1&status=en_attente&type=conges_payes
  */
-export interface ExceptionFilterDTO {
+export interface AbsenceFilterDTO {
     employeId?: number;
-    status?: ExceptionStatus;
-    type?: ExceptionType;
+    status?: AbsenceStatus;
+    type?: AbsenceType;
     startDate?: string; // Format: "YYYY-MM-DD" - filtre sur startDateTime
     endDate?: string;   // Format: "YYYY-MM-DD" - filtre sur endDateTime
 }
 
 /**
- * DTO pour la liste des exceptions (version simplifiée)
- * Basé sur ExceptionProps_Core avec transformations Date → string
+ * DTO pour la liste des absences (version simplifiée)
+ * Basé sur AbsenceProps_Core avec transformations Date → string
  */
-export type ExceptionListItemDTO = Omit<Omit<ExceptionProps_Core,
+export type AbsenceListItemDTO = Omit<Omit<AbsenceProps_Core,
     'startDateTime' | 'endDateTime' | 'validatedAt'> & {
     startDateTime: string;      // Date → string ISO DateTime
     endDateTime: string;        // Date → string ISO DateTime

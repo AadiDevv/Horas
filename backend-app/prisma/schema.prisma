@@ -29,7 +29,7 @@ enum TimesheetStatus {
   incomplete
 }
 
-enum ExceptionType {
+enum AbsenceType {
   conges_payes      // Congés payés
   conges_sans_solde // Congés sans solde
   maladie           // Arrêt maladie
@@ -38,7 +38,7 @@ enum ExceptionType {
   autre             // Autre raison
 }
 
-enum ExceptionStatus {
+enum AbsenceStatus {
   en_attente  // En attente de validation
   approuve    // Approuvé par le manager
   refuse      // Refusé par le manager
@@ -55,7 +55,7 @@ model User {
   id                 Int       @id @default(autoincrement())
   firstName          String    @db.VarChar(100)
   lastName           String    @db.VarChar(100)
-  email              String    @unique @db.VarChar(255)li
+  email              String    @unique @db.VarChar(255)
   phone              String    @db.VarChar(20) @default("")
   hashedPassword     String    @db.VarChar(255)
   role               Role      @default(employe)
@@ -78,8 +78,8 @@ model User {
   timesheets         Timesheet[]
   reports            Report[]     @relation("ReportManager")
   customSchedule     Schedule?    @relation("UserCustomSchedule", fields: [customScheduleId], references: [id], onDelete: SetNull)
-  exceptions         Exception[]  @relation("EmployeExceptions")
-  validatedExceptions Exception[] @relation("ValidatorExceptions")
+  absences           Absence[]  @relation("EmployeAbsences")
+  validatedAbsences  Absence[] @relation("ValidatorAbsences")
 
   @@index([email])
   @@index([role])
@@ -144,24 +144,24 @@ model Timesheet {
   @@index([employeId, timestamp])
 }
 
-model Exception {
-  id              Int              @id @default(autoincrement())
+model Absence {
+  id              Int             @id @default(autoincrement())
   employeId       Int
-  type            ExceptionType
-  status          ExceptionStatus  @default(en_attente)
+  type            AbsenceType
+  status          AbsenceStatus   @default(en_attente)
   startDateTime   DateTime
   endDateTime     DateTime
-  isFullDay       Boolean          @default(false)
+  isFullDay       Boolean         @default(false)
   validatedBy     Int?
   validatedAt     DateTime?
-  comments        String?          @db.Text
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now())
+  comments        String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now())
   deletedAt       DateTime?
 
   // Relations
-  employe         User             @relation("EmployeExceptions", fields: [employeId], references: [id], onDelete: Cascade)
-  validator       User?            @relation("ValidatorExceptions", fields: [validatedBy], references: [id], onDelete: SetNull)
+  employe         User            @relation("EmployeAbsences", fields: [employeId], references: [id], onDelete: Cascade)
+  validator       User?           @relation("ValidatorAbsences", fields: [validatedBy], references: [id], onDelete: SetNull)
 
   @@index([employeId])
   @@index([type])

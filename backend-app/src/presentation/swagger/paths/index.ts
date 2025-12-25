@@ -4,7 +4,7 @@ import { userPaths } from './user.paths';
 import { teamPaths } from './team.paths';
 import { schedulePaths } from './schedule.paths';
 import { timesheetPaths } from './timesheet.paths';
-import { exceptionPaths } from './exception.paths';
+import { absencePaths } from './absence.paths';
 
 // #region Export All Paths
 export const paths = {
@@ -14,7 +14,7 @@ export const paths = {
     ...teamPaths,
     ...schedulePaths,
     ...timesheetPaths,
-    ...exceptionPaths
+    ...absencePaths
 };
 // #endregion
 

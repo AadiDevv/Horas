@@ -1,7 +1,7 @@
-import { ExceptionController } from '@/presentation/controllers/exception.controller';
-import { ExceptionUseCase } from '@/application/usecases';
+import { AbsenceController } from '@/presentation/controllers/absence.controller';
+import { AbsenceUseCase } from '@/application/usecases';
 import { ValidationError } from '@/domain/error/AppError';
-import { Exception, Exception_Core, Exception_L1 } from '@/domain/entities/exception';
+import { Absence, Absence_Core, Absence_L1 } from '@/domain/entities/absence';
 import { UserEmployee_Core, UserManager_Core } from '@/domain/entities/user';
 
 // -----------------------------
@@ -46,8 +46,8 @@ const mockManager = new UserManager_Core({
   isActive: true,
 });
 
-// Exception_Core for getExceptions (returns ExceptionListItemDTO)
-const mockException1_Core = new Exception_Core({
+// Absence_Core for getAbsences (returns AbsenceListItemDTO)
+const mockAbsence1_Core = new Absence_Core({
   id: 1,
   employeId: 10,
   type: 'conges_payes',
@@ -57,11 +57,11 @@ const mockException1_Core = new Exception_Core({
   isFullDay: true,
   validatedBy: null,
   validatedAt: null,
-  comments: 'Vacances de Noël',
+  comments: 'Vacances',
 });
 
-// Exception_L1 for update/validate operations
-const mockException1_L1 = new Exception_L1({
+// Absence_L1 for update/validate operations
+const mockAbsence1_L1 = new Absence_L1({
   id: 1,
   employeId: 10,
   type: 'conges_payes',
@@ -77,8 +77,8 @@ const mockException1_L1 = new Exception_L1({
   deletedAt: null,
 });
 
-// Full Exception for getExceptionById (returns ExceptionReadDTO with relations)
-const mockException1_Full = new Exception({
+// Full Absence for getAbsenceById (returns AbsenceReadDTO with relations)
+const mockAbsence1_Full = new Absence({
   id: 1,
   employeId: 10,
   type: 'conges_payes',
@@ -99,37 +99,37 @@ const mockException1_Full = new Exception({
 // -----------------------------
 // Test Suite
 // -----------------------------
-describe('ExceptionController', () => {
-  let useCaseMock: jest.Mocked<ExceptionUseCase>;
-  let controller: ExceptionController;
+describe('AbsenceController', () => {
+  let useCaseMock: jest.Mocked<AbsenceUseCase>;
+  let controller: AbsenceController;
 
   beforeEach(() => {
     useCaseMock = {
-      getExceptions: jest.fn(),
-      getExceptionById: jest.fn(),
-      getPendingExceptionsForManager: jest.fn(),
-      createException: jest.fn(),
-      updateException: jest.fn(),
-      validateException: jest.fn(),
-      deleteException: jest.fn(),
-    } as unknown as jest.Mocked<ExceptionUseCase>;
+      getAbsences: jest.fn(),
+      getAbsenceById: jest.fn(),
+      getPendingAbsencesForManager: jest.fn(),
+      createAbsence: jest.fn(),
+      updateAbsence: jest.fn(),
+      validateAbsence: jest.fn(),
+      deleteAbsence: jest.fn(),
+    } as unknown as jest.Mocked<AbsenceUseCase>;
 
-    controller = new ExceptionController(useCaseMock);
+    controller = new AbsenceController(useCaseMock);
   });
 
   // ----------------------------------------
-  describe('getExceptions', () => {
-    test('should return list of exceptions', async () => {
-      useCaseMock.getExceptions.mockResolvedValue([mockException1_Core]);
+  describe('getAbsences', () => {
+    test('should return list of absences', async () => {
+      useCaseMock.getAbsences.mockResolvedValue([mockAbsence1_Core]);
 
       const req = mockRequest({
         query: { employeId: '10', status: 'en_attente', type: 'conges_payes' }
       }) as any;
       const res = mockResponse();
 
-      await controller.getExceptions(req, res);
+      await controller.getAbsences(req, res);
 
-      expect(useCaseMock.getExceptions).toHaveBeenCalledWith(
+      expect(useCaseMock.getAbsences).toHaveBeenCalledWith(
         'admin',
         1,
         {
@@ -142,12 +142,12 @@ describe('ExceptionController', () => {
       );
       expect(res.success).toHaveBeenCalledWith(
         [expect.objectContaining({ id: 1, employeId: 10, type: 'conges_payes', status: 'en_attente' })],
-        'Exceptions récupérées avec succès'
+        'Absences récupérées avec succès'
       );
     });
 
     test('should handle filters with dates', async () => {
-      useCaseMock.getExceptions.mockResolvedValue([]);
+      useCaseMock.getAbsences.mockResolvedValue([]);
 
       const req = mockRequest({
         query: { startDate: '2025-12-01', endDate: '2025-12-31' },
@@ -155,9 +155,9 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.getExceptions(req, res);
+      await controller.getAbsences(req, res);
 
-      expect(useCaseMock.getExceptions).toHaveBeenCalledWith(
+      expect(useCaseMock.getAbsences).toHaveBeenCalledWith(
         'manager',
         5,
         {
@@ -172,16 +172,16 @@ describe('ExceptionController', () => {
   });
 
   // ----------------------------------------
-  describe('getExceptionById', () => {
-    test('should return one exception with relations', async () => {
-      useCaseMock.getExceptionById.mockResolvedValue(mockException1_Full);
+  describe('getAbsenceById', () => {
+    test('should return one absence with relations', async () => {
+      useCaseMock.getAbsenceById.mockResolvedValue(mockAbsence1_Full);
 
       const req = mockRequest({ params: { id: '1' } }) as any;
       const res = mockResponse();
 
-      await controller.getExceptionById(req, res);
+      await controller.getAbsenceById(req, res);
 
-      expect(useCaseMock.getExceptionById).toHaveBeenCalledWith(
+      expect(useCaseMock.getAbsenceById).toHaveBeenCalledWith(
         1,
         'admin',
         1
@@ -206,7 +206,7 @@ describe('ExceptionController', () => {
             lastName: 'Durand',
           }),
         }),
-        'Exception récupérée avec succès'
+        'Absence récupérée avec succès'
       );
     });
 
@@ -214,44 +214,44 @@ describe('ExceptionController', () => {
       const req = mockRequest({ params: { id: 'abc' } }) as any;
       const res = mockResponse();
 
-      await expect(controller.getExceptionById(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.getAbsenceById(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
-  describe('getPendingExceptions', () => {
-    test('should return pending exceptions for manager', async () => {
-      useCaseMock.getPendingExceptionsForManager.mockResolvedValue([mockException1_Full]);
+  describe('getPendingAbsences', () => {
+    test('should return pending absences for manager', async () => {
+      useCaseMock.getPendingAbsencesForManager.mockResolvedValue([mockAbsence1_Full]);
 
       const req = mockRequest({ user: { id: 5, role: 'manager' } }) as any;
       const res = mockResponse();
 
-      await controller.getPendingExceptions(req, res);
+      await controller.getPendingAbsences(req, res);
 
-      expect(useCaseMock.getPendingExceptionsForManager).toHaveBeenCalledWith(5);
+      expect(useCaseMock.getPendingAbsencesForManager).toHaveBeenCalledWith(5);
       expect(res.success).toHaveBeenCalledWith(
         [expect.objectContaining({ id: 1, status: 'approuve' })],
-        'Exceptions en attente récupérées avec succès'
+        'Absences en attente récupérées avec succès'
       );
     });
 
     test('should work for admin', async () => {
-      useCaseMock.getPendingExceptionsForManager.mockResolvedValue([]);
+      useCaseMock.getPendingAbsencesForManager.mockResolvedValue([]);
 
       const req = mockRequest({ user: { id: 1, role: 'admin' } }) as any;
       const res = mockResponse();
 
-      await controller.getPendingExceptions(req, res);
+      await controller.getPendingAbsences(req, res);
 
-      expect(useCaseMock.getPendingExceptionsForManager).toHaveBeenCalledWith(1);
+      expect(useCaseMock.getPendingAbsencesForManager).toHaveBeenCalledWith(1);
       expect(res.success).toHaveBeenCalled();
     });
   });
 
   // ----------------------------------------
-  describe('createException', () => {
-    test('should create exception for employee (auto status en_attente)', async () => {
-      useCaseMock.createException.mockResolvedValue(mockException1_Core);
+  describe('createAbsence', () => {
+    test('should create absence for employee (auto status en_attente)', async () => {
+      useCaseMock.createAbsence.mockResolvedValue(mockAbsence1_Core);
 
       const req = mockRequest({
         body: {
@@ -259,21 +259,21 @@ describe('ExceptionController', () => {
           startDateTime: '2025-12-20T00:00:00.000Z',
           endDateTime: '2025-12-22T23:59:59.000Z',
           isFullDay: true,
-          comments: 'Vacances de Noël',
+          comments: 'Vacances',
         },
         user: { id: 10, role: 'employe' },
       }) as any;
       const res = mockResponse();
 
-      await controller.createException(req, res);
+      await controller.createAbsence(req, res);
 
-      expect(useCaseMock.createException).toHaveBeenCalledWith(
+      expect(useCaseMock.createAbsence).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'conges_payes',
           startDateTime: '2025-12-20T00:00:00.000Z',
           endDateTime: '2025-12-22T23:59:59.000Z',
           isFullDay: true,
-          comments: 'Vacances de Noël',
+          comments: 'Vacances',
         }),
         expect.objectContaining({
           userRole: 'employe',
@@ -282,12 +282,12 @@ describe('ExceptionController', () => {
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'conges_payes', status: 'en_attente' }),
-        'Exception créée avec succès'
+        'Absence créée avec succès'
       );
     });
 
-    test('should create exception for manager with employeId', async () => {
-      useCaseMock.createException.mockResolvedValue(mockException1_Core);
+    test('should create absence for manager with employeId', async () => {
+      useCaseMock.createAbsence.mockResolvedValue(mockAbsence1_Core);
 
       const req = mockRequest({
         body: {
@@ -303,9 +303,9 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.createException(req, res);
+      await controller.createAbsence(req, res);
 
-      expect(useCaseMock.createException).toHaveBeenCalledWith(
+      expect(useCaseMock.createAbsence).toHaveBeenCalledWith(
         expect.objectContaining({
           employeId: 10,
           type: 'maladie',
@@ -324,7 +324,7 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.createException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.createAbsence(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError for invalid datetime', async () => {
@@ -337,14 +337,14 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.createException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.createAbsence(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
-  describe('updateException', () => {
-    test('should update exception successfully', async () => {
-      useCaseMock.updateException.mockResolvedValue(mockException1_L1);
+  describe('updateAbsence', () => {
+    test('should update absence successfully', async () => {
+      useCaseMock.updateAbsence.mockResolvedValue(mockAbsence1_L1);
 
       const req = mockRequest({
         params: { id: '1' },
@@ -355,9 +355,9 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.updateException(req, res);
+      await controller.updateAbsence(req, res);
 
-      expect(useCaseMock.updateException).toHaveBeenCalledWith(
+      expect(useCaseMock.updateAbsence).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           endDateTime: '2025-12-30T23:59:59.000Z',
@@ -370,7 +370,7 @@ describe('ExceptionController', () => {
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ id: 1 }),
-        'Exception modifiée avec succès'
+        'Absence modifiée avec succès'
       );
     });
 
@@ -381,21 +381,21 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateAbsence(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError for empty body', async () => {
       const req = mockRequest({ params: { id: '1' }, body: {} }) as any;
       const res = mockResponse();
 
-      await expect(controller.updateException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.updateAbsence(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
-  describe('validateException', () => {
-    test('should approve exception successfully', async () => {
-      useCaseMock.validateException.mockResolvedValue(mockException1_L1);
+  describe('validateAbsence', () => {
+    test('should approve absence successfully', async () => {
+      useCaseMock.validateAbsence.mockResolvedValue(mockAbsence1_L1);
 
       const req = mockRequest({
         params: { id: '1' },
@@ -407,9 +407,9 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.validateException(req, res);
+      await controller.validateAbsence(req, res);
 
-      expect(useCaseMock.validateException).toHaveBeenCalledWith(
+      expect(useCaseMock.validateAbsence).toHaveBeenCalledWith(
         1,
         { status: 'approuve', comments: 'Approuvé - bon repos !' },
         expect.objectContaining({
@@ -419,12 +419,12 @@ describe('ExceptionController', () => {
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'approuve' }),
-        'Exception approuvée avec succès'
+        'Absence approuvée avec succès'
       );
     });
 
-    test('should refuse exception successfully', async () => {
-      useCaseMock.validateException.mockResolvedValue(mockException1_L1);
+    test('should refuse absence successfully', async () => {
+      useCaseMock.validateAbsence.mockResolvedValue(mockAbsence1_L1);
 
       const req = mockRequest({
         params: { id: '1' },
@@ -433,9 +433,9 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.validateException(req, res);
+      await controller.validateAbsence(req, res);
 
-      expect(useCaseMock.validateException).toHaveBeenCalledWith(
+      expect(useCaseMock.validateAbsence).toHaveBeenCalledWith(
         1,
         { status: 'refuse', comments: 'Période trop chargée' },
         expect.any(Object)
@@ -450,7 +450,7 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.validateException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.validateAbsence(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError for invalid status', async () => {
@@ -461,7 +461,7 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.validateException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.validateAbsence(req, res)).rejects.toThrow(ValidationError);
     });
 
     test('should throw ValidationError for invalid id', async () => {
@@ -472,12 +472,12 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await expect(controller.validateException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.validateAbsence(req, res)).rejects.toThrow(ValidationError);
     });
   });
 
   // ----------------------------------------
-  describe('deleteException', () => {
+  describe('deleteAbsence', () => {
     test('should delete successfully', async () => {
       const req = mockRequest({
         params: { id: '1' },
@@ -485,23 +485,23 @@ describe('ExceptionController', () => {
       }) as any;
       const res = mockResponse();
 
-      await controller.deleteException(req, res);
+      await controller.deleteAbsence(req, res);
 
-      expect(useCaseMock.deleteException).toHaveBeenCalledWith(
+      expect(useCaseMock.deleteAbsence).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
           userRole: 'manager',
           userId: 5,
         })
       );
-      expect(res.success).toHaveBeenCalledWith(null, 'Exception supprimée avec succès');
+      expect(res.success).toHaveBeenCalledWith(null, 'Absence supprimée avec succès');
     });
 
     test('should throw ValidationError for invalid id', async () => {
       const req = mockRequest({ params: { id: 'bad' } }) as any;
       const res = mockResponse();
 
-      await expect(controller.deleteException(req, res)).rejects.toThrow(ValidationError);
+      await expect(controller.deleteAbsence(req, res)).rejects.toThrow(ValidationError);
     });
   });
 });

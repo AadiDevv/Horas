@@ -1,28 +1,28 @@
-import { IException } from "@/domain/interfaces/exception.interface";
-import { Exception, Exception_Core, Exception_L1 } from "@/domain/entities/exception";
+import { IAbsence } from "@/domain/interfaces/absence.interface";
+import { Absence, Absence_Core, Absence_L1 } from "@/domain/entities/absence";
 import { prisma } from "../prisma.service";
 import { UserEmployee_Core, UserManager_Core } from "@/domain/entities/user";
-import { EXCEPTION_CORE_SELECT, EXCEPTION_L1_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/exception.prismaConfig";
+import { ABSENCE_CORE_SELECT, ABSENCE_L1_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/absence.prismaConfig";
 import { USER_EMPLOYEE_CORE_SELECT, USER_MANAGER_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/user.prismaConfig";
 
-export class ExceptionRepository implements IException {
+export class AbsenceRepository implements IAbsence {
 
     // #region Read
 
-    async getAllExceptions(filter?: {
+    async getAllAbsences(filter?: {
         employeId?: number;
         status?: string;
         type?: string;
         startDate?: string;
         endDate?: string;
-    }): Promise<Exception_Core[]> {
+    }): Promise<Absence_Core[]> {
         const { employeId, status, type, startDate, endDate } = filter || {};
 
         const dateFilter: { gte?: Date; lte?: Date } = {};
         if (startDate) dateFilter.gte = new Date(startDate);
         if (endDate) dateFilter.lte = new Date(endDate);
 
-        const exceptions = await prisma.exception.findMany({
+        const absences = await prisma.absence.findMany({
             where: {
                 deletedAt: null,
                 ...(employeId && { employeId }),
@@ -31,21 +31,21 @@ export class ExceptionRepository implements IException {
                 ...(Object.keys(dateFilter).length && { startDateTime: dateFilter }),
             },
             select: {
-                ...EXCEPTION_CORE_SELECT,
+                ...ABSENCE_CORE_SELECT,
             },
             orderBy: {
                 startDateTime: 'desc'
             }
         });
 
-        return exceptions.map(e => new Exception_Core({ ...e }));
+        return absences.map(e => new Absence_Core({ ...e }));
     }
 
-    async getException_ById(id: number): Promise<Exception | null> {
-        const exception = await prisma.exception.findUnique({
+    async getAbsence_ById(id: number): Promise<Absence | null> {
+        const absence = await prisma.absence.findUnique({
             where: { id, deletedAt: null },
             select: {
-                ...EXCEPTION_L1_SELECT,
+                ...ABSENCE_L1_SELECT,
                 employe: {
                     select: {
                         ...USER_EMPLOYEE_CORE_SELECT,
@@ -59,26 +59,26 @@ export class ExceptionRepository implements IException {
             },
         });
 
-        if (!exception) return null;
+        if (!absence) return null;
 
-        return new Exception({
-            ...exception,
+        return new Absence({
+            ...absence,
             employe: new UserEmployee_Core({
-                ...exception.employe,
-                managerId: exception.employe.managerId!,
+                ...absence.employe,
+                managerId: absence.employe.managerId!,
                 customScheduleId: null
             }),
-            validator: exception.validator ? new UserManager_Core({
-                ...exception.validator
+            validator: absence.validator ? new UserManager_Core({
+                ...absence.validator
             }) : null
         });
     }
 
-    async getExceptions_ByEmployeId(employeId: number): Promise<Exception[]> {
-        const exceptions = await prisma.exception.findMany({
+    async getAbsences_ByEmployeId(employeId: number): Promise<Absence[]> {
+        const absences = await prisma.absence.findMany({
             where: { employeId, deletedAt: null },
             select: {
-                ...EXCEPTION_L1_SELECT,
+                ...ABSENCE_L1_SELECT,
                 employe: {
                     select: {
                         ...USER_EMPLOYEE_CORE_SELECT,
@@ -95,7 +95,7 @@ export class ExceptionRepository implements IException {
             }
         });
 
-        return exceptions.map(e => new Exception({
+        return absences.map(e => new Absence({
             ...e,
             employe: new UserEmployee_Core({
                 ...e.employe,
@@ -108,8 +108,8 @@ export class ExceptionRepository implements IException {
         }));
     }
 
-    async getPendingExceptions_ByManagerId(managerId: number): Promise<Exception[]> {
-        const exceptions = await prisma.exception.findMany({
+    async getPendingAbsences_ByManagerId(managerId: number): Promise<Absence[]> {
+        const absences = await prisma.absence.findMany({
             where: {
                 deletedAt: null,
                 status: 'en_attente',
@@ -118,7 +118,7 @@ export class ExceptionRepository implements IException {
                 }
             },
             select: {
-                ...EXCEPTION_L1_SELECT,
+                ...ABSENCE_L1_SELECT,
                 employe: {
                     select: {
                         ...USER_EMPLOYEE_CORE_SELECT,
@@ -135,7 +135,7 @@ export class ExceptionRepository implements IException {
             }
         });
 
-        return exceptions.map(e => new Exception({
+        return absences.map(e => new Absence({
             ...e,
             employe: new UserEmployee_Core({
                 ...e.employe,
@@ -152,47 +152,48 @@ export class ExceptionRepository implements IException {
 
     // #region Create
 
-    async createException(exception: Exception_Core): Promise<Exception_Core> {
-        const { id, ...exceptionData } = exception;
+    async createAbsence(absence: Absence_Core): Promise<Absence_Core> {
+        console.log('createAbsence', absence);
+        const { id, ...absenceData } = absence;
 
-        const createdException = await prisma.exception.create({
-            data: { ...exceptionData },
+        const createdAbsence = await prisma.absence.create({
+            data: { ...absenceData },
             select: {
-                ...EXCEPTION_CORE_SELECT,
+                ...ABSENCE_CORE_SELECT,
             }
         });
 
-        return new Exception_Core({ ...createdException });
+        return new Absence_Core({ ...createdAbsence });
     }
 
     // #endregion
 
     // #region Update
 
-    async updateException_ById(exception: Exception_L1): Promise<Exception_L1> {
-        const { createdAt, deletedAt, ...updateData } = exception;
+    async updateAbsence_ById(absence: Absence_L1): Promise<Absence_L1> {
+        const { createdAt, deletedAt, ...updateData } = absence;
 
-        const updatedException = await prisma.exception.update({
-            where: { id: exception.id },
+        const updatedAbsence = await prisma.absence.update({
+            where: { id: absence.id },
             data: {
                 ...updateData,
                 updatedAt: new Date()
             },
             select: {
-                ...EXCEPTION_L1_SELECT,
+                ...ABSENCE_L1_SELECT,
             }
         });
 
-        return new Exception_L1({ ...updatedException });
+        return new Absence_L1({ ...updatedAbsence });
     }
 
-    async validateException(
+    async validateAbsence(
         id: number,
         validatedBy: number,
         status: 'approuve' | 'refuse',
         comments?: string
-    ): Promise<Exception_L1> {
-        const updatedException = await prisma.exception.update({
+    ): Promise<Absence_L1> {
+        const updatedAbsence = await prisma.absence.update({
             where: { id },
             data: {
                 status,
@@ -202,19 +203,19 @@ export class ExceptionRepository implements IException {
                 updatedAt: new Date()
             },
             select: {
-                ...EXCEPTION_L1_SELECT,
+                ...ABSENCE_L1_SELECT,
             }
         });
 
-        return new Exception_L1({ ...updatedException });
+        return new Absence_L1({ ...updatedAbsence });
     }
 
     // #endregion
 
     // #region Delete
 
-    async deleteException_ById(id: number): Promise<void> {
-        await prisma.exception.update({
+    async deleteAbsence_ById(id: number): Promise<void> {
+        await prisma.absence.update({
             where: { id },
             data: {
                 deletedAt: new Date()

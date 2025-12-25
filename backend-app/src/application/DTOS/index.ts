@@ -15,6 +15,6 @@ export * from './schedule.dto';
 export * from './timesheet.dto';
 // #endregion
 
-// #region Exception DTOs
-export * from './exception.dto';
+// #region Absence DTOs
+export * from './absence.dto';
 // #endregion
