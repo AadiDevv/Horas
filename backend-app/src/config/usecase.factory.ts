@@ -1,4 +1,4 @@
-import { AuthUseCase, UserUseCase, TeamUseCase, TimesheetUseCase, ScheduleUseCase } from "@/application/usecases";
+import { AuthUseCase, UserUseCase, TeamUseCase, TimesheetUseCase, ScheduleUseCase, AbsenceUseCase } from "@/application/usecases";
 import { infra } from "./repository.factory";
 
 class ApplicationFactory {
@@ -7,6 +7,7 @@ class ApplicationFactory {
     private static teamUseCase: TeamUseCase | null;
     private static timesheetUseCase: TimesheetUseCase | null;
     private static scheduleUseCase: ScheduleUseCase | null;
+    private static absenceUseCase: AbsenceUseCase | null;
 
     public static getAuthUseCase(): AuthUseCase {
         if (!this.authUseCase) {
@@ -52,12 +53,22 @@ class ApplicationFactory {
         return this.scheduleUseCase;
     }
 
+    public static getAbsenceUseCase(): AbsenceUseCase {
+        if (!this.absenceUseCase) {
+            const absenceRepo = infra.getAbsenceRepo();
+            const userRepo = infra.getUserRepoAsIUser();
+            this.absenceUseCase = new AbsenceUseCase(absenceRepo, userRepo);
+        }
+        return this.absenceUseCase;
+    }
+
     public static reset(): void {
         this.authUseCase = null;
         this.userUseCase = null;
         this.teamUseCase = null;
         this.timesheetUseCase = null;
         this.scheduleUseCase = null;
+        this.absenceUseCase = null;
     }
 }
 export const app = {
@@ -66,5 +77,6 @@ export const app = {
     getTeamUseCase: () => ApplicationFactory.getTeamUseCase(),
     getTimesheetUseCase: () => ApplicationFactory.getTimesheetUseCase(),
     getScheduleUseCase: () => ApplicationFactory.getScheduleUseCase(),
+    getAbsenceUseCase: () => ApplicationFactory.getAbsenceUseCase(),
     reset: () => ApplicationFactory.reset()
 };
