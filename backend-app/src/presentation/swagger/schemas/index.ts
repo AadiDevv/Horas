@@ -5,6 +5,7 @@ import { userSchemas } from './user.schema';
 import { teamSchemas } from './team.schema';
 import { scheduleSchemas } from './schedule.schema';
 import { timesheetSchemas } from './timesheet.schema';
+import { absenceSchemas } from './absence.schema';
 
 // #region Export All Schemas
 export const schemas = {
@@ -14,7 +15,8 @@ export const schemas = {
     ...userSchemas,
     ...teamSchemas,
     ...scheduleSchemas,
-    ...timesheetSchemas
+    ...timesheetSchemas,
+    ...absenceSchemas
 };
 // #endregion
 

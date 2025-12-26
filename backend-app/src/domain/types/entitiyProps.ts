@@ -198,3 +198,47 @@ export type TimesheetProps = Timesheet_Props.TimesheetProps;
 export type TimesheetProps_L1 = Timesheet_Props.TimesheetProps_enriched1;
 export type TimesheetProps_Core = Timesheet_Props.TimesheetProps_Core;
 //#endregion
+
+//#region Absence hierarchy types
+export namespace Absence_Props {
+    // Data enrichment types
+    type Absence_Core = {
+        id: number;
+        employeId: number;
+        type: import("./index").AbsenceType;
+        status: import("./index").AbsenceStatus;
+        startDateTime: Date;
+        endDateTime: Date;
+        isFullDay: boolean;
+        validatedBy: number | null;
+        validatedAt: Date | null;
+        comments: string | null;
+    }
+
+    type Absence_L1 = {
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }
+
+    type Absence_joints = {
+        employe: UserEmployee_Core;
+        validator: UserManager_Core | null;
+    }
+
+    // Props Hierarchy
+    export type AbsenceProps = Omit<
+        Absence_Core
+        & Absence_L1
+        & Absence_joints, never>
+
+    // AbsenceProps = AbsenceProps_enriched1 + Absence_joints
+    export type AbsenceProps_enriched1 = Omit<AbsenceProps, keyof Absence_joints>
+    export type AbsenceProps_Core = Omit<AbsenceProps_enriched1, keyof Absence_L1>
+}
+
+// Aliases top-level pour import direct ailleurs sans préfixe namespace
+export type AbsenceProps = Absence_Props.AbsenceProps;
+export type AbsenceProps_L1 = Absence_Props.AbsenceProps_enriched1;
+export type AbsenceProps_Core = Absence_Props.AbsenceProps_Core;
+//#endregion
