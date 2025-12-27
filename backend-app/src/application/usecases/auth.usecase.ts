@@ -4,6 +4,7 @@ import { IAuth } from "@/domain/interfaces/auth.interface";
 import { AlreadyExistsError, InvalidCredentialsError } from "@/domain/error/AppError";
 import { JWTService, ValidateService } from "@/application/services/";
 import { UserMapper } from "../mappers/";
+import { IUser } from "@/domain/interfaces/user.interface";
 
 /**
  * Use Case pour l'authentification
@@ -11,7 +12,7 @@ import { UserMapper } from "../mappers/";
  */
 export class AuthUseCase {
 
-    constructor(private readonly R_auth: IAuth) { }
+    constructor(private readonly R_auth: IAuth & IUser) { }
 
 
     async registerManager(dto: UserCreateManagerDTO): Promise<UserManager_Core> {
@@ -22,8 +23,8 @@ export class AuthUseCase {
         const user = UserMapper.FromDTO.CreateManager_ToEntityCore(dto, hashedPassword, "manager")
         user.validateManager();
 
-        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
-        if (bdUser != null) {
+        const userWithEmailExist : User_L1 | null = await this.R_auth.getUserL1_ByEmail(user.email)
+        if (userWithEmailExist != null) {
             throw new AlreadyExistsError("User already exists")
 
         }
@@ -44,9 +45,9 @@ export class AuthUseCase {
         const user = UserMapper.FromDTO.CreateEmployee_ToEntityCore(dto, hashedPassword, "employe")
         user.validateEmployee();
 
-        const bdUser = await this.R_auth.getUser_ByEmail(user.email)
+        const userWithEmailExist : User_L1 | null = await this.R_auth.getUserL1_ByEmail(user.email)
 
-        if (bdUser != null) {
+        if (userWithEmailExist != null) {
             throw new AlreadyExistsError("User with this email already exists")
         }
         // #endregion
@@ -64,7 +65,7 @@ export class AuthUseCase {
 
         // #region - Verify email and password
 
-        const user: User_L1 | null = await this.R_auth.getUser_ByEmail(userDTO.email)
+        const user: User_L1 | null = await this.R_auth.getUserL1_ByEmail(userDTO.email)
         if (!user) throw new InvalidCredentialsError('No user with matching email found')
 
         const isPasswordValid = await user.verifyPassword(userDTO.password)

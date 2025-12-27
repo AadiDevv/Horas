@@ -19,7 +19,7 @@ class ApplicationFactory {
 
     public static getUserUseCase(): UserUseCase {
         if (!this.userUseCase) {
-            const userRepo = infra.getUserRepoAsIUser();
+            const userRepo = infra.getUserRepo();
             const teamRepo = infra.getTeamRepo();
             const scheduleRepo = infra.getScheduleRepo();
             this.userUseCase = new UserUseCase(userRepo, teamRepo, scheduleRepo);
@@ -39,7 +39,7 @@ class ApplicationFactory {
     public static getTimesheetUseCase(): TimesheetUseCase {
         if (!this.timesheetUseCase) {
             const timesheetRepo = infra.getTimesheetRepo();
-            const userRepo = infra.getUserRepoAsIUser();
+            const userRepo = infra.getUserRepo();
             this.timesheetUseCase = new TimesheetUseCase(timesheetRepo, userRepo);
         }
         return this.timesheetUseCase;
@@ -56,7 +56,7 @@ class ApplicationFactory {
     public static getAbsenceUseCase(): AbsenceUseCase {
         if (!this.absenceUseCase) {
             const absenceRepo = infra.getAbsenceRepo();
-            const userRepo = infra.getUserRepoAsIUser();
+            const userRepo = infra.getUserRepo();
             this.absenceUseCase = new AbsenceUseCase(absenceRepo, userRepo);
         }
         return this.absenceUseCase;
