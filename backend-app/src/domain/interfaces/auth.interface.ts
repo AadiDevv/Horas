@@ -8,7 +8,7 @@ import { UserEmployee_Core, UserEmployee_L1, UserManager_Core, User_Core, User_L
  */
 export interface IAuth {
   // #region Read (pour authentification uniquement)
-  getUser_ByEmail(email: string): Promise<User_L1 | null>;
+  // getUser_ByEmail(email: string): Promise<User_L1 | null>;
   // #endregion
 
   // #region Update (pour auth)

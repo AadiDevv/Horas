@@ -445,9 +445,10 @@ WHERE teams.managerId = :managerId
 - Peut modifier tous les champs : firstName, lastName, email, phone, role, isActive
 
 **Manager :**
-- Peut uniquement modifier son propre profil
+- Peut uniquement modifier son propre ainsi que ceux de ses employés
 - Champs autorisés : firstName, lastName, email, phone
-- Champs interdits : role, isActive
+- Champs interdits : role, isActive.
+- Le manager ne modifie pas le role de ses employés, car n'est pas logique d'élever le rôle d'un employé à un role égale au sien, il n'aurait plus de droits sur celui ci
 
 **Employé :**
 - Peut uniquement modifier son propre profil  
@@ -464,7 +465,7 @@ Ces attributs seront gérés par des routes admin dédiées dans une version fut
                     in: 'path',
                     required: true,
                     schema: { type: 'integer' },
-                    description: 'ID de l\'utilisateur'
+                    description: 'ID de l\'utilisateur à modifier'
                 }
             ],
             requestBody: {

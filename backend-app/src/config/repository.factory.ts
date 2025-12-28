@@ -17,22 +17,14 @@ class InfrastructureFactory {
     /**
      * Retourne le UserRepository en tant qu'IAuth (pour AuthUseCase)
      */
-    public static getUserRepository(): IAuth {
+    public static getUserRepository(): IAuth & IUser {
         if (!this.userRepository) {
             this.userRepository = new UserRepository()
         }
         return this.userRepository
     }
 
-    /**
-     * Retourne le UserRepository en tant qu'IUser (pour UserUseCase)
-     */
-    public static getUserRepositoryAsIUser(): IUser {
-        if (!this.userRepository) {
-            this.userRepository = new UserRepository()
-        }
-        return this.userRepository
-    }
+
 
     public static getTeamRepository(): ITeam {
         if (!this.teamRepository) {
@@ -76,7 +68,6 @@ class InfrastructureFactory {
 export const infra = {
     initDb: () => { InfrastructureFactory.initializeDatabase() },
     getUserRepo: () => (InfrastructureFactory.getUserRepository()),
-    getUserRepoAsIUser: () => (InfrastructureFactory.getUserRepositoryAsIUser()),
     getTeamRepo: () => (InfrastructureFactory.getTeamRepository()),
     getTimesheetRepo: () => (InfrastructureFactory.getTimesheetRepository()),
     getScheduleRepo: () => (InfrastructureFactory.getScheduleRepository()),

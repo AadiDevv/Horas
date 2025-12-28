@@ -12,6 +12,8 @@ export interface IUser {
 
     getUser_ById(id: number): Promise<User_Core>;
 
+    getUserL1_ByEmail(email: string): Promise<User_L1 | null>;
+
     getManager_ById(id: number): Promise<UserManager>;
 
     getEmployees_ByManagerId(managerId: number): Promise<UserEmployee_Core[]>;

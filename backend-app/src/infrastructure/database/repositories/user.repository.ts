@@ -112,9 +112,9 @@ export class UserRepository implements IAuth, IUser {
     }
   }
 
-  async getUser_ByEmail(email: string): Promise<User_L1 | null> {
+  async getUserL1_ByEmail(email: string): Promise<User_L1 | null> {
     try {
-      const user = await prisma.user.findUnique({ where: { email } });
+      const user = await prisma.user.findUnique({ where: { email, deletedAt: null }});
       if (!user) return null;
       return new User_L1({
         ...user,

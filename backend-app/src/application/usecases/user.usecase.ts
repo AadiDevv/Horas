@@ -1,5 +1,5 @@
 import { UserAuthDTO, UserUpdateDTO } from "@/application/DTOS/";
-import { UserEmployee, UserEmployee_Core, UserManager, User_Core } from "@/domain/entities/user";
+import { UserEmployee, UserEmployee_Core, UserManager, User_Core, User_L1 } from "@/domain/entities/user";
 import { Schedule_Core } from "@/domain/entities/schedule";
 import { IUser } from "@/domain/interfaces/user.interface";
 import { NotFoundError, ForbiddenError, ValidationError } from "@/domain/error/AppError";
@@ -46,6 +46,12 @@ export class UserUseCase {
     async getUserCore_ById(id: number): Promise<User_Core> {
         const user = await this.R_user.getUser_ById(id);
         return new User_Core({ ...user });
+    }
+
+    async getUserL1_ByEmail(email: string): Promise<User_L1 | null> {
+        const user = await this.R_user.getUserL1_ByEmail(email);
+        if (!user) return null;
+        return new User_L1({ ...user });
     }
 
     /**
@@ -195,41 +201,20 @@ export class UserUseCase {
         dto: UserUpdateDTO,
         requestingUser: UserAuthDTO,
     ): Promise<void> {
-        // Admin peut tout modifier
+        
+        // ADMIN
         if (requestingUser.role === 'admin') {
             return;
         }
 
-        // Manager et Employé : restrictions strictes
-        if (requestingUser.role === 'employe') {
-            // Vérifier que c'est leur propre profil
-            if (targetUser.id !== requestingUser.id) {
-                throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
-            }
-        } else if (requestingUser.role === 'manager') {
-
-            // Si Le targetUser n'est pas son propre profil
-            if (targetUser.id !== requestingUser.id) {
-                // Si Le targetUser n'est pas un employé
-                if (targetUser.role !== 'employe') {
-                    throw new ForbiddenError("Vous ne pouvez modifier que des employés");
-                }
-                // Si Le targetUser n'est pas un employé du manager 
-                const manager = await this.getManager_byId(requestingUser.id);
-                if (!manager.employes.some(employee => employee.id === targetUser.id)) {
-                    throw new ForbiddenError("L'utilisateur ne figure pas parmis vos employés");
-                }
-            }
-
-        }
-        // Champs interdits pour manager/employé
+        // MANAGER OR EMPLOYEE : Champs interdits pour manager/employé
         const forbiddenFields: string[] = [];
 
-        if (dto.role !== undefined) {
+        if (dto.role) {
             forbiddenFields.push('role');
         }
 
-        if (dto.isActive !== undefined) {
+        if (dto.isActive && requestingUser.role === 'employe') {
             forbiddenFields.push('isActive');
         }
 
@@ -240,6 +225,41 @@ export class UserUseCase {
             );
         }
 
+        // EMPLOYEE
+        if (requestingUser.role === 'employe') {
+
+            // Vérifier que c'est son propre profil qu'il modifie
+            if (targetUser.id !== requestingUser.id) {
+                throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
+            }
+        } 
+        // MANAGER
+        else if (requestingUser.role === 'manager') {
+
+            // Si Le targetUser n'est pas son propre profil
+            if (targetUser.id !== requestingUser.id) {
+
+                // Si Le targetUser n'est pas un employé
+                if (targetUser.role !== 'employe') {
+                    throw new ForbiddenError("Vous ne pouvez modifier que des employés");
+                }
+                // Si Le targetUser n'est pas un employé du manager 
+                const employee: UserEmployee_Core = await this.getEmployeeCore_ById(targetUser.id);
+                if (employee.managerId !== requestingUser.id) {
+                    throw new ForbiddenError("L'utilisateur ne figure pas parmis vos employés");
+                }
+                if(dto.email && dto.email !== employee.email) {
+
+                    // Vérifier que l'email n'est pas déjà utilisé par un autre utilisateur
+                    const userWithEmailExists = await this.getUserL1_ByEmail(dto.email);
+
+                    if(userWithEmailExists) {
+                        throw new ValidationError("L'email renseigné est déjà utilisé par un autre utilisateur");
+                    }
+                }
+            }
+
+        }
     }
 
     /**

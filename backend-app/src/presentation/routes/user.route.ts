@@ -76,7 +76,6 @@ router.get('/:id',
  */
 router.patch('/:id',
     authMiddleware,      // 1️⃣ Vérifie le JWT
-    adminOrSelf,         // 2️⃣ Vérifie que c'est admin OU que c'est son propre profil
     async (req, res, next) => {
         try {
             await userController.updateUserProfile_ById(req, res);
