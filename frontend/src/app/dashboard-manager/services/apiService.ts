@@ -12,6 +12,13 @@ const getAuthHeaders = () => {
   };
 };
 
+// Helper pour gérer les erreurs HTTP et extraire le message proprement
+const handleHttpError = async (res: Response): Promise<never> => {
+  const errorData = await res.json();
+  // Le backend renvoie { success: false, error: "message", code: "...", timestamp: "..." }
+  throw new Error(errorData.error || errorData.message || `Erreur ${res.status}: ${res.statusText}`);
+};
+
 // Helper pour transformer les données frontend -> backend (CREATE)
 // Note: managerId n'est pas envoyé, il sera automatiquement assigné par le backend depuis le JWT
 const transformAgentToBackend = (agent: Partial<Agent> & { password?: string }) => ({
@@ -174,8 +181,8 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
-
+  console.log('📡 Statut de la réponse:', res.status, res.statusText );
+  console.log('auth headers:', getAuthHeaders());
   if (!res.ok) {
     const errorText = await res.text();
     console.error('❌ Erreur du serveur:', errorText);
@@ -278,15 +285,7 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();
@@ -320,15 +319,7 @@ export async function deleteAgent(id: number): Promise<ApiResponse<void>> {
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();
@@ -401,15 +392,7 @@ export async function assignUserToTeam(userId: number, teamId: number): Promise<
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();
@@ -441,15 +424,7 @@ export async function changeUserPassword(userId: number, oldPassword: string, ne
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();

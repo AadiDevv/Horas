@@ -34,7 +34,7 @@ const mockEquipes: Equipe[] = [
     horaires: [
       { jour: 'Lundi', heureDebut: '08:00', heureFin: '16:00' },
       { jour: 'Mardi', heureDebut: '08:00', heureFin: '16:00' },
-      { jour: 'Mercredi', heureDebut: '08:00', heureFin: '16:00' },
+      { jour: 'Mercredi', heureDebut: '08:00', heureFin: '18:00' },
       { jour: 'Jeudi', heureDebut: '08:00', heureFin: '16:00' },
       { jour: 'Vendredi', heureDebut: '08:00', heureFin: '16:00' }
     ]

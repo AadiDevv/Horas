@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Agent, Equipe, AgentFormData, EquipeFormData, DashboardPage, Manager, ManagerFormData } from '../types';
 import * as api from '../services/apiService';
+import { handleApiError, showSuccess } from '@/app/utils/errorHandler';
 
 export function useManagerDashboard() {
   const [currentPage, setCurrentPage] = useState<DashboardPage>('dashboard');
@@ -69,55 +70,70 @@ export function useAgentManager() {
         console.warn('⚠️ Pas de données d\'agents ou échec');
       }
     } catch (error) {
-      console.error('❌ Erreur chargement agents:', error);
+      handleApiError(error, 'Erreur lors du chargement des agents');
     }
     setLoadingAgents(false);
     console.log('📋 Fin du chargement des agents');
   };
 
   const handleCreate = async () => {
-    const newAgent = {
-      prenom: formData.prenom,
-      nom: formData.nom,
-      email: formData.email,
-      role: formData.role,
-      telephone: formData.telephone || undefined,
-      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined,
-      password: formData.password // Ajout du mot de passe
-    };
-    const result = await api.createAgent(newAgent);
-    if (result.success) {
-      await loadAgents();
-      setShowModal(false);
-      resetForm();
-      // Note: Les équipes seront rechargées automatiquement via useEffect quand agents change
+    try {
+      const newAgent = {
+        prenom: formData.prenom,
+        nom: formData.nom,
+        email: formData.email,
+        role: formData.role,
+        telephone: formData.telephone || undefined,
+        equipeId: formData.equipeId ? Number(formData.equipeId) : undefined,
+        password: formData.password // Ajout du mot de passe
+      };
+      const result = await api.createAgent(newAgent);
+      if (result.success) {
+        showSuccess('Agent créé avec succès');
+        await loadAgents();
+        setShowModal(false);
+        resetForm();
+        // Note: Les équipes seront rechargées automatiquement via useEffect quand agents change
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la création de l\'agent');
     }
   };
 
   const handleUpdate = async () => {
     if (!editingAgent) return;
-    const updates = {
-      prenom: formData.prenom,
-      nom: formData.nom,
-      email: formData.email,
-      role: formData.role,
-      telephone: formData.telephone || undefined,
-      equipeId: formData.equipeId ? Number(formData.equipeId) : undefined
-    };
-    const result = await api.updateAgent(editingAgent.id, updates);
-    if (result.success) {
-      await loadAgents();
-      setShowModal(false);
-      setEditingAgent(null);
-      resetForm();
+    try {
+      const updates = {
+        prenom: formData.prenom,
+        nom: formData.nom,
+        email: formData.email,
+        role: formData.role,
+        telephone: formData.telephone || undefined,
+        equipeId: formData.equipeId ? Number(formData.equipeId) : undefined
+      };
+      const result = await api.updateAgent(editingAgent.id, updates);
+      if (result.success) {
+        showSuccess('Agent mis à jour avec succès');
+        await loadAgents();
+        setShowModal(false);
+        setEditingAgent(null);
+        resetForm();
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la mise à jour de l\'agent');
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) return;
-    const result = await api.deleteAgent(id);
-    if (result.success) {
-      await loadAgents();
+    try {
+      const result = await api.deleteAgent(id);
+      if (result.success) {
+        showSuccess('Agent supprimé avec succès');
+        await loadAgents();
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la suppression de l\'agent');
     }
   };
 
@@ -186,70 +202,77 @@ export function useEquipeManager() {
         setEquipes(result.data);
       }
     } catch (error) {
-      console.error('Erreur chargement équipes:', error);
+      handleApiError(error, 'Erreur lors du chargement des équipes');
     }
     setLoadingEquipes(false);
   };
 
   const handleCreate = async () => {
-    const newEquipe = {
-      nom: formData.nom,
-      description: formData.description || undefined,
-      agents: formData.agents,
-      horaires: formData.horaires
-    };
-    const result = await api.createEquipe(newEquipe);
-    if (result.success) {
-      // Assigner chaque agent à l'équipe via PATCH /api/users/assign/team/{id}
-      if (formData.agents.length > 0 && result.data) {
-        console.log('🔄 Assignation des agents à l\'équipe', result.data.id);
-        for (const agentId of formData.agents) {
-          try {
-            await api.assignUserToTeam(agentId, result.data.id);
-            console.log('✅ Agent', agentId, 'assigné à l\'équipe', result.data.id);
-          } catch (error) {
-            console.error('❌ Erreur lors de l\'assignation de l\'agent', agentId, ':', error);
+    try {
+      const newEquipe = {
+        nom: formData.nom,
+        description: formData.description || undefined,
+        agents: formData.agents,
+        horaires: formData.horaires
+      };
+      const result = await api.createEquipe(newEquipe);
+      if (result.success) {
+        // Assigner chaque agent à l'équipe via PATCH /api/users/assign/team/{id}
+        if (formData.agents.length > 0 && result.data) {
+          console.log('🔄 Assignation des agents à l\'équipe', result.data.id);
+          for (const agentId of formData.agents) {
+            try {
+              await api.assignUserToTeam(agentId, result.data.id);
+              console.log('✅ Agent', agentId, 'assigné à l\'équipe', result.data.id);
+            } catch (error) {
+              handleApiError(error, `Erreur lors de l'assignation de l'agent ${agentId}`);
+            }
           }
         }
-      }
 
-      await loadEquipes();
-      setShowModal(false);
-      resetForm();
+        showSuccess('Équipe créée avec succès');
+        await loadEquipes();
+        setShowModal(false);
+        resetForm();
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la création de l\'équipe');
     }
   };
 
   const handleUpdate = async () => {
     if (!editingEquipe) return;
-    const updates = {
-      nom: formData.nom,
-      description: formData.description || undefined,
-      agents: formData.agents,
-      horaires: formData.horaires
-    };
-    const result = await api.updateEquipe(editingEquipe.id, updates);
-    if (result.success) {
-      // Identifier les nouveaux agents (ceux qui ne sont pas dans l'équipe actuellement)
-      const currentAgentIds = editingEquipe.agents?.map(a => a.id) || [];
-      const newAgentIds = formData.agents.filter(id => !currentAgentIds.includes(id));
 
-      // Assigner uniquement les nouveaux agents à l'équipe
-      if (newAgentIds.length > 0) {
-        console.log('🔄 Assignation des nouveaux agents à l\'équipe', editingEquipe.id);
-        console.log('📋 Agents déjà dans l\'équipe:', currentAgentIds);
-        console.log('➕ Nouveaux agents à assigner:', newAgentIds);
+    try {
+      const updates = {
+        nom: formData.nom,
+        description: formData.description || undefined,
+        agents: formData.agents,
+        horaires: formData.horaires
+      };
+      const result = await api.updateEquipe(editingEquipe.id, updates);
+      if (result.success) {
+        // Identifier les nouveaux agents (ceux qui ne sont pas dans l'équipe actuellement)
+        const currentAgentIds = editingEquipe.agents?.map(a => a.id) || [];
+        const newAgentIds = formData.agents.filter(id => !currentAgentIds.includes(id));
 
-        for (const agentId of newAgentIds) {
-          try {
-            await api.assignUserToTeam(agentId, editingEquipe.id);
-            console.log('✅ Agent', agentId, 'assigné à l\'équipe', editingEquipe.id);
-          } catch (error) {
-            console.error('❌ Erreur lors de l\'assignation de l\'agent', agentId, ':', error);
+        // Assigner uniquement les nouveaux agents à l'équipe
+        if (newAgentIds.length > 0) {
+          console.log('🔄 Assignation des nouveaux agents à l\'équipe', editingEquipe.id);
+          console.log('📋 Agents déjà dans l\'équipe:', currentAgentIds);
+          console.log('➕ Nouveaux agents à assigner:', newAgentIds);
+
+          for (const agentId of newAgentIds) {
+            try {
+              await api.assignUserToTeam(agentId, editingEquipe.id);
+              console.log('✅ Agent', agentId, 'assigné à l\'équipe', editingEquipe.id);
+            } catch (error) {
+              handleApiError(error, `Erreur lors de l'assignation de l'agent ${agentId}`);
+            }
           }
+        } else {
+          console.log('ℹ️ Aucun nouvel agent à assigner');
         }
-      } else {
-        console.log('ℹ️ Aucun nouvel agent à assigner');
-      }
 
       // Gérer les horaires : créer ou mettre à jour un schedule si des horaires sont définis
       if (formData.horaires && formData.horaires.length > 0) {
@@ -300,22 +323,31 @@ export function useEquipeManager() {
             }
           }
         } catch (error) {
-          console.error('❌ Erreur lors de la gestion du schedule:', error);
+          handleApiError(error, 'Erreur lors de la gestion du schedule');
         }
       }
 
-      await loadEquipes();
-      setShowModal(false);
-      setEditingEquipe(null);
-      resetForm();
+        showSuccess('Équipe mise à jour avec succès');
+        await loadEquipes();
+        setShowModal(false);
+        setEditingEquipe(null);
+        resetForm();
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la mise à jour de l\'équipe');
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette équipe ?')) return;
-    const result = await api.deleteEquipe(id);
-    if (result.success) {
-      await loadEquipes();
+    try {
+      const result = await api.deleteEquipe(id);
+      if (result.success) {
+        showSuccess('Équipe supprimée avec succès');
+        await loadEquipes();
+      }
+    } catch (error) {
+      handleApiError(error, 'Erreur lors de la suppression de l\'équipe');
     }
   };
 

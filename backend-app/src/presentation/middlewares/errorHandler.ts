@@ -7,10 +7,13 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error('Error:', error);
+  console.error('🔴 ERROR HANDLER APPELÉ:', error);
+  console.error('🔴 Type:', error.constructor.name);
+  console.error('🔴 Instance de AppError?', error instanceof AppError);
 
   // Si c'est une erreur métier (AppError)
   if (error instanceof AppError) {
+    console.log('✅ Envoi réponse HTTP', error.statusCode, 'avec message:', error.message);
     return res.status(error.statusCode).json({
       success: false,
       error: error.message,

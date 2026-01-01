@@ -173,7 +173,7 @@ export class UserUseCase {
 
 
         // Cas Modifications User profile / il y a des données dans le UserUpdateDTO
-        this.validateUpdateProfilePermissions(existingUser, dtoUserProfile, requestingUser);
+        await this.validateUpdateProfilePermissions(existingUser, dtoUserProfile, requestingUser);
         // #endregion
         // Mise à jour via la factory method
         const updatedUser = UserMapper.FromDTO.UpdateUser_ToEntity(existingUser, dtoUserProfile);
@@ -206,11 +206,13 @@ export class UserUseCase {
         if (requestingUser.role === 'admin') {
             return;
         }
-
+        console.log('dto.role : ', dto.role);
+        console.log('dto.role true ?: ', (dto.role && dto.role !== targetUser.role));
         // MANAGER OR EMPLOYEE : Champs interdits pour manager/employé
         const forbiddenFields: string[] = [];
 
-        if (dto.role) {
+        if (dto.role && dto.role !== targetUser.role) {
+            console.log('dans la condition');
             forbiddenFields.push('role');
         }
 
@@ -289,7 +291,7 @@ export class UserUseCase {
         if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
         if (!targetUser) throw new NotFoundError(`L'utilisateur avec l'ID ${userId} introuvable`);
         if (targetUser.role === 'admin' || targetUser.role === 'manager') throw new ForbiddenError("Vous ne pouvez assigner que des employés");
-        if (targetUser.teamId === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+        if (targetUser.teamId === teamId) return new UserEmployee_Core({ ...targetUser });
         // En tant que manager, l'utilisateur ne peut assigner que ses propres employés à ses propreséquipes
         if (targetUser.managerId !== user.id) {
             throw new ForbiddenError(`Vous ne pouvez assigner que vos propres employé \n targetUser.managerId : ${targetUser.managerId} \n requestingUserId : ${user.id}`);

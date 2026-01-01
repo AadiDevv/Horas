@@ -180,8 +180,8 @@ export class TeamUseCase {
         const targetSchedule = await this.R_schedule.getSchedule_ById(scheduleId)
         // 1.1 Vérification que l'équipe et l'utilisateur existent
         if (!targetTeam) throw new NotFoundError(`L'équipe avec l'ID ${teamId} introuvable`);
-        if (!targetSchedule) throw new NotFoundError(`L'utilisateur avec l'ID ${scheduleId} introuvable`);
-        if (targetTeam.schedule?.id === teamId) throw new ForbiddenError("L'utilisateur est déjà assigné à cette équipe");
+        if (!targetSchedule) throw new NotFoundError(`Le schedule avec l'ID ${scheduleId} introuvable`);
+        if (targetTeam.schedule?.id === scheduleId) return new Team_Core({ ...targetTeam });
         // 1.2 En tant que manager, l'utilisateur ne peut assigner que ses propres schedules que pour ses propres équipes
         if (user.role !== 'admin') {
             if (targetTeam.manager?.id !== user.id) throw new ForbiddenError(`Vous ne pouvez assigner un schedule que pour vos propres équipes \n targetTeam.manager?.id : ${targetTeam.manager?.id} \n user.id : ${user.id}`);
