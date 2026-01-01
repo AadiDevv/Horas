@@ -120,7 +120,9 @@ export function useAgentManager() {
         resetForm();
       }
     } catch (error) {
-      handleApiError(error, 'Erreur lors de la mise à jour de l\'agent');
+      // L'erreur est déjà gérée par apiClient (Modal ou Toast selon le type)
+      // On ne fait rien ici pour éviter les doublons
+      console.log('Erreur gérée par apiClient:', error);
     }
   };
 

@@ -222,7 +222,7 @@ export class UserUseCase {
 
         if (forbiddenFields.length > 0) {
             throw new ForbiddenError(
-                `Vous n'avez pas le droit de modifier les champs suivants : ${forbiddenFields.join(', ')}. ` +
+                `Vous n'avez pas le droit de modifier les champs ${forbiddenFields.map(f => `"${f}"`).join(', ')}. ` +
                 `Seuls les administrateurs peuvent modifier ces informations.`
             );
         }

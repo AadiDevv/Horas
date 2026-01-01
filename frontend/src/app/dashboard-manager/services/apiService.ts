@@ -1,18 +1,11 @@
 import { Agent, Equipe, ApiResponse } from '../types';
+import { apiClient, getAuthHeaders } from '@/app/utils/apiClient';
 
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = false;
 
-// Helper pour récupérer le token JWT
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
-  };
-};
-
-// Helper pour gérer les erreurs HTTP et extraire le message proprement
+// Helper pour gérer les erreurs HTTP et extraire le message proprement (DEPRECATED - Ne plus utiliser)
+// Utilisez apiClient à la place qui gère automatiquement les erreurs
 const handleHttpError = async (res: Response): Promise<never> => {
   const errorData = await res.json();
   // Le backend renvoie { success: false, error: "message", code: "...", timestamp: "..." }
@@ -274,19 +267,11 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
 
   console.log('🚀 Envoi de la requête PATCH /api/users/' + id);
   console.log('📦 Données envoyées:', backendData);
-  console.log('🔑 Headers:', getAuthHeaders());
 
-  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(backendData)
-  });
+  // Utiliser apiClient qui gère automatiquement les erreurs (Modal pour 403)
+  const res = await apiClient.patch(`${API_BASE_URL}/api/users/${id}`, backendData);
 
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
-
-  if (!res.ok) {
-    await handleHttpError(res);
-  }
 
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);

@@ -503,7 +503,7 @@ Ces attributs seront gérés par des routes admin dédiées dans une version fut
                                     summary: 'Champs interdits pour Manager/Employé',
                                     value: {
                                         success: false,
-                                        error: 'Vous n\'avez pas le droit de modifier les champs suivants : role, isActive. Seuls les administrateurs peuvent modifier ces informations.',
+                                        error: 'Vous n\'avez pas le droit de modifier les champs "role", "isActive". Seuls les administrateurs peuvent modifier ces informations.',
                                         code: 'FORBIDDEN',
                                         timestamp: '2025-10-16T12:00:00.000Z'
                                     }
