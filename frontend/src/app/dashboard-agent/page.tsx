@@ -163,7 +163,7 @@ export default function Page() {
                   onClick={currentWeek}
                   className="px-3 py-2 md:px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
                 >
-                  Aujourd'hui
+                  Cette semaine
                 </button>
                 <button
                   onClick={nextWeek}

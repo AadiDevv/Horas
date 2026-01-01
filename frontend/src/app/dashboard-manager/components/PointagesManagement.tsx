@@ -299,7 +299,7 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
                     onClick={currentWeek}
                     className="px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors"
                   >
-                    Aujourd'hui
+                    Cette semaine
                   </button>
                   <button
                     onClick={nextWeek}
