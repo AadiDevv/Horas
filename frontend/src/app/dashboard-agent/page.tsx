@@ -98,7 +98,7 @@ export default function Page() {
             userData={userData}
             formData={formData}
             setFormData={setFormData}
-            onSave={() => handleSaveSettings(setUserData, setFormData)}
+            onSave={() => handleSaveSettings(setUserData)}
             saving={saving}
             successMessage={settingsSuccessMessage}
             errorMessage={settingsErrorMessage}

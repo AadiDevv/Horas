@@ -1,7 +1,8 @@
 import { User, ApiResponse } from '../types';
+import { apiClient } from '../../utils/apiClient';
 
 const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Mock Data
 const mockUsers: User[] = [
@@ -23,6 +24,51 @@ const mockUsers: User[] = [
   }
 ];
 
+// Interface pour le format des données backend
+interface BackendUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  phone?: string;
+  teamId?: number;
+  scheduleId?: number;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+  deletedAt?: string | null;
+}
+
+// Helper pour transformer les données backend -> frontend
+const transformUserFromBackend = (data: BackendUser): User => ({
+  id: data.id,
+  prenom: data.firstName,
+  nom: data.lastName,
+  email: data.email,
+  role: data.role,
+  isActive: data.isActive,
+  telephone: data.phone,
+  equipeId: data.teamId,
+  plageHoraireId: data.scheduleId,
+  createdAt: data.createdAt,
+  updatedAt: data.updatedAt,
+  lastLoginAt: data.lastLoginAt,
+  deletedAt: data.deletedAt
+});
+
+// Helper pour transformer les données frontend -> backend (UPDATE)
+const transformUserToBackend = (updates: Partial<User>): Partial<BackendUser> => {
+  const backendData: Partial<BackendUser> = {};
+  if (updates.prenom !== undefined) backendData.firstName = updates.prenom;
+  if (updates.nom !== undefined) backendData.lastName = updates.nom;
+  if (updates.email !== undefined) backendData.email = updates.email;
+  if (updates.telephone !== undefined) backendData.phone = updates.telephone;
+  // Autres champs si nécessaire
+  return backendData;
+};
+
 export async function getUser(userId: number): Promise<ApiResponse<User>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -38,12 +84,18 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
     };
   }
 
-  const requete = await fetch(`${API_BASE_URL}/api/users/${userId}`);
-  if (!requete.ok) {
-    throw new Error("Erreur récupération utilisateur");
+  const requete = await apiClient.get(`${API_BASE_URL}/api/users/${userId}`);
+  
+  const response = await requete.json();
+  
+  if (!response.success || !response.data) {
+    throw new Error(response.message || "Erreur récupération utilisateur");
   }
-  const user = await requete.json();
-  return user;
+
+  return {
+    ...response,
+    data: transformUserFromBackend(response.data)
+  };
 }
 
 export async function updateUser(userId: number, updates: Partial<User>): Promise<ApiResponse<User>> {
@@ -69,17 +121,20 @@ export async function updateUser(userId: number, updates: Partial<User>): Promis
     };
   }
   
-  const requete = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updates)
-  });
+  const backendData = transformUserToBackend(updates);
   
-  if (!requete.ok) {
-    throw new Error("Erreur mise à jour");
+  const requete = await apiClient.patch(`${API_BASE_URL}/api/users/${userId}`, backendData);
+  
+  const response = await requete.json();
+  
+  if (!response.success || !response.data) {
+     throw new Error(response.message || "Erreur mise à jour");
   }
-  const user = await requete.json();
-  return user;
+
+  return {
+    ...response,
+    data: transformUserFromBackend(response.data)
+  };
 }
 
 export async function changePassword(
@@ -117,15 +172,14 @@ export async function changePassword(
     };
   }
   
-  const requete = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ oldPassword, newPassword })
+  const requete = await apiClient.patch(`${API_BASE_URL}/api/users/${userId}/password`, {
+    oldPassword,
+    newPassword
   });
   
   const response = await requete.json();
   
-  if (!requete.ok || !response.success) {
+  if (!response.success) {
     throw new Error(response.message || "Erreur lors du changement de mot de passe");
   }
   

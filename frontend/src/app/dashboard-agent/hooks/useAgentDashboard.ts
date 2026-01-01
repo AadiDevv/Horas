@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DayKey, TimeLog, User, UserFormData, Horaire } from '../types';
+import { DayKey, TimeLog, User, UserFormData, Horaire, PointageReadDTO } from '../types';
 import { getUser, updateUser, changePassword } from '../services/userService';
 import { getEquipeHoraires } from '../services/equipeService';
 
@@ -21,7 +21,17 @@ export function useUserData() {
   const loadUserData = async () => {
     try {
       setLoading(true);
-      const userId = 1; // TODO: Get from auth context
+
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        console.error('❌ Utilisateur non connecté (localStorage vide)');
+        setLoading(false);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const userId = user.id;
+
       const response = await getUser(userId);
 
       if (response.success && response.data) {
@@ -67,8 +77,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
   };
 
   const handleSaveSettings = async (
-    setUserData: (user: User) => void,
-    setFormData: (data: UserFormData) => void
+    setUserData: (user: User) => void
   ) => {
     if (!userData) return;
 
@@ -76,53 +85,53 @@ export function useSettings(userData: User | null, formData: UserFormData) {
       setSaving(true);
       setSuccessMessage('');
       setErrorMessage('');
-      
+
       const wantsToChangePassword = formData.newPassword || formData.confirmPassword || formData.oldPassword;
-      
+
       if (wantsToChangePassword) {
         if (!formData.oldPassword) {
           setErrorMessage('❌ L\'ancien mot de passe est requis pour changer le mot de passe');
           setSaving(false);
           return;
         }
-        
+
         if (!formData.newPassword) {
           setErrorMessage('❌ Le nouveau mot de passe est requis');
           setSaving(false);
           return;
         }
-        
+
         if (formData.newPassword.length < 6) {
           setErrorMessage('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
           setSaving(false);
           return;
         }
-        
+
         if (formData.newPassword !== formData.confirmPassword) {
           setErrorMessage('❌ Les mots de passe ne correspondent pas');
           setSaving(false);
           return;
         }
-        
+
         const passwordResponse = await changePassword(
           userData.id,
           formData.oldPassword,
           formData.newPassword
         );
-        
+
         if (!passwordResponse.success) {
           setErrorMessage('❌ ' + passwordResponse.message);
           setSaving(false);
           return;
         }
       }
-      
+
       const response = await updateUser(userData.id, {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email
       });
-      
+
       if (response.success && response.data) {
         setUserData(response.data);
         const messages = ['✅ Informations modifiées avec succès !'];
@@ -130,7 +139,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
           messages.push('Mot de passe modifié avec succès !');
         }
         setSuccessMessage(messages.join(' '));
-        
+
         setTimeout(() => {
           setSettingsOpen(false);
           setSuccessMessage('');
@@ -208,7 +217,7 @@ export function useTimeClock() {
   const [pointageLoading, setPointageLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [lastClockIn, setLastClockIn] = useState<any | null>(null);
+  const [lastClockIn, setLastClockIn] = useState<TimesheetReadDTO | null>(null);
 
   const getDayKey = (): DayKey => {
     const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
