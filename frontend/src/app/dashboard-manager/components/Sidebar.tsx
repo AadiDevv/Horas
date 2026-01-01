@@ -46,11 +46,6 @@ export default function Sidebar({ isOpen, currentPage, onPageChange }: SidebarPr
             {item.label}
           </button>
         ))}
-
-        <button className="w-full flex items-center gap-3 px-4 py-3.5 text-gray-700 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100">
-          <Settings size={20} strokeWidth={2} />
-          Paramètres
-        </button>
       </div>
     </aside>
   );
