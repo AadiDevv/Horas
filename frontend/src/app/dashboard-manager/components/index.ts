@@ -14,3 +14,5 @@ export { default as PointagesManagement } from './PointagesManagement';
 export { default as WeeklyTimeline } from './WeeklyTimeline';
 export { default as TimesheetModal } from './TimesheetModal';
 export { default as DeleteConfirmModal } from './DeleteConfirmModal';
+export { default as AbsencesCard } from './AbsencesCard';
+export { default as AbsencesWeekChart } from './AbsencesWeekChart';
