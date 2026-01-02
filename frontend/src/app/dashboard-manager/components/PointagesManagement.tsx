@@ -12,6 +12,7 @@ import WeeklyTimeline from './WeeklyTimeline';
 import BlockModal, { BlockData } from './BlockModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { getEquipeName } from './AgentList';
+import { getWeekDays, getMonday as getUtilMonday } from '@/app/utils/dateUtils';
 
 interface PointagesManagementProps {
   agents: Agent[];
@@ -40,25 +41,9 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     `${agent.prenom} ${agent.nom}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calculer le lundi de la semaine sélectionnée
-  const getMonday = (date: Date) => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day; // Si dimanche (0), -6 jours, sinon 1 - jour actuel
-    d.setDate(d.getDate() + diff);
-    return d;
-  };
-
-  const monday = getMonday(selectedWeek);
-
-  // Générer les 7 jours de la semaine (Lun à Dim)
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(monday);
-    day.setDate(monday.getDate() + i);
-    day.setHours(0, 0, 0, 0);
-    return day;
-  });
+  // Calculer le lundi et les jours de la semaine sélectionnée
+  const monday = getUtilMonday(selectedWeek);
+  const weekDays = getWeekDays(selectedWeek);
 
   const formatWeekRange = () => {
     const sunday = new Date(monday);
@@ -131,66 +116,43 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
   const handleSaveBlock = async (data: BlockData) => {
     // Créer les timestamps complets pour l'entrée et la sortie
-    const entryTimestamp = new Date(`${data.date}T${data.startTime}:00`).toISOString();
-    const exitTimestamp = new Date(`${data.date}T${data.endTime}:00`).toISOString();
+    // IMPORTANT: Utiliser UTC pour éviter les décalages de timezone
+    // Format: YYYY-MM-DDTHH:mm:ss.000Z (l'heure entrée par l'utilisateur est considérée comme UTC)
+    const entryTimestamp = `${data.date}T${data.startTime}:00.000Z`;
+    const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
 
     if (data.entryId && data.exitId) {
       // Mode édition - Stratégie: supprimer les anciens et recréer
+      // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
+      await deleteTimesheet(data.entryId);
+      await deleteTimesheet(data.exitId);
 
-      // 1. Supprimer les anciens timesheets
-      const deleteEntryResponse = await deleteTimesheet(data.entryId);
-      if (!deleteEntryResponse.success) {
-        throw new Error(deleteEntryResponse.error || 'Erreur lors de la suppression de l\'entrée');
-      }
-
-      const deleteExitResponse = await deleteTimesheet(data.exitId);
-      if (!deleteExitResponse.success) {
-        throw new Error(deleteExitResponse.error || 'Erreur lors de la suppression de la sortie');
-      }
-
-      // 2. Recréer les nouveaux timesheets avec les nouveaux timestamps
-      // clockin est auto-déterminé par le backend
-      const entryResponse = await createTimesheet({
+      // Recréer les nouveaux timesheets avec les nouveaux timestamps
+      await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,
         status: data.status
       });
 
-      if (!entryResponse.success) {
-        throw new Error(entryResponse.error || 'Erreur lors de la recréation de l\'entrée');
-      }
-
-      const exitResponse = await createTimesheet({
+      await createTimesheet({
         employeId: data.employeId,
         timestamp: exitTimestamp,
         status: data.status
       });
-
-      if (!exitResponse.success) {
-        throw new Error(exitResponse.error || 'Erreur lors de la recréation de la sortie');
-      }
     } else {
       // Mode création - créer une paire entrée/sortie
-      // clockin est auto-déterminé par le backend (inverse du dernier)
-      const entryResponse = await createTimesheet({
+      // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
+      await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,
         status: data.status
       });
 
-      if (!entryResponse.success) {
-        throw new Error(entryResponse.error || 'Erreur lors de la création de l\'entrée');
-      }
-
-      const exitResponse = await createTimesheet({
+      await createTimesheet({
         employeId: data.employeId,
         timestamp: exitTimestamp,
         status: data.status
       });
-
-      if (!exitResponse.success) {
-        throw new Error(exitResponse.error || 'Erreur lors de la création de la sortie');
-      }
     }
 
     await loadTimesheets();
@@ -201,18 +163,12 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
     setDeleting(true);
     try {
-      // Supprimer l'entrée
-      const entryResponse = await deleteTimesheet(deletingPair.entry.id);
-      if (!entryResponse.success) {
-        throw new Error(entryResponse.error || 'Erreur lors de la suppression de l\'entrée');
-      }
+      // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
+      await deleteTimesheet(deletingPair.entry.id);
 
       // Supprimer la sortie si elle existe
       if (deletingPair.exit) {
-        const exitResponse = await deleteTimesheet(deletingPair.exit.id);
-        if (!exitResponse.success) {
-          throw new Error(exitResponse.error || 'Erreur lors de la suppression de la sortie');
-        }
+        await deleteTimesheet(deletingPair.exit.id);
       }
 
       // Recharger les timesheets
@@ -220,8 +176,8 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
       setShowDeleteModal(false);
       setDeletingPair(null);
     } catch (error) {
-      console.error('❌ Erreur suppression:', error);
-      alert((error as Error).message);
+      // L'erreur est déjà affichée par apiClient (ErrorModal)
+      console.log('Erreur gérée par apiClient:', error);
     } finally {
       setDeleting(false);
     }

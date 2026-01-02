@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getTimesheets, Timesheet } from '../services/timesheetService';
 import { Agent, Equipe } from '../types';
+import { formatDateLocal, getMonday, getSunday } from '@/app/utils/dateUtils';
 
 export interface RetardInfo {
   employeNom: string;
@@ -93,11 +94,10 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     try {
       const today = new Date();
       const monday = getMonday(today);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
+      const sunday = getSunday(today);
 
-      const dateDebut = monday.toISOString().split('T')[0];
-      const dateFin = sunday.toISOString().split('T')[0];
+      const dateDebut = formatDateLocal(monday);
+      const dateFin = formatDateLocal(sunday);
 
       // Récupérer tous les timesheets de la semaine pour tous les employés
       const response = await getTimesheets({ dateDebut, dateFin });
@@ -143,7 +143,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     equipes: Equipe[],
     today: Date
   ): ManagerStats => {
-    const todayStr = today.toISOString().split('T')[0];
+    const todayStr = formatDateLocal(today);
     const monday = getMonday(today);
 
     // 1. Retards aujourd'hui
@@ -216,7 +216,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     for (let i = 0; i < 7; i++) {
       const date = new Date(monday);
       date.setDate(monday.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = formatDateLocal(date);
       const jourIndex = date.getDay();
 
       const retardsJour = timesheets.filter(t => {
