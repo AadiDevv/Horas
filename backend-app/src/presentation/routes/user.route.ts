@@ -80,7 +80,6 @@ router.patch('/:id',
         try {
             await userController.updateUserProfile_ById(req, res);
         } catch (error) {
-            console.log('🟡 ERREUR CAPTURÉE DANS LA ROUTE:', error);
             next(error);
         }
     }

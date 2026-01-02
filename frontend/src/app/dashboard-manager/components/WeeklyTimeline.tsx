@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { Timesheet } from '../services/timesheetService';
+import { formatDateLocal } from '@/app/utils/dateUtils';
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
@@ -101,11 +102,11 @@ export default function WeeklyTimeline({
 
         {/* Colonnes des jours */}
         {weekDays.map((day, dayIndex) => {
-          const dateStr = day.toISOString().split('T')[0];
+          const dateStr = formatDateLocal(day);
           const pairs = getTimesheetPairs(dateStr);
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          const isToday = dateStr === today.toISOString().split('T')[0];
+          const isToday = dateStr === formatDateLocal(today);
 
           return (
             <div key={dayIndex} className="col-span-1 relative">

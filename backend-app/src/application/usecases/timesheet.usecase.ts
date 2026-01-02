@@ -124,10 +124,24 @@ export class TimesheetUseCase {
         // Récupérer le dernier timesheet pour validation et auto-détermination du clockin
         const lastTimesheet = await this.getLastTimesheetByEmployee(targetEmployeeId);
 
+
         // Validation : le nouveau timestamp doit être après le dernier
         if (lastTimesheet && timestamp <= lastTimesheet.timestamp) {
+            // Formater la date en français pour l'utilisateur
+
+            const lastDate = lastTimesheet.timestamp;
+            const formattedDate = lastDate.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const formattedTime = lastDate.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
             throw new ValidationError(
-                `Le timestamp doit être postérieur au dernier pointage (${lastTimesheet.timestamp.toISOString()})`
+                `Le pointage doit être postérieur au dernier pointage effectué le ${formattedDate} à ${formattedTime}`
             );
         }
 

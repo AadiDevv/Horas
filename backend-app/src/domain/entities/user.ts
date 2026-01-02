@@ -127,7 +127,6 @@ export class UserEmployee_Core extends User_Core {
     // #region Validation Employee
     public validateEmployee(): void {
 
-        console.log('🟡 validateEmployee , role : ', this.role);
         if (this.role !== "employe") {
             throw new ValidationError(`Le user ${this.firstName} ${this.lastName} avec l'id '${this.id}' a un role qui n'est pas employé mais plutot ${this.role} \n Mais il a pourtant un managerId : ${this.managerId}`);
         }
