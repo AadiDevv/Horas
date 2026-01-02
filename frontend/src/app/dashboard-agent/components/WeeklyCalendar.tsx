@@ -1,6 +1,5 @@
 import { Clock, User } from 'lucide-react';
 import { DayKey, TimeLog, Horaire } from '../types';
-import TimeLogBar from './TimeLogBar';
 
 interface WeeklyCalendarProps {
   timeLogs: Record<DayKey, TimeLog[]>;
@@ -274,6 +273,7 @@ export default function WeeklyCalendar({
   isClockingIn,
   currentDayLogs,
   currentDayKey,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRefresh,
   teamSchedule = [],
   weekDays

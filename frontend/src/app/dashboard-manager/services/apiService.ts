@@ -1,15 +1,15 @@
 import { Agent, Equipe, ApiResponse } from '../types';
+import { apiClient, getAuthHeaders } from '@/app/utils/apiClient';
 
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = false;
 
-// Helper pour récupérer le token JWT
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
-  };
+// Helper pour gérer les erreurs HTTP et extraire le message proprement (DEPRECATED - Ne plus utiliser)
+// Utilisez apiClient à la place qui gère automatiquement les erreurs
+const handleHttpError = async (res: Response): Promise<never> => {
+  const errorData = await res.json();
+  // Le backend renvoie { success: false, error: "message", code: "...", timestamp: "..." }
+  throw new Error(errorData.error || errorData.message || `Erreur ${res.status}: ${res.statusText}`);
 };
 
 // Helper pour transformer les données frontend -> backend (CREATE)
@@ -174,8 +174,8 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
-
+  console.log('📡 Statut de la réponse:', res.status, res.statusText );
+  console.log('auth headers:', getAuthHeaders());
   if (!res.ok) {
     const errorText = await res.text();
     console.error('❌ Erreur du serveur:', errorText);
@@ -267,27 +267,11 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
 
   console.log('🚀 Envoi de la requête PATCH /api/users/' + id);
   console.log('📦 Données envoyées:', backendData);
-  console.log('🔑 Headers:', getAuthHeaders());
 
-  const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(backendData)
-  });
+  // Utiliser apiClient qui gère automatiquement les erreurs (Modal pour 403)
+  const res = await apiClient.patch(`${API_BASE_URL}/api/users/${id}`, backendData);
 
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
-  }
 
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
@@ -320,15 +304,7 @@ export async function deleteAgent(id: number): Promise<ApiResponse<void>> {
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();
@@ -401,15 +377,7 @@ export async function assignUserToTeam(userId: number, teamId: number): Promise<
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();
@@ -441,15 +409,7 @@ export async function changeUserPassword(userId: number, oldPassword: string, ne
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erreur du serveur:', errorText);
-
-    try {
-      const error = JSON.parse(errorText);
-      throw new Error(error.message || error.error || `Erreur ${res.status}: ${res.statusText}`);
-    } catch (e) {
-      throw new Error(`Erreur ${res.status}: ${errorText || res.statusText}`);
-    }
+    await handleHttpError(res);
   }
 
   const response = await res.json();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 
 interface User {
   id: number;
@@ -151,10 +151,6 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
               )}
             </div>
 
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg transition">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
 
             <div className="text-right hidden md:block">
               <p className="text-sm font-semibold">
