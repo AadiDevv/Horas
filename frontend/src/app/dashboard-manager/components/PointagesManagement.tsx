@@ -122,20 +122,14 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
 
     if (data.entryId && data.exitId) {
-      // Mode édition - Stratégie: supprimer les anciens et recréer
+      // Mode édition - Utiliser PATCH pour modifier les timesheets existants
       // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
-      await deleteTimesheet(data.entryId);
-      await deleteTimesheet(data.exitId);
-
-      // Recréer les nouveaux timesheets avec les nouveaux timestamps
-      await createTimesheet({
-        employeId: data.employeId,
+      await updateTimesheet(data.entryId, {
         timestamp: entryTimestamp,
         status: data.status
       });
 
-      await createTimesheet({
-        employeId: data.employeId,
+      await updateTimesheet(data.exitId, {
         timestamp: exitTimestamp,
         status: data.status
       });

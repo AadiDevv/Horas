@@ -116,7 +116,10 @@ export class TimesheetController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
-        const updated = await this.UC_timesheet.updateTimesheet(id, dto);
+        const userId = req.user!.id;
+        const userRole = req.user!.role;
+
+        const updated = await this.UC_timesheet.updateTimesheet(id, dto, userRole, userId);
         const updatedDTO = TimesheetMapper.FromEntityL1.toReadDTO_L1(updated);
 
         res.success(updatedDTO, "Pointage modifié avec succès");
@@ -134,7 +137,10 @@ export class TimesheetController {
         const id = Number(req.params.id);
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        await this.UC_timesheet.deleteTimesheet(id);
+        const userId = req.user!.id;
+        const userRole = req.user!.role;
+
+        await this.UC_timesheet.deleteTimesheet(id, userRole, userId);
 
         res.success(null, "Pointage supprimé avec succès");
     }

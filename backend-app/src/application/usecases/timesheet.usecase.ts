@@ -17,12 +17,12 @@ export class TimesheetUseCase {
 
     /**
      * Récupère les timesheets selon le rôle de l'utilisateur
-     * 
+     *
      * Logique :
      * - Admin : peut filtrer tous les timesheets
-     * - Manager : peut filtrer par employé de son équipe (logique à faire côté controller/middleware)
+     * - Manager : peut filtrer uniquement par employés de son équipe
      * - Employé : ne peut voir que ses propres timesheets
-     * 
+     *
      * @param userRole - Rôle de l'utilisateur
      * @param userId - ID de l'utilisateur connecté
      * @param filter - Filtres optionnels
@@ -30,9 +30,12 @@ export class TimesheetUseCase {
     async getTimesheets(userRole: string, userId: number, filter?: TimesheetFilterDTO): Promise<Timesheet_Core[]> {
         let effectiveFilter: TimesheetFilterDTO = { ...filter };
 
-        if (userRole !== "admin" && userRole !== "manager") {
+        if (userRole === "employe") {
             // L'employé ne peut voir que ses propres timesheets
             effectiveFilter.employeId = userId;
+        } else if (userRole === "manager" && filter?.employeId) {
+            // Vérifier que l'employé demandé appartient bien au manager
+            await this.validateManagerOwnership(filter.employeId, userRole, userId);
         }
 
         return await this.R_timesheet.getAllTimesheets(effectiveFilter);
@@ -48,10 +51,13 @@ export class TimesheetUseCase {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
 
-        // Si employé, il ne peut consulter que ses propres timesheets
+        // Vérifier les permissions selon le rôle
         if (userRole === "employe" && timesheet.employeId !== userId) {
             throw new ForbiddenError("Accès interdit à ce timesheet");
         }
+
+        // Vérifier que le manager gère bien cet employé
+        await this.validateManagerOwnership(timesheet.employeId, userRole, userId);
 
         return timesheet;
     }
@@ -69,6 +75,9 @@ export class TimesheetUseCase {
         if (userRole === "employe" && employeId !== userId) {
             throw new ForbiddenError("Vous ne pouvez consulter que vos propres statistiques");
         }
+
+        // Vérifier que le manager gère bien cet employé
+        await this.validateManagerOwnership(employeId, userRole, userId);
 
         return await this.R_timesheet.getTimesheetStats(employeId, startDate, endDate);
     }
@@ -95,13 +104,8 @@ export class TimesheetUseCase {
         if ((userRole === 'manager' || userRole === 'admin')) {
             // Manager/Admin peut créer pour un autre employé
             if( dto.employeId){
-                const employee = await this.R_user.getEmployee_ById(dto.employeId);
-                if (!employee) {
-                    throw new NotFoundError(`Employé avec l'ID ${dto.employeId} introuvable`);
-                }
-                if(userRole === 'manager' && employee.managerId !== userId) {
-                    throw new ForbiddenError("Vous ne pouvez pas créer un pointage pour un employé qui n'est pas dans votre équipe");
-                }
+                // Vérifier que le manager gère bien cet employé
+                await this.validateManagerOwnership(dto.employeId, userRole, userId);
                 targetEmployeeId = dto.employeId;
             } else {
                 throw new ValidationError("L'employé cible est requis");
@@ -126,24 +130,7 @@ export class TimesheetUseCase {
 
 
         // Validation : le nouveau timestamp doit être après le dernier
-        if (lastTimesheet && timestamp <= lastTimesheet.timestamp) {
-            // Formater la date en français pour l'utilisateur
-
-            const lastDate = lastTimesheet.timestamp;
-            const formattedDate = lastDate.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-            const formattedTime = lastDate.toLocaleTimeString('fr-FR', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            throw new ValidationError(
-                `Le pointage doit être postérieur au dernier pointage effectué le ${formattedDate} à ${formattedTime}`
-            );
-        }
+        this.validateTimestampChronology(lastTimesheet, timestamp);
 
         // Auto-déterminer le sens du pointage (toujours auto, pas de choix)
         const clockin: boolean = !lastTimesheet ? true : !lastTimesheet.clockin;
@@ -170,11 +157,19 @@ export class TimesheetUseCase {
      * Met à jour un timesheet existant
      * - Employé ne peut PAS modifier un timesheet
      * - Admin/manager uniquement
+     * - Manager ne peut modifier que les timesheets de ses employés
      */
-    async updateTimesheet(id: number, dto: TimesheetUpdateDTO): Promise<Timesheet_L1> {
+    async updateTimesheet(id: number, dto: TimesheetUpdateDTO, userRole: string, userId: number): Promise<Timesheet_L1> {
         const existing = await this.R_timesheet.getTimesheetById(id);
         if (!existing) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
+        }
+
+        // Vérifier que le manager gère bien cet employé
+        await this.validateManagerOwnership(existing.employeId, userRole, userId);
+
+        if (dto.timestamp) {
+            this.validateTimestampChronology(existing, new Date(dto.timestamp));
         }
 
         const timeSheetEntityUpdated = TimesheetMapper.FromDTO.Update_ToEntity(existing, dto);
@@ -189,15 +184,61 @@ export class TimesheetUseCase {
 
     /**
      * Supprime un timesheet (admin/manager uniquement)
+     * - Manager ne peut supprimer que les timesheets de ses employés
      */
-    async deleteTimesheet(id: number): Promise<void> {
+    async deleteTimesheet(id: number, userRole: string, userId: number): Promise<void> {
         const timesheet = await this.R_timesheet.getTimesheetById(id);
         if (!timesheet) {
             throw new NotFoundError(`Timesheet avec l'ID ${id} introuvable`);
         }
 
+        // Vérifier que le manager gère bien cet employé
+        await this.validateManagerOwnership(timesheet.employeId, userRole, userId);
+
         await this.R_timesheet.deleteTimesheet_ById(id);
     }
 
+    // #endregion
+
+    // #region Utils
+
+    /**
+     * Vérifie qu'un manager gère bien l'employé cible
+     * @throws ForbiddenError si le manager ne gère pas cet employé
+     * @throws NotFoundError si l'employé n'existe pas
+     */
+    private async validateManagerOwnership(employeId: number, userRole: string, userId: number): Promise<void> {
+        if (userRole === 'manager') {
+            const employee = await this.R_user.getEmployee_ById(employeId);
+            if (!employee) {
+                throw new NotFoundError(`Employé avec l'ID ${employeId} introuvable`);
+            }
+            if (employee.managerId !== userId) {
+                throw new ForbiddenError("Vous ne pouvez accéder qu'aux ressources de vos employés");
+            }
+        }
+    }
+
+    private validateTimestampChronology(lastTimesheet: Timesheet_Core | null, timestamp: Date): void {
+        // Validation : le nouveau timestamp doit être après le dernier
+        if (lastTimesheet && timestamp <= lastTimesheet.timestamp) {
+            // Formater la date en français pour l'utilisateur
+
+            const lastDate = lastTimesheet.timestamp;
+            const formattedDate = lastDate.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            const formattedTime = lastDate.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            throw new ValidationError(
+                `Le pointage doit être postérieur au dernier pointage effectué le ${formattedDate} à ${formattedTime}`
+            );
+        }
+    }
     // #endregion
 }

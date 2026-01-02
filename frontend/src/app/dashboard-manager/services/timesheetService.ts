@@ -86,41 +86,18 @@ export async function updateTimesheet(
   id: number,
   updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
 ): Promise<ApiResponse<Timesheet>> {
-  try {
-    const token = localStorage.getItem('token');
+  console.log(`🔧 PATCH /api/timesheets/${id}`, updates);
 
-    console.log(`🔧 PATCH /api/timesheets/${id}`, updates);
+  // Utiliser apiClient qui gère automatiquement les erreurs
+  const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/${id}`, updates);
 
-    const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      },
-      body: JSON.stringify(updates)
-    });
+  console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour`);
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      console.error('❌ Erreur backend PATCH:', { status: res.status, errorData, sentData: updates });
-      throw new Error(errorData.message || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour`);
-
-    return {
-      success: true,
-      data: data.data || data,
-      message: 'Timesheet mis à jour avec succès'
-    };
-  } catch (error) {
-    console.error(`❌ Erreur updateTimesheet(${id}):`, error);
-    return {
-      success: false,
-      error: (error as Error).message
-    };
-  }
+  return {
+    success: true,
+    data: data.data || data,
+    message: 'Timesheet mis à jour avec succès'
+  };
 }
 
 /**

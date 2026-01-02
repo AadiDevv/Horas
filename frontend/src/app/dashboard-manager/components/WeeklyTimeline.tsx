@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { Timesheet } from '../services/timesheetService';
-import { formatDateLocal } from '@/app/utils/dateUtils';
+import { formatDateLocal, formatDateTimeUTC, extractTimeLocal } from '@/app/utils/dateUtils';
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
@@ -81,9 +81,11 @@ export default function WeeklyTimeline({
     const hours = Math.floor(hour);
     const minutes = Math.floor((hour - hours) * 60);
 
-    const date = new Date(dayDate);
-    date.setHours(hours, minutes, 0, 0);
-    return date.toISOString();
+    // Formater en ISO UTC sans conversion de timezone
+    // L'heure cliquée reste l'heure stockée
+    const dateStr = formatDateLocal(dayDate);
+    const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return formatDateTimeUTC(dateStr, timeStr);
   };
 
   return (
@@ -149,14 +151,16 @@ export default function WeeklyTimeline({
 
                 {/* Blocs de pointages */}
                 {pairs.map((pair, pairIndex) => {
-                  const startDate = new Date(pair.entry.timestamp);
                   const startPos = getTimePosition(pair.entry.timestamp);
+                  // Extraire l'heure sans conversion timezone
+                  const startTime = extractTimeLocal(pair.entry.timestamp);
 
                   if (pair.exit) {
                     // Paire complète : afficher un bloc
-                    const endDate = new Date(pair.exit.timestamp);
                     const endPos = getTimePosition(pair.exit.timestamp);
                     const height = endPos - startPos;
+                    // Extraire l'heure sans conversion timezone
+                    const endTime = extractTimeLocal(pair.exit.timestamp);
 
                     return (
                       <div
@@ -184,9 +188,9 @@ export default function WeeklyTimeline({
 
                         {/* Contenu */}
                         <div className="text-xs font-semibold">
-                          {startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {startTime}
                           {' → '}
-                          {endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {endTime}
                         </div>
                       </div>
                     );
@@ -209,7 +213,7 @@ export default function WeeklyTimeline({
                         {/* Contenu */}
                         <div className="text-xs italic">
                           {isEntry ? '→ ' : '← '}
-                          {startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          {startTime}
                           {isEntry ? ' (entrée seule)' : ' (sortie seule)'}
                         </div>
                       </div>
