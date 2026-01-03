@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Save, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import { Timesheet } from '../services/timesheetService';
+import { formatDateLocal } from '@/app/utils/dateUtils';
 
 interface BlockModalProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export default function BlockModal({
     status: 'normal'
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
   // Initialiser le formulaire
   useEffect(() => {
@@ -74,7 +75,7 @@ export default function BlockModal({
       });
     } else {
       // Mode création
-      const date = initialDate || new Date().toISOString().split('T')[0];
+      const date = initialDate || formatDateLocal();
       let startTime = '09:00';
 
       if (initialStartTime) {
@@ -95,12 +96,12 @@ export default function BlockModal({
         status: 'normal'
       });
     }
-    setError('');
+    setLocalError('');
   }, [entryTimesheet, exitTimesheet, employeeId, initialDate, initialStartTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
 
     // Validation: heure de fin après heure de début
     const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
@@ -109,7 +110,7 @@ export default function BlockModal({
     const endTotalMinutes = endHours * 60 + endMinutes;
 
     if (endTotalMinutes <= startTotalMinutes) {
-      setError('L\'heure de fin doit être après l\'heure de début');
+      setLocalError('L\'heure de fin doit être après l\'heure de début');
       return;
     }
 
@@ -118,7 +119,9 @@ export default function BlockModal({
       await onSave(formData);
       onClose();
     } catch (err) {
-      setError((err as Error).message || 'Erreur lors de l\'enregistrement');
+      // Les erreurs API (400, etc.) sont gérées par ErrorModal global
+      // On ne gère ici que les erreurs inattendues
+      console.log('Erreur gérée par ErrorModal global:', err);
     } finally {
       setSaving(false);
     }
@@ -145,9 +148,9 @@ export default function BlockModal({
           </button>
         </div>
 
-        {error && (
+        {localError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
+            {localError}
           </div>
         )}
 

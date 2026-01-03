@@ -18,6 +18,8 @@ import {
   RetardsWeekChart,
   PonctualiteScore,
   PointagesManagement,
+  AbsencesCard,
+  AbsencesWeekChart,
 } from "./components";
 import {
   useManagerDashboard,
@@ -250,7 +252,7 @@ function ManagerDashboard() {
                   <KpiCard
                     title="Retards aujourd'hui"
                     value={stats.retardsAujourdhui.toString()}
-                    subtitle={stats.retardMoyen > 0 ? `Retard moyen: ${stats.retardMoyen} min` : "Aucun retard"}
+                    subtitle={stats.absencesEnAttente > 0 ? `${stats.absencesEnAttente} absences en attente` : "Aucun retard"}
                     icon={Clock}
                   />
                 </div>
@@ -261,20 +263,20 @@ function ManagerDashboard() {
                     <HeuresChart
                       equipes={stats.heuresParEquipe}
                     />
-                    <RetardsCard
-                      retards={stats.retardsDetail}
-                      retardMoyen={stats.retardMoyen}
+                    <AbsencesCard
+                      absences={stats.absencesDetail}
+                      absencesEnAttente={stats.absencesEnAttente}
                     />
                   </div>
                 )}
 
-                {/* Section stats retards et ponctualité - Données réelles */}
+                {/* Section stats absences et ponctualité - Données réelles */}
                 {enrichedEquipes.length > 0 && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <RetardsWeekChart
-                      data={stats.retardsParJour}
-                      total={stats.totalRetardsSemaine}
-                      evolution={stats.evolutionRetards}
+                    <AbsencesWeekChart
+                      data={stats.absencesParJour}
+                      total={stats.totalAbsencesSemaine}
+                      evolution={stats.evolutionAbsences}
                     />
                     <PonctualiteScore
                       equipes={stats.scoreParEquipe}

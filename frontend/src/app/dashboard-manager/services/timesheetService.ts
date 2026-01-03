@@ -3,6 +3,9 @@
  * Permet de gérer les pointages de tous les employés
  */
 
+import { apiClient } from '@/app/utils/apiClient';
+import { formatDateLocal, getSunday } from '@/app/utils/dateUtils';
+
 const API_BASE_URL = "http://localhost:8080";
 
 export interface Timesheet {
@@ -125,34 +128,15 @@ export async function updateTimesheet(
  * Supprime un timesheet
  */
 export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE_URL}/api/timesheets/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      }
-    });
+  // Utiliser apiClient qui gère automatiquement les erreurs
+  await apiClient.delete(`${API_BASE_URL}/api/timesheets/${id}`);
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${res.status}`);
-    }
+  console.log(`✅ DELETE /api/timesheets/${id} - Timesheet supprimé`);
 
-    console.log(`✅ DELETE /api/timesheets/${id} - Timesheet supprimé`);
-
-    return {
-      success: true,
-      message: 'Timesheet supprimé avec succès'
-    };
-  } catch (error) {
-    console.error(`❌ Erreur deleteTimesheet(${id}):`, error);
-    return {
-      success: false,
-      error: (error as Error).message
-    };
-  }
+  return {
+    success: true,
+    message: 'Timesheet supprimé avec succès'
+  };
 }
 
 /**
@@ -165,42 +149,22 @@ export async function createTimesheet(timesheet: {
   timestamp: string; // ISO DateTime
   status?: 'normal' | 'retard' | 'absence';
 }): Promise<ApiResponse<Timesheet>> {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE_URL}/api/timesheets/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      },
-      body: JSON.stringify({
-        employeId: timesheet.employeId,
-        timestamp: timesheet.timestamp,
-        status: timesheet.status || 'normal'
-      })
-    });
+  // Utiliser apiClient qui gère automatiquement les erreurs (ErrorModal pour 400)
+  const res = await apiClient.post(`${API_BASE_URL}/api/timesheets/`, {
+    employeId: timesheet.employeId,
+    timestamp: timesheet.timestamp,
+    status: timesheet.status || 'normal'
+  });
 
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${res.status}`);
-    }
+  const data = await res.json();
+  console.log('✅ POST /api/timesheets/ - Timesheet créé', data);
+  console.log('📝 Données du timesheet créé:', JSON.stringify(data, null, 2));
 
-    const data = await res.json();
-    console.log('✅ POST /api/timesheets/ - Timesheet créé', data);
-    console.log('📝 Données du timesheet créé:', JSON.stringify(data, null, 2));
-
-    return {
-      success: true,
-      data: data.data || data,
-      message: 'Timesheet créé avec succès'
-    };
-  } catch (error) {
-    console.error('❌ Erreur createTimesheet:', error);
-    return {
-      success: false,
-      error: (error as Error).message
-    };
-  }
+  return {
+    success: true,
+    data: data.data || data,
+    message: 'Timesheet créé avec succès'
+  };
 }
 
 /**
@@ -211,11 +175,10 @@ export async function getEmployeeWeekTimesheets(
   weekStart: Date
 ): Promise<ApiResponse<Timesheet[]>> {
   const monday = new Date(weekStart);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const sunday = getSunday(monday);
 
-  const dateDebut = monday.toISOString().split('T')[0];
-  const dateFin = sunday.toISOString().split('T')[0];
+  const dateDebut = formatDateLocal(monday);
+  const dateFin = formatDateLocal(sunday);
 
   return getTimesheets({ employeId, dateDebut, dateFin });
 }

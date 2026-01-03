@@ -34,11 +34,13 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
+      console.log("email", email);
+      console.log("password", password);
       const response = await axios.post<LoginResponse>(`${API_CONFIG.BASE_URL}/api/auth/login`, {
         email,
         password,
       });
-
+      console.log("response", response);
       if (response.status === 200) {
         const { accessToken, user, role } = response.data.data;
 
