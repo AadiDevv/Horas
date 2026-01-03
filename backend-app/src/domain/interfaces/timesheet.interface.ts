@@ -1,5 +1,6 @@
 import { Timesheet, Timesheet_Core, Timesheet_L1 } from "@/domain/entities/timesheet";
 import { TimesheetFilterDTO, TimesheetStatsDTO } from "@/application/DTOS";
+import { AdjacentTimeSheet } from "@/application/types/adjacentTimeSheets";
 
 /**
  * Interface du repository Timesheet
@@ -31,6 +32,19 @@ export interface ITimesheet {
      */
     getLastByEmployee(employeId: number): Promise<Timesheet | null>;
 
+    /**
+     * Récupère les timesheets adjacents (précédent et suivant) d'un employé
+     * par rapport à un timestamp cible
+     * @param employeId - ID de l'employé
+     * @param targetTimestamp - Timestamp de référence
+     * @param excludeIds - IDs à exclure (timesheets en cours de modification)
+     */
+    getAdjacentTimesheets(
+        employeId: number,
+        targetTimestamp: Timesheet_L1,
+        excludeIds?: number[]
+    ): Promise<AdjacentTimeSheet>;
+
     // #endregion
 
     // #region Create
@@ -50,6 +64,18 @@ export interface ITimesheet {
      * Met à jour un timesheet
      */
     updateTimesheet_ById(timesheet: Timesheet_L1): Promise<Timesheet_L1>;
+
+    /**
+     * Met à jour une paire de timesheets (entrée + sortie) de manière atomique
+     * @param entryId - ID du timesheet d'entrée
+     * @param exitId - ID du timesheet de sortie
+     * @param entryData - Données à mettre à jour pour l'entrée
+     * @param exitData - Données à mettre à jour pour la sortie
+     */
+    updateTimesheetPair(
+        entryData: Timesheet_L1,
+        exitData: Timesheet_L1
+    ): Promise<{ entry: Timesheet_L1; exit: Timesheet_L1 }>;
 
     // #endregion
 

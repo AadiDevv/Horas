@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { TimesheetUseCase } from '@/application/usecases';
-import { TimesheetFilterDTO, TimesheetCreateDTO,TimesheetUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
+import { TimesheetFilterDTO, TimesheetCreateDTO, TimesheetUpdateDTO, TimesheetPairUpdateDTO, TimesheetReadDTO, TimesheetListItemDTO, TimesheetStatsDTO } from '@/application/DTOS';
 import { ValidationError } from '@/domain/error/AppError';
 import { TimesheetMapper } from '@/application/mappers/';
 
@@ -25,9 +25,7 @@ export class TimesheetController {
             clockin: req.query.clockin ? req.query.clockin === 'true' : undefined,
         };
 
-        const userId = req.user!.id;
-        const userRole = req.user!.role;
-        const timesheets = await this.UC_timesheet.getTimesheets(userRole, userId, filter);
+        const timesheets = await this.UC_timesheet.getTimesheets(req.user!, filter);
         const dto: TimesheetListItemDTO[] = timesheets.map(timesheet => TimesheetMapper.FromEntityCore.toReadDTO_Core(timesheet));
 
         res.success(dto, "Pointages récupérés avec succès");
@@ -41,9 +39,7 @@ export class TimesheetController {
         const id = Number(req.params.id);
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        const userId = req.user!.id;
-        const userRole = req.user!.role;
-        const timesheet = await this.UC_timesheet.getTimesheetById(id, userRole, userId);
+        const timesheet = await this.UC_timesheet.getTimesheetById(id, req.user!);
         const dto: TimesheetReadDTO = TimesheetMapper.FromEntity.toReadDTO(timesheet);
 
         res.success(dto, "Pointage récupéré avec succès");
@@ -57,14 +53,12 @@ export class TimesheetController {
         const employeId = Number(req.query.employeId);
         const startDate = req.query.startDate as string;
         const endDate = req.query.endDate as string;
-        const userId = req.user!.id;
-        const userRole = req.user!.role;
 
         if (isNaN(employeId) || !startDate || !endDate) {
             throw new ValidationError("employeId, startDate et endDate sont requis");
         }
 
-        const stats: TimesheetStatsDTO = await this.UC_timesheet.getTimesheetStats(employeId, startDate, endDate, userRole, userId);
+        const stats: TimesheetStatsDTO = await this.UC_timesheet.getTimesheetStats(employeId, startDate, endDate, req.user!);
         res.success(stats, "Statistiques récupérées avec succès");
     }
 
@@ -86,14 +80,8 @@ export class TimesheetController {
             throw new ValidationError("Le champ 'timestamp' doit être une date valide");
         }
 
-        // Extraction du contexte d'authentification
-        const auth = {
-            userId: req.user!.id,
-            userRole: req.user!.role,
-        };
-
         // Déléguer toute la logique métier au usecase (séparation auth/data)
-        const savedTimesheet = await this.UC_timesheet.createTimesheet(dto, auth);
+        const savedTimesheet = await this.UC_timesheet.createTimesheet(dto, req.user!);
 
         const responseDto = TimesheetMapper.FromEntityCore.toReadDTO_Core(savedTimesheet);
         res.success(responseDto, `Pointage ${savedTimesheet.clockin ? 'entrée' : 'sortie'} enregistré avec succès`);
@@ -102,6 +90,29 @@ export class TimesheetController {
     // #endregion
 
     // #region Update
+
+    /**
+     * PATCH /api/timesheets/pair
+     * Met à jour une paire de timesheets (atomique)
+     */
+    async updateTimesheetPair(req: Request, res: Response): Promise<void> {
+        const dto: TimesheetPairUpdateDTO = req.body;
+
+        if (!dto.entryId || !dto.exitId || !dto.entryTimestamp || !dto.exitTimestamp) {
+            throw new ValidationError("entryId, exitId, entryTimestamp et exitTimestamp sont requis");
+        }
+
+
+        const result = await this.UC_timesheet.updateTimesheetPair(dto, req.user!);
+
+        res.success(
+            {
+                entry: TimesheetMapper.FromEntityL1.toReadDTO_L1(result.entry),
+                exit: TimesheetMapper.FromEntityL1.toReadDTO_L1(result.exit)
+            },
+            "Paire de pointages modifiée avec succès"
+        );
+    }
 
     /**
      * PATCH /api/timesheets/:id
@@ -116,10 +127,7 @@ export class TimesheetController {
             throw new ValidationError("Aucune donnée à mettre à jour");
         }
 
-        const userId = req.user!.id;
-        const userRole = req.user!.role;
-
-        const updated = await this.UC_timesheet.updateTimesheet(id, dto, userRole, userId);
+        const updated = await this.UC_timesheet.updateTimesheet(id, dto, req.user!);
         const updatedDTO = TimesheetMapper.FromEntityL1.toReadDTO_L1(updated);
 
         res.success(updatedDTO, "Pointage modifié avec succès");
@@ -137,10 +145,7 @@ export class TimesheetController {
         const id = Number(req.params.id);
         if (isNaN(id)) throw new ValidationError("ID invalide");
 
-        const userId = req.user!.id;
-        const userRole = req.user!.role;
-
-        await this.UC_timesheet.deleteTimesheet(id, userRole, userId);
+        await this.UC_timesheet.deleteTimesheet(id, req.user!);
 
         res.success(null, "Pointage supprimé avec succès");
     }

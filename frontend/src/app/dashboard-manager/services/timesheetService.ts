@@ -101,6 +101,31 @@ export async function updateTimesheet(
 }
 
 /**
+ * PATCH /api/timesheets/pair
+ * Met à jour une paire de timesheets de manière atomique
+ */
+export async function updateTimesheetPair(pairData: {
+  entryId: number;
+  exitId: number;
+  entryTimestamp: string;
+  exitTimestamp: string;
+  status?: 'normal' | 'retard' | 'absence';
+}): Promise<ApiResponse<{ entry: Timesheet; exit: Timesheet }>> {
+  console.log('🔧 PATCH /api/timesheets/pair', pairData);
+
+  // Utiliser apiClient qui gère automatiquement les erreurs
+  const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/pair`, pairData);
+
+  console.log('✅ PATCH /api/timesheets/pair - Paire mise à jour');
+
+  return {
+    success: true,
+    data: data.data || data,
+    message: 'Paire de timesheets mise à jour avec succès'
+  };
+}
+
+/**
  * DELETE /api/timesheets/{id}
  * Supprime un timesheet
  */

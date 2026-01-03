@@ -5,6 +5,7 @@ import {
   getEmployeeWeekTimesheets,
   Timesheet,
   updateTimesheet,
+  updateTimesheetPair,
   deleteTimesheet,
   createTimesheet
 } from '../services/timesheetService';
@@ -122,15 +123,13 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
 
     if (data.entryId && data.exitId) {
-      // Mode édition - Utiliser PATCH pour modifier les timesheets existants
+      // Mode édition - Utiliser la route atomique pour les paires
       // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
-      await updateTimesheet(data.entryId, {
-        timestamp: entryTimestamp,
-        status: data.status
-      });
-
-      await updateTimesheet(data.exitId, {
-        timestamp: exitTimestamp,
+      await updateTimesheetPair({
+        entryId: data.entryId,
+        exitId: data.exitId,
+        entryTimestamp,
+        exitTimestamp,
         status: data.status
       });
     } else {
