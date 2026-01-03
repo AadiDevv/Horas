@@ -74,8 +74,25 @@ router.post('/',
 
 // #region PATCH Routes
 /**
+ * PATCH /api/timesheets/pair
+ * Mise à jour atomique d'une paire de timesheets (entrée + sortie)
+ * IMPORTANT: Cette route DOIT être avant /:id pour éviter que "pair" soit interprété comme un ID
+ */
+router.patch('/pair',
+    authMiddleware,
+    managerOrAdmin,
+    async (req, res, next) => {
+        try {
+            await timesheetController.updateTimesheetPair(req, res);
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+/**
  * PATCH /api/timesheets/:id
- * Mise à jour d’un timesheet (par un manager/admin)
+ * Mise à jour d'un timesheet (par un manager/admin)
  */
 router.patch('/:id',
     authMiddleware,

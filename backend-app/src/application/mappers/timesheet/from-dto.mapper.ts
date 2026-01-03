@@ -14,7 +14,6 @@ export namespace TimesheetMapper {
             return new Timesheet_L1({
                 ...existing,
                 timestamp: dto.timestamp ? new Date(dto.timestamp) : existing.timestamp,
-                clockin: dto.clockin ?? existing.clockin,
                 status: dto.status ?? existing.status,
                 updatedAt: new Date(Date.now()),
             });

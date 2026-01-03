@@ -5,6 +5,8 @@ import { UserEmployee_Core } from "@/domain/entities/user";
 import { TimesheetFilterDTO } from "@/application/DTOS";
 import { TIMESHEET_CORE_SELECT, TIMESHEET_L1_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/timesheets.prismaConfig";
 import { USER_EMPLOYEE_CORE_SELECT } from "@/infrastructure/prismaUtils/selectConfigs/user.prismaConfig";
+import { AdjacentTimeSheet } from "../../../application/types/adjacentTimeSheets";
+import { PaireTimeSheet } from "@/application/types/paireTimeSheet";
 
 
 export class TimesheetRepository implements ITimesheet {
@@ -105,6 +107,52 @@ export class TimesheetRepository implements ITimesheet {
         });
     }
 
+    async getAdjacentTimesheets(
+        employeId: number,
+        targetTimestamp: Timesheet_L1,
+        excludeIds: number[] = []
+    ): Promise<AdjacentTimeSheet> {
+        // Construire la condition d'exclusion si des IDs sont fournis
+        const excludeCondition = excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {};
+
+        // Récupérer le timesheet précédent (plus récent avant le target)
+        const previousData = await prisma.timesheet.findFirst({
+            where: {
+                employeId,
+                timestamp: { lt: targetTimestamp.timestamp },
+                createdAt: { lt: targetTimestamp.createdAt },
+                ...excludeCondition,
+            },
+            select: {
+                ...TIMESHEET_L1_SELECT,
+            },
+            orderBy: {
+                timestamp: 'desc',
+            },
+        });
+
+        // Récupérer le timesheet suivant (plus ancien après le target)
+        const nextData = await prisma.timesheet.findFirst({
+            where: {
+                employeId,
+                timestamp: { gt: targetTimestamp.timestamp },
+                createdAt: { gt: targetTimestamp.createdAt },
+                ...excludeCondition,
+            },
+            select: {
+                ...TIMESHEET_L1_SELECT,
+            },
+            orderBy: {
+                timestamp: 'asc',
+            },
+        });
+
+        return {
+            previous: previousData ? new Timesheet_L1({ ...previousData }) : null,
+            next: nextData ? new Timesheet_L1({ ...nextData }) : null,
+        };
+    }
+
     async getTimesheetStats(employeId: number, startDate: string, endDate: string) {
         const periodStart = new Date(startDate);
         const periodEnd = new Date(endDate);
@@ -135,6 +183,7 @@ export class TimesheetRepository implements ITimesheet {
         return stats;
     }
 
+    
     // #endregion
 
     // #region Create
@@ -174,6 +223,33 @@ export class TimesheetRepository implements ITimesheet {
         return new Timesheet_L1({
             ...updated,
         });
+    }
+
+    async updateTimesheetPair(
+        entryData: Timesheet_L1,
+        exitData: Timesheet_L1
+    ): Promise<PaireTimeSheet> {
+        const result = await prisma.$transaction(async (tx) => {
+            const [updatedEntry, updatedExit] = await Promise.all([
+                tx.timesheet.update({
+                    where: { id: entryData.id },
+                    data: { ...entryData, updatedAt: new Date() },
+                    select: { ...TIMESHEET_L1_SELECT }
+                }),
+                tx.timesheet.update({
+                    where: { id: exitData.id },
+                    data: { ...exitData, updatedAt: new Date() },
+                    select: { ...TIMESHEET_L1_SELECT }
+                })
+            ]);
+
+            return {
+                entry: new Timesheet_L1({ ...updatedEntry }),
+                exit: new Timesheet_L1({ ...updatedExit })
+            };
+        });
+
+        return result satisfies PaireTimeSheet;
     }
 
     // #endregion

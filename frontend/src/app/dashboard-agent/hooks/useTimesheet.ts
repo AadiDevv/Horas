@@ -436,7 +436,6 @@ export function useTimesheet() {
           setCurrentDayLogs({ start: '' });
           setLastClockIn(null);
           setSuccessMessage('✅ Pointage de sortie enregistré avec succès !');
-          console.log('🔴 État mis à jour: isClockingIn = false');
 
           // Recharger les données en arrière-plan (sans bloquer l'UI)
           setTimeout(() => {
