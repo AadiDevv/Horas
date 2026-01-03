@@ -57,7 +57,8 @@ export default function BlockModal({
     date: '',
     startTime: '09:00',
     endTime: '10:00',
-    status: 'normal'
+    status: 'normal',
+    mode: 'pair'
   });
   const [absenceFormData, setAbsenceFormData] = useState<AbsenceFormData>({
     employeId: employeeId,
