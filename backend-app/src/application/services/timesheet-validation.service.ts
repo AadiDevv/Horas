@@ -39,9 +39,6 @@ export class TimesheetValidationService {
             [oldEntry.id, oldExit.id]
         );
 
-        console.log('adjacent : ', adjacent);
-        console.log('newEntry : ', newEntry);
-        console.log('newExit : ', newExit);
         // ===== VALIDATION 1: newEntry ne doit pas dépasser le previous =====
         if (adjacent.previous && newEntry.timestamp < adjacent.previous.timestamp) {
             const previousType = adjacent.previous.clockin ? 'entrée' : 'sortie';
@@ -86,8 +83,7 @@ export class TimesheetValidationService {
         );
 
         const type = newTimestamp.clockin ? 'entrée' : 'sortie';
-        console.log('aaaaaaaaaaaadjacent previous : ', adjacent.previous);
-        console.log('nnnnnnnnnnnnnewTimestamp : ', newTimestamp);
+
         // ===== VALIDATION 1: Ne doit pas dépasser le previous =====
         if (adjacent.previous && newTimestamp.timestamp < adjacent.previous.timestamp) {
             const previousType = adjacent.previous.clockin ? 'entrée' : 'sortie';

@@ -116,15 +116,12 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
   };
 
   const handleSaveBlock = async (data: BlockData) => {
-    // Créer les timestamps complets pour l'entrée et la sortie
-    // IMPORTANT: Utiliser UTC pour éviter les décalages de timezone
-    // Format: YYYY-MM-DDTHH:mm:ss.000Z (l'heure entrée par l'utilisateur est considérée comme UTC)
+    // Créer le timestamp pour l'entrée
     const entryTimestamp = `${data.date}T${data.startTime}:00.000Z`;
-    const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
 
     if (data.entryId && data.exitId) {
       // Mode édition - Utiliser la route atomique pour les paires
-      // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
+      const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
       await updateTimesheetPair({
         entryId: data.entryId,
         exitId: data.exitId,
@@ -132,9 +129,17 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
         exitTimestamp,
         status: data.status
       });
+    } else if (data.mode === 'single') {
+      // Mode création - pointage unique
+      // Le backend déterminera automatiquement si c'est une entrée ou une sortie
+      await createTimesheet({
+        employeId: data.employeId,
+        timestamp: entryTimestamp,
+        status: data.status
+      });
     } else {
-      // Mode création - créer une paire entrée/sortie
-      // Les erreurs sont gérées automatiquement par apiClient (ErrorModal)
+      // Mode création - paire entrée/sortie
+      const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
       await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,

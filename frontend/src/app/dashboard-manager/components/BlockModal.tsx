@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Save, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { X, Save, Clock, Calendar as CalendarIcon, ArrowRightLeft, MousePointer } from 'lucide-react';
 import { Timesheet } from '../services/timesheetService';
 import { formatDateLocal } from '@/app/utils/dateUtils';
 
@@ -21,8 +21,9 @@ export interface BlockData {
   employeId: number;
   date: string;
   startTime: string; // Format HH:MM
-  endTime: string;   // Format HH:MM
+  endTime?: string;  // Format HH:MM (optionnel si pointage unique)
   status: 'normal' | 'retard' | 'absence';
+  mode: 'pair' | 'single'; // Mode de création
 }
 
 export default function BlockModal({
@@ -43,7 +44,8 @@ export default function BlockModal({
     date: '',
     startTime: '09:00',
     endTime: '10:00',
-    status: 'normal'
+    status: 'normal',
+    mode: 'pair'
   });
   const [saving, setSaving] = useState(false);
   const [localError, setLocalError] = useState('');
@@ -52,11 +54,6 @@ export default function BlockModal({
   useEffect(() => {
     if (entryTimesheet && exitTimesheet) {
       // Mode édition
-      // Extraire date et heures depuis les timestamps
-      // Format ISO: "2025-12-13T14:26:00.000Z"
-      const entryDate = new Date(entryTimesheet.timestamp);
-      const exitDate = new Date(exitTimesheet.timestamp);
-
       // Extraire la date au format YYYY-MM-DD
       const date = entryTimesheet.timestamp.substring(0, 10); // "YYYY-MM-DD"
       
@@ -71,7 +68,8 @@ export default function BlockModal({
         date,
         startTime,
         endTime,
-        status: entryTimesheet.status
+        status: entryTimesheet.status,
+        mode: 'pair'
       });
     } else {
       // Mode création
@@ -93,7 +91,8 @@ export default function BlockModal({
         date,
         startTime,
         endTime,
-        status: 'normal'
+        status: 'normal',
+        mode: 'pair'
       });
     }
     setLocalError('');
@@ -103,15 +102,17 @@ export default function BlockModal({
     e.preventDefault();
     setLocalError('');
 
-    // Validation: heure de fin après heure de début
-    const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
-    const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
-    const startTotalMinutes = startHours * 60 + startMinutes;
-    const endTotalMinutes = endHours * 60 + endMinutes;
+    // Validation: heure de fin après heure de début (uniquement en mode paire)
+    if (formData.mode === 'pair' && formData.endTime) {
+      const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
+      const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
 
-    if (endTotalMinutes <= startTotalMinutes) {
-      setLocalError('L\'heure de fin doit être après l\'heure de début');
-      return;
+      if (endTotalMinutes <= startTotalMinutes) {
+        setLocalError('L\'heure de fin doit être après l\'heure de début');
+        return;
+      }
     }
 
     setSaving(true);
@@ -136,7 +137,7 @@ export default function BlockModal({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'Modifier le bloc' : 'Créer un bloc'}
+              {isEditing ? 'Modifier le bloc' : 'Créer un pointage'}
             </h2>
             <p className="text-sm text-gray-600 mt-1">{employeeName}</p>
           </div>
@@ -170,12 +171,113 @@ export default function BlockModal({
             />
           </div>
 
+          {/* Mode de création (uniquement en création) */}
+          {!isEditing && (
+            <div className="flex items-center justify-start">
+
+              {/* VERSION 1: Tabs discrets (ACTIVE) */}
+              <div className="flex items-center border-b border-gray-200 w-full">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, mode: 'pair' }))}
+                  className={`flex-1 p-2 transition-colors relative flex items-center justify-center ${
+                    formData.mode === 'pair'
+                      ? 'text-gray-900'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                  title="Période (entrée + sortie)"
+                >
+                  <ArrowRightLeft size={18} />
+                  {formData.mode === 'pair' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, mode: 'single' }))}
+                  className={`flex-1 p-2 transition-colors relative flex items-center justify-center ${
+                    formData.mode === 'single'
+                      ? 'text-gray-900'
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
+                  title="Pointage unique (auto-détection)"
+                >
+                  <MousePointer size={18} />
+                  {formData.mode === 'single' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900" />
+                  )}
+                </button>
+              </div>
+
+              {/* VERSION 2: Toggle switch simple (COMMENTÉE)
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  mode: prev.mode === 'pair' ? 'single' : 'pair'
+                }))}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
+                  formData.mode === 'pair'
+                    ? 'border-gray-300 bg-gray-50 text-gray-700'
+                    : 'border-gray-300 bg-white text-gray-500'
+                }`}
+                title={formData.mode === 'pair' ? 'Période (entrée + sortie)' : 'Pointage unique (auto-détection)'}
+              >
+                {formData.mode === 'pair' ? (
+                  <>
+                    <ArrowRightLeft size={16} />
+                    <div className="w-8 h-4 bg-gray-900 rounded-full relative">
+                      <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-8 h-4 bg-gray-300 rounded-full relative">
+                      <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full" />
+                    </div>
+                    <MousePointer size={16} />
+                  </>
+                )}
+              </button>
+              */}
+            </div>
+          )}
+
           {/* Heures */}
-          <div className="grid grid-cols-2 gap-4">
+          {formData.mode === 'pair' ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Clock size={16} className="inline mr-1" />
+                  Début
+                </label>
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Clock size={16} className="inline mr-1" />
+                  Fin
+                </label>
+                <input
+                  type="time"
+                  value={formData.endTime || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  required
+                />
+              </div>
+            </div>
+          ) : (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 <Clock size={16} className="inline mr-1" />
-                Début
+                Heure du pointage
               </label>
               <input
                 type="time"
@@ -185,20 +287,7 @@ export default function BlockModal({
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <Clock size={16} className="inline mr-1" />
-                Fin
-              </label>
-              <input
-                type="time"
-                value={formData.endTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                required
-              />
-            </div>
-          </div>
+          )}
 
           {/* Statut */}
           <div>
