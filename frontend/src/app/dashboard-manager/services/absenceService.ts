@@ -129,6 +129,63 @@ export async function getPendingAbsences(): Promise<ApiResponse<Absence[]>> {
 }
 
 /**
+ * POST /api/absences
+ * Crée une nouvelle absence
+ */
+export async function createAbsence(absence: {
+  employeId: number;
+  type: AbsenceType;
+  startDateTime: string; // ISO DateTime
+  endDateTime: string;   // ISO DateTime
+  comments?: string;
+  status?: AbsenceStatus;
+}): Promise<ApiResponse<Absence>> {
+  try {
+    const token = localStorage.getItem('token');
+
+    console.log('📝 POST /api/absences', absence);
+
+    const res = await fetch(`${API_BASE_URL}/api/absences`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify({
+        employeId: absence.employeId,
+        type: absence.type,
+        startDateTime: absence.startDateTime,
+        endDateTime: absence.endDateTime,
+        isFullDay: true, // Par défaut journée complète
+        comments: absence.comments || null,
+        status: absence.status || 'en_attente'
+      })
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Erreur backend POST:', { status: res.status, errorData });
+      throw new Error(errorData.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log('✅ POST /api/absences - Absence créée', data);
+
+    return {
+      success: true,
+      data: data.data || data,
+      message: 'Absence créée avec succès'
+    };
+  } catch (error) {
+    console.error('❌ Erreur createAbsence:', error);
+    return {
+      success: false,
+      error: (error as Error).message
+    };
+  }
+}
+
+/**
  * PATCH /api/absences/:id/validate
  * Valide ou refuse une absence
  */
@@ -173,3 +230,4 @@ export async function validateAbsence(
     };
   }
 }
+

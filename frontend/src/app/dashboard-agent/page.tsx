@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, AlertCircle, Calendar } from "lucide-react";
+import { Clock, AlertCircle, Calendar, UserX } from "lucide-react";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
 import {
@@ -9,6 +9,7 @@ import {
   ClockButton,
   WeeklyCalendar,
   SettingsModal,
+  Sidebar,
 } from "./components";
 import {
   useUserData,
@@ -17,10 +18,12 @@ import {
   useTimesheet,
 } from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
+import { getAbsences, Absence } from "@/app/dashboard-manager/services/absenceService";
 
 export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [absences, setAbsences] = useState<Absence[]>([]);
 
   // Custom hooks
   const { userData, setUserData, formData, setFormData, loadUserData } =
@@ -75,8 +78,51 @@ export default function Page() {
   useEffect(() => {
     if (userData) {
       loadTeamSchedule();
+      loadAbsences();
     }
   }, [userData]);
+
+  // Charger les absences de l'employé pour la semaine sélectionnée
+  const loadAbsences = async () => {
+    if (!userData?.id) return;
+
+    try {
+      const response = await getAbsences({ employeId: userData.id });
+      if (response.success && response.data) {
+        // Filtrer les absences pour la semaine en cours
+        const monday = weekDays[0];
+        const sunday = weekDays[6];
+
+        if (monday && sunday) {
+          const filteredAbsences = response.data.filter(absence => {
+            const absenceStart = new Date(absence.startDateTime);
+            const absenceEnd = new Date(absence.endDateTime);
+            const weekStart = new Date(monday);
+            const weekEnd = new Date(sunday);
+
+            weekStart.setHours(0, 0, 0, 0);
+            weekEnd.setHours(23, 59, 59, 999);
+
+            // L'absence chevauche la semaine si elle commence avant la fin de la semaine
+            // ET se termine après le début de la semaine
+            return absenceStart <= weekEnd && absenceEnd >= weekStart;
+          });
+
+          setAbsences(filteredAbsences);
+          console.log('✅ Absences chargées pour la semaine:', filteredAbsences);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement absences:', error);
+    }
+  };
+
+  // Recharger les absences quand la semaine change
+  useEffect(() => {
+    if (userData && weekDays.length > 0) {
+      loadAbsences();
+    }
+  }, [selectedWeek, weekDays]);
 
   const handleLogout = () => {
     console.log('🚪 Déconnexion...');
@@ -107,9 +153,10 @@ export default function Page() {
 
         {/* Main Content */}
         <div className="flex">
+          <Sidebar />
           <main className="flex-1 p-4 md:p-8 w-full overflow-hidden">
             {/* Header with Clock Button */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-6 md:gap-0">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-6">
               <div>
                 <h2 className="text-3xl md:text-4xl font-semibold mb-2">Aujourd'hui</h2>
                 <p className="text-gray-600">
@@ -192,9 +239,11 @@ export default function Page() {
                       setCurrentTime(new Date());
                       loadTeamSchedule();
                       loadWeekTimesheets();
+                      loadAbsences();
                     }}
                     teamSchedule={teamSchedule}
                     weekDays={weekDays}
+                    absences={absences}
                   />
                </div>
             </div>

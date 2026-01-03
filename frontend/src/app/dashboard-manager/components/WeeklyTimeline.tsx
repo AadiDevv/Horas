@@ -1,23 +1,69 @@
-import { X } from 'lucide-react';
+import { X, Clock } from 'lucide-react';
 import { Timesheet } from '../services/timesheetService';
+import { Absence } from '../services/absenceService';
 import { formatDateLocal } from '@/app/utils/dateUtils';
+
+interface Horaire {
+  id: number;
+  jour: string;
+  heureDebut: string;
+  heureFin: string;
+}
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
+  absences: Absence[];
   weekDays: Date[];
   onEditPair: (entry: Timesheet, exit?: Timesheet) => void;
   onDelete: (entry: Timesheet, exit?: Timesheet) => void;
   onCreate: (date: Date, hour: string) => void;
+  onAbsenceClick?: (absence: Absence) => void;
+  teamSchedule?: Horaire[];
 }
 
 export default function WeeklyTimeline({
   timesheets,
+  absences,
   weekDays,
   onEditPair,
   onDelete,
-  onCreate
+  onCreate,
+  onAbsenceClick,
+  teamSchedule = []
 }: WeeklyTimelineProps) {
   const hours = Array.from({ length: 17 }, (_, i) => i + 6); // 6h à 22h
+
+  // Mapping des jours français vers les jours courts
+  const jourMapping: Record<string, string> = {
+    'Lundi': 'Mon',
+    'Mardi': 'Tue',
+    'Mercredi': 'Wed',
+    'Jeudi': 'Thu',
+    'Vendredi': 'Fri',
+    'Samedi': 'Sat',
+    'Dimanche': 'Sun'
+  };
+
+  // Créer un mapping des horaires par jour de la semaine
+  const scheduleByDay: Record<string, Horaire | null> = {
+    Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null
+  };
+
+  teamSchedule.forEach(horaire => {
+    const dayKey = jourMapping[horaire.jour];
+    if (dayKey) {
+      scheduleByDay[dayKey] = horaire;
+    }
+  });
+
+  // Fonction pour convertir une heure "HH:MM" en position pourcentage
+  const timeToPosition = (time: string, minHour: number = 6, maxHour: number = 22): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    const minMinutes = minHour * 60;
+    const maxMinutes = maxHour * 60;
+    return ((totalMinutes - minMinutes) / (maxMinutes - minMinutes)) * 100;
+  };
 
   // Grouper les timesheets par date (extraite du timestamp)
   const timesheetsByDate = timesheets.reduce((acc, ts) => {
@@ -64,6 +110,15 @@ export default function WeeklyTimeline({
     return pairs;
   };
 
+  // Récupérer les absences pour un jour donné
+  const getAbsencesForDay = (dateStr: string): Absence[] => {
+    return absences.filter(absence => {
+      const startDate = absence.startDateTime.substring(0, 10);
+      const endDate = absence.endDateTime.substring(0, 10);
+      return dateStr >= startDate && dateStr <= endDate;
+    });
+  };
+
   // Convertir une heure ISO en position Y (en %)
   const getTimePosition = (isoTime: string): number => {
     const date = new Date(isoTime);
@@ -108,6 +163,10 @@ export default function WeeklyTimeline({
           today.setHours(0, 0, 0, 0);
           const isToday = dateStr === formatDateLocal(today);
 
+          // Récupérer l'horaire de l'équipe pour ce jour
+          const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
+          const teamHoraire = scheduleByDay[dayOfWeek];
+
           return (
             <div key={dayIndex} className="col-span-1 relative">
               {/* En-tête jour */}
@@ -132,6 +191,28 @@ export default function WeeklyTimeline({
                     style={{ top: `${hourIndex * 64}px` }}
                   />
                 ))}
+
+                {/* Horaire de l'équipe en arrière-plan */}
+                {teamHoraire && (
+                  <div
+                    className="absolute left-0 right-0 rounded-lg border-2 z-5"
+                    style={{
+                      backgroundColor: 'rgba(51, 51, 51, 0.15)',
+                      borderColor: 'rgba(51, 51, 51, 0.3)',
+                      top: `${timeToPosition(teamHoraire.heureDebut)}%`,
+                      height: `${timeToPosition(teamHoraire.heureFin) - timeToPosition(teamHoraire.heureDebut)}%`
+                    }}
+                  >
+                    <div className="px-2 py-1 text-xs font-semibold flex flex-col items-center justify-center h-full text-gray-700">
+                      <Clock size={14} className="mb-1" />
+                      <div className="text-center leading-tight">
+                        <div>{teamHoraire.heureDebut}</div>
+                        <div className="opacity-75 text-[10px]">-</div>
+                        <div>{teamHoraire.heureFin}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Zone cliquable pour créer un bloc de 1h - DOIT ÊTRE AVANT les blocs */}
                 <div
@@ -215,6 +296,60 @@ export default function WeeklyTimeline({
                       </div>
                     );
                   }
+                })}
+
+                {/* Blocs d'absences */}
+                {getAbsencesForDay(dateStr).map((absence, absenceIndex) => {
+                  // Les absences bloquent uniquement les heures d'équipe si elles existent
+                  if (!teamHoraire) return null; // Ne pas afficher si pas d'horaire d'équipe
+
+                  const statusColors = {
+                    'en_attente': 'bg-orange-400/90 border-orange-600',
+                    'approuve': 'bg-red-400/90 border-red-600',
+                    'refuse': 'bg-gray-400/90 border-gray-600',
+                    'annule': 'bg-gray-300/90 border-gray-500'
+                  };
+
+                  const typeLabels: Record<string, string> = {
+                    'conges_payes': 'Congés payés',
+                    'conges_sans_solde': 'Congés sans solde',
+                    'maladie': 'Maladie',
+                    'formation': 'Formation',
+                    'teletravail': 'Télétravail',
+                    'autre': 'Autre'
+                  };
+
+                  const topPos = timeToPosition(teamHoraire.heureDebut);
+                  const heightPos = timeToPosition(teamHoraire.heureFin) - topPos;
+
+                  return (
+                    <div
+                      key={`absence-${absenceIndex}`}
+                      className={`absolute left-1 right-1 text-white rounded-lg p-3 border-2 cursor-pointer hover:shadow-lg transition-shadow ${statusColors[absence.status]}`}
+                      style={{
+                        top: `${topPos}%`,
+                        height: `${heightPos}%`,
+                        zIndex: 30,
+                        opacity: 0.9
+                      }}
+                      onClick={() => onAbsenceClick?.(absence)}
+                      title={`Absence: ${typeLabels[absence.type]} - ${absence.status}`}
+                    >
+                      <div className="text-center">
+                        <div className="text-sm font-bold mb-1">
+                          ABSENCE
+                        </div>
+                        <div className="text-xs font-semibold">
+                          {typeLabels[absence.type]}
+                        </div>
+                        {absence.status === 'en_attente' && (
+                          <div className="text-xs mt-1 font-medium">
+                            En attente
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
                 })}
               </div>
             </div>
