@@ -1,5 +1,6 @@
 import { Clock, User } from 'lucide-react';
 import { DayKey, TimeLog, Horaire } from '../types';
+import { Absence } from '@/app/dashboard-manager/services/absenceService';
 
 interface WeeklyCalendarProps {
   timeLogs: Record<DayKey, TimeLog[]>;
@@ -9,6 +10,7 @@ interface WeeklyCalendarProps {
   onRefresh: () => void;
   teamSchedule?: Horaire[];
   weekDays: Date[];
+  absences?: Absence[];
 }
 
 const dayKeys: DayKey[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -57,7 +59,8 @@ function DayTimeline({
   timeLogs,
   teamHoraire,
   isClockingIn,
-  currentDayLogs
+  currentDayLogs,
+  dayAbsences
 }: {
   day: DayKey;
   date: Date;
@@ -65,6 +68,7 @@ function DayTimeline({
   teamHoraire: Horaire | null;
   isClockingIn: boolean;
   currentDayLogs?: TimeLog;
+  dayAbsences?: Absence[];
 }) {
   // console.log(`📅 DayTimeline ${day}:`, { timeLogs, teamHoraire, isClockingIn, currentDayLogs });
 
@@ -260,6 +264,40 @@ function DayTimeline({
                   </div>
                 );
               })()}
+
+              {/* Blocs d'absences */}
+              {dayAbsences && dayAbsences.map((absence, idx) => {
+                // Les absences bloquent uniquement les heures de l'équipe
+                if (!teamHoraire) return null;
+
+                const position = calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime);
+
+                const statusColors = {
+                  'en_attente': 'bg-orange-400/90 border-orange-600',
+                  'approuve': 'bg-red-400/90 border-red-600',
+                  'refuse': 'bg-gray-400/90 border-gray-600',
+                  'annule': 'bg-gray-300/90 border-gray-500'
+                };
+
+                return (
+                  <div
+                    key={`absence-${idx}`}
+                    className={`absolute left-0 right-0 rounded-lg border-2 ${statusColors[absence.status]} z-30`}
+                    style={{
+                      top: `${position.top}%`,
+                      height: `${position.height}%`,
+                      opacity: 0.9
+                    }}
+                  >
+                    <div className="px-2 py-2 text-xs font-bold text-white flex flex-col items-center justify-center h-full">
+                      <div className="text-center">ABSENCE</div>
+                      {absence.status === 'en_attente' && (
+                        <div className="text-[10px] mt-1">En attente</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -276,7 +314,8 @@ export default function WeeklyCalendar({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRefresh,
   teamSchedule = [],
-  weekDays
+  weekDays,
+  absences = []
 }: WeeklyCalendarProps) {
   const scheduleByDay: Record<DayKey, Horaire | null> = {
     Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null
@@ -287,6 +326,32 @@ export default function WeeklyCalendar({
     if (dayKey) {
       scheduleByDay[dayKey] = horaire;
     }
+  });
+
+  // Grouper les absences par jour
+  const absencesByDay: Record<DayKey, Absence[]> = {
+    Mon: [], Tue: [], Wed: [], Thu: [], Fri: [], Sat: [], Sun: []
+  };
+
+  absences.forEach(absence => {
+    const startDate = new Date(absence.startDateTime);
+    const endDate = new Date(absence.endDateTime);
+
+    // Pour chaque jour de la semaine, vérifier si l'absence le couvre
+    weekDays.forEach((day, index) => {
+      const dayKey = dayKeys[index];
+      const dayDate = new Date(day);
+      dayDate.setHours(0, 0, 0, 0);
+
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      if (dayDate >= start && dayDate <= end && absence.status !== 'refuse') {
+        absencesByDay[dayKey].push(absence);
+      }
+    });
   });
 
   return (
@@ -327,6 +392,7 @@ export default function WeeklyCalendar({
             teamHoraire={scheduleByDay[day]}
             isClockingIn={isClockingIn && currentDayKey === day}
             currentDayLogs={isClockingIn && currentDayKey === day ? currentDayLogs : undefined}
+            dayAbsences={absencesByDay[day]}
           />
         ))}
       </div>

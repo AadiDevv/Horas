@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Calendar, Edit2, Trash2, Plus, Clock } from 'lucide-react';
+import { Search, Calendar, Edit2, Trash2, Clock, Bell } from 'lucide-react';
 import { Agent, Equipe } from '../types';
 import {
   getEmployeeWeekTimesheets,
@@ -8,11 +8,21 @@ import {
   deleteTimesheet,
   createTimesheet
 } from '../services/timesheetService';
+import { getPendingAbsences, getAbsences, Absence, validateAbsence, createAbsence } from '../services/absenceService';
+import { getEquipeHoraires } from '@/app/dashboard-agent/services/equipeService';
 import WeeklyTimeline from './WeeklyTimeline';
 import BlockModal, { BlockData } from './BlockModal';
+import AbsenceModal, { AbsenceFormData } from './AbsenceModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { getEquipeName } from './AgentList';
-import { getWeekDays, getMonday as getUtilMonday } from '@/app/utils/dateUtils';
+import { getWeekDays, getMonday as getUtilMonday, formatDateLocal } from '@/app/utils/dateUtils';
+
+interface Horaire {
+  id?: number;
+  jour: string;
+  heureDebut: string;
+  heureFin: string;
+}
 
 interface PointagesManagementProps {
   agents: Agent[];
@@ -25,9 +35,13 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
+  const [teamSchedule, setTeamSchedule] = useState<Horaire[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pendingAbsencesCount, setPendingAbsencesCount] = useState(0);
+  const [pendingAbsencesByAgent, setPendingAbsencesByAgent] = useState<Record<number, number>>({});
 
-  // Modales
+  // Modales Pointages
   const [showModal, setShowModal] = useState(false);
   const [editingPair, setEditingPair] = useState<{ entry: Timesheet; exit?: Timesheet } | null>(null);
   const [createDate, setCreateDate] = useState<string>('');
@@ -35,6 +49,10 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingPair, setDeletingPair] = useState<{ entry: Timesheet; exit?: Timesheet } | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Modales Absences
+  const [showAbsenceModal, setShowAbsenceModal] = useState(false);
+  const [editingAbsence, setEditingAbsence] = useState<Absence | null>(null);
 
   // Filtrer les agents par recherche
   const filteredAgents = agents.filter(agent =>
@@ -67,15 +85,44 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     setSelectedWeek(new Date());
   };
 
-  // Charger les timesheets quand l'agent ou la semaine change
+  // Charger le nombre d'absences en attente au montage
+  useEffect(() => {
+    loadPendingAbsences();
+  }, []);
+
+  // Charger les timesheets et absences quand l'agent ou la semaine change
   useEffect(() => {
     if (!selectedAgent) {
       setTimesheets([]);
+      setAbsences([]);
+      setTeamSchedule([]);
       return;
     }
 
     loadTimesheets();
+    loadAbsences();
+    loadTeamSchedule();
   }, [selectedAgent, selectedWeek]);
+
+  const loadPendingAbsences = async () => {
+    try {
+      const response = await getPendingAbsences();
+      if (response.success && response.data) {
+        setPendingAbsencesCount(response.data.length);
+
+        // Grouper par agent
+        const byAgent: Record<number, number> = {};
+        response.data.forEach(absence => {
+          if (absence.employeId) {
+            byAgent[absence.employeId] = (byAgent[absence.employeId] || 0) + 1;
+          }
+        });
+        setPendingAbsencesByAgent(byAgent);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement absences en attente:', error);
+    }
+  };
 
   const loadTimesheets = async () => {
     if (!selectedAgent) return;
@@ -90,6 +137,49 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
       console.error('❌ Erreur chargement timesheets:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAbsences = async () => {
+    if (!selectedAgent) return;
+
+    try {
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      const response = await getAbsences({
+        employeId: selectedAgent.id,
+        startDate: formatDateLocal(monday),
+        endDate: formatDateLocal(sunday)
+      });
+
+      if (response.success && response.data) {
+        setAbsences(response.data);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement absences:', error);
+    }
+  };
+
+  const loadTeamSchedule = async () => {
+    if (!selectedAgent?.equipeId) {
+      console.log('⚠️ Agent sans équipe, pas d\'horaires à charger');
+      setTeamSchedule([]);
+      return;
+    }
+
+    try {
+      const response = await getEquipeHoraires(selectedAgent.equipeId);
+      if (response.success && response.data) {
+        setTeamSchedule(response.data);
+        console.log('✅ Horaires équipe chargés:', response.data);
+      } else {
+        console.error('❌ Erreur chargement horaires:', response.message);
+        setTeamSchedule([]);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement horaires équipe:', error);
+      setTeamSchedule([]);
     }
   };
 
@@ -183,16 +273,81 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     }
   };
 
+  // Handlers Absences
+  const handleCreateAbsence = () => {
+    setEditingAbsence(null);
+    setShowAbsenceModal(true);
+  };
+
+  const handleEditAbsence = (absence: Absence) => {
+    setEditingAbsence(absence);
+    setShowAbsenceModal(true);
+  };
+
+  const handleSaveAbsence = async (data: AbsenceFormData) => {
+    try {
+      if (data.id) {
+        // Mode édition - valider l'absence
+        await validateAbsence(data.id, data.status as 'approuve' | 'refuse', data.comments);
+      } else {
+        // Mode création
+        await createAbsence({
+          employeId: data.employeId,
+          type: data.type,
+          startDateTime: data.startDateTime,
+          endDateTime: data.endDateTime,
+          comments: data.comments
+        });
+      }
+
+      await loadAbsences();
+      await loadPendingAbsences();
+      setShowAbsenceModal(false);
+    } catch (error) {
+      console.error('Erreur sauvegarde absence:', error);
+      throw error;
+    }
+  };
+
+  const handleSaveAbsenceFromBlockModal = async (data: any) => {
+    try {
+      await createAbsence({
+        employeId: data.employeId,
+        type: data.type,
+        startDateTime: data.startDateTime,
+        endDateTime: data.endDateTime,
+        comments: data.comments,
+        status: data.status || 'approuve' // Manager crée des absences approuvées par défaut
+      });
+
+      await loadAbsences();
+      await loadPendingAbsences();
+    } catch (error) {
+      console.error('Erreur sauvegarde absence:', error);
+      throw error;
+    }
+  };
+
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            Gestion des Pointages
-          </h2>
-          <p className="text-gray-600">Ajustez les pointages de vos agents</p>
+          <div className="flex items-center gap-3">
+            <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Gestion des Pointages
+            </h2>
+            {pendingAbsencesCount > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-full">
+                <Bell size={16} className="text-orange-600" />
+                <span className="text-sm font-semibold text-orange-600">
+                  {pendingAbsencesCount} absence{pendingAbsencesCount > 1 ? 's' : ''} en attente
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600">Ajustez les pointages et validez les absences de vos agents</p>
         </div>
       </div>
 
@@ -213,22 +368,37 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
           </div>
 
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
-            {filteredAgents.map((agent) => (
-              <button
-                key={agent.id}
-                onClick={() => setSelectedAgent(agent)}
-                className={`w-full text-left p-3 rounded-xl transition-all ${
-                  selectedAgent?.id === agent.id
-                    ? 'bg-black text-white'
-                    : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
-                }`}
-              >
-                <div className="font-semibold">{agent.prenom} {agent.nom}</div>
-                <div className={`text-sm ${selectedAgent?.id === agent.id ? 'text-gray-300' : 'text-gray-500'}`}>
-                  {getEquipeName(equipes, agent.equipeId) || 'Sans équipe'}
-                </div>
-              </button>
-            ))}
+            {filteredAgents.map((agent) => {
+              const pendingCount = pendingAbsencesByAgent[agent.id] || 0;
+
+              return (
+                <button
+                  key={agent.id}
+                  onClick={() => setSelectedAgent(agent)}
+                  className={`w-full text-left p-3 rounded-xl transition-all relative ${
+                    selectedAgent?.id === agent.id
+                      ? 'bg-black text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold">{agent.prenom} {agent.nom}</div>
+                      <div className={`text-sm ${selectedAgent?.id === agent.id ? 'text-gray-300' : 'text-gray-500'}`}>
+                        {getEquipeName(equipes, agent.equipeId) || 'Sans équipe'}
+                      </div>
+                    </div>
+                    {pendingCount > 0 && (
+                      <div className="flex-shrink-0 ml-2">
+                        <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          {pendingCount}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -283,13 +453,18 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
                   </div>
                 </div>
               ) : (
-                <WeeklyTimeline
-                  timesheets={timesheets}
-                  weekDays={weekDays}
-                  onEditPair={handleEditPair}
-                  onDelete={handleDelete}
-                  onCreate={handleCreate}
-                />
+                <>
+                  <WeeklyTimeline
+                    timesheets={timesheets}
+                    absences={absences}
+                    weekDays={weekDays}
+                    onEditPair={handleEditPair}
+                    onDelete={handleDelete}
+                    onCreate={handleCreate}
+                    onAbsenceClick={handleEditAbsence}
+                    teamSchedule={teamSchedule}
+                  />
+                </>
               )}
             </>
           ) : (
@@ -314,12 +489,25 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
               setEditingPair(null);
             }}
             onSave={handleSaveBlock}
+            onAbsenceSave={handleSaveAbsenceFromBlockModal}
             entryTimesheet={editingPair?.entry}
             exitTimesheet={editingPair?.exit}
             employeeId={selectedAgent.id}
             employeeName={`${selectedAgent.prenom} ${selectedAgent.nom}`}
             initialDate={createDate}
             initialStartTime={createStartTime}
+          />
+
+          <AbsenceModal
+            isOpen={showAbsenceModal}
+            onClose={() => {
+              setShowAbsenceModal(false);
+              setEditingAbsence(null);
+            }}
+            onSave={handleSaveAbsence}
+            absence={editingAbsence}
+            employeeId={selectedAgent.id}
+            employeeName={`${selectedAgent.prenom} ${selectedAgent.nom}`}
           />
 
           <DeleteConfirmModal
