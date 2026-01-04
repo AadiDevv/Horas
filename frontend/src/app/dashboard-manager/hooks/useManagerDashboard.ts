@@ -103,17 +103,48 @@ export function useAgentManager() {
   const handleUpdate = async () => {
     if (!editingAgent) return;
     try {
+      // Mise à jour des informations de base de l'agent (sans equipeId)
       const updates = {
         prenom: formData.prenom,
         nom: formData.nom,
         email: formData.email,
         role: formData.role,
-        telephone: formData.telephone || undefined,
-        equipeId: formData.equipeId ? Number(formData.equipeId) : undefined
+        telephone: formData.telephone || undefined
       };
       const result = await api.updateAgent(editingAgent.id, updates);
       if (result.success) {
-        showSuccess('Agent mis à jour avec succès');
+        // Gérer l'assignation/changement d'équipe séparément via la route dédiée
+        const newTeamId = formData.equipeId ? Number(formData.equipeId) : null;
+        const oldTeamId = editingAgent.equipeId || null;
+
+        // Vérifier si l'équipe a changé
+        if (newTeamId !== oldTeamId) {
+          console.log('🔄 Changement d\'équipe détecté:', { oldTeamId, newTeamId });
+
+          if (newTeamId) {
+            // Assigner à une nouvelle équipe
+            console.log('➕ Assignation à l\'équipe', newTeamId);
+            await api.assignUserToTeam(editingAgent.id, newTeamId);
+            showSuccess('Agent mis à jour avec succès');
+          } else {
+            // Le backend ne supporte pas le retrait d'un agent d'une équipe
+            // On informe l'utilisateur qu'il doit assigner l'agent à une autre équipe
+            console.warn('⚠️ Le backend ne supporte pas le retrait d\'une équipe. L\'agent reste dans son équipe actuelle.');
+            handleApiError(
+              new Error('Le retrait d\'une équipe n\'est pas supporté. Veuillez assigner l\'agent à une autre équipe si nécessaire.'),
+              'Impossible de retirer l\'agent de son équipe'
+            );
+            // On recharge quand même pour afficher l'équipe actuelle
+            await loadAgents();
+            setShowModal(false);
+            setEditingAgent(null);
+            resetForm();
+            return; // On sort de la fonction pour ne pas afficher le message de succès
+          }
+        } else {
+          showSuccess('Agent mis à jour avec succès');
+        }
+
         await loadAgents();
         setShowModal(false);
         setEditingAgent(null);
