@@ -56,6 +56,8 @@ export default function Page() {
     nextWeek,
     currentWeek,
     formatWeekRange,
+    isCurrentWeek,
+    formatWeekButtonText,
   } = useTimesheet();
   const { teamSchedule, loadTeamSchedule } = useTeamSchedule(userData);
 
@@ -208,9 +210,13 @@ export default function Page() {
                 </button>
                 <button
                   onClick={currentWeek}
-                  className="px-3 py-2 md:px-4 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
+                  className={`px-3 py-2 md:px-4 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
+                    isCurrentWeek()
+                      ? 'bg-black hover:bg-gray-900 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                  }`}
                 >
-                  Cette semaine
+                  {formatWeekButtonText()}
                 </button>
                 <button
                   onClick={nextWeek}

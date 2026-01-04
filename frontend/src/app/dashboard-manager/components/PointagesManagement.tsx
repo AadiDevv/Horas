@@ -70,6 +70,22 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     return `${monday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
   };
 
+  const isCurrentWeek = () => {
+    const today = new Date();
+    const selectedMonday = getUtilMonday(selectedWeek);
+    const currentMonday = getUtilMonday(today);
+    return selectedMonday.toDateString() === currentMonday.toDateString();
+  };
+
+  const formatWeekButtonText = () => {
+    if (isCurrentWeek()) {
+      return 'Cette semaine';
+    }
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return `Semaine du ${monday.getDate()}/${monday.getMonth() + 1} au ${sunday.getDate()}/${sunday.getMonth() + 1}`;
+  };
+
   const previousWeek = () => {
     const newDate = new Date(selectedWeek);
     newDate.setDate(newDate.getDate() - 7);
@@ -421,9 +437,13 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
                   </button>
                   <button
                     onClick={currentWeek}
-                    className="px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl text-sm font-medium transition-colors"
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      isCurrentWeek()
+                        ? 'bg-black hover:bg-gray-900 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                    }`}
                   >
-                    Cette semaine
+                    {formatWeekButtonText()}
                   </button>
                   <button
                     onClick={nextWeek}
