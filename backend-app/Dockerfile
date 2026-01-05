@@ -1,45 +1,25 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Development Dockerfile
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install all dependencies (including devDependencies)
-# Using npm install instead of npm ci to handle package-lock.json updates
-RUN npm install
-
-# Copy source code and configuration
-COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# Build TypeScript
-RUN npm run build
-
-# Production stage
-FROM node:20-alpine AS production
-
-WORKDIR /app
-
-# Install OpenSSL compatibility for Prisma
+# Install OpenSSL for Prisma
 RUN apk add --no-cache openssl openssl-dev
 
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm install --omit=dev
+# Install ALL dependencies (including devDependencies for tests)
+RUN npm install
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma
 RUN npx prisma generate
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+# Copy source code
+COPY . .
 
 EXPOSE 5000
 
-CMD ["node", "dist/index.js"]
+# Use tsx for hot-reload in development
+CMD ["npm", "run", "dev"]

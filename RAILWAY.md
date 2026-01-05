@@ -4,7 +4,7 @@ Ce fichier contient les instructions pour déployer le backend sur Railway.
 
 ## Fichiers de déploiement
 
-- **`Dockerfile`** : Dockerfile multi-stage optimisé pour Railway (build depuis la racine du monorepo)
+- **`Dockerfile.prod`** : Dockerfile multi-stage optimisé pour Railway (build depuis la racine du monorepo)
 - **`.dockerignore`** : Ignore les fichiers non nécessaires pour Railway
 - **`railway.json`** : Configuration Railway
 
@@ -23,7 +23,7 @@ NODE_ENV=production
 
 ### 2. Déploiement
 
-Railway détecte automatiquement le `Dockerfile` à la racine et le `railway.json`.
+Railway détecte automatiquement le `Dockerfile.prod` à la racine et le `railway.json`.
 
 Le build se fera automatiquement :
 1. Build depuis la racine du monorepo
