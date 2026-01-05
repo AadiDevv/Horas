@@ -1,7 +1,7 @@
 import { Horaire, ApiResponse } from '../types';
 
 const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 interface Equipe {
   id: number;
@@ -60,16 +60,26 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
     };
   }
 
-  const requete = await fetch(`${API_BASE_URL}/api/equipes/${equipeId}`);
+  const token = localStorage.getItem('token');
+  const requete = await fetch(`${API_BASE_URL}/api/teams/${equipeId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    }
+  });
+
   if (!requete.ok) {
     throw new Error("Erreur récupération équipe");
   }
+
   const equipe = await requete.json();
   return equipe;
 }
 
 /**
  * Récupère uniquement les horaires d'une équipe
+ * Le backend retourne un schedule avec activeDays, on le transforme en horaires par jour
  */
 export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<Horaire[]>> {
   if (USE_MOCK) {
@@ -88,20 +98,106 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
     };
   }
 
-  // Récupère l'équipe complète et extrait les horaires
-  const equipeResponse = await getEquipe(equipeId);
-  if (equipeResponse.success && equipeResponse.data) {
+  try {
+    const token = localStorage.getItem('token');
+    console.log('🔍 GET /api/teams/' + equipeId);
+
+    const res = await fetch(`${API_BASE_URL}/api/teams/${equipeId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
+
+    if (!res.ok) {
+      console.error('❌ Erreur récupération équipe:', res.status);
+      return {
+        success: false,
+        data: [],
+        message: `Erreur ${res.status}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    const response = await res.json();
+    console.log('📦 Réponse backend équipe:', response);
+
+    // Le backend retourne response.data avec un scheduleId
+    const team = response.data || response;
+
+    if (!team.scheduleId) {
+      console.warn('⚠️ Équipe sans schedule');
+      return {
+        success: true,
+        data: [],
+        message: "Équipe sans horaires",
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Récupérer le schedule
+    console.log('🔍 GET /api/schedules/' + team.scheduleId);
+    const scheduleRes = await fetch(`${API_BASE_URL}/api/schedules/${team.scheduleId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
+
+    if (!scheduleRes.ok) {
+      console.error('❌ Erreur récupération schedule:', scheduleRes.status);
+      return {
+        success: false,
+        data: [],
+        message: `Erreur récupération schedule ${scheduleRes.status}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    const scheduleResponse = await scheduleRes.json();
+    const schedule = scheduleResponse.data || scheduleResponse;
+    console.log('📦 Schedule récupéré:', schedule);
+
+    // Transformer le schedule en horaires par jour
+    const jourMapping: Record<number, string> = {
+      1: 'Lundi',
+      2: 'Mardi',
+      3: 'Mercredi',
+      4: 'Jeudi',
+      5: 'Vendredi',
+      6: 'Samedi',
+      7: 'Dimanche'
+    };
+
+    // Extraire seulement HH:mm depuis le format Time (qui peut être HH:mm:ss)
+    const formatTime = (time: string) => {
+      if (!time) return '09:00';
+      return time.substring(0, 5);
+    };
+
+    const horaires: Horaire[] = (schedule.activeDays || []).map((day: number) => ({
+      jour: jourMapping[day],
+      heureDebut: formatTime(schedule.startHour),
+      heureFin: formatTime(schedule.endHour)
+    }));
+
+    console.log('✅ Horaires transformés:', horaires);
+
     return {
       success: true,
-      data: equipeResponse.data.horaires || [],
+      data: horaires,
       message: "Horaires récupérés avec succès",
       timestamp: new Date().toISOString()
     };
+  } catch (error) {
+    console.error('❌ Erreur getEquipeHoraires:', error);
+    return {
+      success: false,
+      data: [],
+      message: (error as Error).message,
+      timestamp: new Date().toISOString()
+    };
   }
-
-  return {
-    success: false,
-    message: "Impossible de récupérer les horaires",
-    timestamp: new Date().toISOString()
-  };
 }
