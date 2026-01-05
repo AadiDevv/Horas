@@ -102,10 +102,12 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     setSelectedWeek(new Date());
   };
 
-  // Charger le nombre d'absences en attente au montage
+  // Charger le nombre d'absences en attente au montage et quand les agents changent
   useEffect(() => {
-    loadPendingAbsences();
-  }, []);
+    if (agents.length > 0) {
+      loadPendingAbsences();
+    }
+  }, [agents.length]);
 
   // Charger les timesheets et absences quand l'agent ou la semaine change
   useEffect(() => {
@@ -125,11 +127,23 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     try {
       const response = await getPendingAbsences();
       if (response.success && response.data) {
-        setPendingAbsencesCount(response.data.length);
+        // Filtrer les absences pour ne garder que celles des agents actifs (non supprimés)
+        const activeAgentIds = agents.map(a => a.id);
+        const filteredAbsences = response.data.filter(absence =>
+          activeAgentIds.includes(absence.employeId)
+        );
+
+        console.log('📊 Absences en attente:', {
+          total: response.data.length,
+          filtered: filteredAbsences.length,
+          activeAgents: activeAgentIds.length
+        });
+
+        setPendingAbsencesCount(filteredAbsences.length);
 
         // Grouper par agent
         const byAgent: Record<number, number> = {};
-        response.data.forEach(absence => {
+        filteredAbsences.forEach(absence => {
           if (absence.employeId) {
             byAgent[absence.employeId] = (byAgent[absence.employeId] || 0) + 1;
           }
