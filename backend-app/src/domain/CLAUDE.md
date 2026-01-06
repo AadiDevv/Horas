@@ -1,37 +1,37 @@
 # Domain - Entities & Architecture
 
-## Source de Vérité Unique
+## Single Source of Truth
 
-**`domain/types/entityProps.ts`** = source de vérité de toute l'architecture.
+**`domain/types/entityProps.ts`** = source of truth for the entire architecture.
 
 ```
 entityProps.ts (XEntityProps namespaces)
     ↓
-Entities (basées sur Props)
+Entities (based on Props)
     ↓
 Infrastructure SELECT_CONFIG (satisfies Props)
     ↓
-Application DTOs (basés sur Props)
+Application DTOs (based on Props)
     ↓
-Repositories (transformations manuelles Prisma → Entity via Props)
+Repositories (manual transformations Prisma → Entity via Props)
 ```
 
-**Important:** Les types Prisma générés ne sont **jamais** utilisés directement. Seules les Props dictent la structure.
+**Important:** Generated Prisma types are **never** used directly. Only Props dictate the structure.
 
 ---
 
 ## Entity Hierarchy System
 
-### Philosophie
+### Philosophy
 ```
-XEntity_Core     → Minimum métier (champs obligatoires, validation)
+XEntity_Core     → Business minimum (required fields, validation)
     ↓
-XEntity_L1       → + Enrichissement DB (id, timestamps, méthodes métier)
+XEntity_L1       → + DB enrichment (id, timestamps, business methods)
     ↓
-XEntity          → + Jointures (relations complètes)
+XEntity          → + Joins (complete relations)
 ```
 
-### Pattern Constructeur
+### Constructor Pattern
 ```typescript
 class Entity_L1 extends Entity_Core {
   constructor(props: EntityProps_L1) {
@@ -42,7 +42,7 @@ class Entity_L1 extends Entity_Core {
 }
 ```
 
-**Règle:** Destructurer, passer au super(), assigner propriétés niveau actuel.
+**Rule:** Destructure, pass to super(), assign current level properties.
 
 ---
 
@@ -51,65 +51,65 @@ class Entity_L1 extends Entity_Core {
 ### Structure
 ```typescript
 export namespace XEntity_Props {
-  // Helpers internes (NON exportés)
+  // Internal helpers (NOT exported)
   type XEntityDataEnrichment = { id, createdAt, updatedAt };
   type XEntityJoints = { /* relations */ };
 
-  // Types exportés (dérivation mécanique)
-  export type XEntityProps = { /* complet */ };
+  // Exported types (mechanical derivation)
+  export type XEntityProps = { /* complete */ };
   export type XEntityProps_L1 = Omit<XEntityProps, keyof XEntityJoints>;
   export type XEntityProps_Core = Omit<XEntityProps_L1, keyof XEntityDataEnrichment>;
 }
 
-// Aliases top-level
+// Top-level aliases
 export type XEntityProps = XEntity_Props.XEntityProps;
 export type XEntityProps_L1 = XEntity_Props.XEntityProps_L1;
 export type XEntityProps_Core = XEntity_Props.XEntityProps_Core;
 ```
 
-**Règle:** Définir type complet, dériver avec `Omit<>`. Changement Props → propagation auto.
+**Rule:** Define complete type, derive with `Omit<>`. Props change → auto propagation.
 
 ---
 
 ## Workflow Architecture
 
-### Flux Données
+### Data Flow
 ```
 Domain (Entities, Types, Interfaces)
-    ↑ Dépend de
-    ↓ Utilisé par
+    ↑ Depends on
+    ↓ Used by
 Application (UseCases, DTOs, Mappers)
-    ↑ Dépend de
-    ↓ Utilisé par
+    ↑ Depends on
+    ↓ Used by
 Infrastructure (Repositories Prisma)
 Presentation (Controllers, Routes)
 ```
 
-### Rôles par Couche
+### Roles by Layer
 
 **Domain:**
-- **Rôle:** Logique métier pure (validation, règles, état)
-- **Dépend de:** Rien (aucune dépendance externe)
-- **Utilisé par:** Application, Infrastructure
+- **Role:** Pure business logic (validation, rules, state)
+- **Depends on:** Nothing (no external dependencies)
+- **Used by:** Application, Infrastructure
 
 **Application:**
-- **Rôle:** Orchestration métier (use cases, transformations)
-- **Dépend de:** Domain (interfaces, entities, types)
-- **Utilisé par:** Presentation
+- **Role:** Business orchestration (use cases, transformations)
+- **Depends on:** Domain (interfaces, entities, types)
+- **Used by:** Presentation
 
 **Infrastructure:**
-- **Rôle:** Détails techniques (DB, Prisma, transformations Prisma → Entity)
-- **Dépend de:** Domain (interfaces, entities)
-- **Utilisé par:** Application (injection repositories)
+- **Role:** Technical details (DB, Prisma, Prisma → Entity transformations)
+- **Depends on:** Domain (interfaces, entities)
+- **Used by:** Application (repository injection)
 
 **Presentation:**
-- **Rôle:** Interface HTTP (controllers, routes, middlewares)
-- **Dépend de:** Application (use cases, DTOs), Domain (types pour validation)
-- **Utilisé par:** Client HTTP
+- **Role:** HTTP interface (controllers, routes, middlewares)
+- **Depends on:** Application (use cases, DTOs), Domain (types for validation)
+- **Used by:** HTTP Client
 
 ---
 
-## Conventions Nommage
+## Naming Conventions
 
 ### Entities
 ```
@@ -121,45 +121,45 @@ XEntity_Core, XEntity_L1, XEntity
 XEntityProps_Core, XEntityProps_L1, XEntityProps
 ```
 
-### Méthodes Entités
+### Entity Methods
 ```typescript
-validate(): void          // Validation métier
-activate() / deactivate() // État
+validate(): void          // Business validation
+activate() / deactivate() // State
 softDelete() / restore()  // Soft delete
 ```
 
 ---
 
-## Directive Claude
+## Claude Directive
 
-### Création entité:
+### Entity creation:
 
-1. **TOUJOURS** suivre hiérarchie Core → L1 → Complete
-2. **TOUJOURS** créer Props namespace avec dérivation `Omit<>`
-3. **TOUJOURS** pattern constructeur destructuration
-4. **Validation métier** dans `validate()` de `_Core`
-5. **Logique état** (activate, softDelete) dans `_L1`
+1. **ALWAYS** follow hierarchy Core → L1 → Complete
+2. **ALWAYS** create Props namespace with `Omit<>` derivation
+3. **ALWAYS** destructuring constructor pattern
+4. **Business validation** in `validate()` of `_Core`
+5. **State logic** (activate, softDelete) in `_L1`
 
 ### Respect Clean Architecture:
 
-- Domain **NE DOIT PAS** importer Application/Infrastructure/Presentation
-- Domain **NE CONNAÎT PAS** Prisma, DTOs, Controllers
-- Entities **NE DOIVENT PAS** avoir méthodes `toDTO()` (utiliser Mappers)
+- Domain **MUST NOT** import Application/Infrastructure/Presentation
+- Domain **DOES NOT KNOW** Prisma, DTOs, Controllers
+- Entities **MUST NOT** have `toDTO()` methods (use Mappers)
 
 ---
 
 ## Anti-Patterns
 
-### ⚠️ #1 - Propriétés optionnelles
+### ⚠️ #1 - Optional properties
 
-**Justification temporaire:**
-- `id?` : Création avant génération Prisma
-- `relation?` : Performance (éviter jointures)
+**Temporary justification:**
+- `id?`: Creation before Prisma generation
+- `relation?`: Performance (avoid joins)
 
-**Directive:** `?` autorisé si nullable schema.prisma.
+**Directive:** `?` allowed if nullable in schema.prisma.
 
 ---
 
-### ⚠️ #2 - Méthodes toDTO() (DEPRECATED)
+### ⚠️ #2 - toDTO() methods (DEPRECATED)
 
-**Directive:** ⛔ NE PAS ajouter - créer Mapper application/.
+**Directive:** ⛔ DO NOT add - create Mapper in application/.

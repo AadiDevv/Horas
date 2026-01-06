@@ -1,6 +1,6 @@
 # backend-app
 
-API REST avec Express.js et TypeScript utilisant une architecture hexagonale.
+REST API with Express.js and TypeScript using hexagonal architecture.
 
 ## 🏗️ Architecture
 

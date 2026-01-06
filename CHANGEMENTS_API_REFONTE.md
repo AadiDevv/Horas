@@ -1,10 +1,10 @@
-# Changements API - Branche `refonte`
+# API Changes - `refonte` Branch
 
 ## 🎯 TIMESHEETS - `/api/timesheets`
 
 ### POST `/api/timesheets/`
 
-**AVANT (dev)**
+**BEFORE (dev)**
 ```json
 {
   "date": "2025-10-24",
@@ -14,9 +14,9 @@
 }
 ```
 
-**APRÈS (refonte)**
+**AFTER (refonte)**
 ```json
-// Employé
+// Employee
 {}
 
 // Manager/Admin
@@ -29,7 +29,7 @@
 
 ### GET `/api/timesheets`, GET `/api/timesheets/:id`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "id": 1,
@@ -40,7 +40,7 @@
 }
 ```
 
-**APRÈS**
+**AFTER**
 ```json
 {
   "id": 1,
@@ -52,7 +52,7 @@
 
 ### PATCH `/api/timesheets/:id`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "date": "2025-10-25",
@@ -61,7 +61,7 @@
 }
 ```
 
-**APRÈS**
+**AFTER**
 ```json
 {
   "timestamp": "2025-12-13T09:00:00.000Z",
@@ -75,7 +75,7 @@
 
 ### GET `/api/users/:id`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "id": 1,
@@ -86,7 +86,7 @@
 }
 ```
 
-**APRÈS (relations incluses automatiquement)**
+**AFTER (relations automatically included)**
 ```json
 // Employee
 {
@@ -113,7 +113,7 @@
 }
 ```
 
-⚠️ **Note** : La création d'utilisateurs se fait via `/auth/register`
+⚠️ **Note**: User creation is done via `/auth/register`
 
 ---
 
@@ -121,7 +121,7 @@
 
 ### POST `/api/teams`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "name": "Dev Team",
@@ -131,7 +131,7 @@
 }
 ```
 
-**APRÈS**
+**AFTER**
 ```json
 {
   "name": "Dev Team",
@@ -139,11 +139,11 @@
   "scheduleId": 1
 }
 ```
-⚠️ `managerId` auto-extrait du JWT
+⚠️ `managerId` auto-extracted from JWT
 
 ### GET `/api/teams/:id`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "id": 1,
@@ -154,7 +154,7 @@
 }
 ```
 
-**APRÈS**
+**AFTER**
 ```json
 {
   "id": 1,
@@ -174,7 +174,7 @@
 
 ### POST `/api/schedules`
 
-**AVANT**
+**BEFORE**
 ```json
 {
   "name": "9-17",
@@ -184,7 +184,7 @@
 }
 ```
 
-**APRÈS** (identique structure, mais managerId auto-extrait)
+**AFTER** (same structure, but managerId auto-extracted)
 ```json
 {
   "name": "9-17",
@@ -196,23 +196,23 @@
 
 ---
 
-## 📊 RÉSUMÉ DES CHANGEMENTS
+## 📊 CHANGES SUMMARY
 
-| Route | Changement Principal |
+| Route | Main Change |
 |-------|---------------------|
-| `POST /timesheets` | `date + hour` → `timestamp`, `clockin` supprimé du request |
-| `GET /timesheets` | `date + hour` → `timestamp` dans response |
-| `GET /users/:id` | Relations incluses automatiquement (team, manager, customSchedule) |
-| `POST /teams` | `managerId` auto-extrait du JWT |
-| `GET /teams/:id` | Relations incluses (manager, schedule, members) |
-| `POST /schedules` | `managerId` auto-extrait du JWT |
+| `POST /timesheets` | `date + hour` → `timestamp`, `clockin` removed from request |
+| `GET /timesheets` | `date + hour` → `timestamp` in response |
+| `GET /users/:id` | Relations automatically included (team, manager, customSchedule) |
+| `POST /teams` | `managerId` auto-extracted from JWT |
+| `GET /teams/:id` | Relations included (manager, schedule, members) |
+| `POST /schedules` | `managerId` auto-extracted from JWT |
 
 ---
 
-## 🔑 RÈGLES MÉTIER AJOUTÉES
+## 🔑 BUSINESS RULES ADDED
 
-1. **Timesheets** : `clockin` TOUJOURS auto-déterminé (inverse du dernier)
-2. **Timesheets** : Employé = payload vide, Manager = `employeId` obligatoire
-3. **Timesheets** : `timestamp` manuel doit être postérieur au dernier
-4. **Teams/Schedules** : `managerId` extrait du JWT (pas dans request)
-5. **Relations** : Incluses automatiquement dans GET (team, manager, schedule, members)
+1. **Timesheets**: `clockin` ALWAYS auto-determined (opposite of the last one)
+2. **Timesheets**: Employee = empty payload, Manager = `employeId` required
+3. **Timesheets**: Manual `timestamp` must be after the last one
+4. **Teams/Schedules**: `managerId` extracted from JWT (not in request)
+5. **Relations**: Automatically included in GET (team, manager, schedule, members)

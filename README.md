@@ -1,6 +1,6 @@
 # Horas - Time Management System
 
-A full-stack time tracking application enabling employees to clock their hours and managers to oversee teams and generate reports.
+A full-stack time tracking application enabling employees to clock their hours and managers to oversee teams and consult reports.
 
 ## Table of Contents
 

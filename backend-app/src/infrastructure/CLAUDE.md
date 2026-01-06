@@ -1,11 +1,11 @@
 # Infrastructure - Repositories & Prisma
 
-## Pattern Repository avec SELECT_CONFIG
+## Repository Pattern with SELECT_CONFIG
 
-### Philosophie
-Repositories implémentent les interfaces domain avec Prisma, transforment les résultats DB → Entities.
+### Philosophy
+Repositories implement domain interfaces with Prisma, transform DB results → Entities.
 
-**Type safety maximal** : SELECT_CONFIG garantit correspondance Props ↔ requête Prisma.
+**Maximum type safety**: SELECT_CONFIG ensures Props ↔ Prisma query correspondence.
 
 ---
 
@@ -20,7 +20,7 @@ infrastructure/prismaUtils/selectConfigs/
 └── timesheet.prismaConfig.ts
 ```
 
-### Exemple : User
+### Example: User
 
 ```typescript
 // user.prismaConfig.ts
@@ -51,12 +51,12 @@ export const USER_EMPLOYEE_L1_SELECT = {
 } as const satisfies Record<keyof UserEmployeeProps_L1, true>;
 ```
 
-**Règles:**
-- ✅ `as const satisfies` : type safety stricte
+**Rules:**
+- ✅ `as const satisfies`: strict type safety
 - ✅ Composition via spread (`...USER_CORE_SELECT`)
-- ✅ Champs calculés gérés séparément (ex: `_count`)
+- ✅ Calculated fields handled separately (e.g., `_count`)
 
-### Champs Calculés
+### Calculated Fields
 
 ```typescript
 // team.prismaConfig.ts
@@ -74,13 +74,13 @@ export const TEAM_CORE_SELECT = {
 } as const satisfies WithCount<TeamProps_Core_Prisma>;
 ```
 
-**Directive:** Champs calculés (`membersCount`, `usersCount`) → `_count` Prisma, puis transformation manuelle.
+**Directive:** Calculated fields (`membersCount`, `usersCount`) → Prisma `_count`, then manual transformation.
 
 ---
 
-## Pattern Repository
+## Repository Pattern
 
-### Convention Nommage
+### Naming Convention
 
 ```typescript
 getX_ById(id: number): Promise<X>           // GET unique
@@ -91,7 +91,7 @@ updateX_ById(x: X_Core): Promise<X_Core>     // PATCH
 deleteX_ById(id: number): Promise<X_L1>      // DELETE (soft)
 ```
 
-### Exemple : UserRepository
+### Example: UserRepository
 
 ```typescript
 export class UserRepository implements IUser {
