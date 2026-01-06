@@ -162,7 +162,12 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     try {
       const response = await getEmployeeWeekTimesheets(selectedAgent.id, monday);
       if (response.success && response.data) {
-        setTimesheets(response.data);
+        // Mapper 'delay' → 'retard' depuis le backend pour l'affichage frontend
+        const mappedTimesheets = response.data.map(ts => ({
+          ...ts,
+          status: ts.status === 'delay' ? 'retard' : ts.status
+        })) as any[];
+        setTimesheets(mappedTimesheets);
       }
     } catch (error) {
       console.error('❌ Erreur chargement timesheets:', error);
@@ -239,6 +244,9 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
     // Créer le timestamp pour l'entrée
     const entryTimestamp = `${data.date}T${data.startTime}:00.000Z`;
 
+    // Mapper 'retard' → 'delay' pour le backend (Prisma attend 'delay')
+    const backendStatus = data.status === 'retard' ? 'delay' : data.status;
+
     if (data.entryId && data.exitId) {
       // Mode édition - Utiliser la route atomique pour les paires
       const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
@@ -247,7 +255,7 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
         exitId: data.exitId,
         entryTimestamp,
         exitTimestamp,
-        status: data.status
+        status: backendStatus as any
       });
     } else if (data.mode === 'single') {
       // Mode création - pointage unique
@@ -255,7 +263,7 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
       await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,
-        status: data.status
+        status: backendStatus as any
       });
     } else {
       // Mode création - paire entrée/sortie
@@ -263,17 +271,19 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
       await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,
-        status: data.status
+        status: backendStatus as any
       });
 
       await createTimesheet({
         employeId: data.employeId,
         timestamp: exitTimestamp,
-        status: data.status
+        status: backendStatus as any
       });
     }
 
     await loadTimesheets();
+    // Rafraîchir les agents et stats du dashboard pour mettre à jour les KPIs
+    onRefresh();
   };
 
   const handleConfirmDelete = async () => {
@@ -291,6 +301,8 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
       // Recharger les timesheets
       await loadTimesheets();
+      // Rafraîchir les stats du dashboard
+      onRefresh();
       setShowDeleteModal(false);
       setDeletingPair(null);
     } catch (error) {
@@ -330,6 +342,8 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
       await loadAbsences();
       await loadPendingAbsences();
+      // Rafraîchir les stats du dashboard
+      onRefresh();
       setShowAbsenceModal(false);
     } catch (error) {
       console.error('Erreur sauvegarde absence:', error);
@@ -350,6 +364,8 @@ export default function PointagesManagement({ agents, equipes, onRefresh }: Poin
 
       await loadAbsences();
       await loadPendingAbsences();
+      // Rafraîchir les stats du dashboard
+      onRefresh();
     } catch (error) {
       console.error('Erreur sauvegarde absence:', error);
       throw error;

@@ -16,7 +16,7 @@ initializeApp();
 // #endregion
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.HOST_PORT || 5000;
 
 // Middlewares
 app.use(helmet());

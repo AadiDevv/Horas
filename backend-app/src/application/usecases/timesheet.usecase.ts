@@ -99,14 +99,17 @@ export class TimesheetUseCase {
      * @returns Timesheet complet (après insertion, avec employe)
      */
     async createTimesheet(dto: TimesheetCreateDTO, authUser: UserAuthDTO): Promise<Timesheet_Core> {
+        console.log('🔵 createTimesheet - Début', { dto, authUser });
 
         // Déterminer l'employé cible
         let targetEmployeeId: number;
         if ((authUser.role === 'manager' || authUser.role === 'admin')) {
             // Manager/Admin peut créer pour un autre employé
             if( dto.employeId){
+                console.log('🔵 Validation manager ownership pour employé:', dto.employeId);
                 // Vérifier que le manager gère bien cet employé
                 await this.authorizationService.validateManagerOwnership(dto.employeId, authUser);
+                console.log('✅ Validation manager ownership OK');
                 targetEmployeeId = dto.employeId;
             } else {
                 throw new ValidationError("L'employé cible est requis");
