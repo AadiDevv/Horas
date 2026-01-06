@@ -25,22 +25,23 @@ export default function AgentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 max-w-md w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 max-w-md w-full max-h-[95vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold">
             {agent ? "Modifier l'agent" : "Nouvel Agent"}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all"
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all flex-shrink-0"
           >
-            <X size={24} />
+            <X size={20} className="sm:hidden" />
+            <X size={24} className="hidden sm:block" />
           </button>
         </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Prénom</label>
               <input
@@ -49,7 +50,7 @@ export default function AgentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, prenom: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
             <div>
@@ -60,7 +61,7 @@ export default function AgentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, nom: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
           </div>
@@ -73,7 +74,7 @@ export default function AgentModal({
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
@@ -87,7 +88,7 @@ export default function AgentModal({
               onChange={(e) =>
                 setFormData({ ...formData, telephone: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
@@ -102,7 +103,7 @@ export default function AgentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 required={!agent}
                 placeholder="Minimum 6 caractères"
               />
@@ -120,14 +121,13 @@ export default function AgentModal({
               onChange={(e) =>
                 setFormData({ ...formData, role: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="employe">Employé</option>
               <option value="manager">Manager</option>
             </select>
           </div>
 
-          {/* Champ équipe - visible pour création et modification */}
           <div>
             <label className="block text-sm font-semibold mb-2">
               Équipe {agent ? "(Changement possible)" : "(Optionnel)"}
@@ -137,7 +137,7 @@ export default function AgentModal({
               onChange={(e) =>
                 setFormData({ ...formData, equipeId: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">Aucune équipe</option>
               {equipes.map((e) => (
@@ -156,11 +156,11 @@ export default function AgentModal({
           <button
             onClick={onSave}
             disabled={loading}
-            className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+            className="w-full mt-4 sm:mt-6 py-3 text-sm sm:text-base bg-black text-white rounded-xl sm:rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={20} />
+                <Loader2 className="animate-spin" size={18} />
                 {agent ? "Modification..." : "Création..."}
               </>
             ) : agent ? (

@@ -205,33 +205,12 @@ function ManagerDashboard() {
         )}
 
         <div className="flex flex-1 overflow-hidden relative">
-          <div className="hidden lg:block h-full">
-            <Sidebar
-              isOpen={sidebarOpen}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-
-          <div
-            className={`lg:hidden fixed inset-y-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-          >
-            <Sidebar
-              isOpen={true}
-              currentPage={currentPage}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setSidebarOpen(false);
-              }}
-            />
-          </div>
-
-          {sidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
+          <Sidebar
+            isOpen={sidebarOpen}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            onClose={() => setSidebarOpen(false)}
+          />
 
           <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
             {currentPage === "dashboard" && (

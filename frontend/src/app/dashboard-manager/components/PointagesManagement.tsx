@@ -382,48 +382,47 @@ export default function PointagesManagement({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h2 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              Gestion des Pointages
-            </h2>
-            {pendingAbsencesCount > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-full">
-                <Bell size={16} className="text-orange-600" />
-                <span className="text-sm font-semibold text-orange-600">
-                  {pendingAbsencesCount} absence
-                  {pendingAbsencesCount > 1 ? "s" : ""} en attente
-                </span>
-              </div>
-            )}
-          </div>
-          <p className="text-gray-600">
-            Ajustez les pointages et validez les absences de vos agents
-          </p>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            Gestion des Pointages
+          </h2>
+          {pendingAbsencesCount > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-full w-fit">
+              <Bell size={14} className="text-orange-600 sm:hidden" />
+              <Bell size={16} className="text-orange-600 hidden sm:block" />
+              <span className="text-xs sm:text-sm font-semibold text-orange-600">
+                {pendingAbsencesCount} absence
+                {pendingAbsencesCount > 1 ? "s" : ""} en attente
+              </span>
+            </div>
+          )}
         </div>
+        <p className="text-sm sm:text-base text-gray-600">
+          Ajustez les pointages et validez les absences de vos agents
+        </p>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-3 bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        <div className="lg:col-span-3 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200">
           <div className="mb-4">
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={20}
+                size={18}
               />
               <input
                 type="text"
                 placeholder="Rechercher un agent..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
           </div>
 
-          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+          <div className="space-y-2 max-h-[300px] lg:max-h-[600px] overflow-y-auto">
             {filteredAgents.map((agent) => {
               const pendingCount = pendingAbsencesByAgent[agent.id] || 0;
 
@@ -431,27 +430,27 @@ export default function PointagesManagement({
                 <button
                   key={agent.id}
                   onClick={() => setSelectedAgent(agent)}
-                  className={`w-full text-left p-3 rounded-xl transition-all relative cursor-pointer ${
+                  className={`w-full text-left p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all relative cursor-pointer active:scale-95 ${
                     selectedAgent?.id === agent.id
                       ? "bg-black text-white"
                       : "bg-gray-50 hover:bg-gray-100 text-gray-900"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="font-semibold">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm sm:text-base truncate">
                         {agent.prenom} {agent.nom}
                       </div>
                       <div
-                        className={`text-sm ${selectedAgent?.id === agent.id ? "text-gray-300" : "text-gray-500"}`}
+                        className={`text-xs sm:text-sm truncate ${selectedAgent?.id === agent.id ? "text-gray-300" : "text-gray-500"}`}
                       >
                         {getEquipeName(equipes, agent.equipeId) ||
                           "Sans équipe"}
                       </div>
                     </div>
                     {pendingCount > 0 && (
-                      <div className="flex-shrink-0 ml-2">
-                        <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      <div className="flex-shrink-0">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           {pendingCount}
                         </div>
                       </div>
@@ -463,26 +462,26 @@ export default function PointagesManagement({
           </div>
         </div>
 
-        <div className="col-span-9 bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+        <div className="lg:col-span-9 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200">
           {selectedAgent ? (
             <>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+              <div className="flex flex-col gap-4 mb-4 sm:mb-6 pb-4 border-b border-gray-200">
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                     {selectedAgent.prenom} {selectedAgent.nom}
                   </h3>
-                  <p className="text-sm text-gray-600">{selectedAgent.email}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">{selectedAgent.email}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <button
                     onClick={previousWeek}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95"
+                    className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer active:scale-95"
                   >
                     ← Précédent
                   </button>
                   <button
                     onClick={currentWeek}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95 ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer active:scale-95 ${
                       isCurrentWeek()
                         ? "bg-black hover:bg-gray-900 text-white"
                         : "bg-gray-100 hover:bg-gray-200 text-gray-900"
@@ -492,17 +491,18 @@ export default function PointagesManagement({
                   </button>
                   <button
                     onClick={nextWeek}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95"
+                    className="px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer active:scale-95"
                   >
                     Suivant →
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <div className="flex items-center gap-2 text-gray-900">
-                  <Calendar size={20} />
-                  <span className="font-semibold">{formatWeekRange()}</span>
+                  <Calendar size={16} className="sm:hidden" />
+                  <Calendar size={20} className="hidden sm:block" />
+                  <span className="text-sm sm:text-base font-semibold">{formatWeekRange()}</span>
                 </div>
               </div>
 
@@ -529,11 +529,12 @@ export default function PointagesManagement({
               )}
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <div className="text-center">
-                <Search size={48} className="mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">Sélectionnez un agent</p>
-                <p className="text-sm">
+            <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[300px] text-gray-400">
+              <div className="text-center px-4">
+                <Search size={40} className="mx-auto mb-4 opacity-50 sm:hidden" />
+                <Search size={48} className="mx-auto mb-4 opacity-50 hidden sm:block" />
+                <p className="text-base sm:text-lg font-medium">Sélectionnez un agent</p>
+                <p className="text-xs sm:text-sm">
                   Choisissez un agent dans la liste pour gérer ses pointages
                 </p>
               </div>

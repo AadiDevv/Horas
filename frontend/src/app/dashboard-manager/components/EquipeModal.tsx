@@ -101,34 +101,35 @@ export default function EquipeModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-semibold">
             {equipe ? "Gérer l'équipe" : "Nouvelle Équipe"}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all"
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all flex-shrink-0"
           >
-            <X size={24} />
+            <X size={20} className="sm:hidden" />
+            <X size={24} className="hidden sm:block" />
           </button>
         </div>
 
-        <div className="flex gap-2 mb-6 border-b border-gray-200">
+        <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("info")}
-            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
+            className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer ${
               activeTab === "info"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Informations
+            Infos
           </button>
           <button
             onClick={() => setActiveTab("agents")}
-            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
+            className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer ${
               activeTab === "agents"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
@@ -138,7 +139,7 @@ export default function EquipeModal({
           </button>
           <button
             onClick={() => setActiveTab("horaires")}
-            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
+            className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-medium transition-all cursor-pointer ${
               activeTab === "horaires"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
@@ -185,11 +186,11 @@ export default function EquipeModal({
 
           {activeTab === "agents" && (
             <div>
-              <div className="flex gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
                 <select
                   value={selectedAgent || ""}
                   onChange={(e) => setSelectedAgent(Number(e.target.value))}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 >
                   <option value="">Sélectionner un agent</option>
                   {availableAgents
@@ -203,16 +204,17 @@ export default function EquipeModal({
                 <button
                   onClick={addAgent}
                   disabled={!selectedAgent}
-                  className="px-4 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-3 text-sm sm:text-base bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                 >
-                  <Plus size={18} />
+                  <Plus size={16} className="sm:hidden" />
+                  <Plus size={18} className="hidden sm:block" />
                   Ajouter
                 </button>
               </div>
 
               <div className="space-y-2">
                 {formData.agents.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-sm sm:text-base text-gray-500">
                     Aucun agent dans cette équipe
                   </div>
                 ) : (
@@ -227,16 +229,17 @@ export default function EquipeModal({
                     return (
                       <div
                         key={agentId}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl"
                       >
-                        <div className="flex-1">
-                          <p className="font-medium">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">
                             {agent.prenom} {agent.nom}
                           </p>
-                          <p className="text-sm text-gray-600">{agent.email}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">{agent.email}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <ArrowRightLeft size={16} className="text-gray-400" />
+                          <ArrowRightLeft size={14} className="text-gray-400 sm:hidden flex-shrink-0" />
+                          <ArrowRightLeft size={16} className="text-gray-400 hidden sm:block flex-shrink-0" />
                           <select
                             value=""
                             onChange={(e) => {
@@ -248,7 +251,7 @@ export default function EquipeModal({
                               }
                             }}
                             disabled={isMoving || otherEquipes.length === 0}
-                            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <option value="">
                               {isMoving
@@ -276,29 +279,30 @@ export default function EquipeModal({
             <div>
               <button
                 onClick={addHoraire}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all cursor-pointer active:scale-95"
+                className="mb-4 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all cursor-pointer active:scale-95"
               >
-                <Clock size={18} />
+                <Clock size={16} className="sm:hidden" />
+                <Clock size={18} className="hidden sm:block" />
                 Ajouter un horaire
               </button>
 
               <div className="space-y-3">
                 {formData.horaires.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-sm sm:text-base text-gray-500">
                     Aucun horaire défini
                   </div>
                 ) : (
                   formData.horaires.map((horaire, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl"
                     >
                       <select
                         value={horaire.jour}
                         onChange={(e) =>
                           updateHoraire(index, "jour", e.target.value)
                         }
-                        className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full sm:w-auto px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                       >
                         {jours.map((jour) => (
                           <option key={jour} value={jour}>
@@ -306,29 +310,32 @@ export default function EquipeModal({
                           </option>
                         ))}
                       </select>
-                      <input
-                        type="time"
-                        value={horaire.heureDebut}
-                        onChange={(e) =>
-                          updateHoraire(index, "heureDebut", e.target.value)
-                        }
-                        className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                      <span className="text-gray-500">à</span>
-                      <input
-                        type="time"
-                        value={horaire.heureFin}
-                        onChange={(e) =>
-                          updateHoraire(index, "heureFin", e.target.value)
-                        }
-                        className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                      <button
-                        onClick={() => removeHoraire(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer active:scale-95"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <input
+                          type="time"
+                          value={horaire.heureDebut}
+                          onChange={(e) =>
+                            updateHoraire(index, "heureDebut", e.target.value)
+                          }
+                          className="flex-1 sm:flex-none px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                        <span className="text-gray-500 text-sm sm:text-base">à</span>
+                        <input
+                          type="time"
+                          value={horaire.heureFin}
+                          onChange={(e) =>
+                            updateHoraire(index, "heureFin", e.target.value)
+                          }
+                          className="flex-1 sm:flex-none px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                        />
+                        <button
+                          onClick={() => removeHoraire(index)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer active:scale-95 flex-shrink-0"
+                        >
+                          <Trash2 size={16} className="sm:hidden" />
+                          <Trash2 size={18} className="hidden sm:block" />
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -340,11 +347,11 @@ export default function EquipeModal({
         <button
           onClick={onSave}
           disabled={loading}
-          className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+          className="w-full mt-4 sm:mt-6 py-3 text-sm sm:text-base bg-black text-white rounded-xl sm:rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
         >
           {loading ? (
             <>
-              <Loader2 className="animate-spin" size={20} />
+              <Loader2 className="animate-spin" size={18} />
               {equipe ? "Sauvegarde..." : "Création..."}
             </>
           ) : equipe ? (

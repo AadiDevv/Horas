@@ -186,14 +186,14 @@ export default function WeeklyTimeline({
   };
 
   return (
-    <div className="relative">
-      <div className="grid grid-cols-8 gap-2">
+    <div className="relative overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div className="grid grid-cols-8 gap-1 sm:gap-2 min-w-[600px] sm:min-w-0">
         <div className="col-span-1">
-          <div className="h-12"></div> {}
+          <div className="h-10 sm:h-12"></div>
           {hours.map((hour) => (
             <div
               key={hour}
-              className="h-16 flex items-center justify-end pr-2 text-sm text-gray-500"
+              className="h-12 sm:h-16 flex items-center justify-end pr-1 sm:pr-2 text-xs sm:text-sm text-gray-500"
             >
               {hour.toString().padStart(2, "0")}:00
             </div>
@@ -215,22 +215,23 @@ export default function WeeklyTimeline({
           return (
             <div key={dayIndex} className="col-span-1 relative">
               <div
-                className={`h-12 flex flex-col items-center justify-center rounded-t-lg ${
+                className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-t-lg ${
                   isToday ? "bg-black text-white" : "bg-gray-100 text-gray-900"
                 }`}
               >
-                <div className="text-xs font-medium">
+                <div className="text-[10px] sm:text-xs font-medium">
                   {day.toLocaleDateString("fr-FR", { weekday: "short" })}
                 </div>
-                <div className="text-lg font-bold">{day.getDate()}</div>
+                <div className="text-base sm:text-lg font-bold">{day.getDate()}</div>
               </div>
 
-              <div className="relative h-[1088px] bg-gray-50 border border-gray-200 rounded-b-lg overflow-hidden">
+              <div className="relative h-[816px] sm:h-[1088px] bg-gray-50 border border-gray-200 rounded-b-lg overflow-hidden">
                 {hours.map((hour, hourIndex) => (
                   <div
                     key={hourIndex}
-                    className="absolute left-0 right-0 h-16 border-b border-gray-200 z-0"
-                    style={{ top: `${hourIndex * 64}px` }}
+                    className="absolute left-0 right-0 h-12 sm:h-16 border-b border-gray-200 z-0"
+                    style={{ top: `${hourIndex * 48}px`, height: '48px' }}
+                    data-sm-top={`${hourIndex * 64}px`}
                   />
                 ))}
 
@@ -244,11 +245,12 @@ export default function WeeklyTimeline({
                       height: `${timeToPosition(teamHoraire.heureFin) - timeToPosition(teamHoraire.heureDebut)}%`,
                     }}
                   >
-                    <div className="px-2 py-1 text-xs font-semibold flex flex-col items-center justify-center h-full text-gray-700">
-                      <Clock size={14} className="mb-1" />
+                    <div className="px-1 sm:px-2 py-1 text-[10px] sm:text-xs font-semibold flex flex-col items-center justify-center h-full text-gray-700">
+                      <Clock size={12} className="mb-1 sm:hidden" />
+                      <Clock size={14} className="mb-1 hidden sm:block" />
                       <div className="text-center leading-tight">
                         <div>{teamHoraire.heureDebut}</div>
-                        <div className="opacity-75 text-[10px]">-</div>
+                        <div className="opacity-75 text-[8px] sm:text-[10px]">-</div>
                         <div>{teamHoraire.heureFin}</div>
                       </div>
                     </div>
@@ -299,11 +301,11 @@ export default function WeeklyTimeline({
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-1 right-1 ${bgColorClass} text-white rounded-lg p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? "border-2 border-yellow-400" : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColorClass} text-white rounded-md sm:rounded-lg p-1 sm:p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? "border border-yellow-400 sm:border-2" : ""}`}
                         style={{
                           top: `${startPos}%`,
                           height: `${height}%`,
-                          minHeight: "48px",
+                          minHeight: "36px",
                           zIndex: 20,
                         }}
                         onClick={() => onEditPair(pair.entry, pair.exit)}
@@ -320,13 +322,14 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry, pair.exit);
                           }}
-                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+                          className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                           title="Supprimer le bloc"
                         >
-                          <X size={14} />
+                          <X size={12} className="sm:hidden" />
+                          <X size={14} className="hidden sm:block" />
                         </button>
 
-                        <div className="text-xs font-semibold flex items-center gap-1">
+                        <div className="text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1">
                           {isDelay && <span title="Retard">🔶</span>}
                           {entryOutOfBounds.isOut && (
                             <span
@@ -336,9 +339,10 @@ export default function WeeklyTimeline({
                               ⬆
                             </span>
                           )}
-                          {startTime}
-                          {" → "}
-                          {endTime}
+                          <span className="truncate">{startTime}</span>
+                          <span className="hidden sm:inline"> → </span>
+                          <span className="sm:hidden">→</span>
+                          <span className="truncate">{endTime}</span>
                           {exitOutOfBounds.isOut && (
                             <span
                               className="text-yellow-300"
@@ -365,10 +369,10 @@ export default function WeeklyTimeline({
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-1 right-1 ${bgColor} text-white rounded-lg px-2 py-1 group cursor-pointer hover:opacity-80 transition-opacity ${outOfBounds.isOut ? "border-2 border-yellow-400" : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColor} text-white rounded-md sm:rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 group cursor-pointer hover:opacity-80 transition-opacity ${outOfBounds.isOut ? "border border-yellow-400 sm:border-2" : ""}`}
                         style={{
                           top: `${startPos}%`,
-                          height: "28px",
+                          height: "24px",
                           zIndex: 15,
                         }}
                         onClick={() => onEditPair(pair.entry)}
@@ -379,16 +383,17 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry);
                           }}
-                          className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+                          className="absolute top-0.5 right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                           title="Supprimer le pointage"
                         >
-                          <X size={10} />
+                          <X size={8} className="sm:hidden" />
+                          <X size={10} className="hidden sm:block" />
                         </button>
 
-                        <div className="text-xs italic flex items-center gap-1">
+                        <div className="text-[9px] sm:text-xs italic flex items-center gap-0.5 sm:gap-1 truncate">
                           {outOfBounds.isOut && (
                             <span
-                              className="text-yellow-300 font-bold"
+                              className="text-yellow-300 font-bold flex-shrink-0"
                               title={
                                 outOfBounds.position === "before"
                                   ? "Avant 6h"
@@ -398,9 +403,9 @@ export default function WeeklyTimeline({
                               {outOfBounds.position === "before" ? "⬆" : "⬇"}
                             </span>
                           )}
-                          {isEntry ? "→ " : "← "}
-                          {startTime}
-                          {isEntry ? " (entrée seule)" : " (sortie seule)"}
+                          <span className="flex-shrink-0">{isEntry ? "→" : "←"}</span>
+                          <span className="truncate">{startTime}</span>
+                          <span className="hidden sm:inline truncate">{isEntry ? "(entrée seule)" : "(sortie seule)"}</span>
                         </div>
                       </div>
                     );
@@ -433,7 +438,7 @@ export default function WeeklyTimeline({
                   return (
                     <div
                       key={`absence-${absenceIndex}`}
-                      className={`absolute left-1 right-1 text-white rounded-lg p-3 border-2 cursor-pointer hover:shadow-lg transition-shadow ${statusColors[absence.status]}`}
+                      className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 text-white rounded-md sm:rounded-lg p-1.5 sm:p-3 border sm:border-2 cursor-pointer hover:shadow-lg transition-shadow ${statusColors[absence.status]}`}
                       style={{
                         top: `${topPos}%`,
                         height: `${heightPos}%`,
@@ -444,12 +449,12 @@ export default function WeeklyTimeline({
                       title={`Absence: ${typeLabels[absence.type]} - ${absence.status}`}
                     >
                       <div className="text-center">
-                        <div className="text-sm font-bold mb-1">ABSENCE</div>
-                        <div className="text-xs font-semibold">
+                        <div className="text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1">ABSENCE</div>
+                        <div className="text-[9px] sm:text-xs font-semibold leading-tight">
                           {typeLabels[absence.type]}
                         </div>
                         {absence.status === "en_attente" && (
-                          <div className="text-xs mt-1 font-medium">
+                          <div className="text-[9px] sm:text-xs mt-0.5 sm:mt-1 font-medium">
                             En attente
                           </div>
                         )}
