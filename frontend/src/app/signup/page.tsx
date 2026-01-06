@@ -52,7 +52,7 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           phone: formData.phone || undefined,
-        }
+        },
       );
 
       if (response.status === 201 || response.status === 200) {
@@ -62,7 +62,7 @@ export default function SignupPage() {
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-        "Échec de l'inscription. Veuillez réessayer."
+          "Échec de l'inscription. Veuillez réessayer.",
       );
     } finally {
       setIsLoading(false);
@@ -213,7 +213,8 @@ export default function SignupPage() {
                 htmlFor="phone"
                 className="block text-sm font-medium text-[#333333] mb-2"
               >
-                Téléphone <span className="text-gray-400 text-xs">(optionnel)</span>
+                Téléphone{" "}
+                <span className="text-gray-400 text-xs">(optionnel)</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -468,7 +469,6 @@ export default function SignupPage() {
           </form>
         </div>
 
-        {/* Lien de connexion */}
         <p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
           Vous avez déjà un compte ?{" "}
           <button

@@ -113,7 +113,7 @@ export function useManagerSettings() {
       });
 
       setSuccessMessage('Paramètres enregistrés avec succès !');
-      
+
       setTimeout(() => {
         setSettingsOpen(false);
         setSuccessMessage('');

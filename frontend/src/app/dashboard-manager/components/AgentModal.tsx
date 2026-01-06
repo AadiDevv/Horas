@@ -1,5 +1,5 @@
-import { X, Loader2 } from 'lucide-react';
-import { Agent, AgentFormData, Equipe } from '../types';
+import { X, Loader2 } from "lucide-react";
+import { Agent, AgentFormData, Equipe } from "../types";
 
 interface AgentModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export default function AgentModal({
   setFormData,
   equipes,
   onSave,
-  loading
+  loading,
 }: AgentModalProps) {
   if (!isOpen) return null;
 
@@ -29,9 +29,12 @@ export default function AgentModal({
       <div className="bg-white rounded-3xl p-8 max-w-md w-full">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">
-            {agent ? "Modifier l'agent" : 'Nouvel Agent'}
+            {agent ? "Modifier l'agent" : "Nouvel Agent"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
             <X size={24} />
           </button>
         </div>
@@ -43,7 +46,9 @@ export default function AgentModal({
               <input
                 type="text"
                 value={formData.prenom}
-                onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, prenom: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
@@ -52,7 +57,9 @@ export default function AgentModal({
               <input
                 type="text"
                 value={formData.nom}
-                onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, nom: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
@@ -63,35 +70,45 @@ export default function AgentModal({
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Téléphone</label>
+            <label className="block text-sm font-semibold mb-2">
+              Téléphone
+            </label>
             <input
               type="tel"
               value={formData.telephone}
-              onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, telephone: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
 
-          {/* Champ mot de passe visible uniquement lors de la création */}
           {!agent && (
             <div>
-              <label className="block text-sm font-semibold mb-2">Mot de passe</label>
+              <label className="block text-sm font-semibold mb-2">
+                Mot de passe
+              </label>
               <input
                 type="password"
-                value={formData.password || ''}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                value={formData.password || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 required={!agent}
                 placeholder="Minimum 6 caractères"
               />
               <p className="text-xs text-gray-500 mt-1">
-                L'agent pourra changer son mot de passe après la première connexion
+                L'agent pourra changer son mot de passe après la première
+                connexion
               </p>
             </div>
           )}
@@ -100,7 +117,9 @@ export default function AgentModal({
             <label className="block text-sm font-semibold mb-2">Rôle</label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="employe">Employé</option>
@@ -115,13 +134,15 @@ export default function AgentModal({
             </label>
             <select
               value={formData.equipeId}
-              onChange={(e) => setFormData({ ...formData, equipeId: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, equipeId: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="">Aucune équipe</option>
               {equipes.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {e.nom} ({e.agentCount} membre{e.agentCount > 1 ? 's' : ''})
+                  {e.nom} ({e.agentCount} membre{e.agentCount > 1 ? "s" : ""})
                 </option>
               ))}
             </select>
@@ -140,10 +161,12 @@ export default function AgentModal({
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={20} />
-                {agent ? 'Modification...' : 'Création...'}
+                {agent ? "Modification..." : "Création..."}
               </>
+            ) : agent ? (
+              "Modifier"
             ) : (
-              agent ? 'Modifier' : 'Créer'
+              "Créer"
             )}
           </button>
         </div>

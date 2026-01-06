@@ -3,7 +3,7 @@
 type ButtonProps = {
   children: React.ReactNode;
   onClick: () => void;
-  className?: string; // <- optionnel
+  className?: string;
 };
 
 export default function Button({ children, onClick, className }: ButtonProps) {

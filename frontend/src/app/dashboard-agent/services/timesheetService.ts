@@ -1,27 +1,22 @@
-/**
- * Service pour gérer les timesheets via l'API Swagger
- * Routes: /api/timesheets
- */
+
 
 const API_BASE_URL = "http://localhost:8080";
-
-// ==================== TYPES ====================
 
 export interface Timesheet {
   id: number;
   employeId: number;
-  timestamp: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
-  clockin: boolean; // true = entrée, false = sortie
+  timestamp: string;
+  clockin: boolean;
   status: 'normal' | 'retard' | 'absence';
   createdAt: string;
   updatedAt: string;
 }
 
 export interface TimesheetStats {
-  heuresJour: number; // Heures travaillées aujourd'hui
-  heuresSemaine: number; // Heures travaillées cette semaine
-  retardsMois: number; // Nombre de retards ce mois
-  moyenneHebdo: number; // Moyenne d'heures par semaine
+  heuresJour: number;
+  heuresSemaine: number;
+  retardsMois: number;
+  moyenneHebdo: number;
 }
 
 export interface ApiResponse<T> {
@@ -32,19 +27,10 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-// ==================== API CALLS ====================
-
-/**
- * POST /api/timesheets/
- * Pointer automatiquement (entrée ou sortie)
- * L'API détermine automatiquement si c'est un clock-in ou clock-out
- * Payload vide : timestamp, clockin et employeId sont auto-générés par le backend
- */
 export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
   try {
     const token = localStorage.getItem('token');
 
-    // Payload vide ou minimal - tout est auto-généré côté backend
     const body = { };
 
     console.log('🔄 POST /api/timesheets/ - Tentative de pointage...');
@@ -74,8 +60,6 @@ export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
     console.log('🔍 data.data existe?', !!data.data);
     console.log('🔍 data.clockin existe?', !!data.clockin);
 
-    // L'API peut retourner { success: true, data: { clockin: ... } }
-    // ou directement { clockin: ... }
     const timesheet = data.data || data;
 
     console.log('📦 Timesheet extrait:', timesheet);
@@ -96,12 +80,6 @@ export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
   }
 }
 
-/**
- * GET /api/timesheets
- * Liste des timesheets avec filtres optionnels
- * @param dateDebut Format: YYYY-MM-DD
- * @param dateFin Format: YYYY-MM-DD
- */
 export async function getTimesheets(
   dateDebut?: string,
   dateFin?: string
@@ -110,7 +88,6 @@ export async function getTimesheets(
     const token = localStorage.getItem('token');
     const params = new URLSearchParams();
 
-    // Le backend attend 'startDate' et 'endDate', pas 'dateDebut' et 'dateFin'
     if (dateDebut) params.append('startDate', dateDebut);
     if (dateFin) params.append('endDate', dateFin);
 
@@ -134,7 +111,6 @@ export async function getTimesheets(
 
     const data = await res.json();
 
-    // L'API peut retourner directement un array ou un objet { data: [...] }
     const timesheets = Array.isArray(data) ? data : (data.data || []);
 
     console.log(`✅ GET /api/timesheets - ${timesheets.length || 0} timesheets récupérés`, timesheets);
@@ -155,10 +131,6 @@ export async function getTimesheets(
   }
 }
 
-/**
- * GET /api/timesheets/{id}
- * Détail d'un timesheet
- */
 export async function getTimesheet(id: number): Promise<ApiResponse<Timesheet>> {
   try {
     const token = localStorage.getItem('token');
@@ -193,10 +165,6 @@ export async function getTimesheet(id: number): Promise<ApiResponse<Timesheet>> 
   }
 }
 
-/**
- * PATCH /api/timesheets/{id}
- * Corriger un timesheet
- */
 export async function updateTimesheet(
   id: number,
   updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
@@ -236,10 +204,6 @@ export async function updateTimesheet(
   }
 }
 
-/**
- * DELETE /api/timesheets/{id}
- * Supprimer un timesheet
- */
 export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
   try {
     const token = localStorage.getItem('token');
@@ -273,10 +237,6 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
   }
 }
 
-/**
- * GET /api/timesheets/stats
- * Statistiques des timesheets
- */
 export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> {
   try {
     const token = localStorage.getItem('token');
@@ -292,7 +252,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
       const errorData = await res.json().catch(() => ({}));
       console.warn(`⚠️ Stats API returned ${res.status}, using default values`);
 
-      // Retourner des stats par défaut si l'API n'est pas prête
       return {
         success: true,
         data: {
@@ -317,7 +276,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
   } catch (error) {
     console.error('❌ Erreur getTimesheetStats:', error);
 
-    // Retourner des stats par défaut en cas d'erreur
     return {
       success: true,
       data: {
@@ -332,23 +290,14 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
   }
 }
 
-// ==================== HELPER FUNCTIONS ====================
-
-/**
- * Récupère les timesheets du jour actuel
- */
 export async function getTodayTimesheets(): Promise<ApiResponse<Timesheet[]>> {
   const today = new Date().toISOString().split('T')[0];
   console.log(`📅 Récupération des timesheets du jour: ${today}`);
   return getTimesheets(today, today);
 }
 
-/**
- * Récupère les timesheets d'une semaine
- * @param weekStart Date optionnelle pour le début de la semaine (lundi). Si non fournie, utilise la semaine en cours.
- */
 export async function getWeekTimesheets(weekStart?: Date): Promise<ApiResponse<Timesheet[]>> {
-  // Calculer le lundi de la semaine
+
   let monday: Date;
 
   if (weekStart) {
@@ -356,14 +305,13 @@ export async function getWeekTimesheets(weekStart?: Date): Promise<ApiResponse<T
     monday.setHours(0, 0, 0, 0);
   } else {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, etc.
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si dimanche, -6, sinon 1 - jour
+    const dayOfWeek = today.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     monday = new Date(today);
     monday.setDate(today.getDate() + diff);
     monday.setHours(0, 0, 0, 0);
   }
 
-  // Calculer le dimanche de la semaine
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
@@ -376,9 +324,6 @@ export async function getWeekTimesheets(weekStart?: Date): Promise<ApiResponse<T
   return getTimesheets(dateDebut, dateFin);
 }
 
-/**
- * Vérifie si l'utilisateur est actuellement pointé (clock-in actif)
- */
 export async function isCurrentlyClockedIn(): Promise<boolean> {
   const response = await getTodayTimesheets();
 
@@ -386,13 +331,11 @@ export async function isCurrentlyClockedIn(): Promise<boolean> {
     return false;
   }
 
-  // Trier par timestamp pour avoir le dernier pointage
   const sorted = [...response.data].sort((a, b) =>
     a.timestamp.localeCompare(b.timestamp)
   );
 
   const lastTimesheet = sorted[sorted.length - 1];
 
-  // Si le dernier pointage est une entrée (clockin === true), on est pointé
   return lastTimesheet.clockin === true;
 }

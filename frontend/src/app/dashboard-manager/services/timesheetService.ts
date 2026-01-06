@@ -1,7 +1,4 @@
-/**
- * Service pour gérer les timesheets côté manager
- * Permet de gérer les pointages de tous les employés
- */
+
 
 import { apiClient } from '@/app/utils/apiClient';
 import { formatDateLocal, getSunday } from '@/app/utils/dateUtils';
@@ -11,8 +8,8 @@ const API_BASE_URL = "http://localhost:8080";
 export interface Timesheet {
   id: number;
   employeId: number;
-  timestamp: string; // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
-  clockin: boolean; // true = entrée, false = sortie
+  timestamp: string;
+  clockin: boolean;
   status: 'normal' | 'retard' | 'absence';
   createdAt: string;
   updatedAt: string;
@@ -25,10 +22,6 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-/**
- * GET /api/timesheets
- * Récupère les timesheets avec filtres
- */
 export async function getTimesheets(params: {
   employeId?: number;
   dateDebut?: string;
@@ -78,17 +71,12 @@ export async function getTimesheets(params: {
   }
 }
 
-/**
- * PATCH /api/timesheets/{id}
- * Met à jour un timesheet
- */
 export async function updateTimesheet(
   id: number,
   updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
 ): Promise<ApiResponse<Timesheet>> {
   console.log(`🔧 PATCH /api/timesheets/${id}`, updates);
 
-  // Utiliser apiClient qui gère automatiquement les erreurs
   const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/${id}`, updates);
 
   console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour`);
@@ -100,10 +88,6 @@ export async function updateTimesheet(
   };
 }
 
-/**
- * PATCH /api/timesheets/pair
- * Met à jour une paire de timesheets de manière atomique
- */
 export async function updateTimesheetPair(pairData: {
   entryId: number;
   exitId: number;
@@ -113,7 +97,6 @@ export async function updateTimesheetPair(pairData: {
 }): Promise<ApiResponse<{ entry: Timesheet; exit: Timesheet }>> {
   console.log('🔧 PATCH /api/timesheets/pair', pairData);
 
-  // Utiliser apiClient qui gère automatiquement les erreurs
   const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/pair`, pairData);
 
   console.log('✅ PATCH /api/timesheets/pair - Paire mise à jour');
@@ -125,12 +108,8 @@ export async function updateTimesheetPair(pairData: {
   };
 }
 
-/**
- * DELETE /api/timesheets/{id}
- * Supprime un timesheet
- */
 export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
-  // Utiliser apiClient qui gère automatiquement les erreurs
+
   await apiClient.delete(`${API_BASE_URL}/api/timesheets/${id}`);
 
   console.log(`✅ DELETE /api/timesheets/${id} - Timesheet supprimé`);
@@ -141,17 +120,12 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
   };
 }
 
-/**
- * POST /api/timesheets/
- * Crée un nouveau timesheet (pour un employé)
- * Manager peut spécifier timestamp (optionnel), clockin est auto-déterminé
- */
 export async function createTimesheet(timesheet: {
   employeId: number;
-  timestamp: string; // ISO DateTime
+  timestamp: string;
   status?: 'normal' | 'retard' | 'absence';
 }): Promise<ApiResponse<Timesheet>> {
-  // Utiliser apiClient qui gère automatiquement les erreurs (ErrorModal pour 400)
+
   const res = await apiClient.post(`${API_BASE_URL}/api/timesheets/`, {
     employeId: timesheet.employeId,
     timestamp: timesheet.timestamp,
@@ -169,9 +143,6 @@ export async function createTimesheet(timesheet: {
   };
 }
 
-/**
- * Récupère les timesheets d'un employé pour une semaine
- */
 export async function getEmployeeWeekTimesheets(
   employeId: number,
   weekStart: Date

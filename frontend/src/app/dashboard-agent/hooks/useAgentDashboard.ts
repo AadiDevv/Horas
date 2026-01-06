@@ -3,7 +3,6 @@ import { DayKey, TimeLog, User, UserFormData, Horaire, PointageReadDTO } from '.
 import { getUser, updateUser, changePassword } from '../services/userService';
 import { getEquipeHoraires } from '../services/equipeService';
 
-// Export du nouveau hook timesheet
 export { useTimesheet } from './useTimesheet';
 
 export function useUserData() {
@@ -224,24 +223,17 @@ export function useTimeClock() {
     return days[new Date().getDay()];
   };
 
-  /**
-   * Convertit une date ISO en DayKey
-   */
   const dateToDayKey = (dateStr: string): DayKey => {
     const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const date = new Date(dateStr + 'T00:00:00');
     return days[date.getDay()];
   };
 
-  /**
-   * Charge les pointages de la semaine et les transforme en TimeLog
-   */
   const loadWeekPointages = async () => {
     try {
       const { getWeekPointages } = await import('../services/pointageService');
       const weekPointages = await getWeekPointages();
 
-      // Réinitialiser les timeLogs
       const newTimeLogs: Record<DayKey, TimeLog[]> = {
         Mon: [],
         Tue: [],
@@ -252,10 +244,9 @@ export function useTimeClock() {
         Sun: []
       };
 
-      // Grouper les pointages par date (extraite du timestamp)
       const pointagesByDate: Record<string, typeof weekPointages> = {};
       weekPointages.forEach(p => {
-        const date = p.timestamp.substring(0, 10); // "YYYY-MM-DD"
+        const date = p.timestamp.substring(0, 10);
         if (!pointagesByDate[date]) {
           pointagesByDate[date] = [];
         }
@@ -264,37 +255,34 @@ export function useTimeClock() {
 
       console.log('📊 Pointages groupés par date:', pointagesByDate);
 
-      // Transformer chaque jour
       Object.entries(pointagesByDate).forEach(([date, pointages]) => {
         const dayKey = dateToDayKey(date);
         const dayLogs: TimeLog[] = [];
 
-        // Trier par heure
         const sortedPointages = [...pointages].sort((a, b) =>
           a.heure.localeCompare(b.heure)
         );
 
         console.log(`🔍 Traitement du ${date} (${dayKey}):`, sortedPointages);
 
-        // Créer des paires entrée/sortie
         for (let i = 0; i < sortedPointages.length; i++) {
           const pointage = sortedPointages[i];
 
           if (pointage.clockin === true) {
-            // C'est une entrée, chercher la sortie correspondante
+
             const nextPointage = sortedPointages[i + 1];
-            const start = pointage.heure.substring(0, 5); // "14:30:00" -> "14:30"
+            const start = pointage.heure.substring(0, 5);
 
             console.log(`  ➡️ Entrée trouvée à ${start}`);
 
             if (nextPointage && nextPointage.clockin === false) {
-              // Paire complète
+
               const end = nextPointage.heure.substring(0, 5);
               dayLogs.push({ start, end });
               console.log(`  ✅ Paire complète: ${start} - ${end}`);
-              i++; // Sauter le prochain pointage car déjà traité
+              i++;
             } else {
-              // Entrée sans sortie (pointage en cours ou incomplet)
+
               console.log(`  ⏳ Entrée sans sortie (en cours ou incomplet)`);
             }
           }
@@ -311,40 +299,34 @@ export function useTimeClock() {
     }
   };
 
-  /**
-   * Vérifie les pointages du jour au chargement pour restaurer l'état
-   */
   const checkTodayPointages = async () => {
     try {
-      // Charger tous les pointages de la semaine
+
       await loadWeekPointages();
 
-      // Vérifier le statut du jour actuel
       const { getTodayPointages } = await import('../services/pointageService');
       const todayPointages = await getTodayPointages();
 
-      // Trouver le DERNIER pointage pour déterminer l'état actuel
       if (todayPointages.length > 0) {
-        // Trier par heure pour avoir le dernier pointage
+
         const sortedPointages = [...todayPointages].sort((a, b) =>
           a.heure.localeCompare(b.heure)
         );
         const lastPointage = sortedPointages[sortedPointages.length - 1];
 
-        // Si le dernier pointage est une entrée (clockin === true), on est en train de pointer
         if (lastPointage.clockin === true) {
           setLastClockIn(lastPointage);
           setIsClockingIn(true);
-          const time = lastPointage.heure.substring(0, 5); // "14:30"
+          const time = lastPointage.heure.substring(0, 5);
           setCurrentDayLogs({ start: time });
         } else {
-          // Le dernier pointage est une sortie, on n'est pas en train de pointer
+
           setLastClockIn(null);
           setIsClockingIn(false);
           setCurrentDayLogs({ start: '' });
         }
       } else {
-        // Aucun pointage aujourd'hui
+
         setLastClockIn(null);
         setIsClockingIn(false);
         setCurrentDayLogs({ start: '' });
@@ -354,10 +336,6 @@ export function useTimeClock() {
     }
   };
 
-  /**
-   * Gère à la fois Clock In et Clock Out avec la même fonction
-   * L'API backend détermine automatiquement s'il faut faire un clock in ou un clock out
-   */
   const handleClockIn = async () => {
     try {
       setPointageLoading(true);
@@ -365,24 +343,22 @@ export function useTimeClock() {
       setSuccessMessage('');
 
       const { clockIn } = await import('../services/pointageService');
-      const response = await clockIn();  // Appelle toujours la même route
+      const response = await clockIn();
 
       if (response.success && response.data) {
         const time = response.data.heure.substring(0, 5);
 
-        // Si clockin === true → C'est une entrée
         if (response.data.clockin === true) {
           setLastClockIn(response.data);
           setIsClockingIn(true);
           setCurrentDayLogs({ start: time });
           setSuccessMessage('✅ Pointage d\'entrée enregistré avec succès !');
         }
-        // Si clockin === false → C'est une sortie
+
         else {
-          // Recharger tous les pointages de la semaine pour être sûr d'avoir les données à jour
+
           await loadWeekPointages();
 
-          // Petit délai pour que le loader reste visible
           await new Promise(resolve => setTimeout(resolve, 300));
 
           setIsClockingIn(false);
@@ -403,7 +379,6 @@ export function useTimeClock() {
     }
   };
 
-  // handleClockOut n'est plus utilisé car tout passe par handleClockIn
   const handleClockOut = handleClockIn;
 
   return {

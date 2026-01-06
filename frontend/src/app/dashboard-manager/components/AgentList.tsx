@@ -15,7 +15,6 @@ export const getEquipeName = (equipes: Equipe[], equipeId?: number) => {
   return equipe?.nom || 'Équipe inconnue';
 };
 
-
 export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, onDeleteAgent }: AgentListProps) {
   return (
     <div>

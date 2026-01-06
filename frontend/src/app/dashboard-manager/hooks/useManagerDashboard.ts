@@ -45,7 +45,6 @@ export function useAgentManager() {
     equipeId: ''
   });
 
-  // Filter agents when search term changes
   useEffect(() => {
     const filtered = agents.filter((agent) =>
       `${agent.prenom} ${agent.nom} ${agent.email}`
@@ -85,7 +84,7 @@ export function useAgentManager() {
         role: formData.role,
         telephone: formData.telephone || undefined,
         equipeId: formData.equipeId ? Number(formData.equipeId) : undefined,
-        password: formData.password // Ajout du mot de passe
+        password: formData.password
       };
       const result = await api.createAgent(newAgent);
       if (result.success) {
@@ -93,7 +92,7 @@ export function useAgentManager() {
         await loadAgents();
         setShowModal(false);
         resetForm();
-        // Note: Les équipes seront rechargées automatiquement via useEffect quand agents change
+
       }
     } catch (error) {
       handleApiError(error, 'Erreur lors de la création de l\'agent');
@@ -103,7 +102,7 @@ export function useAgentManager() {
   const handleUpdate = async () => {
     if (!editingAgent) return;
     try {
-      // Mise à jour des informations de base de l'agent (sans equipeId)
+
       const updates = {
         prenom: formData.prenom,
         nom: formData.nom,
@@ -113,33 +112,31 @@ export function useAgentManager() {
       };
       const result = await api.updateAgent(editingAgent.id, updates);
       if (result.success) {
-        // Gérer l'assignation/changement d'équipe séparément via la route dédiée
+
         const newTeamId = formData.equipeId ? Number(formData.equipeId) : null;
         const oldTeamId = editingAgent.equipeId || null;
 
-        // Vérifier si l'équipe a changé
         if (newTeamId !== oldTeamId) {
           console.log('🔄 Changement d\'équipe détecté:', { oldTeamId, newTeamId });
 
           if (newTeamId) {
-            // Assigner à une nouvelle équipe
+
             console.log('➕ Assignation à l\'équipe', newTeamId);
             await api.assignUserToTeam(editingAgent.id, newTeamId);
             showSuccess('Agent mis à jour avec succès');
           } else {
-            // Le backend ne supporte pas le retrait d'un agent d'une équipe
-            // On informe l'utilisateur qu'il doit assigner l'agent à une autre équipe
+
             console.warn('⚠️ Le backend ne supporte pas le retrait d\'une équipe. L\'agent reste dans son équipe actuelle.');
             handleApiError(
               new Error('Le retrait d\'une équipe n\'est pas supporté. Veuillez assigner l\'agent à une autre équipe si nécessaire.'),
               'Impossible de retirer l\'agent de son équipe'
             );
-            // On recharge quand même pour afficher l'équipe actuelle
+
             await loadAgents();
             setShowModal(false);
             setEditingAgent(null);
             resetForm();
-            return; // On sort de la fonction pour ne pas afficher le message de succès
+            return;
           }
         } else {
           showSuccess('Agent mis à jour avec succès');
@@ -151,8 +148,7 @@ export function useAgentManager() {
         resetForm();
       }
     } catch (error) {
-      // L'erreur est déjà gérée par apiClient (Modal ou Toast selon le type)
-      // On ne fait rien ici pour éviter les doublons
+
       console.log('Erreur gérée par apiClient:', error);
     }
   };
@@ -250,7 +246,7 @@ export function useEquipeManager() {
       };
       const result = await api.createEquipe(newEquipe);
       if (result.success) {
-        // Assigner chaque agent à l'équipe via PATCH /api/users/assign/team/{id}
+
         if (formData.agents.length > 0 && result.data) {
           console.log('🔄 Assignation des agents à l\'équipe', result.data.id);
           for (const agentId of formData.agents) {
@@ -285,11 +281,10 @@ export function useEquipeManager() {
       };
       const result = await api.updateEquipe(editingEquipe.id, updates);
       if (result.success) {
-        // Identifier les nouveaux agents (ceux qui ne sont pas dans l'équipe actuellement)
+
         const currentAgentIds = editingEquipe.agents?.map(a => a.id) || [];
         const newAgentIds = formData.agents.filter(id => !currentAgentIds.includes(id));
 
-        // Assigner uniquement les nouveaux agents à l'équipe
         if (newAgentIds.length > 0) {
           console.log('🔄 Assignation des nouveaux agents à l\'équipe', editingEquipe.id);
           console.log('📋 Agents déjà dans l\'équipe:', currentAgentIds);
@@ -307,14 +302,10 @@ export function useEquipeManager() {
           console.log('ℹ️ Aucun nouvel agent à assigner');
         }
 
-      // Gérer les horaires : créer ou mettre à jour un schedule si des horaires sont définis
       if (formData.horaires && formData.horaires.length > 0) {
         console.log('⏰ Gestion du schedule pour l\'équipe', editingEquipe.id);
         console.log('📋 Horaires:', formData.horaires);
 
-        // Convertir les horaires du format frontend vers le format schedule backend
-        // On prend le premier horaire comme référence (startHour, endHour)
-        // et on collecte tous les jours actifs
         const joursMap: { [key: string]: number } = {
           'Lundi': 1,
           'Mardi': 2,
@@ -336,21 +327,20 @@ export function useEquipeManager() {
         };
 
         try {
-          // Vérifier si l'équipe a déjà un schedule
+
           if (editingEquipe.scheduleId) {
-            // Mettre à jour le schedule existant
+
             console.log('🔄 Mise à jour du schedule existant ID:', editingEquipe.scheduleId);
             await api.updateSchedule(editingEquipe.scheduleId, scheduleData);
             console.log('✅ Schedule mis à jour');
           } else {
-            // Créer un nouveau schedule
+
             console.log('➕ Création d\'un nouveau schedule');
             const scheduleResult = await api.createSchedule(scheduleData);
 
             if (scheduleResult.success && scheduleResult.data) {
               console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
 
-              // Assigner le schedule à l'équipe
               await api.assignScheduleToTeam(editingEquipe.id, scheduleResult.data.id);
               console.log('✅ Schedule assigné à l\'équipe');
             }
@@ -387,7 +377,6 @@ export function useEquipeManager() {
   const openEditModal = async (equipe: Equipe) => {
     setEditingEquipe(equipe);
 
-    // Charger le schedule si l'équipe en a un
     let horaires: any[] = [];
     if (equipe.scheduleId) {
       try {
@@ -398,7 +387,6 @@ export function useEquipeManager() {
           const schedule = scheduleResult.data;
           console.log('✅ Schedule chargé:', schedule);
 
-          // Convertir le schedule backend vers le format horaires frontend
           const joursMap: { [key: number]: string } = {
             1: 'Lundi',
             2: 'Mardi',
@@ -409,11 +397,9 @@ export function useEquipeManager() {
             7: 'Dimanche'
           };
 
-          // Convertir activeDays en horaires
-          // Extraire seulement HH:mm depuis le format Time (qui peut être HH:mm:ss)
           const formatTime = (time: string) => {
             if (!time) return '09:00';
-            // Si le format est HH:mm:ss, on prend seulement HH:mm
+
             return time.substring(0, 5);
           };
 

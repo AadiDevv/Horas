@@ -13,8 +13,8 @@ export interface Agent {
   updatedAt?: string;
   lastLoginAt?: string;
   deletedAt?: string;
-  // Relations (retournées par GET /api/users/{id})
-  equipeNom?: string; // teamName depuis l'API
+
+  equipeNom?: string;
   manager?: {
     id: number;
     prenom: string;
@@ -58,7 +58,7 @@ export interface AgentFormData {
   telephone: string;
   role: string;
   equipeId: string;
-  password?: string; // Requis uniquement lors de la création
+  password?: string;
 }
 
 export interface EquipeFormData {

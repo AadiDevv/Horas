@@ -1,6 +1,6 @@
-import { X, Loader2, Plus, Clock, Trash2, ArrowRightLeft } from 'lucide-react';
-import { useState } from 'react';
-import { Equipe, EquipeFormData, Agent, Horaire } from '../types';
+import { X, Loader2, Plus, Clock, Trash2, ArrowRightLeft } from "lucide-react";
+import { useState } from "react";
+import { Equipe, EquipeFormData, Agent, Horaire } from "../types";
 
 interface EquipeModalProps {
   isOpen: boolean;
@@ -25,21 +25,31 @@ export default function EquipeModal({
   loading,
   availableAgents = [],
   allEquipes = [],
-  onMoveAgent
+  onMoveAgent,
 }: EquipeModalProps) {
-  const [activeTab, setActiveTab] = useState<'info' | 'agents' | 'horaires'>('info');
+  const [activeTab, setActiveTab] = useState<"info" | "agents" | "horaires">(
+    "info",
+  );
   const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
   const [movingAgent, setMovingAgent] = useState<number | null>(null);
 
   if (!isOpen) return null;
 
-  const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  const jours = [
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+    "Dimanche",
+  ];
 
   const addAgent = () => {
     if (selectedAgent && !formData.agents.includes(selectedAgent)) {
       setFormData({
         ...formData,
-        agents: [...formData.agents, selectedAgent]
+        agents: [...formData.agents, selectedAgent],
       });
       setSelectedAgent(null);
     }
@@ -51,13 +61,13 @@ export default function EquipeModal({
     setMovingAgent(agentId);
     try {
       await onMoveAgent(agentId, newTeamId);
-      // Retirer l'agent de la liste locale après le déplacement réussi
+
       setFormData({
         ...formData,
-        agents: formData.agents.filter(id => id !== agentId)
+        agents: formData.agents.filter((id) => id !== agentId),
       });
     } catch (error) {
-      console.error('Erreur lors du déplacement de l\'agent:', error);
+      console.error("Erreur lors du déplacement de l'agent:", error);
     } finally {
       setMovingAgent(null);
     }
@@ -66,11 +76,18 @@ export default function EquipeModal({
   const addHoraire = () => {
     setFormData({
       ...formData,
-      horaires: [...formData.horaires, { jour: 'Lundi', heureDebut: '09:00', heureFin: '17:00' }]
+      horaires: [
+        ...formData.horaires,
+        { jour: "Lundi", heureDebut: "09:00", heureFin: "17:00" },
+      ],
     });
   };
 
-  const updateHoraire = (index: number, field: keyof Horaire, value: string) => {
+  const updateHoraire = (
+    index: number,
+    field: keyof Horaire,
+    value: string,
+  ) => {
     const newHoraires = [...formData.horaires];
     newHoraires[index] = { ...newHoraires[index], [field]: value };
     setFormData({ ...formData, horaires: newHoraires });
@@ -79,7 +96,7 @@ export default function EquipeModal({
   const removeHoraire = (index: number) => {
     setFormData({
       ...formData,
-      horaires: formData.horaires.filter((_, i) => i !== index)
+      horaires: formData.horaires.filter((_, i) => i !== index),
     });
   };
 
@@ -88,67 +105,76 @@ export default function EquipeModal({
       <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">
-            {equipe ? "Gérer l'équipe" : 'Nouvelle Équipe'}
+            {equipe ? "Gérer l'équipe" : "Nouvelle Équipe"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
             <X size={24} />
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-gray-200">
           <button
-            onClick={() => setActiveTab('info')}
+            onClick={() => setActiveTab("info")}
             className={`px-4 py-2 font-medium transition-all ${
-              activeTab === 'info'
-                ? 'text-black border-b-2 border-black'
-                : 'text-gray-500 hover:text-gray-700'
+              activeTab === "info"
+                ? "text-black border-b-2 border-black"
+                : "text-gray-500 hover:text-gray-700"
             }`}
           >
             Informations
           </button>
           <button
-            onClick={() => setActiveTab('agents')}
+            onClick={() => setActiveTab("agents")}
             className={`px-4 py-2 font-medium transition-all ${
-              activeTab === 'agents'
-                ? 'text-black border-b-2 border-black'
-                : 'text-gray-500 hover:text-gray-700'
+              activeTab === "agents"
+                ? "text-black border-b-2 border-black"
+                : "text-gray-500 hover:text-gray-700"
             }`}
           >
             Agents ({formData.agents.length})
           </button>
           <button
-            onClick={() => setActiveTab('horaires')}
+            onClick={() => setActiveTab("horaires")}
             className={`px-4 py-2 font-medium transition-all ${
-              activeTab === 'horaires'
-                ? 'text-black border-b-2 border-black'
-                : 'text-gray-500 hover:text-gray-700'
+              activeTab === "horaires"
+                ? "text-black border-b-2 border-black"
+                : "text-gray-500 hover:text-gray-700"
             }`}
           >
             Horaires ({formData.horaires.length})
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="space-y-4">
-          {activeTab === 'info' && (
+          {activeTab === "info" && (
             <>
               <div>
-                <label className="block text-sm font-semibold mb-2">Nom de l&apos;équipe</label>
+                <label className="block text-sm font-semibold mb-2">
+                  Nom de l&apos;équipe
+                </label>
                 <input
                   type="text"
                   value={formData.nom}
-                  onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nom: e.target.value })
+                  }
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Ex: Équipe Support"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Description</label>
+                <label className="block text-sm font-semibold mb-2">
+                  Description
+                </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black resize-none"
                   placeholder="Décrivez le rôle de cette équipe..."
@@ -157,18 +183,18 @@ export default function EquipeModal({
             </>
           )}
 
-          {activeTab === 'agents' && (
+          {activeTab === "agents" && (
             <div>
               <div className="flex gap-2 mb-4">
                 <select
-                  value={selectedAgent || ''}
+                  value={selectedAgent || ""}
                   onChange={(e) => setSelectedAgent(Number(e.target.value))}
                   className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 >
                   <option value="">Sélectionner un agent</option>
                   {availableAgents
-                    .filter(agent => !formData.agents.includes(agent.id))
-                    .map(agent => (
+                    .filter((agent) => !formData.agents.includes(agent.id))
+                    .map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.prenom} {agent.nom} ({agent.email})
                       </option>
@@ -190,10 +216,12 @@ export default function EquipeModal({
                     Aucun agent dans cette équipe
                   </div>
                 ) : (
-                  formData.agents.map(agentId => {
-                    const agent = availableAgents.find(a => a.id === agentId);
+                  formData.agents.map((agentId) => {
+                    const agent = availableAgents.find((a) => a.id === agentId);
                     if (!agent) return null;
-                    const otherEquipes = allEquipes.filter(e => e.id !== equipe?.id);
+                    const otherEquipes = allEquipes.filter(
+                      (e) => e.id !== equipe?.id,
+                    );
                     const isMoving = movingAgent === agentId;
 
                     return (
@@ -202,7 +230,9 @@ export default function EquipeModal({
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
                       >
                         <div className="flex-1">
-                          <p className="font-medium">{agent.prenom} {agent.nom}</p>
+                          <p className="font-medium">
+                            {agent.prenom} {agent.nom}
+                          </p>
                           <p className="text-sm text-gray-600">{agent.email}</p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -211,16 +241,23 @@ export default function EquipeModal({
                             value=""
                             onChange={(e) => {
                               if (e.target.value) {
-                                handleMoveAgent(agentId, Number(e.target.value));
+                                handleMoveAgent(
+                                  agentId,
+                                  Number(e.target.value),
+                                );
                               }
                             }}
                             disabled={isMoving || otherEquipes.length === 0}
                             className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <option value="">
-                              {isMoving ? 'Déplacement...' : otherEquipes.length === 0 ? 'Aucune autre équipe' : 'Déplacer vers...'}
+                              {isMoving
+                                ? "Déplacement..."
+                                : otherEquipes.length === 0
+                                  ? "Aucune autre équipe"
+                                  : "Déplacer vers..."}
                             </option>
-                            {otherEquipes.map(eq => (
+                            {otherEquipes.map((eq) => (
                               <option key={eq.id} value={eq.id}>
                                 {eq.nom}
                               </option>
@@ -235,7 +272,7 @@ export default function EquipeModal({
             </div>
           )}
 
-          {activeTab === 'horaires' && (
+          {activeTab === "horaires" && (
             <div>
               <button
                 onClick={addHoraire}
@@ -258,24 +295,32 @@ export default function EquipeModal({
                     >
                       <select
                         value={horaire.jour}
-                        onChange={(e) => updateHoraire(index, 'jour', e.target.value)}
+                        onChange={(e) =>
+                          updateHoraire(index, "jour", e.target.value)
+                        }
                         className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                       >
-                        {jours.map(jour => (
-                          <option key={jour} value={jour}>{jour}</option>
+                        {jours.map((jour) => (
+                          <option key={jour} value={jour}>
+                            {jour}
+                          </option>
                         ))}
                       </select>
                       <input
                         type="time"
                         value={horaire.heureDebut}
-                        onChange={(e) => updateHoraire(index, 'heureDebut', e.target.value)}
+                        onChange={(e) =>
+                          updateHoraire(index, "heureDebut", e.target.value)
+                        }
                         className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                       />
                       <span className="text-gray-500">à</span>
                       <input
                         type="time"
                         value={horaire.heureFin}
-                        onChange={(e) => updateHoraire(index, 'heureFin', e.target.value)}
+                        onChange={(e) =>
+                          updateHoraire(index, "heureFin", e.target.value)
+                        }
                         className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                       />
                       <button
@@ -300,10 +345,12 @@ export default function EquipeModal({
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={20} />
-              {equipe ? 'Sauvegarde...' : 'Création...'}
+              {equipe ? "Sauvegarde..." : "Création..."}
             </>
+          ) : equipe ? (
+            "Sauvegarder les modifications"
           ) : (
-            equipe ? 'Sauvegarder les modifications' : 'Créer l\'équipe'
+            "Créer l'équipe"
           )}
         </button>
       </div>

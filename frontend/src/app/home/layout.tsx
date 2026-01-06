@@ -1,4 +1,4 @@
-// frontend/src/app/home/layout.tsx
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ export default function HomeLayout({
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       router.push('/login');
     } else {
