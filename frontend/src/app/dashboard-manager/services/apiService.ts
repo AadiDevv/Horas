@@ -754,3 +754,71 @@ export async function updateSchedule(scheduleId: number, updates: { name?: strin
     message: response.message
   };
 }
+
+// ==================== SCHEDULE FUNCTIONS ====================
+
+/**
+ * Récupère la liste de tous les schedules
+ */
+export async function getSchedules(): Promise<ApiResponse<any[]>> {
+  try {
+    console.log('🚀 GET /api/schedules');
+
+    const res = await fetch(`${API_BASE_URL}/api/schedules`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const schedules = Array.isArray(data) ? data : (data.data || []);
+
+    console.log(`✅ GET /api/schedules - ${schedules.length} schedules retrieved`);
+
+    return {
+      success: true,
+      data: schedules
+    };
+  } catch (error) {
+    console.error('❌ Error getSchedules:', error);
+    return {
+      success: false,
+      data: [],
+      error: (error as Error).message
+    };
+  }
+}
+
+/**
+ * Supprime un schedule
+ */
+export async function deleteSchedule(scheduleId: number): Promise<ApiResponse<void>> {
+  try {
+    console.log('🚀 DELETE /api/schedules/:id', scheduleId);
+
+    const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    console.log(`✅ DELETE /api/schedules/${scheduleId} - Schedule deleted`);
+
+    return {
+      success: true,
+      message: 'Schedule supprimé avec succès'
+    };
+  } catch (error) {
+    console.error('❌ Error deleteSchedule:', error);
+    return {
+      success: false,
+      error: (error as Error).message
+    };
+  }
+}

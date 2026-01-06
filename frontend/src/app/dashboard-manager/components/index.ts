@@ -17,3 +17,6 @@ export { default as DeleteConfirmModal } from './DeleteConfirmModal';
 export { default as AbsencesCard } from './AbsencesCard';
 export { default as AbsencesWeekChart } from './AbsencesWeekChart';
 export { default as AbsenceModal } from './AbsenceModal';
+export { default as ScheduleList } from './ScheduleList';
+export { default as ScheduleModal } from './ScheduleModal';
+export { default as ScheduleVisualizer } from './ScheduleVisualizer';

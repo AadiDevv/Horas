@@ -20,6 +20,8 @@ import {
   PointagesManagement,
   AbsencesCard,
   AbsencesWeekChart,
+  ScheduleList,
+  ScheduleModal,
 } from "./components";
 import {
   useManagerDashboard,
@@ -28,6 +30,7 @@ import {
 } from "./hooks/useManagerDashboard";
 import { useManagerSettings } from "./hooks/useManagerSettings";
 import { useManagerStats } from "./hooks/useManagerStats";
+import { useScheduleManager } from "./hooks/useScheduleManager";
 
 // ==================== MAIN COMPONENT ====================
 function ManagerDashboard() {
@@ -99,9 +102,26 @@ function ManagerDashboard() {
     resetForm: resetEquipeForm,
   } = useEquipeManager();
 
+  const {
+    schedules,
+    loadingSchedules,
+    showModal: showScheduleModal,
+    setShowModal: setShowScheduleModal,
+    editingSchedule,
+    formData: scheduleFormData,
+    setFormData: setScheduleFormData,
+    loadSchedules,
+    handleCreate: handleCreateSchedule,
+    handleUpdate: handleUpdateSchedule,
+    handleDelete: handleDeleteSchedule,
+    openEditModal: openEditScheduleModal,
+    resetForm: resetScheduleForm,
+  } = useScheduleManager();
+
   // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
+    loadSchedules();
   }, []);
 
   // Recharger les équipes quand les agents changent (pour mettre à jour agentCount)
@@ -149,6 +169,19 @@ function ManagerDashboard() {
   const openEquipeModal = () => {
     resetEquipeForm();
     setShowEquipeModal(true);
+  };
+
+  const handleScheduleSubmit = () => {
+    if (editingSchedule) {
+      handleUpdateSchedule();
+    } else {
+      handleCreateSchedule();
+    }
+  };
+
+  const openScheduleModal = () => {
+    resetScheduleForm();
+    setShowScheduleModal(true);
   };
 
   // ==================== RENDER ====================
@@ -317,6 +350,16 @@ function ManagerDashboard() {
                 onRefresh={loadAgents}
               />
             )}
+
+            {/* HORAIRES PAGE */}
+            {currentPage === "horaires" && (
+              <ScheduleList
+                schedules={schedules}
+                onAddSchedule={openScheduleModal}
+                onEditSchedule={openEditScheduleModal}
+                onDeleteSchedule={handleDeleteSchedule}
+              />
+            )}
           </main>
         </div>
 
@@ -347,6 +390,19 @@ function ManagerDashboard() {
           equipe={editingEquipe}
           loading={loadingEquipes}
           availableAgents={agents}
+        />
+
+        <ScheduleModal
+          isOpen={showScheduleModal}
+          onClose={() => {
+            setShowScheduleModal(false);
+            resetScheduleForm();
+          }}
+          formData={scheduleFormData}
+          setFormData={setScheduleFormData}
+          schedule={editingSchedule}
+          onSave={handleScheduleSubmit}
+          loading={loadingSchedules}
         />
       </div>
     </RoleProtection>
