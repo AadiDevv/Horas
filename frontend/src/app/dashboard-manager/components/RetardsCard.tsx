@@ -13,10 +13,10 @@ interface RetardsCardProps {
 
 export default function RetardsCard({ retards, retardMoyen }: RetardsCardProps) {
   const getRetardColor = (minutes: number) => {
-    // Nuances de gris/noir pour les différents niveaux
-    if (minutes >= 30) return "#333333"; // Noir complet pour retard important
-    if (minutes >= 15) return "#666666"; // Gris foncé
-    return "#999999"; // Gris moyen
+
+    if (minutes >= 30) return "#333333";
+    if (minutes >= 15) return "#666666";
+    return "#999999";
   };
 
   return (

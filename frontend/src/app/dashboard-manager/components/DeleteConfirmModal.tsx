@@ -1,4 +1,4 @@
-import { X, Trash2, AlertTriangle } from 'lucide-react';
+import { X, Trash2, AlertTriangle } from "lucide-react";
 
 interface DeleteConfirmModalProps {
   isOpen: boolean;
@@ -15,14 +15,13 @@ export default function DeleteConfirmModal({
   onConfirm,
   title,
   message,
-  deleting = false
+  deleting = false,
 }: DeleteConfirmModalProps) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
@@ -41,7 +40,6 @@ export default function DeleteConfirmModal({
           </button>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3 mt-6">
           <button
             type="button"

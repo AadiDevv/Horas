@@ -30,13 +30,10 @@ import { useManagerSettings } from "./hooks/useManagerSettings";
 import { useManagerStats } from "./hooks/useManagerStats";
 import * as api from "./services/apiService";
 
-// ==================== MAIN COMPONENT ====================
 function ManagerDashboard() {
-  // Custom hooks for state management
   const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Close sidebar by default on smaller screens
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -46,14 +43,12 @@ function ManagerDashboard() {
       }
     };
 
-    // Initial check
     handleResize();
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Settings hook
   const {
     userData,
     formData,
@@ -100,32 +95,31 @@ function ManagerDashboard() {
     resetForm: resetEquipeForm,
   } = useEquipeManager();
 
-  // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
   }, []);
 
-  // Recharger les équipes quand les agents changent (pour mettre à jour agentCount)
   useEffect(() => {
     if (agents.length >= 0) {
       loadEquipes();
     }
   }, [agents]);
 
-  // Enrichir les équipes avec le vrai nombre d'agents
-  const enrichedEquipes = equipes.map(equipe => {
-    const agentsInTeam = agents.filter(agent => agent.equipeId === equipe.id);
+  const enrichedEquipes = equipes.map((equipe) => {
+    const agentsInTeam = agents.filter((agent) => agent.equipeId === equipe.id);
     return {
       ...equipe,
       agentCount: agentsInTeam.length,
-      agents: agentsInTeam
+      agents: agentsInTeam,
     };
   });
 
-  // Stats hook pour les données réelles (APRÈS enrichedEquipes)
-  const { stats, loading: statsLoading, refreshStats } = useManagerStats(agents, enrichedEquipes);
+  const {
+    stats,
+    loading: statsLoading,
+    refreshStats,
+  } = useManagerStats(agents, enrichedEquipes);
 
-  // ==================== HANDLERS ====================
   const handleAgentSubmit = () => {
     if (editingAgent) {
       handleUpdateAgent();
@@ -152,7 +146,6 @@ function ManagerDashboard() {
     setShowEquipeModal(true);
   };
 
-  // ==================== RENDER ====================
   return (
     <RoleProtection allowedRoles={["manager", "admin"]}>
       <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -162,7 +155,6 @@ function ManagerDashboard() {
           setSidebarOpen={setSidebarOpen}
         />
 
-        {/* Settings Modal */}
         {userData && (
           <SettingsModal
             isOpen={settingsOpen}
@@ -186,15 +178,17 @@ function ManagerDashboard() {
             />
           </div>
 
-          <div className={`lg:hidden fixed inset-y-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-             <Sidebar
-               isOpen={true}
-               currentPage={currentPage}
-               onPageChange={(page) => {
-                 setCurrentPage(page);
-                 setSidebarOpen(false);
-               }}
-             />
+          <div
+            className={`lg:hidden fixed inset-y-0 left-0 z-40 h-full transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+          >
+            <Sidebar
+              isOpen={true}
+              currentPage={currentPage}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setSidebarOpen(false);
+              }}
+            />
           </div>
 
           {sidebarOpen && (
@@ -204,12 +198,9 @@ function ManagerDashboard() {
             />
           )}
 
-          {/* Main Content */}
           <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
-            {/* DASHBOARD PAGE */}
             {currentPage === "dashboard" && (
               <>
-                {/* Header */}
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-10 gap-4">
                   <div>
                     <h2 className="text-3xl md:text-4xl font-semibold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -253,7 +244,13 @@ function ManagerDashboard() {
                   <KpiCard
                     title="Retards aujourd'hui"
                     value={stats.retardsAujourdhui.toString()}
-                    subtitle={stats.absencesEnAttente > 0 ? `${stats.absencesEnAttente} absences en attente` : (stats.retardsAujourdhui === 0 ? "Aucun retard" : `${stats.retardsAujourdhui} retard${stats.retardsAujourdhui > 1 ? 's' : ''} aujourd'hui`)}
+                    subtitle={
+                      stats.absencesEnAttente > 0
+                        ? `${stats.absencesEnAttente} absences en attente`
+                        : stats.retardsAujourdhui === 0
+                          ? "Aucun retard"
+                          : `${stats.retardsAujourdhui} retard${stats.retardsAujourdhui > 1 ? "s" : ""} aujourd'hui`
+                    }
                     icon={Clock}
                   />
                 </div>
@@ -261,9 +258,7 @@ function ManagerDashboard() {
                 {/* Section graphiques - Données réelles */}
                 {enrichedEquipes.length > 0 && (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <HeuresChart
-                      equipes={stats.heuresParEquipe}
-                    />
+                    <HeuresChart equipes={stats.heuresParEquipe} />
                     <AbsencesCard
                       absences={stats.absencesDetail}
                       absencesEnAttente={stats.absencesEnAttente}

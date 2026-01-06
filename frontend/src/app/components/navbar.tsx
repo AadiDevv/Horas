@@ -151,7 +151,6 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
               )}
             </div>
 
-
             <div className="text-right hidden md:block">
               <p className="text-sm font-semibold">
                 {user.firstName} {user.lastName}

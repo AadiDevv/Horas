@@ -4,29 +4,22 @@ import { apiClient, getAuthHeaders } from '@/app/utils/apiClient';
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = false;
 
-// Helper pour gérer les erreurs HTTP et extraire le message proprement (DEPRECATED - Ne plus utiliser)
-// Utilisez apiClient à la place qui gère automatiquement les erreurs
 const handleHttpError = async (res: Response): Promise<never> => {
   const errorData = await res.json();
-  // Le backend renvoie { success: false, error: "message", code: "...", timestamp: "..." }
+
   throw new Error(errorData.error || errorData.message || `Erreur ${res.status}: ${res.statusText}`);
 };
 
-// Helper pour transformer les données frontend -> backend (CREATE)
-// Note: managerId n'est pas envoyé, il sera automatiquement assigné par le backend depuis le JWT
 const transformAgentToBackend = (agent: Partial<Agent> & { password?: string }) => ({
   firstName: agent.prenom,
   lastName: agent.nom,
   email: agent.email,
-  password: agent.password || 'TempPassword123!', // Mot de passe temporaire
+  password: agent.password || 'TempPassword123!',
   role: agent.role || 'employe',
   phone: agent.telephone,
   teamId: agent.equipeId
 });
 
-// Helper pour transformer les données frontend -> backend (UPDATE)
-// Note: teamId et scheduleId ne sont plus modifiables via PATCH /api/users/{id}
-// Ils doivent être modifiés via des routes dédiées
 const transformAgentUpdateToBackend = (updates: Partial<Agent>) => {
   const backendData: any = {};
   if (updates.prenom !== undefined) backendData.firstName = updates.prenom;
@@ -35,11 +28,10 @@ const transformAgentUpdateToBackend = (updates: Partial<Agent>) => {
   if (updates.telephone !== undefined) backendData.phone = updates.telephone;
   if (updates.role !== undefined) backendData.role = updates.role;
   if (updates.isActive !== undefined) backendData.isActive = updates.isActive;
-  // teamId et scheduleId ne sont pas envoyés (gérés par routes dédiées)
+
   return backendData;
 };
 
-// Helper pour transformer les données backend -> frontend
 const transformAgentFromBackend = (data: any): Agent => ({
   id: data.id,
   prenom: data.firstName,
@@ -55,8 +47,8 @@ const transformAgentFromBackend = (data: any): Agent => ({
   updatedAt: data.updatedAt,
   lastLoginAt: data.lastLoginAt,
   deletedAt: data.deletedAt,
-  // Champs de relations (pour GET /api/users/{id} ou my-employees)
-  equipeNom: data.teamName || data.teamlastName, // teamlastName dans my-employees, teamName dans users/{id}
+
+  equipeNom: data.teamName || data.teamlastName,
   manager: data.manager ? {
     id: data.manager.id,
     prenom: data.manager.firstName,
@@ -74,7 +66,6 @@ const transformAgentFromBackend = (data: any): Agent => ({
   } : undefined
 });
 
-// Helper pour récupérer le managerId du user connecté
 const getManagerId = (): number => {
   const userStr = localStorage.getItem('user');
   if (!userStr) {
@@ -84,30 +75,26 @@ const getManagerId = (): number => {
   return user.id;
 };
 
-// Helper pour transformer les données équipe frontend -> backend
 const transformEquipeToBackend = (equipe: any) => ({
   name: equipe.nom,
   description: equipe.description || undefined,
-  managerId: getManagerId(), // Récupère l'ID du manager connecté
-  // Note: agents et horaires ne sont pas gérés dans le DTO de création
-  // Ils seront assignés via des routes séparées après la création
+  managerId: getManagerId(),
+
 });
 
-// Helper pour transformer les données équipe backend -> frontend
 const transformEquipeFromBackend = (data: any): Equipe => ({
   id: data.id,
   nom: data.name,
   description: data.description,
   managerId: data.managerId,
-  scheduleId: data.scheduleId, // Ajout du scheduleId
+  scheduleId: data.scheduleId,
   agentCount: data.membersCount || 0,
   createdAt: data.createdAt,
   deletedAt: data.deletedAt,
-  agents: [], // Les agents ne sont pas retournés lors de la création
-  horaires: [] // Les horaires ne sont pas retournés lors de la création
+  agents: [],
+  horaires: []
 });
 
-// Mock Data
 const mockAgents: Agent[] = [
   {
     id: 1,
@@ -159,7 +146,6 @@ const mockEquipes: Equipe[] = [
   }
 ];
 
-// AGENTS
 export async function getAgents(): Promise<ApiResponse<Agent[]>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -190,7 +176,6 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
     console.log('🔍 Premier employé brut:', response.data[0]);
   }
 
-  // Transformer chaque agent de backend → frontend
   const transformedData = response.data.map(transformAgentFromBackend);
   console.log('🔄 Données transformées:', transformedData);
 
@@ -215,7 +200,6 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
     return { success: true, data: newAgent };
   }
 
-  // Transformer les données frontend -> backend
   const backendData = transformAgentToBackend(agent);
 
   console.log('🚀 Envoi de la requête POST /api/auth/register/employe');
@@ -245,7 +229,6 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
-  // Transformer la réponse backend -> frontend
   return {
     success: response.success,
     data: transformAgentFromBackend(response.data),
@@ -262,13 +245,11 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
     return { success: true, data: mockAgents[index] };
   }
 
-  // Transformer les données frontend -> backend
   const backendData = transformAgentUpdateToBackend(updates);
 
   console.log('🚀 Envoi de la requête PATCH /api/users/' + id);
   console.log('📦 Données envoyées:', backendData);
 
-  // Utiliser apiClient qui gère automatiquement les erreurs (Modal pour 403)
   const res = await apiClient.patch(`${API_BASE_URL}/api/users/${id}`, backendData);
 
   console.log('📡 Statut de la réponse:', res.status, res.statusText);
@@ -276,7 +257,6 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
-  // Transformer la réponse backend -> frontend
   return {
     success: response.success,
     data: transformAgentFromBackend(response.data),
@@ -421,7 +401,6 @@ export async function changeUserPassword(userId: number, oldPassword: string, ne
   };
 }
 
-// ÉQUIPES
 export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -450,7 +429,6 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
     console.log('🔍 Première équipe brute du backend:', response.data[0]);
   }
 
-  // Transformer chaque équipe de backend -> frontend et filtrer les supprimées
   const allEquipes = response.data.map(transformEquipeFromBackend);
   console.log('🔄 Première équipe transformée:', allEquipes[0]);
   const activeEquipes = allEquipes.filter((equipe: Equipe) => !equipe.deletedAt);
@@ -467,7 +445,7 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
 export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
-    // Convert agent IDs to agent objects
+
     const agentObjects = equipe.agents
       ? mockAgents.filter((a: Agent) => equipe.agents.includes(a.id))
       : [];
@@ -486,7 +464,6 @@ export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
     return { success: true, data: newEquipe };
   }
 
-  // Transformer les données frontend -> backend
   const backendData = transformEquipeToBackend(equipe);
 
   console.log('🚀 Envoi de la requête POST /api/teams');
@@ -516,13 +493,11 @@ export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
-  // Note: Les agents et horaires doivent être assignés séparément après la création
   if (equipe.agents && equipe.agents.length > 0) {
     console.warn('⚠️ Les agents ne sont pas assignés automatiquement lors de la création.');
     console.warn('   Vous devrez mettre à jour chaque agent avec le teamId de cette équipe.');
   }
 
-  // Transformer la réponse backend -> frontend
   return {
     success: response.success,
     data: transformEquipeFromBackend(response.data),
@@ -535,7 +510,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockEquipes.findIndex(e => e.id === id);
 
-    // Convert agent IDs to agent objects if agents are provided
     const agentObjects = updates.agents
       ? mockAgents.filter((a: Agent) => updates.agents.includes(a.id))
       : mockEquipes[index].agents;
@@ -553,13 +527,10 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
     return { success: true, data: mockEquipes[index] };
   }
 
-  // Transformer les données frontend -> backend (seulement les champs à mettre à jour)
   const backendData: any = {};
   if (updates.nom !== undefined) backendData.name = updates.nom;
   if (updates.description !== undefined) backendData.description = updates.description;
-  // IMPORTANT : Ne jamais envoyer managerId lors de l'update
 
-  // Vérifier l'utilisateur connecté
   const userStr = localStorage.getItem('user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
 
@@ -592,7 +563,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
   const response = await res.json();
   console.log('✅ Réponse du serveur:', response);
 
-  // Note: Les agents doivent être mis à jour séparément
   if (updates.agents && updates.agents.length > 0) {
     console.warn('⚠️ Les agents doivent être mis à jour séparément via PATCH /api/users/:id avec teamId');
   }
@@ -644,7 +614,6 @@ export async function deleteEquipe(id: number): Promise<ApiResponse<void>> {
   };
 }
 
-// SCHEDULES
 export async function createSchedule(schedule: { name: string; startHour: string; endHour: string; activeDays: number[] }): Promise<ApiResponse<any>> {
   console.log('🚀 Envoi de la requête POST /api/schedules');
   console.log('📦 Données envoyées:', schedule);

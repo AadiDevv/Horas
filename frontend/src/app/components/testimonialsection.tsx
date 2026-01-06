@@ -5,9 +5,9 @@ export default function Testimonial() {
     <section className="flex justify-center items-center py-12 md:py-24 px-6 bg-white">
       <div className="bg-[#333333] text-white rounded-2xl p-6 md:p-12 max-w-4xl text-center shadow-lg">
         <p className="text-xl font-medium mb-10 leading-relaxed">
-          “Depuis que j’utilise Horas, ma gestion du temps a complètement changé.  
-          L’application m’aide à mieux organiser mes journées, à rester concentrée  
-          et à suivre mes progrès sans stress.  
+          “Depuis que j’utilise Horas, ma gestion du temps a complètement changé.
+          L’application m’aide à mieux organiser mes journées, à rester concentrée
+          et à suivre mes progrès sans stress.
           J’ai enfin l’impression de maîtriser mon emploi du temps.”
         </p>
 

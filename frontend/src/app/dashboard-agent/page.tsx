@@ -18,14 +18,16 @@ import {
   useTimesheet,
 } from "./hooks/useAgentDashboard";
 import { formatDate } from "./utils/dateUtils";
-import { getAbsences, Absence } from "@/app/dashboard-manager/services/absenceService";
+import {
+  getAbsences,
+  Absence,
+} from "@/app/dashboard-manager/services/absenceService";
 
 export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
   const [absences, setAbsences] = useState<Absence[]>([]);
 
-  // Custom hooks
   const { userData, setUserData, formData, setFormData, loadUserData } =
     useUserData();
   const {
@@ -76,7 +78,6 @@ export default function Page() {
     };
   }, []);
 
-  // Charger les horaires de l'équipe quand userData est disponible
   useEffect(() => {
     if (userData) {
       loadTeamSchedule();
@@ -84,19 +85,17 @@ export default function Page() {
     }
   }, [userData]);
 
-  // Charger les absences de l'employé pour la semaine sélectionnée
   const loadAbsences = async () => {
     if (!userData?.id) return;
 
     try {
       const response = await getAbsences({ employeId: userData.id });
       if (response.success && response.data) {
-        // Filtrer les absences pour la semaine en cours
         const monday = weekDays[0];
         const sunday = weekDays[6];
 
         if (monday && sunday) {
-          const filteredAbsences = response.data.filter(absence => {
+          const filteredAbsences = response.data.filter((absence) => {
             const absenceStart = new Date(absence.startDateTime);
             const absenceEnd = new Date(absence.endDateTime);
             const weekStart = new Date(monday);
@@ -105,21 +104,21 @@ export default function Page() {
             weekStart.setHours(0, 0, 0, 0);
             weekEnd.setHours(23, 59, 59, 999);
 
-            // L'absence chevauche la semaine si elle commence avant la fin de la semaine
-            // ET se termine après le début de la semaine
             return absenceStart <= weekEnd && absenceEnd >= weekStart;
           });
 
           setAbsences(filteredAbsences);
-          console.log('✅ Absences chargées pour la semaine:', filteredAbsences);
+          console.log(
+            "✅ Absences chargées pour la semaine:",
+            filteredAbsences,
+          );
         }
       }
     } catch (error) {
-      console.error('❌ Erreur chargement absences:', error);
+      console.error("❌ Erreur chargement absences:", error);
     }
   };
 
-  // Recharger les absences quand la semaine change
   useEffect(() => {
     if (userData && weekDays.length > 0) {
       loadAbsences();
@@ -127,18 +126,15 @@ export default function Page() {
   }, [selectedWeek, weekDays]);
 
   const handleLogout = () => {
-    console.log('🚪 Déconnexion...');
-    window.location.href = '/login';
+    console.log("🚪 Déconnexion...");
+    window.location.href = "/login";
   };
 
   return (
     <RoleProtection allowedRoles={["manager", "admin", "employe"]}>
       <div className="min-h-screen bg-white">
-        <Navbar
-          onOpenSettings={handleOpenSettings}
-        />
+        <Navbar onOpenSettings={handleOpenSettings} />
 
-        {/* Settings Modal */}
         {userData && (
           <SettingsModal
             isOpen={settingsOpen}
@@ -153,14 +149,14 @@ export default function Page() {
           />
         )}
 
-        {/* Main Content */}
         <div className="flex">
           <Sidebar />
           <main className="flex-1 p-4 md:p-8 w-full overflow-hidden">
-            {/* Header with Clock Button */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-6">
               <div>
-                <h2 className="text-3xl md:text-4xl font-semibold mb-2">Aujourd'hui</h2>
+                <h2 className="text-3xl md:text-4xl font-semibold mb-2">
+                  Aujourd'hui
+                </h2>
                 <p className="text-gray-600">
                   {mounted && currentTime
                     ? formatDate(currentTime)
@@ -200,7 +196,9 @@ export default function Page() {
 
             {/* Weekly Calendar Header */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-              <h3 className="text-xl md:text-2xl font-semibold">Planning de la semaine</h3>
+              <h3 className="text-xl md:text-2xl font-semibold">
+                Planning de la semaine
+              </h3>
               <div className="flex items-center gap-2 self-start md:self-auto overflow-x-auto max-w-full pb-1">
                 <button
                   onClick={previousWeek}
@@ -212,8 +210,8 @@ export default function Page() {
                   onClick={currentWeek}
                   className={`px-3 py-2 md:px-4 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${
                     isCurrentWeek()
-                      ? 'bg-black hover:bg-gray-900 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                      ? "bg-black hover:bg-gray-900 text-white"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                   }`}
                 >
                   {formatWeekButtonText()}
@@ -235,23 +233,23 @@ export default function Page() {
 
             {/* Weekly Calendar Container - Scrollable on mobile */}
             <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
-               <div className="min-w-[800px] md:min-w-0">
-                  <WeeklyCalendar
-                    timeLogs={timeLogs}
-                    isClockingIn={isClockingIn}
-                    currentDayLogs={currentDayLogs}
-                    currentDayKey={getDayKey()}
-                    onRefresh={() => {
-                      setCurrentTime(new Date());
-                      loadTeamSchedule();
-                      loadWeekTimesheets();
-                      loadAbsences();
-                    }}
-                    teamSchedule={teamSchedule}
-                    weekDays={weekDays}
-                    absences={absences}
-                  />
-               </div>
+              <div className="min-w-[800px] md:min-w-0">
+                <WeeklyCalendar
+                  timeLogs={timeLogs}
+                  isClockingIn={isClockingIn}
+                  currentDayLogs={currentDayLogs}
+                  currentDayKey={getDayKey()}
+                  onRefresh={() => {
+                    setCurrentTime(new Date());
+                    loadTeamSchedule();
+                    loadWeekTimesheets();
+                    loadAbsences();
+                  }}
+                  teamSchedule={teamSchedule}
+                  weekDays={weekDays}
+                  absences={absences}
+                />
+              </div>
             </div>
           </main>
         </div>
