@@ -34,7 +34,7 @@ export default function DeleteConfirmModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer active:scale-95"
           >
             <X size={20} />
           </button>
@@ -45,7 +45,7 @@ export default function DeleteConfirmModal({
             type="button"
             onClick={onClose}
             disabled={deleting}
-            className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors disabled:opacity-50 cursor-pointer active:scale-95"
           >
             Annuler
           </button>
@@ -53,7 +53,7 @@ export default function DeleteConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={deleting}
-            className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {deleting ? (
               <>

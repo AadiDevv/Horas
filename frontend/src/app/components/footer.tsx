@@ -7,9 +7,9 @@ export default function Footer() {
         <h2 className="text-white font-semibold text-lg">Horas.</h2>
 
         <div className="flex flex-wrap justify-center gap-6 text-sm">
-          <a href="#" className="hover:text-white transition">Privacy policy</a>
-          <a href="#" className="hover:text-white transition">Cookies policy</a>
-          <a href="#" className="hover:text-white transition">Terms of use</a>
+          <a href="#" className="hover:text-white transition cursor-pointer">Privacy policy</a>
+          <a href="#" className="hover:text-white transition cursor-pointer">Cookies policy</a>
+          <a href="#" className="hover:text-white transition cursor-pointer">Terms of use</a>
         </div>
 
         <p className="text-sm text-gray-500">

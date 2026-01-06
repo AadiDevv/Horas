@@ -34,7 +34,7 @@ export default function ClockButton({
       <button
         onClick={isClockingIn ? onClockOut : onClockIn}
         disabled={pointageLoading}
-        className="flex items-center gap-6 px-8 py-4 bg-black text-white rounded-2xl font-semibold text-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center gap-6 px-8 py-4 bg-black text-white rounded-2xl font-semibold text-lg hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
       >
         {pointageLoading ? (
           <>

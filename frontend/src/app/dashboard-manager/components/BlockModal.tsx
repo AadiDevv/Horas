@@ -224,7 +224,7 @@ export default function BlockModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer active:scale-95"
           >
             <X size={24} />
           </button>
@@ -235,7 +235,7 @@ export default function BlockModal({
             <button
               type="button"
               onClick={() => setActiveTab("pointage")}
-              className={`flex-1 py-3 px-4 font-semibold transition-colors flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === "pointage"
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-gray-700"
@@ -247,7 +247,7 @@ export default function BlockModal({
             <button
               type="button"
               onClick={() => setActiveTab("absence")}
-              className={`flex-1 py-3 px-4 font-semibold transition-colors flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === "absence"
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-gray-700"
@@ -291,7 +291,7 @@ export default function BlockModal({
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, mode: "pair" }))
                     }
-                    className={`flex-1 p-2 transition-colors relative flex items-center justify-center ${
+                    className={`flex-1 p-2 transition-all relative flex items-center justify-center cursor-pointer active:scale-95 ${
                       formData.mode === "pair"
                         ? "text-gray-900"
                         : "text-gray-400 hover:text-gray-600"
@@ -308,7 +308,7 @@ export default function BlockModal({
                     onClick={() =>
                       setFormData((prev) => ({ ...prev, mode: "single" }))
                     }
-                    className={`flex-1 p-2 transition-colors relative flex items-center justify-center ${
+                    className={`flex-1 p-2 transition-all relative flex items-center justify-center cursor-pointer active:scale-95 ${
                       formData.mode === "single"
                         ? "text-gray-900"
                         : "text-gray-400 hover:text-gray-600"
@@ -407,14 +407,14 @@ export default function BlockModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors cursor-pointer active:scale-95"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
                 {saving ? (
                   <>
@@ -522,14 +522,14 @@ export default function BlockModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors"
+                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors cursor-pointer active:scale-95"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
                 {saving ? (
                   <>

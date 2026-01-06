@@ -109,7 +109,7 @@ export default function EquipeModal({
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all"
           >
             <X size={24} />
           </button>
@@ -118,7 +118,7 @@ export default function EquipeModal({
         <div className="flex gap-2 mb-6 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("info")}
-            className={`px-4 py-2 font-medium transition-all ${
+            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
               activeTab === "info"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
@@ -128,7 +128,7 @@ export default function EquipeModal({
           </button>
           <button
             onClick={() => setActiveTab("agents")}
-            className={`px-4 py-2 font-medium transition-all ${
+            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
               activeTab === "agents"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
@@ -138,7 +138,7 @@ export default function EquipeModal({
           </button>
           <button
             onClick={() => setActiveTab("horaires")}
-            className={`px-4 py-2 font-medium transition-all ${
+            className={`px-4 py-2 font-medium transition-all cursor-pointer ${
               activeTab === "horaires"
                 ? "text-black border-b-2 border-black"
                 : "text-gray-500 hover:text-gray-700"
@@ -203,7 +203,7 @@ export default function EquipeModal({
                 <button
                   onClick={addAgent}
                   disabled={!selectedAgent}
-                  className="px-4 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Plus size={18} />
                   Ajouter
@@ -276,7 +276,7 @@ export default function EquipeModal({
             <div>
               <button
                 onClick={addHoraire}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all cursor-pointer active:scale-95"
               >
                 <Clock size={18} />
                 Ajouter un horaire
@@ -325,7 +325,7 @@ export default function EquipeModal({
                       />
                       <button
                         onClick={() => removeHoraire(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer active:scale-95"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -340,7 +340,7 @@ export default function EquipeModal({
         <button
           onClick={onSave}
           disabled={loading}
-          className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
         >
           {loading ? (
             <>

@@ -33,7 +33,7 @@ export default function AgentModal({
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer active:scale-95 transition-all"
           >
             <X size={24} />
           </button>
@@ -156,7 +156,7 @@ export default function AgentModal({
           <button
             onClick={onSave}
             disabled={loading}
-            className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {loading ? (
               <>

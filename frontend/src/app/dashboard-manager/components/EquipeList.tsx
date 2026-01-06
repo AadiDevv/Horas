@@ -15,7 +15,7 @@ export default function EquipeList({ equipes, onAddEquipe, onEditEquipe, onDelet
         <h2 className="text-3xl font-semibold">Gestion des Équipes</h2>
         <button
           onClick={onAddEquipe}
-          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all"
+          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-800 transition-all cursor-pointer active:scale-95"
         >
           <Users size={20} />
           Créer une équipe
@@ -28,7 +28,7 @@ export default function EquipeList({ equipes, onAddEquipe, onEditEquipe, onDelet
             <p>Aucune équipe pour le moment</p>
             <button
               onClick={onAddEquipe}
-              className="mt-4 text-black hover:underline font-medium"
+              className="mt-4 text-black hover:underline font-medium cursor-pointer"
             >
               Créer votre première équipe
             </button>
@@ -48,14 +48,14 @@ export default function EquipeList({ equipes, onAddEquipe, onEditEquipe, onDelet
               <div className="flex gap-3">
                 <button
                   onClick={() => onEditEquipe(equipe)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all cursor-pointer active:scale-95"
                 >
                   <Users size={18} />
                   Gérer équipe
                 </button>
                 <button
                   onClick={() => onDeleteEquipe(equipe.id)}
-                  className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all"
+                  className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all cursor-pointer active:scale-95"
                   title="Supprimer l'équipe"
                 >
                   <Trash2 size={18} />

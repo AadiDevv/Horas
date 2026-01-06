@@ -69,7 +69,7 @@ export default function ContactSection() {
 
         <button
           type="submit"
-          className="w-full bg-[#333333] text-white font-semibold py-3 rounded-lg hover:bg-[#444444] transition"
+          className="w-full bg-[#333333] text-white font-semibold py-3 rounded-lg hover:bg-[#555555] transition cursor-pointer"
         >
           Envoyer
         </button>

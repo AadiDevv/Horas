@@ -431,7 +431,7 @@ export default function PointagesManagement({
                 <button
                   key={agent.id}
                   onClick={() => setSelectedAgent(agent)}
-                  className={`w-full text-left p-3 rounded-xl transition-all relative ${
+                  className={`w-full text-left p-3 rounded-xl transition-all relative cursor-pointer ${
                     selectedAgent?.id === agent.id
                       ? "bg-black text-white"
                       : "bg-gray-50 hover:bg-gray-100 text-gray-900"
@@ -476,13 +476,13 @@ export default function PointagesManagement({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={previousWeek}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95"
                   >
                     ← Précédent
                   </button>
                   <button
                     onClick={currentWeek}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95 ${
                       isCurrentWeek()
                         ? "bg-black hover:bg-gray-900 text-white"
                         : "bg-gray-100 hover:bg-gray-200 text-gray-900"
@@ -492,7 +492,7 @@ export default function PointagesManagement({
                   </button>
                   <button
                     onClick={nextWeek}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-colors"
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium transition-all cursor-pointer active:scale-95"
                   >
                     Suivant →
                   </button>

@@ -31,7 +31,7 @@ export default function Sidebar() {
             <Link
               key={item.path}
               href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors cursor-pointer ${
                 item.active
                   ? "bg-black text-white"
                   : "text-gray-700 hover:bg-gray-100"

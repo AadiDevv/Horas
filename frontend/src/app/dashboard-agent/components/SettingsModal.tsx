@@ -35,7 +35,7 @@ export default function SettingsModal({
           <h2 className="text-2xl font-semibold">Paramètres</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className="p-2 hover:bg-gray-100 rounded-lg transition cursor-pointer"
           >
             <X size={24} />
           </button>
@@ -189,7 +189,7 @@ export default function SettingsModal({
           <button
             onClick={onSave}
             disabled={saving}
-            className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
           >
             {saving ? (
               <>

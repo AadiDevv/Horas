@@ -47,7 +47,7 @@ export default function ScheduleModal({
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer active:scale-95"
           >
             <X size={24} />
           </button>
@@ -132,7 +132,7 @@ export default function ScheduleModal({
         <button
           onClick={onSave}
           disabled={loading || !formData.name.trim() || formData.activeDays.length === 0}
-          className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full mt-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
         >
           {loading ? (
             <>

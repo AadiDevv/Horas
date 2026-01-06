@@ -246,14 +246,14 @@ function ManagerDashboard() {
                   <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                     <button
                       onClick={openEquipeModal}
-                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow"
+                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl font-semibold transition-all duration-200 shadow-sm hover:shadow cursor-pointer active:scale-95"
                     >
                       <Users size={20} strokeWidth={2} />
                       Créer une équipe
                     </button>
                     <button
                       onClick={openAgentModal}
-                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-900 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20"
+                      className="flex-1 sm:flex-none justify-center flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-gray-800 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg shadow-black/20 cursor-pointer active:scale-95"
                     >
                       <UserPlus size={20} strokeWidth={2} />
                       Ajouter un agent

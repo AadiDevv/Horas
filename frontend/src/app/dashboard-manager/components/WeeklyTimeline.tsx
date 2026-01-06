@@ -320,7 +320,7 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry, pair.exit);
                           }}
-                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                           title="Supprimer le bloc"
                         >
                           <X size={14} />
@@ -379,7 +379,7 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry);
                           }}
-                          className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                          className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
                           title="Supprimer le pointage"
                         >
                           <X size={10} />

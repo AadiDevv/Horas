@@ -63,7 +63,7 @@ export default function Hero() {
           </p>
           <Button
             onClick={handleButtonClick}
-            className="text-white px-6 py-3 rounded-lg shadow-lg transition duration-300"
+            className="text-white px-6 py-3 rounded-lg shadow-lg transition duration-300 cursor-pointer hover:bg-[#555555]"
           >
             {isAuthenticated ? "Accéder au tableau de bord" : "Commencer"}
           </Button>

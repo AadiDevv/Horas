@@ -136,7 +136,7 @@ export default function AbsenceModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer active:scale-95"
           >
             <X size={24} className="text-gray-500" />
           </button>
@@ -225,7 +225,7 @@ export default function AbsenceModal({
                   onClick={() =>
                     setFormData({ ...formData, status: "approuve" })
                   }
-                  className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors ${
+                  className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors cursor-pointer active:scale-95 ${
                     formData.status === "approuve"
                       ? "bg-green-500 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -235,7 +235,7 @@ export default function AbsenceModal({
                 </button>
                 <button
                   onClick={() => setFormData({ ...formData, status: "refuse" })}
-                  className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors ${
+                  className={`flex-1 px-4 py-2 rounded-xl font-medium transition-colors cursor-pointer active:scale-95 ${
                     formData.status === "refuse"
                       ? "bg-red-500 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -252,7 +252,7 @@ export default function AbsenceModal({
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
           <button
             onClick={onClose}
-            className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors"
+            className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors cursor-pointer active:scale-95"
             disabled={saving}
           >
             Annuler
@@ -260,7 +260,7 @@ export default function AbsenceModal({
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-6 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
           >
             {saving ? (
               <>
