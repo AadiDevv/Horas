@@ -33,7 +33,7 @@ export interface BlockData {
   date: string;
   startTime: string; // Format HH:MM
   endTime?: string;  // Format HH:MM (optionnel si pointage unique)
-  status: 'normal' | 'retard' | 'absence';
+  status: 'normal' | 'retard';
   mode: 'pair' | 'single'; // Mode de création
 }
 
@@ -402,7 +402,6 @@ export default function BlockModal({
             >
               <option value="normal">Normal</option>
               <option value="retard">Retard</option>
-              <option value="absence">Absence</option>
             </select>
           </div>
 
