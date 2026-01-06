@@ -1,5 +1,5 @@
 import { Search, Plus, Clock, Edit2, Trash2, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Schedule } from '../types';
 import ScheduleVisualizer from './ScheduleVisualizer';
 import { getDayName, getDayInitial, ALL_DAY_NUMBERS } from '../constants/schedule';
@@ -19,6 +19,16 @@ export default function ScheduleList({
 }: ScheduleListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+
+  // Synchronize selectedSchedule with updated schedules data
+  useEffect(() => {
+    if (selectedSchedule) {
+      const updatedSchedule = schedules.find(s => s.id === selectedSchedule.id);
+      if (updatedSchedule) {
+        setSelectedSchedule(updatedSchedule);
+      }
+    }
+  }, [schedules]);
 
   // Filter schedules
   const filteredSchedules = schedules.filter(schedule =>
@@ -200,7 +210,10 @@ export default function ScheduleList({
               </div>
 
               {/* Visual timeline */}
-              <ScheduleVisualizer key={selectedSchedule.id} schedule={selectedSchedule} />
+              <ScheduleVisualizer
+                key={`${selectedSchedule.id}-${selectedSchedule.startHour}-${selectedSchedule.endHour}-${selectedSchedule.activeDays.join(',')}`}
+                schedule={selectedSchedule}
+              />
 
               {/* Active days section */}
               <div>
