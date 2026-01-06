@@ -153,7 +153,7 @@ export class UserRepository implements IAuth, IUser {
       ]
     });
 
-    employees.forEach((employee: UserEmployee_Core, index: number) => {
+    employees.forEach((employee, index) => {
       console.log(`employee ${index}:`, employee);
     });
     return employees.map(employee => new UserEmployee_Core({
