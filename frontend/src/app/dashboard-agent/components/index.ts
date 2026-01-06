@@ -3,3 +3,4 @@ export { default as ClockButton } from './ClockButton';
 export { default as TimeLogBar } from './TimeLogBar';
 export { default as WeeklyCalendar } from './WeeklyCalendar';
 export { default as SettingsModal } from './SettingsModal';
+export { default as Sidebar } from './Sidebar';

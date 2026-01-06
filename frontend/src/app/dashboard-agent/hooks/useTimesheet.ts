@@ -436,7 +436,6 @@ export function useTimesheet() {
           setCurrentDayLogs({ start: '' });
           setLastClockIn(null);
           setSuccessMessage('✅ Pointage de sortie enregistré avec succès !');
-          console.log('🔴 État mis à jour: isClockingIn = false');
 
           // Recharger les données en arrière-plan (sans bloquer l'UI)
           setTimeout(() => {
@@ -514,6 +513,29 @@ export function useTimesheet() {
     return `${monday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
   };
 
+  /**
+   * Vérifie si la semaine sélectionnée est la semaine en cours
+   */
+  const isCurrentWeek = (): boolean => {
+    const today = new Date();
+    const selectedMonday = getMonday(selectedWeek);
+    const currentMonday = getMonday(today);
+    return selectedMonday.toDateString() === currentMonday.toDateString();
+  };
+
+  /**
+   * Formate le texte du bouton semaine (affiche "Cette semaine" ou la plage de dates)
+   */
+  const formatWeekButtonText = (): string => {
+    if (isCurrentWeek()) {
+      return 'Cette semaine';
+    }
+    const monday = getMonday(selectedWeek);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return `Semaine du ${monday.getDate()}/${monday.getMonth() + 1} au ${sunday.getDate()}/${sunday.getMonth() + 1}`;
+  };
+
   return {
     timeLogs,
     isClockingIn,
@@ -533,6 +555,8 @@ export function useTimesheet() {
     previousWeek,
     nextWeek,
     currentWeek,
-    formatWeekRange
+    formatWeekRange,
+    isCurrentWeek,
+    formatWeekButtonText
   };
 }

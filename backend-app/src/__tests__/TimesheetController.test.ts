@@ -87,7 +87,7 @@ describe('TimesheetController', () => {
 
       await controller.getTimesheets(req, res);
 
-      expect(useCaseMock.getTimesheets).toHaveBeenCalledWith('admin', 1, {
+      expect(useCaseMock.getTimesheets).toHaveBeenCalledWith({ id: 1, role: 'admin' }, {
         employeId: 5,
         startDate: undefined,
         endDate: undefined,
@@ -111,7 +111,7 @@ describe('TimesheetController', () => {
 
       await controller.getTimesheetById(req, res);
 
-      expect(useCaseMock.getTimesheetById).toHaveBeenCalledWith(1, 'admin', 1);
+      expect(useCaseMock.getTimesheetById).toHaveBeenCalledWith(1, { id: 1, role: 'admin' });
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 1,
@@ -165,8 +165,7 @@ describe('TimesheetController', () => {
         5,
         '2025-05-01',
         '2025-05-07',
-        'admin',
-        1
+        { id: 1, role: 'admin' }
       );
       expect(res.success).toHaveBeenCalledWith(mockStats, 'Statistiques récupérées avec succès');
     });
@@ -196,10 +195,7 @@ describe('TimesheetController', () => {
         expect.objectContaining({
           status: 'normal',
         }),
-        expect.objectContaining({
-          userRole: 'employe',
-          userId: 5,
-        })
+        { id: 5, role: 'employe' }
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ clockin: true, employeId: 5 }),
@@ -232,7 +228,8 @@ describe('TimesheetController', () => {
 
       expect(useCaseMock.updateTimesheet).toHaveBeenCalledWith(
         2,
-        expect.objectContaining({ timestamp: '2025-05-10T10:00:00.000Z' })
+        expect.objectContaining({ timestamp: '2025-05-10T10:00:00.000Z', status: 'normal' }),
+        { id: 1, role: 'admin' }
       );
       expect(res.success).toHaveBeenCalledWith(
         expect.objectContaining({ id: 1, clockin: true }),
@@ -263,7 +260,7 @@ describe('TimesheetController', () => {
 
       await controller.deleteTimesheet(req, res);
 
-      expect(useCaseMock.deleteTimesheet).toHaveBeenCalledWith(1);
+      expect(useCaseMock.deleteTimesheet).toHaveBeenCalledWith(1, { id: 1, role: 'admin' });
       expect(res.success).toHaveBeenCalledWith(null, 'Pointage supprimé avec succès');
     });
 

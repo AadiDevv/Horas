@@ -221,13 +221,7 @@ export function displayError(error: ApiError): ApiError | null {
         duration: 5000
       });
 
-      // Log technique en console
-      console.error('🔴 Erreur API:', {
-        status: error.statusCode,
-        type: error.type,
-        message: error.message,
-        technical: error.technicalMessage
-      });
+   
 
       return null; // Pas besoin de retourner, déjà affiché
 

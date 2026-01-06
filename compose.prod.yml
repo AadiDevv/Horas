@@ -12,7 +12,7 @@ services:
   backend:
     build:
       context: ./backend-app
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
       target: production
     ports:
       - "5000:5000"

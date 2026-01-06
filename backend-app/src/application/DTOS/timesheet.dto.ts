@@ -57,6 +57,18 @@ export interface TimesheetUpdateDTO {
     clockin?: boolean;
     status?: TimesheetStatus;
 }
+
+/**
+ * DTO pour mettre à jour une paire de timesheets (entrée + sortie) de manière atomique
+ * Utilisé par PATCH /api/timesheets/pair
+ */
+export interface TimesheetPairUpdateDTO {
+    entryId: number;
+    exitId: number;
+    entryTimestamp: string;  // ISO DateTime
+    exitTimestamp: string;   // ISO DateTime
+    status?: TimesheetStatus;
+}
 // #endregion
 
 // #region Read DTO

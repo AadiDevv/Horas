@@ -265,28 +265,21 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
 
     const totalAbsencesSemaine = absencesParJour.reduce((sum, j) => sum + j.count, 0);
 
-    // 5. Score de présence par équipe (basé sur les absences)
+    // 5. Score de ponctualité par équipe (basé sur les retards)
     const scoreParEquipe: EquipeScore[] = equipes.map(equipe => {
       const membresIds = agents.filter(a => a.equipeId === equipe.id).map(a => a.id);
-      const absencesEquipe = absences.filter(a => membresIds.includes(a.employeId) && a.status === 'approuve');
+      const timesheetsEquipe = timesheets.filter(t => membresIds.includes(t.employeId));
 
-      // Calculer le nombre de jours d'absence total pour l'équipe
-      let totalJoursAbsence = 0;
-      absencesEquipe.forEach(a => {
-        const start = new Date(a.startDateTime);
-        const end = new Date(a.endDateTime);
-        const diffMs = end.getTime() - start.getTime();
-        const jours = Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1; // +1 pour inclure le jour de départ
-        totalJoursAbsence += jours;
-      });
+      // Compter les pointages de la semaine (clockin uniquement)
+      const totalClockins = timesheetsEquipe.filter(t => t.clockin === true).length;
 
-      const nbMembres = membresIds.length;
-      const joursOuvrablesSemaine = 5; // Lundi à vendredi
-      const totalJoursPossibles = nbMembres * joursOuvrablesSemaine;
+      // Compter les retards de la semaine
+      const retardsEquipe = timesheetsEquipe.filter(t => t.clockin === true && t.status === 'retard').length;
 
-      // Score = % de présence (100% - % d'absence)
-      const score = totalJoursPossibles > 0
-        ? Math.max(0, Math.round(((totalJoursPossibles - totalJoursAbsence) / totalJoursPossibles) * 100))
+      // Score de ponctualité = % de pointages à l'heure (sans retard)
+      // Plus il y a de retards, plus le score baisse
+      const score = totalClockins > 0
+        ? Math.max(0, Math.round(((totalClockins - retardsEquipe) / totalClockins) * 100))
         : 100;
 
       return {
