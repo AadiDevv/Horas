@@ -1,4 +1,4 @@
-import { X, Loader2, Plus, UserMinus, Clock, Trash2 } from 'lucide-react';
+import { X, Loader2, Plus, Clock, Trash2, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Equipe, EquipeFormData, Agent, Horaire } from '../types';
 
@@ -11,6 +11,8 @@ interface EquipeModalProps {
   onSave: () => void;
   loading: boolean;
   availableAgents?: Agent[];
+  allEquipes?: Equipe[];
+  onMoveAgent?: (agentId: number, newTeamId: number) => Promise<void>;
 }
 
 export default function EquipeModal({
@@ -21,10 +23,13 @@ export default function EquipeModal({
   setFormData,
   onSave,
   loading,
-  availableAgents = []
+  availableAgents = [],
+  allEquipes = [],
+  onMoveAgent
 }: EquipeModalProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'agents' | 'horaires'>('info');
   const [selectedAgent, setSelectedAgent] = useState<number | null>(null);
+  const [movingAgent, setMovingAgent] = useState<number | null>(null);
 
   if (!isOpen) return null;
 
@@ -40,11 +45,22 @@ export default function EquipeModal({
     }
   };
 
-  const removeAgent = (agentId: number) => {
-    setFormData({
-      ...formData,
-      agents: formData.agents.filter(id => id !== agentId)
-    });
+  const handleMoveAgent = async (agentId: number, newTeamId: number) => {
+    if (!onMoveAgent) return;
+
+    setMovingAgent(agentId);
+    try {
+      await onMoveAgent(agentId, newTeamId);
+      // Retirer l'agent de la liste locale après le déplacement réussi
+      setFormData({
+        ...formData,
+        agents: formData.agents.filter(id => id !== agentId)
+      });
+    } catch (error) {
+      console.error('Erreur lors du déplacement de l\'agent:', error);
+    } finally {
+      setMovingAgent(null);
+    }
   };
 
   const addHoraire = () => {
@@ -177,21 +193,40 @@ export default function EquipeModal({
                   formData.agents.map(agentId => {
                     const agent = availableAgents.find(a => a.id === agentId);
                     if (!agent) return null;
+                    const otherEquipes = allEquipes.filter(e => e.id !== equipe?.id);
+                    const isMoving = movingAgent === agentId;
+
                     return (
                       <div
                         key={agentId}
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
                       >
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{agent.prenom} {agent.nom}</p>
                           <p className="text-sm text-gray-600">{agent.email}</p>
                         </div>
-                        <button
-                          onClick={() => removeAgent(agentId)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                          <UserMinus size={18} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <ArrowRightLeft size={16} className="text-gray-400" />
+                          <select
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleMoveAgent(agentId, Number(e.target.value));
+                              }
+                            }}
+                            disabled={isMoving || otherEquipes.length === 0}
+                            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <option value="">
+                              {isMoving ? 'Déplacement...' : otherEquipes.length === 0 ? 'Aucune autre équipe' : 'Déplacer vers...'}
+                            </option>
+                            {otherEquipes.map(eq => (
+                              <option key={eq.id} value={eq.id}>
+                                {eq.nom}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     );
                   })
