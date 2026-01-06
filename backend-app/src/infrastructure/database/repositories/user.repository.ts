@@ -67,6 +67,10 @@ export class UserRepository implements IAuth, IUser {
       if (!user.manager) throw new NotFoundError(`Manager not found for employee with id ${id}`);
       return this.toUserEmployee(user as typeof user & { manager: UserManagerProps_Core });
     } catch (error) {
+      // Re-throw NotFoundError as-is, wrap other errors
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
       throw new NotFoundError(`Error fetching user by id: ${error}`);
     }
   }

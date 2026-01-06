@@ -278,10 +278,14 @@ export default function WeeklyTimeline({
                     const exitOutOfBounds = isOutOfBounds(pair.exit.timestamp);
                     const hasOutOfBounds = entryOutOfBounds.isOut || exitOutOfBounds.isOut;
 
+                    // Déterminer la couleur selon le statut
+                    const isDelay = pair.entry.status === 'retard' || pair.entry.status === 'delay';
+                    const bgColorClass = isDelay ? 'bg-orange-500' : 'bg-black';
+
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-1 right-1 bg-black text-white rounded-lg p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? 'border-2 border-yellow-400' : ''}`}
+                        className={`absolute left-1 right-1 ${bgColorClass} text-white rounded-lg p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? 'border-2 border-yellow-400' : ''}`}
                         style={{
                           top: `${startPos}%`,
                           height: `${height}%`,
@@ -289,7 +293,7 @@ export default function WeeklyTimeline({
                           zIndex: 20
                         }}
                         onClick={() => onEditPair(pair.entry, pair.exit)}
-                        title={hasOutOfBounds ? `⚠️ Bloc partiellement hors limites (6h-23h)` : undefined}
+                        title={isDelay ? `🔶 RETARD ${hasOutOfBounds ? '- Bloc partiellement hors limites (6h-23h)' : ''}` : (hasOutOfBounds ? `⚠️ Bloc partiellement hors limites (6h-23h)` : undefined)}
                       >
                         {/* Bouton de suppression */}
                         <button
@@ -305,6 +309,7 @@ export default function WeeklyTimeline({
 
                         {/* Contenu */}
                         <div className="text-xs font-semibold flex items-center gap-1">
+                          {isDelay && <span title="Retard">🔶</span>}
                           {entryOutOfBounds.isOut && (
                             <span className="text-yellow-300" title="Début hors limites">⬆</span>
                           )}
@@ -320,7 +325,8 @@ export default function WeeklyTimeline({
                   } else {
                     // Pointage individuel orphelin : afficher avec possibilité de supprimer
                     const isEntry = pair.entry.clockin;
-                    const bgColor = isEntry ? 'bg-gray-400' : 'bg-gray-500';
+                    const isDelay = pair.entry.status === 'retard' || pair.entry.status === 'delay';
+                    const bgColor = isDelay ? 'bg-orange-500' : (isEntry ? 'bg-gray-400' : 'bg-gray-500');
                     const outOfBounds = isOutOfBounds(pair.entry.timestamp);
 
                     return (
