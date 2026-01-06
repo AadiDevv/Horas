@@ -20,6 +20,8 @@ import {
   PointagesManagement,
   AbsencesCard,
   AbsencesWeekChart,
+  ScheduleList,
+  ScheduleModal,
 } from "./components";
 import {
   useManagerDashboard,
@@ -29,6 +31,7 @@ import {
 import { useManagerSettings } from "./hooks/useManagerSettings";
 import { useManagerStats } from "./hooks/useManagerStats";
 import * as api from "./services/apiService";
+import { useScheduleManager } from "./hooks/useScheduleManager";
 
 function ManagerDashboard() {
   const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
@@ -95,8 +98,26 @@ function ManagerDashboard() {
     resetForm: resetEquipeForm,
   } = useEquipeManager();
 
+  const {
+    schedules,
+    loadingSchedules,
+    showModal: showScheduleModal,
+    setShowModal: setShowScheduleModal,
+    editingSchedule,
+    formData: scheduleFormData,
+    setFormData: setScheduleFormData,
+    loadSchedules,
+    handleCreate: handleCreateSchedule,
+    handleUpdate: handleUpdateSchedule,
+    handleDelete: handleDeleteSchedule,
+    openEditModal: openEditScheduleModal,
+    resetForm: resetScheduleForm,
+  } = useScheduleManager();
+
+  // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
+    loadSchedules();
   }, []);
 
   useEffect(() => {
@@ -146,6 +167,20 @@ function ManagerDashboard() {
     setShowEquipeModal(true);
   };
 
+  const handleScheduleSubmit = () => {
+    if (editingSchedule) {
+      handleUpdateSchedule();
+    } else {
+      handleCreateSchedule();
+    }
+  };
+
+  const openScheduleModal = () => {
+    resetScheduleForm();
+    setShowScheduleModal(true);
+  };
+
+  // ==================== RENDER ====================
   return (
     <RoleProtection allowedRoles={["manager", "admin"]}>
       <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -314,6 +349,16 @@ function ManagerDashboard() {
                 }}
               />
             )}
+
+            {/* HORAIRES PAGE */}
+            {currentPage === "horaires" && (
+              <ScheduleList
+                schedules={schedules}
+                onAddSchedule={openScheduleModal}
+                onEditSchedule={openEditScheduleModal}
+                onDeleteSchedule={handleDeleteSchedule}
+              />
+            )}
           </main>
         </div>
 
@@ -354,6 +399,19 @@ function ManagerDashboard() {
               await loadEquipes();
             }
           }}
+        />
+
+        <ScheduleModal
+          isOpen={showScheduleModal}
+          onClose={() => {
+            setShowScheduleModal(false);
+            resetScheduleForm();
+          }}
+          formData={scheduleFormData}
+          setFormData={setScheduleFormData}
+          schedule={editingSchedule}
+          onSave={handleScheduleSubmit}
+          loading={loadingSchedules}
         />
       </div>
     </RoleProtection>

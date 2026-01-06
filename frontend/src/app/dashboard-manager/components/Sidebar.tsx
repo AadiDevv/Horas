@@ -1,4 +1,4 @@
-import { Users, Folder, Settings, Clock } from 'lucide-react';
+import { Users, Folder, Settings, Clock, Calendar } from 'lucide-react';
 import { DashboardPage } from '../types';
 
 interface SidebarProps {
@@ -27,6 +27,7 @@ export default function Sidebar({ isOpen, currentPage, onPageChange }: SidebarPr
     { id: 'agents' as DashboardPage, label: 'Agents', icon: Users },
     { id: 'equipes' as DashboardPage, label: 'Équipes', icon: Folder },
     { id: 'pointages' as DashboardPage, label: 'Pointages', icon: Clock },
+    { id: 'horaires' as DashboardPage, label: 'Horaires', icon: Calendar },
   ];
 
   return (

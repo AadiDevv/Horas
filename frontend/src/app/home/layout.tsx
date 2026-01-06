@@ -17,7 +17,7 @@ export default function HomeLayout({
 
     if (!token) {
       router.push('/login');
-    } else {
+    } else {                                                                                                                                                                                                                                        
       setIsChecking(false);
     }
   }, [router]);
