@@ -1,4 +1,5 @@
 import { Horaire, ApiResponse } from '../types';
+import { apiClient } from '@/app/utils/apiClient';
 
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = false;
@@ -60,14 +61,7 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
     };
   }
 
-  const token = localStorage.getItem('token');
-  const requete = await fetch(`${API_BASE_URL}/api/teams/${equipeId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
-    }
-  });
+  const requete = await apiClient.get(`${API_BASE_URL}/api/teams/${equipeId}`);
 
   if (!requete.ok) {
     throw new Error("Erreur récupération équipe");
@@ -99,16 +93,9 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
   }
 
   try {
-    const token = localStorage.getItem('token');
     console.log('🔍 GET /api/teams/' + equipeId);
 
-    const res = await fetch(`${API_BASE_URL}/api/teams/${equipeId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      }
-    });
+    const res = await apiClient.get(`${API_BASE_URL}/api/teams/${equipeId}`);
 
     if (!res.ok) {
       console.error('❌ Erreur récupération équipe:', res.status);
@@ -123,10 +110,11 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
     const response = await res.json();
     console.log('📦 Réponse backend équipe:', response);
 
-    // Le backend retourne response.data avec un scheduleId
+    // Le backend retourne response.data avec un objet schedule inclus
     const team = response.data || response;
 
-    if (!team.scheduleId) {
+    // Vérifier si l'équipe a un schedule (inclus dans la réponse)
+    if (!team.schedule) {
       console.warn('⚠️ Équipe sans schedule');
       return {
         success: true,
@@ -136,29 +124,9 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
       };
     }
 
-    // Récupérer le schedule
-    console.log('🔍 GET /api/schedules/' + team.scheduleId);
-    const scheduleRes = await fetch(`${API_BASE_URL}/api/schedules/${team.scheduleId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      }
-    });
-
-    if (!scheduleRes.ok) {
-      console.error('❌ Erreur récupération schedule:', scheduleRes.status);
-      return {
-        success: false,
-        data: [],
-        message: `Erreur récupération schedule ${scheduleRes.status}`,
-        timestamp: new Date().toISOString()
-      };
-    }
-
-    const scheduleResponse = await scheduleRes.json();
-    const schedule = scheduleResponse.data || scheduleResponse;
-    console.log('📦 Schedule récupéré:', schedule);
+    // Le schedule est déjà inclus dans la réponse team
+    const schedule = team.schedule;
+    console.log('📦 Schedule récupéré depuis team:', schedule);
 
     // Transformer le schedule en horaires par jour
     const jourMapping: Record<number, string> = {
