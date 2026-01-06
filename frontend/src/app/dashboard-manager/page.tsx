@@ -28,6 +28,7 @@ import {
 } from "./hooks/useManagerDashboard";
 import { useManagerSettings } from "./hooks/useManagerSettings";
 import { useManagerStats } from "./hooks/useManagerStats";
+import * as api from "./services/apiService";
 
 // ==================== MAIN COMPONENT ====================
 function ManagerDashboard() {
@@ -350,6 +351,16 @@ function ManagerDashboard() {
           equipe={editingEquipe}
           loading={loadingEquipes}
           availableAgents={agents}
+          allEquipes={enrichedEquipes}
+          onMoveAgent={async (agentId: number, newTeamId: number) => {
+            // Déplacer l'agent vers la nouvelle équipe
+            const result = await api.assignUserToTeam(agentId, newTeamId);
+            if (result.success) {
+              // Recharger les agents et équipes pour mettre à jour l'UI
+              await loadAgents();
+              await loadEquipes();
+            }
+          }}
         />
       </div>
     </RoleProtection>
