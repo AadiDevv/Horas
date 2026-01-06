@@ -245,11 +245,9 @@ function ManagerDashboard() {
                     title="Retards aujourd'hui"
                     value={stats.retardsAujourdhui.toString()}
                     subtitle={
-                      stats.absencesEnAttente > 0
-                        ? `${stats.absencesEnAttente} absences en attente`
-                        : stats.retardsAujourdhui === 0
-                          ? "Aucun retard"
-                          : `${stats.retardsAujourdhui} retard${stats.retardsAujourdhui > 1 ? "s" : ""} aujourd'hui`
+                      stats.retardsAujourdhui === 0
+                        ? "Aucun retard"
+                        : `${stats.retardsAujourdhui} retard${stats.retardsAujourdhui > 1 ? "s" : ""} aujourd'hui`
                     }
                     icon={Clock}
                   />
