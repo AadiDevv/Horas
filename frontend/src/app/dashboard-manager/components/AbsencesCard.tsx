@@ -13,8 +13,8 @@ interface AbsencesCardProps {
 }
 
 export default function AbsencesCard({
-  absences,
-  absencesEnAttente,
+  absences = [],
+  absencesEnAttente = 0,
 }: AbsencesCardProps) {
   const getTypeColor = (type: string) => {
 
