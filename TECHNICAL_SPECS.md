@@ -1,95 +1,88 @@
-## Vue globale de l'architecture
+## Global Architecture Overview
 
-### Stack principale
+### Main Stack
 
-- **Frontend** : React.js (NextJS + TypeScript)
-- **Backend** : Express.js + TypeScript
-- **ORM** : Prisma
-- **Database** : PostgreSQL (cloud Néon)
-- **Orchestration** : Docker Compose
-- **Reverse Proxy** : *Toujours en brainstorming*
-- **CI/CD** : GitHub Actions
+- **Frontend**: React.js (NextJS + TypeScript)
+- **Backend**: Express.js + TypeScript
+- **ORM**: Prisma
+- **Database**: PostgreSQL (Neon Cloud)
+- **Orchestration**: Docker Compose
+- **Reverse Proxy**: Nginx
+- **CI/CD**: GitHub Actions
 
 ---
 
 ## Docker & Containers
 
-### 
+### Dockerfiles
 
-Deux Dockerfiles distincts :
-- `Dockerfile.dev` : environnement de développement
-- `Dockerfile.prod` : environnement de production 
+Two distinct Dockerfiles:
+- `Dockerfile.dev`: Development environment
+- `Dockerfile.prod`: Production environment
 
 ### Containers
 
-Les composants sont isolés : *à brainstormer*
-- `frontend` 
-- `backend` 
-- `db` 
-- `reverse-proxy` 
+Components are isolated:
+- `frontend`
+- `backend`
+- `nginx` (reverse proxy)
 
+### Configuration Files
 
-### Fichiers de configuration
-
-Les environnements utilisent des fichiers séparés :
+Environments use separate files:
 - `.env.dev`
 - `.env.prod`
 
+### Sensitive Data
 
-### Données sensibles
-
-Les mots de passe, tokens JWT et clés d’accès ne sont **jamais commités**.  
-Ils sont gérés via les variables d'enviroinnement dans le `.env` 
+Passwords, JWT tokens, and access keys are **never committed**.
+They are managed via environment variables in the `.env` files.
 
 ---
 
 ## Backend (Express + TypeScript)
 
-### Détail des endpoints
+### API Endpoints
 
-| Méthode | Route | Description |
-|----------|--------|-------------|
-| GET | `/users` | Liste les users |
-| POST | `/users` | Crée un utilisateur |
-| PUT | `/users/{id}` | Met à jour un utilisateur |
-| DELETE | `/users/{id}` | Supprime un utilisateur |
-| GET | `/teams` | Liste les équipes |
-| POST | `/teams` | Crée une équipe |
-| PUT | `/teams/{id}` | Met à jour une équipe |
-| DELETE | `/teams/{id}` | Supprime une équipe |
-| POST | `/clocks` | Enregistre un timesheet |
-| GET | `/users/{id}/clock` | Sommaire des départs et arrivées d'un employé |
-| GET | `/reports` | Génères un report global basé sur un KPI en particulier |
-| POST | `/auth/login` | Authentification JWT |
+| Method | Route | Description |
+|---------|--------|-------------|
+| GET | `/users` | List all users |
+| POST | `/users` | Create a user |
+| PUT | `/users/{id}` | Update a user |
+| DELETE | `/users/{id}` | Delete a user |
+| GET | `/teams` | List all teams |
+| POST | `/teams` | Create a team |
+| PUT | `/teams/{id}` | Update a team |
+| DELETE | `/teams/{id}` | Delete a team |
+| POST | `/clocks` | Record a timesheet entry |
+| GET | `/users/{id}/clock` | Summary of an employee's clock ins and outs |
+| GET | `/reports` | Generate a global report based on specific KPIs |
+| POST | `/auth/login` | JWT authentication |
 
-### Persistance des données
+### Data Persistence
 
-- **Base de données PostgreSQL** structurée :
-  - `users` (employés/managers)
+- **PostgreSQL database** structured with:
+  - `users` (employees/managers)
   - `teams`
   - `team_members`
   - `clocks`
   - `reports`
-- ORM utilisé : **Prisma**
+- ORM used: **Prisma**
 
-### Rôles
+### User Roles
 
-Deux rôles :
-- **employe** : pointer, consulter ses hours, éditer son profil.
-- **MANAGER** : gérer équipes, consulter reports et KPIs.
+Two roles:
+- **Employee**: Clock in/out, view their hours, edit their profile
+- **Manager**: Manage teams, view reports and KPIs
 
-### Authentication JWT
+### JWT Authentication
 
-- Génération de token à la connexion
-- Validation sur chaque requête protégée
-- Token conservé côté client jusqu'à expiration de ce dernier
+- Token generation on login
+- Validation on each protected request
+- Token stored client-side until expiration
 
+### Backend Security
 
-### Sécurité back
-
-Sécurisation contre :
-- **XSS / CSRF** via `helmet`, `cors` et `sanitize` dans Express.
-- **Hash mot de passe** avec `bcrypt`.
-
-
-
+Security measures against:
+- **XSS / CSRF** via `helmet`, `cors`, and `sanitize` in Express
+- **Password hashing** with `bcrypt`
