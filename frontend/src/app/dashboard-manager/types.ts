@@ -65,7 +65,7 @@ export interface EquipeFormData {
   nom: string;
   description: string;
   agents: number[];
-  horaires: Horaire[];
+  scheduleId?: number;
 }
 
 export interface Manager {

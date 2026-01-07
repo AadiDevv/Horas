@@ -220,7 +220,7 @@ export function useEquipeManager() {
     nom: '',
     description: '',
     agents: [],
-    horaires: []
+    scheduleId: undefined
   });
 
   const loadEquipes = async () => {
@@ -242,7 +242,7 @@ export function useEquipeManager() {
         nom: formData.nom,
         description: formData.description || undefined,
         agents: formData.agents,
-        horaires: formData.horaires
+        scheduleId: formData.scheduleId
       };
       const result = await api.createEquipe(newEquipe);
       if (result.success) {
@@ -256,6 +256,16 @@ export function useEquipeManager() {
             } catch (error) {
               handleApiError(error, `Erreur lors de l'assignation de l'agent ${agentId}`);
             }
+          }
+        }
+
+        if (formData.scheduleId && result.data) {
+          console.log('⏰ Assignation du schedule', formData.scheduleId, 'à l\'équipe', result.data.id);
+          try {
+            await api.assignScheduleToTeam(result.data.id, formData.scheduleId);
+            console.log('✅ Schedule assigné avec succès');
+          } catch (error) {
+            handleApiError(error, 'Erreur lors de l\'assignation du schedule');
           }
         }
 
@@ -277,7 +287,7 @@ export function useEquipeManager() {
         nom: formData.nom,
         description: formData.description || undefined,
         agents: formData.agents,
-        horaires: formData.horaires
+        scheduleId: formData.scheduleId
       };
       const result = await api.updateEquipe(editingEquipe.id, updates);
       if (result.success) {
@@ -302,53 +312,19 @@ export function useEquipeManager() {
           console.log('ℹ️ Aucun nouvel agent à assigner');
         }
 
-      if (formData.horaires && formData.horaires.length > 0) {
-        console.log('⏰ Gestion du schedule pour l\'équipe', editingEquipe.id);
-        console.log('📋 Horaires:', formData.horaires);
+        if (formData.scheduleId !== editingEquipe.scheduleId) {
+          console.log('⏰ Changement de schedule détecté');
+          console.log('Ancien:', editingEquipe.scheduleId, '→ Nouveau:', formData.scheduleId);
 
-        const joursMap: { [key: string]: number } = {
-          'Lundi': 1,
-          'Mardi': 2,
-          'Mercredi': 3,
-          'Jeudi': 4,
-          'Vendredi': 5,
-          'Samedi': 6,
-          'Dimanche': 7
-        };
-
-        const activeDays = formData.horaires.map(h => joursMap[h.jour]).filter(Boolean);
-        const firstHoraire = formData.horaires[0];
-
-        const scheduleData = {
-          name: `Horaire ${formData.nom}`,
-          startHour: firstHoraire.heureDebut,
-          endHour: firstHoraire.heureFin,
-          activeDays: activeDays
-        };
-
-        try {
-
-          if (editingEquipe.scheduleId) {
-
-            console.log('🔄 Mise à jour du schedule existant ID:', editingEquipe.scheduleId);
-            await api.updateSchedule(editingEquipe.scheduleId, scheduleData);
-            console.log('✅ Schedule mis à jour');
-          } else {
-
-            console.log('➕ Création d\'un nouveau schedule');
-            const scheduleResult = await api.createSchedule(scheduleData);
-
-            if (scheduleResult.success && scheduleResult.data) {
-              console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
-
-              await api.assignScheduleToTeam(editingEquipe.id, scheduleResult.data.id);
-              console.log('✅ Schedule assigné à l\'équipe');
+          if (formData.scheduleId) {
+            try {
+              await api.assignScheduleToTeam(editingEquipe.id, formData.scheduleId);
+              console.log('✅ Schedule mis à jour avec succès');
+            } catch (error) {
+              handleApiError(error, 'Erreur lors de l\'assignation du schedule');
             }
           }
-        } catch (error) {
-          handleApiError(error, 'Erreur lors de la gestion du schedule');
         }
-      }
 
         showSuccess('Équipe mise à jour avec succès');
         await loadEquipes();
@@ -377,50 +353,11 @@ export function useEquipeManager() {
   const openEditModal = async (equipe: Equipe) => {
     setEditingEquipe(equipe);
 
-    let horaires: any[] = [];
-    if (equipe.scheduleId) {
-      try {
-        console.log('⏰ Chargement du schedule ID:', equipe.scheduleId);
-        const scheduleResult = await api.getScheduleById(equipe.scheduleId);
-
-        if (scheduleResult.success && scheduleResult.data) {
-          const schedule = scheduleResult.data;
-          console.log('✅ Schedule chargé:', schedule);
-
-          const joursMap: { [key: number]: string } = {
-            1: 'Lundi',
-            2: 'Mardi',
-            3: 'Mercredi',
-            4: 'Jeudi',
-            5: 'Vendredi',
-            6: 'Samedi',
-            7: 'Dimanche'
-          };
-
-          const formatTime = (time: string) => {
-            if (!time) return '09:00';
-
-            return time.substring(0, 5);
-          };
-
-          horaires = (schedule.activeDays || []).map((day: number) => ({
-            jour: joursMap[day],
-            heureDebut: formatTime(schedule.startHour),
-            heureFin: formatTime(schedule.endHour)
-          }));
-
-          console.log('📋 Horaires convertis:', horaires);
-        }
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement du schedule:', error);
-      }
-    }
-
     setFormData({
       nom: equipe.nom,
       description: equipe.description || '',
       agents: equipe.agents?.map(a => a.id) || [],
-      horaires: horaires
+      scheduleId: equipe.scheduleId || undefined
     });
     setShowModal(true);
   };
@@ -430,7 +367,7 @@ export function useEquipeManager() {
       nom: '',
       description: '',
       agents: [],
-      horaires: []
+      scheduleId: undefined
     });
     setEditingEquipe(null);
   };

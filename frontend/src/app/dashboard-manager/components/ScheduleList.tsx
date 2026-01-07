@@ -94,7 +94,7 @@ export default function ScheduleList({
                       {schedule.startHour} - {schedule.endHour}
                     </div>
 
-                    {/* Active days - all days with inactive grayed */}
+                    Active days - all days with inactive grayed
                     <div className="flex gap-0.5 mb-2">
                       {ALL_DAY_NUMBERS.map((day) => {
                         const isActive = schedule.activeDays.includes(day);
@@ -104,10 +104,10 @@ export default function ScheduleList({
                             className={`w-5 h-5 flex items-center justify-center rounded text-[10px] font-semibold transition-all ${
                               selectedSchedule?.id === schedule.id
                                 ? isActive
-                                  ? 'bg-black text-white'
+                                  ? 'bg-stone-800/90 text-white'
                                   : 'bg-gray-300 text-gray-500'
                                 : isActive
-                                  ? 'bg-black text-white'
+                                  ? 'bg-stone-800/90 text-white'
                                   : 'bg-gray-200 text-gray-400'
                             }`}
                             title={getDayName(day)}
@@ -148,7 +148,7 @@ export default function ScheduleList({
                             key={day}
                             className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-all ${
                               isActive
-                                ? 'bg-black text-white'
+                                ? 'bg-stone-800/90 text-white'
                                 : 'bg-gray-200 text-gray-400'
                             }`}
                             title={getDayName(day)}
@@ -170,7 +170,7 @@ export default function ScheduleList({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onEditSchedule(schedule)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-stone-800/90 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all"
                       >
                         <Edit2 size={16} />
                         Modifier
@@ -217,12 +217,12 @@ export default function ScheduleList({
 
               {/* Active days section */}
               <div>
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-3">
+                <div className="flex items-center justify-center gap-2 text-sm font-semibold text-gray-500 mb-3">
                   <Calendar size={16} />
                   <span>JOURS DE LA SEMAINE</span>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex flex-wrap gap-2">
+                <div className="bg-gray-50 rounded-xl p-4 ">
+                  <div className="flex flex-wrap gap-2 justify-center">
                     {ALL_DAY_NUMBERS.map((day) => {
                       const isActive = selectedSchedule.activeDays.includes(day);
                       return (
@@ -230,7 +230,7 @@ export default function ScheduleList({
                           key={day}
                           className={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all ${
                             isActive
-                              ? 'bg-white text-black border border-gray-200'
+                              ? 'bg-white text-black border shadow-xl border-gray-200'
                               : 'bg-gray-200 text-gray-400'
                           }`}
                         >
@@ -299,7 +299,7 @@ export default function ScheduleList({
               <div className="flex gap-3 pt-6 border-t border-gray-200">
                 <button
                   onClick={() => onEditSchedule(selectedSchedule)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-stone-800/90 text-white rounded-xl font-semibold hover:bg-stone-800 transition-all"
                 >
                   <Edit2 size={18} />
                   Modifier
