@@ -1,6 +1,6 @@
 import { X, Loader2, Plus, Clock, Trash2, ArrowRightLeft } from "lucide-react";
 import { useState } from "react";
-import { Equipe, EquipeFormData, Agent, Horaire } from "../types";
+import { Equipe, EquipeFormData, Agent, Schedule } from "../types";
 
 interface EquipeModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface EquipeModalProps {
   loading: boolean;
   availableAgents?: Agent[];
   allEquipes?: Equipe[];
+  availableSchedules?: Schedule[];
   onMoveAgent?: (agentId: number, newTeamId: number) => Promise<void>;
 }
 
@@ -25,6 +26,7 @@ export default function EquipeModal({
   loading,
   availableAgents = [],
   allEquipes = [],
+  availableSchedules = [],
   onMoveAgent,
 }: EquipeModalProps) {
   const [activeTab, setActiveTab] = useState<"info" | "agents" | "horaires">(
@@ -34,16 +36,6 @@ export default function EquipeModal({
   const [movingAgent, setMovingAgent] = useState<number | null>(null);
 
   if (!isOpen) return null;
-
-  const jours = [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche",
-  ];
 
   const addAgent = () => {
     if (selectedAgent && !formData.agents.includes(selectedAgent)) {
@@ -71,33 +63,6 @@ export default function EquipeModal({
     } finally {
       setMovingAgent(null);
     }
-  };
-
-  const addHoraire = () => {
-    setFormData({
-      ...formData,
-      horaires: [
-        ...formData.horaires,
-        { jour: "Lundi", heureDebut: "09:00", heureFin: "17:00" },
-      ],
-    });
-  };
-
-  const updateHoraire = (
-    index: number,
-    field: keyof Horaire,
-    value: string,
-  ) => {
-    const newHoraires = [...formData.horaires];
-    newHoraires[index] = { ...newHoraires[index], [field]: value };
-    setFormData({ ...formData, horaires: newHoraires });
-  };
-
-  const removeHoraire = (index: number) => {
-    setFormData({
-      ...formData,
-      horaires: formData.horaires.filter((_, i) => i !== index),
-    });
   };
 
   return (
@@ -145,11 +110,11 @@ export default function EquipeModal({
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Horaires ({formData.horaires.length})
+            Horaire {formData.scheduleId ? '(1)' : '(0)'}
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-h-[400px]">
           {activeTab === "info" && (
             <>
               <div>
@@ -276,70 +241,90 @@ export default function EquipeModal({
           )}
 
           {activeTab === "horaires" && (
-            <div>
-              <button
-                onClick={addHoraire}
-                className="mb-4 flex items-center gap-2 px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all cursor-pointer active:scale-95"
-              >
-                <Clock size={16} className="sm:hidden" />
-                <Clock size={18} className="hidden sm:block" />
-                Ajouter un horaire
-              </button>
-
-              <div className="space-y-3">
-                {formData.horaires.length === 0 ? (
-                  <div className="text-center py-8 text-sm sm:text-base text-gray-500">
-                    Aucun horaire défini
-                  </div>
-                ) : (
-                  formData.horaires.map((horaire, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl"
-                    >
-                      <select
-                        value={horaire.jour}
-                        onChange={(e) =>
-                          updateHoraire(index, "jour", e.target.value)
-                        }
-                        className="w-full sm:w-auto px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                      >
-                        {jours.map((jour) => (
-                          <option key={jour} value={jour}>
-                            {jour}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <input
-                          type="time"
-                          value={horaire.heureDebut}
-                          onChange={(e) =>
-                            updateHoraire(index, "heureDebut", e.target.value)
-                          }
-                          className="flex-1 sm:flex-none px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                        />
-                        <span className="text-gray-500 text-sm sm:text-base">à</span>
-                        <input
-                          type="time"
-                          value={horaire.heureFin}
-                          onChange={(e) =>
-                            updateHoraire(index, "heureFin", e.target.value)
-                          }
-                          className="flex-1 sm:flex-none px-3 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                        />
-                        <button
-                          onClick={() => removeHoraire(index)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer active:scale-95 flex-shrink-0"
-                        >
-                          <Trash2 size={16} className="sm:hidden" />
-                          <Trash2 size={18} className="hidden sm:block" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
+            <div className="space-y-4">
+              {/* Dropdown de sélection */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  Horaire de l&apos;équipe
+                </label>
+                <select
+                  value={formData.scheduleId || ""}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    scheduleId: e.target.value ? Number(e.target.value) : undefined
+                  })}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                >
+                  <option value="">Aucun horaire assigné</option>
+                  {availableSchedules?.map((schedule) => (
+                    <option key={schedule.id} value={schedule.id}>
+                      {schedule.name} • {schedule.startHour} - {schedule.endHour}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {/* Preview du schedule sélectionné */}
+              {formData.scheduleId && (() => {
+                const selectedSchedule = availableSchedules?.find(s => s.id === formData.scheduleId);
+                if (!selectedSchedule) return null;
+
+                const dayNames: { [key: number]: string } = {
+                  1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu',
+                  5: 'Ven', 6: 'Sam', 7: 'Dim'
+                };
+
+                return (
+                  <div className="mt-4 p-5 bg-gray-50 rounded-xl border border-gray-200">
+
+                       {/* Nom */}
+                      <div className="mb-3">
+                        <p className="text-xs text-gray-500 mb-1">Nom</p>
+                        <p className="font-medium">{selectedSchedule.name}</p>
+                      </div>
+
+                      {/* Heures */}
+                      <div className="mb-3">
+                        <p className="text-xs text-gray-500 mb-1">Horaires</p>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium">{selectedSchedule.startHour}</span>
+                          <span className="text-gray-400">→</span>
+                          <span className="font-medium">{selectedSchedule.endHour}</span>
+                        </div>
+                      </div>
+
+                      {/* Jours actifs */}
+                      <div>
+                        <p className="text-xs text-gray-500 mb-2">Jours actifs</p>
+                        <div className="flex flex-wrap gap-1">
+                          {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+                            const isActive = selectedSchedule.activeDays.includes(day);
+                            return (
+                              <span
+                                key={day}
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  isActive
+                                    ? 'bg-stone-800/90 text-white'
+                                    : 'bg-gray-200 text-gray-400'
+                                }`}
+                              >
+                                {dayNames[day]}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                   
+                  </div>
+                );
+              })()}
+
+              {/* Lien vers la gestion des horaires */}
+              {/* <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-xs text-blue-800">
+                  💡 Pour créer ou modifier des horaires, utilisez l&apos;onglet <strong>&quot;Horaires&quot;</strong> dans le menu de gauche.
+                </p>
+              </div> */}
             </div>
           )}
         </div>
