@@ -170,7 +170,7 @@ export default function ScheduleList({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onEditSchedule(schedule)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-stone-800/90 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all"
                       >
                         <Edit2 size={16} />
                         Modifier
@@ -299,11 +299,11 @@ export default function ScheduleList({
               <div className="flex gap-3 pt-6 border-t border-gray-200">
                 <button
                   onClick={() => onEditSchedule(selectedSchedule)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-stone-800/90 text-white rounded-xl font-semibold hover:bg-stone-800 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-stone-800 transition-all"
                 >
                   <Edit2 size={18} />
                   Modifier
-                </button>
+                </button>ss
                 <button
                   onClick={() => {
                     if (confirm('Êtes-vous sûr de vouloir supprimer cet horaire ?')) {
