@@ -120,60 +120,6 @@ export default function SettingsModal({
             />
           </div>
 
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <h3 className="text-sm font-semibold mb-3">
-              Changer le mot de passe
-            </h3>
-            <p className="text-xs text-gray-500 mb-4">
-              Laissez vide si vous ne souhaitez pas changer le mot de passe
-            </p>
-
-            <div className="mb-3">
-              <label className="block text-xs text-gray-600 mb-1">
-                Ancien mot de passe *
-              </label>
-              <input
-                type="password"
-                value={formData.oldPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, oldPassword: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
-                placeholder="Requis pour changer le mot de passe"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="block text-xs text-gray-600 mb-1">
-                Nouveau mot de passe * (min. 6 caractères)
-              </label>
-              <input
-                type="password"
-                value={formData.newPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, newPassword: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
-                placeholder="Au moins 6 caractères"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Confirmer le mot de passe *
-              </label>
-              <input
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black text-sm"
-                placeholder="Retapez le nouveau mot de passe"
-              />
-            </div>
-          </div>
-
           {errorMessage && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
               {errorMessage}

@@ -85,46 +85,6 @@ export function useSettings(userData: User | null, formData: UserFormData) {
       setSuccessMessage('');
       setErrorMessage('');
 
-      const wantsToChangePassword = formData.newPassword || formData.confirmPassword || formData.oldPassword;
-
-      if (wantsToChangePassword) {
-        if (!formData.oldPassword) {
-          setErrorMessage('❌ L\'ancien mot de passe est requis pour changer le mot de passe');
-          setSaving(false);
-          return;
-        }
-
-        if (!formData.newPassword) {
-          setErrorMessage('❌ Le nouveau mot de passe est requis');
-          setSaving(false);
-          return;
-        }
-
-        if (formData.newPassword.length < 6) {
-          setErrorMessage('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
-          setSaving(false);
-          return;
-        }
-
-        if (formData.newPassword !== formData.confirmPassword) {
-          setErrorMessage('❌ Les mots de passe ne correspondent pas');
-          setSaving(false);
-          return;
-        }
-
-        const passwordResponse = await changePassword(
-          userData.id,
-          formData.oldPassword,
-          formData.newPassword
-        );
-
-        if (!passwordResponse.success) {
-          setErrorMessage('❌ ' + passwordResponse.message);
-          setSaving(false);
-          return;
-        }
-      }
-
       const response = await updateUser(userData.id, {
         nom: formData.nom,
         prenom: formData.prenom,
@@ -133,11 +93,7 @@ export function useSettings(userData: User | null, formData: UserFormData) {
 
       if (response.success && response.data) {
         setUserData(response.data);
-        const messages = ['✅ Informations modifiées avec succès !'];
-        if (wantsToChangePassword) {
-          messages.push('Mot de passe modifié avec succès !');
-        }
-        setSuccessMessage(messages.join(' '));
+        setSuccessMessage('✅ Informations modifiées avec succès !');
 
         setTimeout(() => {
           setSettingsOpen(false);
