@@ -61,21 +61,6 @@ export function useManagerSettings() {
       return;
     }
 
-    if (formData.newPassword || formData.confirmPassword || formData.oldPassword) {
-      if (!formData.oldPassword) {
-        setErrorMessage('Ancien mot de passe requis');
-        return;
-      }
-      if (formData.newPassword.length < 6) {
-        setErrorMessage('Le mot de passe doit contenir au moins 6 caractères');
-        return;
-      }
-      if (formData.newPassword !== formData.confirmPassword) {
-        setErrorMessage('Les mots de passe ne correspondent pas');
-        return;
-      }
-    }
-
     setSaving(true);
     setErrorMessage('');
     setSuccessMessage('');
@@ -103,13 +88,6 @@ export function useManagerSettings() {
         nom: formData.nom,
         email: formData.email,
         telephone: formData.telephone
-      });
-
-      setFormData({
-        ...formData,
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
       });
 
       setSuccessMessage('Paramètres enregistrés avec succès !');
