@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Calendar, Edit2, Trash2, Clock, Bell } from "lucide-react";
+import { Search, Calendar, Edit2, Trash2, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
 import { Agent, Equipe } from "../types";
 import {
   getEmployeeWeekTimesheets,
@@ -74,6 +74,7 @@ export default function PointagesManagement({
 
   const [showAbsenceModal, setShowAbsenceModal] = useState(false);
   const [editingAbsence, setEditingAbsence] = useState<Absence | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const filteredAgents = agents.filter((agent) =>
     `${agent.prenom} ${agent.nom}`
@@ -404,65 +405,138 @@ export default function PointagesManagement({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-        <div className="lg:col-span-3 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200">
-          <div className="mb-4">
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Rechercher un agent..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 relative">
+        {/* Sidebar des agents */}
+        <div
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+            sidebarCollapsed
+              ? "lg:col-span-1"
+              : "lg:col-span-3"
+          }`}
+        >
+          {!sidebarCollapsed ? (
+            <>
+              <div className="mb-4 flex items-center justify-between gap-2">
+                <div className="relative flex-1">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un agent..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+                {selectedAgent && (
+                  <button
+                    onClick={() => setSidebarCollapsed(true)}
+                    className="hidden lg:flex p-2 hover:bg-gray-100 rounded-lg transition-all cursor-pointer active:scale-95"
+                    title="Réduire la sidebar"
+                  >
+                    <ChevronLeft size={20} className="text-gray-600" />
+                  </button>
+                )}
+              </div>
 
-          <div className="space-y-2 max-h-[300px] lg:max-h-[600px] overflow-y-auto">
-            {filteredAgents.map((agent) => {
-              const pendingCount = pendingAbsencesByAgent[agent.id] || 0;
+              <div className="space-y-2 max-h-[300px] lg:max-h-[600px] overflow-y-auto">
+                {filteredAgents.map((agent) => {
+                  const pendingCount = pendingAbsencesByAgent[agent.id] || 0;
 
-              return (
-                <button
-                  key={agent.id}
-                  onClick={() => setSelectedAgent(agent)}
-                  className={`w-full text-left p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all relative cursor-pointer active:scale-95 ${
-                    selectedAgent?.id === agent.id
-                      ? "bg-black text-white"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-900"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm sm:text-base truncate">
-                        {agent.prenom} {agent.nom}
+                  return (
+                    <button
+                      key={agent.id}
+                      onClick={() => {
+                        setSelectedAgent(agent);
+                        setSidebarCollapsed(true);
+                      }}
+                      className={`w-full text-left p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all relative cursor-pointer active:scale-95 ${
+                        selectedAgent?.id === agent.id
+                          ? "bg-black text-white"
+                          : "bg-gray-50 hover:bg-gray-100 text-gray-900"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm sm:text-base truncate">
+                            {agent.prenom} {agent.nom}
+                          </div>
+                          <div
+                            className={`text-xs sm:text-sm truncate ${selectedAgent?.id === agent.id ? "text-gray-300" : "text-gray-500"}`}
+                          >
+                            {getEquipeName(equipes, agent.equipeId) ||
+                              "Sans équipe"}
+                          </div>
+                        </div>
+                        {pendingCount > 0 && (
+                          <div className="flex-shrink-0">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                              {pendingCount}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div
-                        className={`text-xs sm:text-sm truncate ${selectedAgent?.id === agent.id ? "text-gray-300" : "text-gray-500"}`}
-                      >
-                        {getEquipeName(equipes, agent.equipeId) ||
-                          "Sans équipe"}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <button
+                onClick={() => setSidebarCollapsed(false)}
+                className="p-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-all cursor-pointer active:scale-95 w-full flex items-center justify-center shadow-sm"
+                title="Développer la sidebar"
+              >
+                <ChevronRight size={20} className="text-gray-700" />
+              </button>
+              <div className="h-px w-full bg-gray-200 my-1"></div>
+              <div className="flex flex-col gap-2 w-full">
+                {filteredAgents.map((agent) => {
+                  const pendingCount = pendingAbsencesByAgent[agent.id] || 0;
+                  const isSelected = selectedAgent?.id === agent.id;
+
+                  return (
+                    <button
+                      key={agent.id}
+                      onClick={() => {
+                        setSelectedAgent(agent);
+                        setSidebarCollapsed(true);
+                      }}
+                      className={`relative p-2 rounded-lg transition-all cursor-pointer active:scale-95 bg-gray-50 hover:bg-gray-100 ${
+                        isSelected
+                          ? "border-2 border-black"
+                          : "border-2 border-transparent"
+                      }`}
+                      title={`${agent.prenom} ${agent.nom}`}
+                    >
+                      <div className="w-8 h-8 mx-auto bg-black rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {agent.prenom.charAt(0).toUpperCase()}
+                        {agent.nom.charAt(0).toUpperCase()}
                       </div>
-                    </div>
-                    {pendingCount > 0 && (
-                      <div className="flex-shrink-0">
-                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      {pendingCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                           {pendingCount}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="lg:col-span-9 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200">
+        {/* Zone du planning */}
+        <div
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+            sidebarCollapsed
+              ? "lg:col-span-11"
+              : "lg:col-span-9"
+          }`}
+        >
           {selectedAgent ? (
             <>
               <div className="flex flex-col gap-4 mb-4 sm:mb-6 pb-4 border-b border-gray-200">
