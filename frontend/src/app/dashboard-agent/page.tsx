@@ -71,7 +71,6 @@ export default function Page() {
     }, 1000);
 
     loadUserData();
-    checkTodayTimesheets();
 
     return () => {
       clearInterval(timer);
