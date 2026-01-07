@@ -45,7 +45,6 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-// Import des types générés par le backend pour les pointages
 export type {
   PointageStatus,
   PointageReadDTO,

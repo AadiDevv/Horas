@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { API_CONFIG } from "@/constants/config";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -51,11 +52,15 @@ export default function LoginPage() {
         axios.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${accessToken}`;
+        
+        toast.success("Connexion réussie ! Redirection...");
         setIsLoggedIn(true);
         setError("");
       }
     } catch (err) {
-      setError("Échec de la connexion. Veuillez vérifier vos informations.");
+      const errorMessage = "Échec de la connexion. Veuillez vérifier vos informations.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -87,17 +92,13 @@ export default function LoginPage() {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="mt-4 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200"
+            className="mt-4 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200 cursor-pointer"
           >
             Retour à l'accueil
           </button>
         </div>
-        {isLoggedIn ? (
-          <p className="mt-4 text-sm text-green-600">
-            Connexion réussie ! Redirection...
-          </p>
-        ) : (
-          error && <p className="mt-4 text-sm text-red-600">{error}</p>
+        {!isLoggedIn && error && (
+          <p className="mt-4 text-sm text-red-600">{error}</p>
         )}
 
         <div className="bg-[#F5F5F0] rounded-lg shadow-lg p-8 border">
@@ -172,7 +173,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200 cursor-pointer"
                 >
                   {showPassword ? (
                     <svg
@@ -215,7 +216,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-[#333333] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-[#333333] hover:bg-[#555555] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 cursor-pointer active:scale-95"
             >
               {isLoading ? (
                 <>

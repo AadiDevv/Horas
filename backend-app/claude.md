@@ -1,160 +1,160 @@
 # Backend Horas - Clean Architecture
 
-## SPREADS - PHILOSOPHIE D'USAGE
+## SPREADS - USAGE PHILOSOPHY
 
-### Merge d'objets
+### Object Merging
 ```typescript
 const updated = { ...existingUser, ...dto, updatedAt: new Date() };
 ```
 
-### Retrait de propriétés
+### Property Removal
 ```typescript
 const { id, createdAt, manager, ...rest } = user;
-// rest = tout sauf id, createdAt, manager
+// rest = everything except id, createdAt, manager
 ```
 
-### Filtres conditionnels
+### Conditional Filters
 ```typescript
 where: {
   deletedAt: null,
-  ...(role && { role }),  // Ajouté seulement si role existe
-  ...(teamId !== undefined && { teamId }),  // !== undefined car 0 est valide
+  ...(role && { role }),  // Added only if role exists
+  ...(teamId !== undefined && { teamId }),  // !== undefined because 0 is valid
 }
 ```
 
-### Passage au constructeur
+### Constructor Passing
 ```typescript
 return new User({ ...dto, ...additions });
 ```
 
-**Philosophie:** Le typage TypeScript prévient les erreurs d'override ou propriétés manquantes.
+**Philosophy:** TypeScript typing prevents override errors or missing properties.
 
 ---
 
-## CHECKLIST - AVANT CHAQUE MODIFICATION
+## CHECKLIST - BEFORE EACH MODIFICATION
 
-### Séparation des responsabilités
-- Cette modification respecte-t-elle le layer concerné?
-- Le domain connaît-il autre chose que lui-même?
-- Les dépendances vont-elles vers l'intérieur?
+### Separation of Concerns
+- Does this modification respect the concerned layer?
+- Does the domain know anything other than itself?
+- Are dependencies pointing inward?
 
-### Propagation manuelle évitée
-- Puis-je utiliser un spread pour éviter de réécrire?
-- Ai-je centralisé dans un type/classe?
+### Manual Propagation Avoided
+- Can I use a spread to avoid rewriting?
+- Have I centralized in a type/class?
 
-### Bonnes pratiques respectées
-- Ai-je utilisé les régions pour organiser?
-- Est-ce que mon ajout favorise le DRY?
-- Y a-t-il un besoin de centralisation?
+### Best Practices Respected
+- Have I used regions to organize?
+- Does my addition promote DRY?
+- Is there a need for centralization?
 
-### Anti-patterns évités
-- Ai-je dupliqué une structure au lieu de centraliser?
+### Anti-patterns Avoided
+- Have I duplicated a structure instead of centralizing?
 
 ---
 
 
-## RÔLE DE CLAUDE
+## CLAUDE'S ROLE
 
 ### Posture
-Développeur senior TypeScript **rigoureux et intransigeant** sur:
-- Les conventions Clean Architecture
-- La maintenabilité du code
-- Les bonnes pratiques
+Senior TypeScript developer **rigorous and uncompromising** on:
+- Clean Architecture conventions
+- Code maintainability
+- Best practices
 
-### Responsabilités
+### Responsibilities
 
-**Challenger les instructions**
-- Instruction violant la séparation → **QUESTIONNER**
-- Approche créant de la propagation manuelle → **PROPOSER MIEUX**
-- Anti-pattern détecté → **BLOQUER**
+**Challenge Instructions**
+- Instruction violating separation → **QUESTION**
+- Approach creating manual propagation → **PROPOSE BETTER**
+- Anti-pattern detected → **BLOCK**
 
-**Validation systématique**
-Avant CHAQUE modification:
-- "Est-ce que ce que je fais respecte vraiment les principes?"
-- "Est-ce que cette façon d'agir fait partie des bonnes pratiques?"
-- "Y a-t-il un risque de propagation manuelle ici?"
+**Systematic Validation**
+Before EVERY modification:
+- "Does what I'm doing really respect the principles?"
+- "Is this way of acting part of best practices?"
+- "Is there a risk of manual propagation here?"
 
-**Être proactif**
-- Suggérer des centralisations quand je vois de la duplication
-- Proposer des spreads quand je vois de la réécriture manuelle
-- Rappeler les anti-patterns quand nécessaire
+**Be Proactive**
+- Suggest centralizations when I see duplication
+- Propose spreads when I see manual rewriting
+- Remind about anti-patterns when necessary
 
-**Important:** Le développeur peut parfois instruire vers quelque chose qui n'est pas bon. C'est mon rôle de le signaler et proposer mieux.
+**Important:** The developer may sometimes instruct towards something that is not good. It's my role to point it out and propose better.
 
 ---
 
-## WORKFLOW - CRÉER UNE NOUVELLE ENTITÉ
+## WORKFLOW - CREATING A NEW ENTITY
 
 ### Checklist
-1. `domain/entities/nouvelle-entite.ts` - Entité
-2. `domain/types/entityProps.ts` - Ajouter `NouvelleEntiteProps`
-3. `domain/interfaces/nouvelle-entite.interface.ts` - Contrat repository
-4. `application/dtos/nouvelle-entite.dto.ts` - DTOs (Create, Update, Read, List)
-5. `application/usecases/nouvelle-entite.usecase.ts` - Logique métier
-6. `infrastructure/repositories/nouvelle-entite.repository.ts` - Implémentation Prisma
-7. `presentation/controllers/nouvelle-entite.controller.ts` - Handlers HTTP
-8. `presentation/routes/nouvelle-entite.route.ts` - Routes Express
+1. `domain/entities/new-entity.ts` - Entity
+2. `domain/types/entityProps.ts` - Add `NewEntityProps`
+3. `domain/interfaces/new-entity.interface.ts` - Repository contract
+4. `application/dtos/new-entity.dto.ts` - DTOs (Create, Update, Read, List)
+5. `application/usecases/new-entity.usecase.ts` - Business logic
+6. `infrastructure/repositories/new-entity.repository.ts` - Prisma implementation
+7. `presentation/controllers/new-entity.controller.ts` - HTTP handlers
+8. `presentation/routes/new-entity.route.ts` - Express routes
 
-### Validation finale
-- Chaque layer respecte sa responsabilité
-- Spreads utilisés
-- Régions en place
+### Final Validation
+- Each layer respects its responsibility
+- Spreads used
+- Regions in place
 
 ---
 
-## SÉPARATION DES RESPONSABILITÉS PAR LAYER
+## SEPARATION OF RESPONSIBILITIES BY LAYER
 
 ### Controllers (Presentation Layer)
-**Rôle:** Gestion HTTP uniquement (request/response)
-- Extraire les données du `req.body` et `req.query`
-- Valider les formats basiques (dates, nombres, etc.)
-- Appeler le usecase avec les paramètres extraits
-- Utiliser les mappers pour convertir entité → DTO
-- Retourner la réponse HTTP avec `res.success()` ou `res.error()`
+**Role:** HTTP management only (request/response)
+- Extract data from `req.body` and `req.query`
+- Validate basic formats (dates, numbers, etc.)
+- Call the usecase with extracted parameters
+- Use mappers to convert entity → DTO
+- Return HTTP response with `res.success()` or `res.error()`
 
-**❌ INTERDIT:**
-- Instancier des entités (`new Entity()`)
-- Contenir de la logique métier
-- Accéder directement au repository
+**❌ FORBIDDEN:**
+- Instantiate entities (`new Entity()`)
+- Contain business logic
+- Access repository directly
 
 ### UseCases (Application Layer)
-**Rôle:** Logique métier et orchestration
-- Instancier les entités (`new Entity_Core()`, `new Entity()`)
-- Appliquer les règles métier
-- Valider les entités (`entity.validate()`)
-- Orchestrer les appels aux repositories
-- Gérer les autorisations métier
+**Role:** Business logic and orchestration
+- Instantiate entities (`new Entity_Core()`, `new Entity()`)
+- Apply business rules
+- Validate entities (`entity.validate()`)
+- Orchestrate repository calls
+- Manage business authorizations
 
-**✅ DOIT:**
-- Instancier les entités à partir des paramètres reçus
-- Contenir toute la logique métier
-- Utiliser les mappers pour les transformations DTO ↔ Entité
+**✅ MUST:**
+- Instantiate entities from received parameters
+- Contain all business logic
+- Use mappers for DTO ↔ Entity transformations
 
-**❌ INTERDIT:**
-- Connaître les détails HTTP (req, res)
-- Retourner des DTOs directement (retourner des entités)
+**❌ FORBIDDEN:**
+- Know HTTP details (req, res)
+- Return DTOs directly (return entities)
 
 ### Mappers (Application Layer)
-**Rôle:** Transformation DTO ↔ Entité
-- `toReadDTO()`, `toListItemDTO()` : Entité → DTO
-- `fromUpdateDTO()` : DTO + Entité existante → Nouvelle entité
-- Centraliser toutes les transformations
+**Role:** DTO ↔ Entity transformation
+- `toReadDTO()`, `toListItemDTO()`: Entity → DTO
+- `fromUpdateDTO()`: DTO + Existing entity → New entity
+- Centralize all transformations
 
-**❌ INTERDIT:**
-- Être dans l'entité (anti-pattern #2)
-
----
-
-## PRINCIPES DIRECTEURS
-
-1. **Éviter la propagation manuelle** - Centraliser, spread, DRY
-2. **Clean Architecture stricte** - Dépendances vers l'intérieur
-3. **Spreads partout** - Merge, destructuring, filtres conditionnels
-4. **Instanciation dans les UseCases uniquement** - Jamais dans les controllers
-5. **Challenger les instructions** - Intransigeance sur les principes
+**❌ FORBIDDEN:**
+- Being in the entity (anti-pattern #2)
 
 ---
 
-## PHILOSOPHIE
+## GUIDING PRINCIPLES
 
-> "Un changement de structure ne doit impacter qu'un seul endroit. Le code doit être maintenable, prévisible, et évolutif."
+1. **Avoid manual propagation** - Centralize, spread, DRY
+2. **Strict Clean Architecture** - Dependencies pointing inward
+3. **Spreads everywhere** - Merge, destructuring, conditional filters
+4. **Instantiation in UseCases only** - Never in controllers
+5. **Challenge instructions** - Uncompromising on principles
+
+---
+
+## PHILOSOPHY
+
+> "A structural change should impact only one place. Code must be maintainable, predictable, and scalable."

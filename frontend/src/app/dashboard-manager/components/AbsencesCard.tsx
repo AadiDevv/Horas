@@ -13,11 +13,11 @@ interface AbsencesCardProps {
 }
 
 export default function AbsencesCard({
-  absences,
-  absencesEnAttente,
+  absences = [],
+  absencesEnAttente = 0,
 }: AbsencesCardProps) {
   const getTypeColor = (type: string) => {
-    // Nuances de couleur selon le type d'absence
+
     const colors: Record<string, string> = {
       "Congés payés": "#3b82f6",
       Maladie: "#ef4444",

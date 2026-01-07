@@ -2,7 +2,7 @@ import { Award, TrendingUp, TrendingDown } from "lucide-react";
 
 interface EquipeScore {
   nom: string;
-  score: number; // Pourcentage 0-100
+  score: number;
 }
 
 interface PonctualiteScoreProps {
@@ -13,10 +13,10 @@ interface PonctualiteScoreProps {
 
 export default function PonctualiteScore({ equipes, scoreGlobal, objectif }: PonctualiteScoreProps) {
   const getScoreColor = (score: number) => {
-    // Nuances de noir/gris selon le score
-    if (score >= 90) return '#333333'; // Excellent: noir complet
-    if (score >= 75) return '#666666'; // Bon: gris foncé
-    return '#999999'; // À améliorer: gris moyen
+
+    if (score >= 90) return '#333333';
+    if (score >= 75) return '#666666';
+    return '#999999';
   };
 
   const getScoreIcon = (score: number) => {

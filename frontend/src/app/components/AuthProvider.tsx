@@ -7,10 +7,6 @@ import { setGlobalErrorHandler } from '../utils/apiClient';
 import SessionExpiredModal from './SessionExpiredModal';
 import ErrorModal from './ErrorModal';
 
-/**
- * Composant Provider qui gère l'authentification globale
- * Surveille l'expiration du token et affiche les modals d'erreur
- */
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const { showExpiredModal } = useTokenExpiration();
   const {
@@ -21,7 +17,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     retryAction
   } = useErrorHandler();
 
-  // Définir le handler global pour les erreurs API
   useEffect(() => {
     setGlobalErrorHandler(showError);
   }, [showError]);

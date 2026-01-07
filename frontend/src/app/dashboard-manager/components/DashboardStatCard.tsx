@@ -8,10 +8,10 @@ interface DashboardStatCardProps {
   bgGradient?: string;
 }
 
-export default function DashboardStatCard({ 
-  title, 
-  value, 
-  icon: Icon, 
+export default function DashboardStatCard({
+  title,
+  value,
+  icon: Icon,
   iconColor = "text-gray-700",
   bgGradient = "from-gray-100 to-gray-200"
 }: DashboardStatCardProps) {

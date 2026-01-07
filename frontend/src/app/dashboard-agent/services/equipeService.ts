@@ -12,7 +12,6 @@ interface Equipe {
   horaires?: Horaire[];
 }
 
-// Mock Data - Horaires d'exemple
 const mockEquipes: Equipe[] = [
   {
     id: 1,
@@ -42,9 +41,6 @@ const mockEquipes: Equipe[] = [
   }
 ];
 
-/**
- * Récupère les détails d'une équipe incluant ses horaires
- */
 export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -71,10 +67,6 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
   return equipe;
 }
 
-/**
- * Récupère uniquement les horaires d'une équipe
- * Le backend retourne un schedule avec activeDays, on le transforme en horaires par jour
- */
 export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<Horaire[]>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -110,10 +102,8 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
     const response = await res.json();
     console.log('📦 Réponse backend équipe:', response);
 
-    // Le backend retourne response.data avec un objet schedule inclus
     const team = response.data || response;
 
-    // Vérifier si l'équipe a un schedule (inclus dans la réponse)
     if (!team.schedule) {
       console.warn('⚠️ Équipe sans schedule');
       return {
@@ -124,11 +114,9 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
       };
     }
 
-    // Le schedule est déjà inclus dans la réponse team
     const schedule = team.schedule;
     console.log('📦 Schedule récupéré depuis team:', schedule);
 
-    // Transformer le schedule en horaires par jour
     const jourMapping: Record<number, string> = {
       1: 'Lundi',
       2: 'Mardi',
@@ -139,7 +127,6 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
       7: 'Dimanche'
     };
 
-    // Extraire seulement HH:mm depuis le format Time (qui peut être HH:mm:ss)
     const formatTime = (time: string) => {
       if (!time) return '09:00';
       return time.substring(0, 5);

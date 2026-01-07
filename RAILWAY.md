@@ -1,71 +1,71 @@
-# Déploiement Railway - Backend Horas
+# Railway Deployment - Horas Backend
 
-Ce fichier contient les instructions pour déployer le backend sur Railway.
+This file contains instructions for deploying the backend to Railway.
 
-## Fichiers de déploiement
+## Deployment Files
 
-- **`Dockerfile.prod`** : Dockerfile multi-stage optimisé pour Railway (build depuis la racine du monorepo)
-- **`.dockerignore`** : Ignore les fichiers non nécessaires pour Railway
-- **`railway.json`** : Configuration Railway
+- **`Dockerfile.prod`** : Multi-stage Dockerfile optimized for Railway (builds from monorepo root)
+- **`.dockerignore`** : Ignores unnecessary files for Railway
+- **`railway.json`** : Railway configuration
 
-## Configuration Railway
+## Railway Configuration
 
-### 1. Variables d'environnement requises
+### 1. Required Environment Variables
 
-Dans votre projet Railway, configurez les variables suivantes :
+In your Railway project, configure the following variables:
 
 ```
 DATABASE_URL=postgresql://user:password@host:port/database
-JWT_SECRET=votre-secret-jwt-securise
+JWT_SECRET=your-secure-jwt-secret
 PORT=5000
 NODE_ENV=production
 ```
 
-### 2. Déploiement
+### 2. Deployment
 
-Railway détecte automatiquement le `Dockerfile.prod` à la racine et le `railway.json`.
+Railway automatically detects the `Dockerfile.prod` at the root and the `railway.json`.
 
-Le build se fera automatiquement :
-1. Build depuis la racine du monorepo
-2. Copie uniquement les fichiers du dossier `backend-app/`
-3. Installation des dépendances
-4. Génération du client Prisma
-5. Build du TypeScript
-6. Image de production légère
+The build will happen automatically:
+1. Build from monorepo root
+2. Copy only files from the `backend-app/` folder
+3. Install dependencies
+4. Generate Prisma client
+5. Build TypeScript
+6. Lightweight production image
 
-### 3. Commandes utiles
+### 3. Useful Commands
 
-#### Migrations Prisma
-Après le premier déploiement, exécutez les migrations :
+#### Prisma Migrations
+After the first deployment, run migrations:
 
 ```bash
 npx prisma migrate deploy
 ```
 
-#### Seed de la base de données (optionnel)
+#### Database Seed (optional)
 ```bash
 npm run db:seed
 ```
 
-## Architecture multi-stage
+## Multi-stage Architecture
 
-Le Dockerfile utilise une approche multi-stage :
+The Dockerfile uses a multi-stage approach:
 
-1. **Builder stage** : Compile le TypeScript avec toutes les dépendances
-2. **Production stage** : Image légère avec uniquement les dépendances de production
+1. **Builder stage** : Compiles TypeScript with all dependencies
+2. **Production stage** : Lightweight image with only production dependencies
 
 ## Troubleshooting
 
-### Prisma Client non généré
-Si vous voyez des erreurs liées à Prisma Client, vérifiez que :
-- `prisma generate` est bien exécuté dans le Dockerfile
-- Les `binaryTargets` dans `schema.prisma` incluent `"linux-musl-openssl-3.0.x"`
+### Prisma Client not generated
+If you see errors related to Prisma Client, verify that:
+- `prisma generate` is properly executed in the Dockerfile
+- The `binaryTargets` in `schema.prisma` include `"linux-musl-openssl-3.0.x"`
 
 ### Port binding
-Railway injecte automatiquement la variable `PORT`. Le backend l'utilise via :
+Railway automatically injects the `PORT` variable. The backend uses it via:
 ```typescript
 const port = process.env.PORT || 5000;
 ```
 
 ### Database URL
-Railway fournit automatiquement `DATABASE_URL` si vous ajoutez un service PostgreSQL au projet.
+Railway automatically provides `DATABASE_URL` if you add a PostgreSQL service to the project.

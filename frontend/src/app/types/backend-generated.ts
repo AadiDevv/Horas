@@ -1,23 +1,7 @@
-/**
- * 🎯 TYPES TYPESCRIPT POUR L'ÉQUIPE FRONTEND
- * 
- * Ce fichier contient tous les types nécessaires pour consommer l'API Horas.
- * Copiez ce fichier dans votre projet frontend (ex: src/types/api.ts)
- * 
- * Date: 12 Octobre 2025
- * Version: 1.0.0
- */
 
-// =========================================
-// TYPES DE BASE
-// =========================================
 
 export type Role = 'admin' | 'manager' | 'employe';
 export type PointageStatus = 'normal' | 'retard' | 'absence' | 'incomplet';
-
-// =========================================
-// RÉPONSES STANDARD
-// =========================================
 
 export interface ApiSuccessResponse<T> {
     success: true;
@@ -34,12 +18,6 @@ export interface ApiErrorResponse {
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
-
-// =========================================
-// 1. USER / AUTHENTICATION
-// =========================================
-
-// #region User DTOs
 
 export interface UserCreateDTO {
     prenom: string;
@@ -128,14 +106,6 @@ export interface TokenResponse {
     role: string;
 }
 
-// #endregion
-
-// =========================================
-// 2. ÉQUIPE
-// =========================================
-
-// #region Equipe DTOs
-
 export interface EquipeCreateDTO {
     nom: string;
     description?: string;
@@ -188,19 +158,11 @@ export interface EquipeListItemDTO {
     createdAt: string;
 }
 
-// #endregion
-
-// =========================================
-// 3. HORAIRE
-// =========================================
-
-// #region Horaire DTOs
-
 export interface HoraireCreateDTO {
     nom: string;
-    heureDebut: string; // Format: "HH:mm"
-    heureFin: string;   // Format: "HH:mm"
-    joursActifs: number[]; // 1=Lundi, 7=Dimanche
+    heureDebut: string;
+    heureFin: string;
+    joursActifs: number[];
 }
 
 export interface HoraireUpdateDTO {
@@ -240,41 +202,23 @@ export interface HoraireListItemDTO {
     utilisateursCount: number;
 }
 
-// #endregion
-
-// =========================================
-// 4. POINTAGE
-// =========================================
-
-// #region Timesheet DTOs (anciennement Pointage)
-
-/**
- * DTO pour créer un timesheet (Manager/Admin uniquement)
- * Pour les employés, utiliser POST /api/timesheets/ avec payload vide
- */
 export interface TimesheetCreateDTO {
     employeId: number;
-    timestamp: string;  // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
+    timestamp: string;
     status?: PointageStatus;
 }
 
-/**
- * DTO pour mise à jour d'un timesheet
- */
 export interface TimesheetUpdateDTO {
-    timestamp?: string;  // Format: ISO DateTime
+    timestamp?: string;
     clockin?: boolean;
     status?: PointageStatus;
 }
 
-/**
- * DTO de lecture d'un timesheet
- */
 export interface TimesheetReadDTO {
     id: number;
     employeId: number;
-    timestamp: string;  // Format: ISO DateTime "2025-12-13T08:30:00.000Z"
-    clockin: boolean;   // true = entrée, false = sortie
+    timestamp: string;
+    clockin: boolean;
     status: PointageStatus;
     createdAt: string;
     updatedAt: string;
@@ -286,42 +230,31 @@ export interface TimesheetReadDTO {
     };
 }
 
-/**
- * DTO pour liste de timesheets
- */
 export interface TimesheetListItemDTO {
     id: number;
     employeId: number;
     employeNom: string;
-    timestamp: string;  // Format: ISO DateTime
+    timestamp: string;
     clockin: boolean;
     status: PointageStatus;
 }
 
-// Aliases pour compatibilité (à supprimer progressivement)
-/** @deprecated Utiliser TimesheetCreateDTO */
 export type PointageCreateDTO = TimesheetCreateDTO;
-/** @deprecated Utiliser TimesheetUpdateDTO */
+
 export type PointageUpdateDTO = TimesheetUpdateDTO;
-/** @deprecated Utiliser TimesheetReadDTO */
+
 export type PointageReadDTO = TimesheetReadDTO;
-/** @deprecated Utiliser TimesheetListItemDTO */
+
 export type PointageListItemDTO = TimesheetListItemDTO;
 
-/**
- * DTO pour filtrer les timesheets
- */
 export interface TimesheetFilterDTO {
     employeId?: number;
-    startDate?: string;  // Format: "YYYY-MM-DD"
-    endDate?: string;    // Format: "YYYY-MM-DD"
+    startDate?: string;
+    endDate?: string;
     status?: PointageStatus;
     clockin?: boolean;
 }
 
-/**
- * DTO pour les statistiques de timesheets
- */
 export interface TimesheetStatsDTO {
     employeId: number;
     periodeDebut: string;
@@ -335,27 +268,12 @@ export interface TimesheetStatsDTO {
     clockedDays: number;
 }
 
-// Aliases pour compatibilité
-/** @deprecated Utiliser TimesheetFilterDTO */
 export type PointageFilterDTO = TimesheetFilterDTO;
-/** @deprecated Utiliser TimesheetStatsDTO */
+
 export type PointageStatsDTO = TimesheetStatsDTO;
 
-// #endregion
-
-// =========================================
-// HELPER TYPES POUR AXIOS
-// =========================================
-
-/**
- * Type helper pour les réponses Axios
- * Usage: AxiosResponse<ApiData<UserReadDTO>>
- */
 export type ApiData<T> = ApiSuccessResponse<T>['data'];
 
-/**
- * Type guards pour vérifier le succès d'une réponse
- */
 export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiSuccessResponse<T> {
     return response.success === true;
 }
@@ -363,53 +281,4 @@ export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiSucces
 export function isApiError(response: ApiResponse<any>): response is ApiErrorResponse {
     return response.success === false;
 }
-
-// =========================================
-// EXEMPLE D'UTILISATION DANS LE FRONTEND
-// =========================================
-
-/**
- * EXEMPLE AVEC AXIOS
- * 
- * import axios from 'axios';
- * import type { ApiSuccessResponse, UserLoginDTO, TokenResponse } from '@/types/api';
- * 
- * async function login(credentials: UserLoginDTO) {
- *   const response = await axios.post<ApiSuccessResponse<TokenResponse>>(
- *     '/api/users/login',
- *     credentials
- *   );
- *   return response.data.data; // TypeScript sait que c'est un TokenResponse
- * }
- */
-
-/**
- * EXEMPLE AVEC FETCH
- * 
- * import type { ApiSuccessResponse, EquipeListItemDTO } from '@/types/api';
- * 
- * async function getEquipes(): Promise<EquipeListItemDTO[]> {
- *   const response = await fetch('/api/equipes');
- *   const json = await response.json() as ApiSuccessResponse<EquipeListItemDTO[]>;
- *   return json.data;
- * }
- */
-
-/**
- * EXEMPLE AVEC REACT QUERY
- * 
- * import { useQuery } from '@tanstack/react-query';
- * import type { ApiSuccessResponse, HoraireListItemDTO } from '@/types/api';
- * 
- * function useHoraires() {
- *   return useQuery({
- *     queryKey: ['horaires'],
- *     queryFn: async () => {
- *       const response = await fetch('/api/horaires');
- *       const json = await response.json() as ApiSuccessResponse<HoraireListItemDTO[]>;
- *       return json.data;
- *     }
- *   });
- * }
- */
 

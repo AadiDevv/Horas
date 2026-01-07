@@ -1,7 +1,4 @@
-/**
- * @deprecated Ce service est obsolète. Utiliser timesheetService.ts à la place.
- * Les pointages sont maintenant appelés "timesheets" dans la nouvelle API.
- */
+
 
 import { TimesheetReadDTO } from '../../types/backend-generated';
 
@@ -16,14 +13,8 @@ export type ClockResponse = {
   timestamp?: string;
 };
 
-// Mock Data pour les timesheets
 export const mockPointages: TimesheetReadDTO[] = [];
 
-/**
- * API clock in/out - UNE SEULE ROUTE QUI TOGGLE AUTOMATIQUEMENT
- * Si le dernier timesheet est un clock in, cette route fera un clock out
- * Si le dernier timesheet est un clock out (ou s'il n'y a pas de timesheet), cette route fera un clock in
- */
 export async function clockIn(): Promise<ClockResponse> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -31,17 +22,16 @@ export async function clockIn(): Promise<ClockResponse> {
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
-    
+
     const todayTimesheets = mockPointages.filter(p => {
       const pDate = new Date(p.timestamp);
       return pDate >= todayStart;
     });
 
-    // Déterminer si c'est un clock in ou clock out en fonction du dernier timesheet
     let isClockIn = true;
     if (todayTimesheets.length > 0) {
       const lastTimesheet = todayTimesheets[todayTimesheets.length - 1];
-      // Si le dernier est un clock in (true), alors celui-ci sera un clock out (false)
+
       isClockIn = !lastTimesheet.clockin;
     }
 
@@ -69,17 +59,16 @@ export async function clockIn(): Promise<ClockResponse> {
     };
   }
 
-  // MODE PRODUCTION : Utiliser la nouvelle API /api/timesheets/
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE_URL}/api/timesheets/`, {
     method: 'POST',
-    headers: { 
+    headers: {
       'Content-Type': 'application/json',
       ...(token && { 'Authorization': `Bearer ${token}` })
     },
-    body: JSON.stringify({}) // Payload vide pour employé
+    body: JSON.stringify({})
   });
-  
+
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     return {
@@ -88,7 +77,7 @@ export async function clockIn(): Promise<ClockResponse> {
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const data = await res.json();
   return {
     success: true,
@@ -98,15 +87,12 @@ export async function clockIn(): Promise<ClockResponse> {
   };
 }
 
-/**
- * Récupère les timesheets du jour pour déterminer l'état actuel
- */
 export async function getTodayPointages(): Promise<TimesheetReadDTO[]> {
   if (USE_MOCK) {
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
-    
+
     return mockPointages.filter(p => {
       const pDate = new Date(p.timestamp);
       return pDate >= todayStart;
@@ -124,20 +110,16 @@ export async function getTodayPointages(): Promise<TimesheetReadDTO[]> {
   return response.data || [];
 }
 
-/**
- * Récupère les timesheets de la semaine en cours
- */
 export async function getWeekPointages(): Promise<TimesheetReadDTO[]> {
   if (USE_MOCK) {
-    // Calculer le lundi de la semaine en cours
+
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, etc.
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si dimanche, -6, sinon 1 - jour
+    const dayOfWeek = today.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const monday = new Date(today);
     monday.setDate(today.getDate() + diff);
     monday.setHours(0, 0, 0, 0);
 
-    // Calculer le dimanche de la semaine en cours
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
@@ -153,7 +135,6 @@ export async function getWeekPointages(): Promise<TimesheetReadDTO[]> {
     return weekTimesheets;
   }
 
-  // Calculer les dates de début et fin de semaine
   const today = new Date();
   const dayOfWeek = today.getDay();
   const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;

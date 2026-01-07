@@ -119,7 +119,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       }
 
       const absences = absencesResponse.data || [];
-      // Mapper 'delay' → 'retard' depuis le backend pour le calcul des stats
       const timesheets = (timesheetsResponse.data || []).map(ts => ({
         ...ts,
         status: ts.status === 'delay' ? 'retard' : ts.status

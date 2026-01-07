@@ -4,7 +4,6 @@ import { apiClient } from '../../utils/apiClient';
 const API_BASE_URL = "http://localhost:8080";
 const USE_MOCK = false;
 
-// Mock Data
 const mockUsers: User[] = [
   {
     id: 1,
@@ -24,7 +23,6 @@ const mockUsers: User[] = [
   }
 ];
 
-// Interface pour le format des données backend
 interface BackendUser {
   id: number;
   firstName: string;
@@ -41,7 +39,6 @@ interface BackendUser {
   deletedAt?: string | null;
 }
 
-// Helper pour transformer les données backend -> frontend
 const transformUserFromBackend = (data: BackendUser): User => ({
   id: data.id,
   prenom: data.firstName,
@@ -58,14 +55,13 @@ const transformUserFromBackend = (data: BackendUser): User => ({
   deletedAt: data.deletedAt
 });
 
-// Helper pour transformer les données frontend -> backend (UPDATE)
 const transformUserToBackend = (updates: Partial<User>): Partial<BackendUser> => {
   const backendData: Partial<BackendUser> = {};
   if (updates.prenom !== undefined) backendData.firstName = updates.prenom;
   if (updates.nom !== undefined) backendData.lastName = updates.nom;
   if (updates.email !== undefined) backendData.email = updates.email;
   if (updates.telephone !== undefined) backendData.phone = updates.telephone;
-  // Autres champs si nécessaire
+
   return backendData;
 };
 
@@ -85,9 +81,9 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
   }
 
   const requete = await apiClient.get(`${API_BASE_URL}/api/users/${userId}`);
-  
+
   const response = await requete.json();
-  
+
   if (!response.success || !response.data) {
     throw new Error(response.message || "Erreur récupération utilisateur");
   }
@@ -108,11 +104,11 @@ export async function updateUser(userId: number, updates: Partial<User>): Promis
       updatedAt: new Date().toISOString()
     };
     mockUsers[userIndex] = updatedUser;
-    
+
     console.log('🔄 Mock PATCH /api/users/' + userId);
     console.log('📝 Données envoyées:', updates);
     console.log('✅ Utilisateur mis à jour:', updatedUser);
-    
+
     return {
       success: true,
       data: updatedUser,
@@ -120,13 +116,13 @@ export async function updateUser(userId: number, updates: Partial<User>): Promis
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const backendData = transformUserToBackend(updates);
-  
+
   const requete = await apiClient.patch(`${API_BASE_URL}/api/users/${userId}`, backendData);
-  
+
   const response = await requete.json();
-  
+
   if (!response.success || !response.data) {
      throw new Error(response.message || "Erreur mise à jour");
   }
@@ -138,16 +134,16 @@ export async function updateUser(userId: number, updates: Partial<User>): Promis
 }
 
 export async function changePassword(
-  userId: number, 
-  oldPassword: string, 
+  userId: number,
+  oldPassword: string,
   newPassword: string
 ): Promise<ApiResponse<void>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     console.log('🔒 Mock PATCH /api/users/' + userId + '/password');
     console.log('📝 Changement de mot de passe simulé');
-    
+
     const user = mockUsers.find(u => u.id === userId);
     if (user && user.oldPassword !== oldPassword) {
       return {
@@ -156,7 +152,7 @@ export async function changePassword(
         timestamp: new Date().toISOString()
       };
     }
-    
+
     if (!oldPassword) {
       return {
         success: false,
@@ -164,24 +160,24 @@ export async function changePassword(
         timestamp: new Date().toISOString()
       };
     }
-    
+
     return {
       success: true,
       message: "Mot de passe modifié avec succès",
       timestamp: new Date().toISOString()
     };
   }
-  
+
   const requete = await apiClient.patch(`${API_BASE_URL}/api/users/${userId}/password`, {
     oldPassword,
     newPassword
   });
-  
+
   const response = await requete.json();
-  
+
   if (!response.success) {
     throw new Error(response.message || "Erreur lors du changement de mot de passe");
   }
-  
+
   return response;
 }

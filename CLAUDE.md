@@ -1,202 +1,202 @@
-# Horas - Système de gestion du temps
+# Horas - Time Management System
 
-## Vue d'ensemble du projet
+## Project Overview
 
-Horas est une application de gestion du temps (timesheet) permettant aux employés de pointer leurs heures et aux managers de gérer les équipes et consulter les rapports.
+Horas is a time management application (timesheet) allowing employees to clock their hours and managers to manage teams and consult reports.
 
-### Domaine métier
-- **Gestion du temps** : Enregistrement des arrivées/départs (clocks)
-- **Gestion d'équipes** : Organisation en équipes avec managers
-- **Rapports & KPIs** : Analyse des heures travaillées
-- **Authentification basée sur les rôles** : Employé vs Manager
+### Business Domain
+- **Time Management**: Recording clock in/out times
+- **Team Management**: Team organization with managers
+- **Reports & KPIs**: Analysis of hours worked
+- **Role-based Authentication**: Employee vs Manager
 
-## Architecture du monorepo
+## Monorepo Architecture
 
 ```
 Horas/
 ├── backend-app/          # Backend Express + TypeScript (Clean Architecture)
-│   ├── Dockerfile        # Production (multi-stage, optimisé)
-│   └── Dockerfile.dev    # Développement (hot-reload, tests)
+│   ├── Dockerfile        # Production (multi-stage, optimized)
+│   └── Dockerfile.dev    # Development (hot-reload, tests)
 ├── frontend/             # Frontend Next.js + TypeScript
-│   ├── Dockerfile        # Développement
-│   └── Dockerfile.prod   # Production (multi-stage, optimisé)
-├── nginx/                # Configuration reverse proxy
-├── compose.yml           # Docker Compose développement
+│   ├── Dockerfile        # Development
+│   └── Dockerfile.prod   # Production (multi-stage, optimized)
+├── nginx/                # Reverse proxy configuration
+├── compose.yml           # Docker Compose development
 ├── compose.prod.yml      # Docker Compose production
-├── TECHNICAL_SPECS.md    # Spécifications techniques détaillées
-└── CLAUDE.md             # Ce fichier
+├── TECHNICAL_SPECS.md    # Detailed technical specifications
+└── CLAUDE.md             # This file
 ```
 
-### Contexte spécifique par dossier
-- **backend-app/** : Consulter `backend-app/claude.md` pour l'architecture Clean Architecture
-- **frontend/** : Consulter `frontend/claude.md` pour les conventions Next.js
+### Folder-Specific Context
+- **backend-app/**: Consult `backend-app/claude.md` for Clean Architecture details
+- **frontend/**: Consult `frontend/claude.md` for Next.js conventions
 
-## Stack technologique
+## Technology Stack
 
 ### Frontend
-- **Framework** : Next.js (React 19)
-- **Language** : TypeScript
-- **Port** : 3000
+- **Framework**: Next.js (React 19)
+- **Language**: TypeScript
+- **Port**: 3000
 
 ### Backend
-- **Framework** : Express.js
-- **Language** : TypeScript
-- **ORM** : Prisma
-- **Base de données** : PostgreSQL (cloud Néon)
-- **Port** : 5000
-- **Architecture** : Clean Architecture (domain, application, infrastructure, presentation)
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **ORM**: Prisma
+- **Database**: PostgreSQL (Neon Cloud)
+- **Port**: 5000
+- **Architecture**: Clean Architecture (domain, application, infrastructure, presentation)
 
 ### Infrastructure
-- **Orchestration** : Docker Compose
-- **Reverse Proxy** : Nginx (port 8080)
-- **CI/CD** : GitHub Actions
+- **Orchestration**: Docker Compose
+- **Reverse Proxy**: Nginx (port 8080)
+- **CI/CD**: GitHub Actions
 
-### Sécurité
-- **Authentification** : JWT (jsonwebtoken)
-- **Hash passwords** : bcrypt
-- **Protection** : helmet, cors
+### Security
+- **Authentication**: JWT (jsonwebtoken)
+- **Password Hashing**: bcrypt
+- **Protection**: helmet, cors
 
-## Démarrage rapide
+## Quick Start
 
-### Développement avec Docker
+### Development with Docker
 ```bash
 docker-compose up
-# OU
+# OR
 docker-compose -f compose.yml up
 ```
-- Frontend : http://localhost:3000
-- Backend : http://localhost:5000
-- Nginx : http://localhost:8080
+- Frontend: http://localhost:3000
+- Backend: http://localhost:5000
+- Nginx: http://localhost:8080
 
-### Production avec Docker
+### Production with Docker
 ```bash
 docker-compose -f compose.prod.yml up -d
 ```
-- Mode optimisé (multi-stage builds, sans volumes)
-- Pas de hot-reload
-- Images légères (production dependencies seulement)
+- Optimized mode (multi-stage builds, no volumes)
+- No hot-reload
+- Lightweight images (production dependencies only)
 
-### Tests dans Docker
+### Testing in Docker
 ```bash
-# Lancer les tests backend
+# Run backend tests
 docker-compose run --rm backend npm test
 
-# Tests en mode watch
+# Watch mode
 docker-compose run --rm backend npm run test:watch
 
 # Coverage
 docker-compose run --rm backend npm run test:coverage
 ```
 
-### Backend seul
+### Backend Only
 ```bash
 cd backend-app
-npm run dev              # Démarrer le serveur de dev
-npm run db:generate      # Générer le client Prisma
-npm run db:push          # Pousser le schéma vers la DB
-npm run db:migrate       # Créer une migration
-npm run db:seed          # Seed la base de données
-npm run db:studio        # Ouvrir Prisma Studio
-npm test                 # Lancer les tests
-npm run test:watch       # Mode watch
-npm run test:coverage    # Avec couverture
+npm run dev              # Start dev server
+npm run db:generate      # Generate Prisma client
+npm run db:push          # Push schema to DB
+npm run db:migrate       # Create a migration
+npm run db:seed          # Seed the database
+npm run db:studio        # Open Prisma Studio
+npm test                 # Run tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # With coverage
 ```
 
-### Frontend seul
+### Frontend Only
 ```bash
 cd frontend
-npm run dev              # Démarrer Next.js
-npm run build            # Build production
-npm start                # Démarrer en mode production
+npm run dev              # Start Next.js
+npm run build            # Production build
+npm start                # Start in production mode
 ```
 
-## Workflow Git
+## Git Workflow
 
-### Branches principales
-- **main** : Branche de production
-- **dev** : Branche de développement
+### Main Branches
+- **main**: Production branch
+- **dev**: Development branch
 
-### Convention de branches
-- `feature/nom-feature` : Nouvelles fonctionnalités
-- `fix/nom-bug` : Corrections de bugs
-- Exemple actuel : `assignSchedualToTeam`
+### Branch Naming Convention
+- `feature/feature-name`: New features
+- `fix/bug-name`: Bug fixes
+- Current example: `assignSchedualToTeam`
 
 ### Commits
-- Utiliser des messages clairs et descriptifs
-- Préfixer avec le type : `feat:`, `fix:`, `refactor:`, `docs:`
-- Exemple : `feat(Scheduals): Add schedule assignment to team`
+- Use clear and descriptive messages
+- Prefix with type: `feat:`, `fix:`, `refactor:`, `docs:`
+- Example: `feat(Scheduals): Add schedule assignment to team`
 
-## Rôles utilisateurs
+## User Roles
 
-### Employé
-- Pointer (clock in/out)
-- Consulter ses heures
-- Éditer son profil
+### Employee
+- Clock in/out
+- View their hours
+- Edit their profile
 
 ### Manager
-- Toutes les permissions d'un employé
-- Gérer les équipes
-- Consulter les rapports et KPIs
+- All employee permissions
+- Manage teams
+- View reports and KPIs
 
-## Endpoints API principaux
+## Main API Endpoints
 
-| Méthode | Route | Description |
+| Method | Route | Description |
 |---------|-------|-------------|
-| POST | `/auth/login` | Authentification JWT |
-| GET/POST | `/users` | Gestion des utilisateurs |
-| GET/POST | `/teams` | Gestion des équipes |
-| POST | `/clocks` | Enregistrer un timesheet |
-| GET | `/users/{id}/clock` | Historique d'un employé |
-| GET | `/reports` | Générer des rapports |
+| POST | `/auth/login` | JWT authentication |
+| GET/POST | `/users` | User management |
+| GET/POST | `/teams` | Team management |
+| POST | `/clocks` | Record a timesheet |
+| GET | `/users/{id}/clock` | Employee history |
+| GET | `/reports` | Generate reports |
 
-Voir `TECHNICAL_SPECS.md` pour la documentation complète.
+See `TECHNICAL_SPECS.md` for complete documentation.
 
-## Variables d'environnement
+## Environment Variables
 
-### Fichiers
-- `.env.dev` : Environnement de développement
-- `.env.prod` : Environnement de production
+### Files
+- `.env.dev`: Development environment
+- `.env.prod`: Production environment
 
 ### Important
-**JAMAIS** committer les fichiers `.env` - ils contiennent des secrets (JWT, DB credentials)
+**NEVER** commit `.env` files - they contain secrets (JWT, DB credentials)
 
 ## Tests
 
 ```bash
 cd backend-app
-npm test                 # Lancer les tests
-npm run test:watch       # Mode watch
-npm run test:coverage    # Avec couverture
+npm test                 # Run tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # With coverage
 ```
 
-## Documentation complémentaire
+## Additional Documentation
 
-- **Spécifications techniques** : `TECHNICAL_SPECS.md`
-- **Architecture backend** : `backend-app/claude.md`
-- **Architecture frontend** : `frontend/claude.md`
-- **API Swagger** : http://localhost:5000/api-docs (quand le backend tourne)
+- **Technical Specifications**: `TECHNICAL_SPECS.md`
+- **Backend Architecture**: `backend-app/claude.md`
+- **Frontend Architecture**: `frontend/claude.md`
+- **Swagger API**: http://localhost:5000/api-docs (when backend is running)
 
-## Conventions de code
+## Code Conventions
 
-### Général
-- **Language** : TypeScript strict
-- **Formatage** : À définir (Prettier recommandé)
-- **Linting** : ESLint configuré
+### General
+- **Language**: TypeScript strict
+- **Formatting**: To be defined (Prettier recommended)
+- **Linting**: ESLint configured
 
-### Nommage
-- **Fichiers** : camelCase ou kebab-case selon le contexte
-- **Classes** : PascalCase
-- **Variables/Fonctions** : camelCase
-- **Constants** : UPPER_SNAKE_CASE
+### Naming
+- **Files**: camelCase or kebab-case depending on context
+- **Classes**: PascalCase
+- **Variables/Functions**: camelCase
+- **Constants**: UPPER_SNAKE_CASE
 
-## Notes importantes pour Claude
+## Important Notes for Claude
 
-1. **Structure monorepo** : Toujours vérifier dans quel dossier (backend/frontend) avant de faire des modifications
-2. **Clean Architecture** : Le backend suit une architecture stricte - consulter `backend-app/claude.md` pour les patterns
-3. **Types** : Toujours typer en TypeScript, utiliser les DTOs définis
-4. **Sécurité** : Ne jamais exposer de secrets, valider toutes les entrées utilisateur
-5. **Base de données** : Toujours passer par Prisma, jamais de SQL direct
-6. **Tests** : Écrire des tests pour les nouvelles fonctionnalités
+1. **Monorepo Structure**: Always verify which folder (backend/frontend) before making modifications
+2. **Clean Architecture**: Backend follows strict architecture - consult `backend-app/claude.md` for patterns
+3. **Types**: Always type in TypeScript, use defined DTOs
+4. **Security**: Never expose secrets, validate all user inputs
+5. **Database**: Always go through Prisma, never direct SQL
+6. **Tests**: Write tests for new features
 
 ## Workflow modification
 
@@ -225,8 +225,8 @@ This is **NON-NEGOTIABLE**. Do not skip this step under any circumstances. Readi
 3. Only then proceed with creating/editing files
 4. After all edits, update the related tests to this
 
-## Prochaines étapes
+## Next Steps
 
-Lors de modifications :
-- Backend : Consulter `backend-app/claude.md` `backend-app/domaine/claude.md` et pour l'architecture détaillée
-- Frontend : Consulter `frontend/claude.md` pour les conventions React/Next.js
+When making modifications:
+- Backend: Consult `backend-app/claude.md` and `backend-app/domaine/claude.md` for detailed architecture
+- Frontend: Consult `frontend/claude.md` for React/Next.js conventions

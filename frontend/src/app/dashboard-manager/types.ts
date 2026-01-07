@@ -13,8 +13,8 @@ export interface Agent {
   updatedAt?: string;
   lastLoginAt?: string;
   deletedAt?: string;
-  // Relations (retournées par GET /api/users/{id})
-  equipeNom?: string; // teamName depuis l'API
+
+  equipeNom?: string;
   manager?: {
     id: number;
     prenom: string;
@@ -58,7 +58,7 @@ export interface AgentFormData {
   telephone: string;
   role: string;
   equipeId: string;
-  password?: string; // Requis uniquement lors de la création
+  password?: string;
 }
 
 export interface EquipeFormData {
@@ -94,4 +94,34 @@ export interface ApiResponse<T> {
   timestamp?: string;
 }
 
-export type DashboardPage = 'dashboard' | 'agents' | 'equipes' | 'pointages';
+export interface Schedule {
+  id: number;
+  name: string;
+  startHour: string;
+  endHour: string;
+  activeDays: number[];
+  usersCount?: number;
+  managerId?: number;
+  createdAt: string;
+  updatedAt?: string;
+  manager?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  teams?: Array<{
+    id: number;
+    name: string;
+    membersCount: number;
+  }>;
+}
+
+export interface ScheduleFormData {
+  name: string;
+  startHour: string;
+  endHour: string;
+  activeDays: number[];
+}
+
+export type DashboardPage = 'dashboard' | 'agents' | 'equipes' | 'pointages' | 'horaires';

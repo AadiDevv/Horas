@@ -1,23 +1,23 @@
-import { useState, useEffect } from 'react';
-import { X, Save, Clock, Calendar as CalendarIcon } from 'lucide-react';
-import { Timesheet } from '../services/timesheetService';
+import { useState, useEffect } from "react";
+import { X, Save, Clock, Calendar as CalendarIcon } from "lucide-react";
+import { Timesheet } from "../services/timesheetService";
 
 interface TimesheetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: TimesheetData) => Promise<void>;
-  timesheet?: Timesheet | null; // Si null = création, sinon édition
+  timesheet?: Timesheet | null;
   employeeId: number;
   employeeName: string;
-  initialDate?: string; // Pour la création
-  initialHour?: string; // Pour la création
+  initialDate?: string;
+  initialHour?: string;
 }
 
 export interface TimesheetData {
   id?: number;
   employeId: number;
-  timestamp: string; // ISO DateTime
-  status: 'normal' | 'retard' | 'absence';
+  timestamp: string;
+  status: "normal" | "retard" | "absence";
 }
 
 export default function TimesheetModal({
@@ -28,79 +28,75 @@ export default function TimesheetModal({
   employeeId,
   employeeName,
   initialDate,
-  initialHour
+  initialHour,
 }: TimesheetModalProps) {
   const isEditing = !!timesheet;
 
   const [formData, setFormData] = useState<TimesheetData>({
     employeId: 0,
-    timestamp: '',
-    status: 'normal'
+    timestamp: "",
+    status: "normal",
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  // Initialiser le formulaire
   useEffect(() => {
     if (timesheet) {
-      // Mode édition
       setFormData({
         id: timesheet.id,
         employeId: timesheet.employeId,
         timestamp: timesheet.timestamp,
-        status: timesheet.status
+        status: timesheet.status,
       });
     } else {
-      // Mode création
       const timestamp = initialHour || new Date().toISOString();
 
       setFormData({
         employeId: employeeId,
         timestamp,
-        status: 'normal'
+        status: "normal",
       });
     }
-    setError('');
+    setError("");
   }, [timesheet, employeeId, initialDate, initialHour]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setSaving(true);
 
     try {
       await onSave(formData);
       onClose();
     } catch (err) {
-      setError((err as Error).message || 'Erreur lors de l\'enregistrement');
+      setError((err as Error).message || "Erreur lors de l'enregistrement");
     } finally {
       setSaving(false);
     }
   };
 
-  // Convertir timestamp ISO en date et heure séparées pour les inputs
   const getDateFromTimestamp = () => {
-    if (!formData.timestamp) return '';
-    return formData.timestamp.split('T')[0];
+    if (!formData.timestamp) return "";
+    return formData.timestamp.split("T")[0];
   };
 
   const getTimeFromTimestamp = () => {
-    if (!formData.timestamp) return '';
+    if (!formData.timestamp) return "";
     const date = new Date(formData.timestamp);
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
   const updateDateTime = (dateStr?: string, timeStr?: string) => {
     const currentDate = dateStr || getDateFromTimestamp();
     const currentTime = timeStr || getTimeFromTimestamp();
 
-    const [hours, minutes] = currentTime.split(':');
+    const [hours, minutes] = currentTime.split(":");
     const isoDate = new Date(currentDate);
     isoDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      timestamp: isoDate.toISOString()
+      timestamp: isoDate.toISOString(),
     }));
   };
 
@@ -109,17 +105,16 @@ export default function TimesheetModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {isEditing ? 'Modifier le pointage' : 'Créer un pointage'}
+              {isEditing ? "Modifier le pointage" : "Créer un pointage"}
             </h2>
             <p className="text-sm text-gray-600 mt-1">{employeeName}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer active:scale-95"
           >
             <X size={24} />
           </button>
@@ -132,9 +127,6 @@ export default function TimesheetModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Note: clockin est auto-déterminé par le backend */}
-          
-          {/* Date */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               <CalendarIcon size={16} className="inline mr-1" />
@@ -149,7 +141,6 @@ export default function TimesheetModal({
             />
           </div>
 
-          {/* Heure */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               <Clock size={16} className="inline mr-1" />
@@ -164,14 +155,18 @@ export default function TimesheetModal({
             />
           </div>
 
-          {/* Statut */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Statut
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  status: e.target.value as any,
+                }))
+              }
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             >
               <option value="normal">Normal</option>
@@ -180,19 +175,18 @@ export default function TimesheetModal({
             </select>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors"
+              className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-semibold transition-colors cursor-pointer active:scale-95"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
             >
               {saving ? (
                 <>

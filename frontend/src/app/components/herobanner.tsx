@@ -54,7 +54,6 @@ export default function Hero() {
   return (
     <section className="bg-white min-h-screen flex items-center px-6 py-12 sm:px-16 sm:py-0 font-sans">
       <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full max-w-7xl mx-auto gap-10">
-        {/* Texte + CTA à gauche */}
         <div className="w-full lg:w-1/2 text-center lg:text-left">
           <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
             Gérez votre temps efficacement
@@ -64,13 +63,12 @@ export default function Hero() {
           </p>
           <Button
             onClick={handleButtonClick}
-            className="text-white px-6 py-3 rounded-lg shadow-lg transition duration-300"
+            className="text-white px-6 py-3 rounded-lg shadow-lg transition duration-300 cursor-pointer hover:bg-[#555555]"
           >
             {isAuthenticated ? "Accéder au tableau de bord" : "Commencer"}
           </Button>
         </div>
 
-        {/* Image produit à droite */}
         <div className="w-full lg:w-1/2">
           <Image
             src={productImage}

@@ -1,6 +1,4 @@
-/**
- * Service pour gérer les absences côté manager
- */
+
 
 import { formatDateLocal } from '@/app/utils/dateUtils';
 
@@ -14,8 +12,8 @@ export interface Absence {
   employeId: number;
   type: AbsenceType;
   status: AbsenceStatus;
-  startDateTime: string; // Format: ISO DateTime "2025-12-29T08:30:00.000Z"
-  endDateTime: string;   // Format: ISO DateTime "2025-12-29T17:30:00.000Z"
+  startDateTime: string;
+  endDateTime: string;
   isFullDay: boolean;
   validatedBy: number | null;
   validatedAt: string | null;
@@ -29,16 +27,12 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-/**
- * GET /api/absences
- * Récupère les absences avec filtres
- */
 export async function getAbsences(params: {
   employeId?: number;
   status?: AbsenceStatus;
   type?: AbsenceType;
-  startDate?: string; // Format: "YYYY-MM-DD"
-  endDate?: string;   // Format: "YYYY-MM-DD"
+  startDate?: string;
+  endDate?: string;
 }): Promise<ApiResponse<Absence[]>> {
   try {
     const token = localStorage.getItem('token');
@@ -86,10 +80,6 @@ export async function getAbsences(params: {
   }
 }
 
-/**
- * GET /api/absences/pending
- * Récupère les absences en attente de validation pour le manager
- */
 export async function getPendingAbsences(): Promise<ApiResponse<Absence[]>> {
   try {
     const token = localStorage.getItem('token');
@@ -128,15 +118,11 @@ export async function getPendingAbsences(): Promise<ApiResponse<Absence[]>> {
   }
 }
 
-/**
- * POST /api/absences
- * Crée une nouvelle absence
- */
 export async function createAbsence(absence: {
   employeId: number;
   type: AbsenceType;
-  startDateTime: string; // ISO DateTime
-  endDateTime: string;   // ISO DateTime
+  startDateTime: string;
+  endDateTime: string;
   comments?: string;
   status?: AbsenceStatus;
 }): Promise<ApiResponse<Absence>> {
@@ -156,7 +142,7 @@ export async function createAbsence(absence: {
         type: absence.type,
         startDateTime: absence.startDateTime,
         endDateTime: absence.endDateTime,
-        isFullDay: true, // Par défaut journée complète
+        isFullDay: true,
         comments: absence.comments || null,
         status: absence.status || 'en_attente'
       })
@@ -185,10 +171,6 @@ export async function createAbsence(absence: {
   }
 }
 
-/**
- * PATCH /api/absences/:id/validate
- * Valide ou refuse une absence
- */
 export async function validateAbsence(
   id: number,
   status: 'approuve' | 'refuse',
