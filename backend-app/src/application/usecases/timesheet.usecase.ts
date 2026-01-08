@@ -123,6 +123,8 @@ export class TimesheetUseCase {
         let timestamp: Date;
         if (authUser.role === 'employe') {
             // Employé : timestamp automatique (temps réel)
+            // On utilise directement new Date() car on veut l'heure locale du serveur
+            // Le serveur doit être configuré dans le bon fuseau horaire
             timestamp = new Date();
         } else {
             // Manager/Admin : peut spécifier ou auto

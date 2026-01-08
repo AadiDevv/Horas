@@ -26,6 +26,7 @@ import {
   getWeekDays,
   getMonday as getUtilMonday,
   formatDateLocal,
+  formatDateTimeUTC,
 } from "@/app/utils/dateUtils";
 
 interface Horaire {
@@ -260,12 +261,13 @@ export default function PointagesManagement({
   };
 
   const handleSaveBlock = async (data: BlockData) => {
-    const entryTimestamp = `${data.date}T${data.startTime}:00.000Z`;
+    // Utiliser formatDateTimeUTC pour convertir l'heure locale en UTC
+    const entryTimestamp = formatDateTimeUTC(data.date, data.startTime);
 
     const backendStatus = data.status === "retard" ? "delay" : data.status;
 
     if (data.entryId && data.exitId) {
-      const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
+      const exitTimestamp = formatDateTimeUTC(data.date, data.endTime);
       await updateTimesheetPair({
         entryId: data.entryId,
         exitId: data.exitId,
@@ -280,7 +282,7 @@ export default function PointagesManagement({
         status: backendStatus as any,
       });
     } else {
-      const exitTimestamp = `${data.date}T${data.endTime}:00.000Z`;
+      const exitTimestamp = formatDateTimeUTC(data.date, data.endTime);
       await createTimesheet({
         employeId: data.employeId,
         timestamp: entryTimestamp,

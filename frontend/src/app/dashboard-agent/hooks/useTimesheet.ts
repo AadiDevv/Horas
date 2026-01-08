@@ -9,6 +9,7 @@ import {
   Timesheet,
   TimesheetStats
 } from '../services/timesheetService';
+import { extractTimeLocal } from '@/app/utils/dateUtils';
 
 export function useTimesheet() {
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
@@ -235,15 +236,16 @@ export function useTimesheet() {
 
             const nextTimesheet = sortedTimesheets[i + 1];
 
-            const start = timesheet.timestamp ? new Date(timesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
+            const start = extractTimeLocal(timesheet.timestamp);
 
             console.log(`  ➡️ Entrée trouvée à ${start}`);
 
             if (nextTimesheet && nextTimesheet.clockin === false) {
 
-              const end = nextTimesheet.timestamp ? new Date(nextTimesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
-              dayLogs.push({ start, end });
-              console.log(`  ✅ Paire complète: ${start} - ${end}`);
+              const end = extractTimeLocal(nextTimesheet.timestamp);
+              const normalizedStatus = timesheet.status === 'delay' ? 'retard' : timesheet.status;
+              dayLogs.push({ start, end, status: normalizedStatus });
+              console.log(`  ✅ Paire complète: ${start} - ${end}, statut: ${normalizedStatus}`);
               i++;
             } else {
 
@@ -307,7 +309,7 @@ export function useTimesheet() {
           console.log('✅ Clock-in actif détecté!');
           setLastClockIn(lastTimesheet);
           setIsClockingIn(true);
-          const time = lastTimesheet.timestamp ? new Date(lastTimesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
+          const time = extractTimeLocal(lastTimesheet.timestamp);
           setCurrentDayLogs({ start: time });
           console.log('✅ States mis à jour: isClockingIn=true, start=', time);
         } else {
@@ -358,7 +360,7 @@ export function useTimesheet() {
       if (response.success && response.data) {
         console.log('✅ Data reçue:', response.data);
 
-        const time = response.data.timestamp ? new Date(response.data.timestamp).toTimeString().substring(0, 5) : '00:00';
+        const time = response.data.timestamp ? extractTimeLocal(response.data.timestamp) : '00:00';
 
         console.log(`⏰ Heure extraite: ${time}, clockin: ${response.data.clockin}`);
 
