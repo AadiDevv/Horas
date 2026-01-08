@@ -321,9 +321,7 @@ export class AbsenceUseCase {
             if (!employee || employee.managerId !== userId) {
                 throw new ForbiddenError("Vous ne pouvez supprimer que les absences de vos employés");
             }
-            if (absence.status !== 'en_attente') {
-                throw new ForbiddenError("Vous ne pouvez supprimer que les absences en attente");
-            }
+            // Manager peut supprimer les absences quel que soit leur statut
         }
 
         await this.R_absence.deleteAbsence_ById(id);

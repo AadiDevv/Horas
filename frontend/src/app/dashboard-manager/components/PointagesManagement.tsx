@@ -15,6 +15,7 @@ import {
   Absence,
   validateAbsence,
   createAbsence,
+  deleteAbsence,
 } from "../services/absenceService";
 import { getUserSchedule } from "@/app/dashboard-agent/services/equipeService";
 import WeeklyTimeline from "./WeeklyTimeline";
@@ -360,6 +361,23 @@ export default function PointagesManagement({
     }
   };
 
+  const handleDeleteAbsence = async (id: number) => {
+    try {
+      const result = await deleteAbsence(id);
+      if (result.success) {
+        await loadAbsences();
+        await loadPendingAbsences();
+        onRefresh();
+        setShowAbsenceModal(false);
+      } else {
+        throw new Error(result.error || 'Erreur de suppression');
+      }
+    } catch (error) {
+      console.error("Erreur suppression absence:", error);
+      throw error;
+    }
+  };
+
   const handleSaveAbsenceFromBlockModal = async (data: any) => {
     try {
       await createAbsence({
@@ -641,6 +659,7 @@ export default function PointagesManagement({
               setEditingAbsence(null);
             }}
             onSave={handleSaveAbsence}
+            onDelete={handleDeleteAbsence}
             absence={editingAbsence}
             employeeId={selectedAgent.id}
             employeeName={`${selectedAgent.prenom} ${selectedAgent.nom}`}

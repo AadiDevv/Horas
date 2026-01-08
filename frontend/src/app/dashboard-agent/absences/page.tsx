@@ -9,12 +9,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import Navbar from "@/app/components/navbar";
 import RoleProtection from "@/app/middleware/roleProtection";
 import {
   getAbsences,
   createAbsence,
+  deleteAbsence,
   Absence,
   AbsenceType,
 } from "@/app/dashboard-manager/services/absenceService";
@@ -100,6 +102,26 @@ export default function MesAbsencesPage() {
     } catch (error) {
       console.error("❌ Erreur création absence:", error);
       throw error;
+    }
+  };
+
+  const handleDeleteAbsence = async (id: number) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette demande d'absence ?")) {
+      return;
+    }
+
+    try {
+      const result = await deleteAbsence(id);
+      if (result.success) {
+        console.log("✅ Absence supprimée avec succès");
+        await loadAbsences();
+      } else {
+        console.error("❌ Erreur lors de la suppression:", result.error);
+        alert("Erreur lors de la suppression de l'absence");
+      }
+    } catch (error) {
+      console.error("❌ Erreur suppression absence:", error);
+      alert("Erreur lors de la suppression de l'absence");
     }
   };
 
@@ -280,6 +302,17 @@ export default function MesAbsencesPage() {
                             </div>
                           )}
                         </div>
+
+                        {/* Bouton de suppression pour les absences en attente */}
+                        {absence.status === "en_attente" && (
+                          <button
+                            onClick={() => handleDeleteAbsence(absence.id)}
+                            className="ml-4 p-2 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95"
+                            title="Supprimer la demande"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

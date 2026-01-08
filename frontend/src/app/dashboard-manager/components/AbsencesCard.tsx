@@ -1,7 +1,8 @@
-import { UserX } from "lucide-react";
+import { UserX, Trash2 } from "lucide-react";
 import { getAbsenceColorFromLabelOrType } from '../config/timelineStylesConfig';
 
 interface Absence {
+  id?: number;
   employeNom: string;
   type: string;
   dateDebut: string;
@@ -11,11 +12,13 @@ interface Absence {
 interface AbsencesCardProps {
   absences: Absence[];
   absencesEnAttente: number;
+  onDeleteAbsence?: (id: number) => void;
 }
 
 export default function AbsencesCard({
   absences = [],
   absencesEnAttente = 0,
+  onDeleteAbsence,
 }: AbsencesCardProps) {
 
   const formatDate = (dateStr: string) => {
@@ -83,6 +86,15 @@ export default function AbsencesCard({
                   {formatDate(absence.dateDebut)} -{" "}
                   {formatDate(absence.dateFin)}
                 </span>
+                {onDeleteAbsence && absence.id && (
+                  <button
+                    onClick={() => onDeleteAbsence(absence.id!)}
+                    className="ml-2 p-1.5 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95"
+                    title="Supprimer l'absence"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
