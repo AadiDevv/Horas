@@ -130,9 +130,16 @@ export function useTimesheet() {
       console.log(`  ✅ Ajout à heuresSemaine: ${dayHours.toFixed(2)}h, total = ${heuresSemaine.toFixed(2)}h`);
 
       if (date >= firstDayOfMonth) {
-
-        const retards = sorted.filter(t => t.status === 'retard' && t.clockin === true);
+        // Compter les retards (clockin uniquement)
+        const retards = sorted.filter(t => {
+          const isRetard = (t.status === 'retard' || t.status === 'delay') && t.clockin === true;
+          if (isRetard) {
+            console.log(`  🔶 Retard détecté: ${t.timestamp} (status: ${t.status})`);
+          }
+          return isRetard;
+        });
         retardsMois += retards.length;
+        console.log(`  📊 ${date} - Retards ce jour: ${retards.length}, total mois: ${retardsMois}`);
       }
     });
 
