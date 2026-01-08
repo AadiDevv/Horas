@@ -2,8 +2,9 @@
 
 import { apiClient } from '@/app/utils/apiClient';
 import { formatDateLocal, getSunday } from '@/app/utils/dateUtils';
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 export interface Timesheet {
   id: number;

@@ -1,8 +1,9 @@
 
 
 import { formatDateLocal } from '@/app/utils/dateUtils';
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 export type AbsenceType = 'conges_payes' | 'conges_sans_solde' | 'maladie' | 'formation' | 'teletravail' | 'autre';
 export type AbsenceStatus = 'en_attente' | 'approuve' | 'refuse' | 'annule';

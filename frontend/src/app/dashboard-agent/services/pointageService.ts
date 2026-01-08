@@ -1,9 +1,10 @@
 
 
 import { TimesheetReadDTO } from '../../types/backend-generated';
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = true;
+const API_BASE_URL = API_CONFIG.BASE_URL;
+const USE_MOCK = API_CONFIG.USE_MOCK;
 
 export type ClockResponse = {
   success: boolean;

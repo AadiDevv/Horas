@@ -1,8 +1,9 @@
 import { User, ApiResponse } from '../types';
 import { apiClient } from '../../utils/apiClient';
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = false;
+const API_BASE_URL = API_CONFIG.BASE_URL;
+const USE_MOCK = API_CONFIG.USE_MOCK;
 
 const mockUsers: User[] = [
   {
