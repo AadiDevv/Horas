@@ -251,8 +251,8 @@ function ManagerDashboard() {
                   />
                   <KpiCard
                     title="Taux de présence"
-                    value={`${Math.round((agents.filter((a) => a.isActive).length / Math.max(agents.length, 1)) * 100)}%`}
-                    subtitle={`${agents.filter((a) => a.isActive).length}/${agents.length} présents`}
+                    value={`${Math.round(((agents.length - stats.absencesAujourdhui) / Math.max(agents.length, 1)) * 100)}%`}
+                    subtitle={`${agents.length - stats.absencesAujourdhui}/${agents.length} présents`}
                     icon={UserCheck}
                   />
                   <KpiCard

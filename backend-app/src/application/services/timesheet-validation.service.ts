@@ -113,7 +113,14 @@ export class TimesheetValidationService {
      * @param timestamp - Nouveau timestamp à valider
      */
     validateTimestampChronology(lastTimesheet: Timesheet_Core | null, timestamp: Date): void {
-        if (lastTimesheet && timestamp < lastTimesheet.timestamp) {
+        if (!lastTimesheet) return;
+
+        // Comparer uniquement la partie date/heure (ignorer les millisecondes)
+        // car le système stocke les heures locales marquées comme UTC
+        const lastMinutes = Math.floor(lastTimesheet.timestamp.getTime() / 60000);
+        const newMinutes = Math.floor(timestamp.getTime() / 60000);
+
+        if (newMinutes < lastMinutes) {
             const lastDate = lastTimesheet.timestamp;
             const formattedDate = lastDate.toLocaleDateString('fr-FR', {
                 day: '2-digit',

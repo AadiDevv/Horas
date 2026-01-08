@@ -1,13 +1,14 @@
 
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 export interface Timesheet {
   id: number;
   employeId: number;
   timestamp: string;
   clockin: boolean;
-  status: 'normal' | 'retard' | 'absence';
+  status: 'normal' | 'retard' | 'absence' | 'delay';
   createdAt: string;
   updatedAt: string;
 }

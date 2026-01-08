@@ -1,8 +1,9 @@
 import { Agent, Equipe, ApiResponse } from '../types';
 import { apiClient, getAuthHeaders } from '@/app/utils/apiClient';
+import { API_CONFIG } from '@/constants/config';
 
-const API_BASE_URL = "http://localhost:8080";
-const USE_MOCK = false;
+const API_BASE_URL = API_CONFIG.BASE_URL;
+const USE_MOCK = API_CONFIG.USE_MOCK;
 
 const handleHttpError = async (res: Response): Promise<never> => {
   const errorData = await res.json();
