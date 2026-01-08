@@ -130,6 +130,7 @@ export namespace Schedule_Props {
         name: string;
         startHour: Date;
         endHour: Date;
+        isCustom: boolean;
         activeDays: number[];
         managerId: number;
     }

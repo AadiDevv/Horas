@@ -351,9 +351,21 @@ function ManagerDashboard() {
           formData={agentFormData}
           setFormData={setAgentFormData}
           equipes={enrichedEquipes}
+          schedules={schedules}
           agent={editingAgent}
           onSave={handleAgentSubmit}
           loading={loadingAgents}
+          onCustomScheduleAssign={async (agentId, scheduleId) => {
+            try {
+              const result = await api.assignCustomScheduleToUser(agentId, scheduleId);
+              if (result.success) {
+                await loadAgents();
+                await loadSchedules();
+              }
+            } catch (error) {
+              console.error('Erreur lors de l\'assignation du schedule:', error);
+            }
+          }}
         />
 
         <EquipeModal

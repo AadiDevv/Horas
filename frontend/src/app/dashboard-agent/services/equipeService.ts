@@ -68,29 +68,11 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
 }
 
 export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<Horaire[]>> {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const equipe = mockEquipes.find(e => e.id === equipeId);
-    const horaires = equipe?.horaires || [];
-
-    console.log('🔍 Mock GET horaires pour équipe ' + equipeId);
-    console.log('✅ Horaires:', horaires);
-
-    return {
-      success: true,
-      data: horaires,
-      message: "Horaires récupérés avec succès",
-      timestamp: new Date().toISOString()
-    };
-  }
 
   try {
-    console.log('🔍 GET /api/teams/' + equipeId);
-
     const res = await apiClient.get(`${API_BASE_URL}/api/teams/${equipeId}`);
 
     if (!res.ok) {
-      console.error('❌ Erreur récupération équipe:', res.status);
       return {
         success: false,
         data: [],
