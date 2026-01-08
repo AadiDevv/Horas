@@ -180,34 +180,26 @@ function DayTimeline({
                 const durationMinutes = endMin - startMin;
                 const isShortBlock = durationMinutes < 15;
 
+                const isDelay = log.status === 'retard';
+                const bgColorClass = isDelay ? "bg-orange-500" : "bg-black";
+
                 return (
                   <div
                     key={idx}
-                    className="absolute text-white shadow-lg rounded-lg z-10 border-2 transition-all duration-200 hover:z-50 hover:shadow-2xl group cursor-pointer"
+                    className={`absolute left-3 right-1 ${bgColorClass} text-white rounded-lg p-2 hover:shadow-lg transition-shadow group cursor-pointer z-10`}
                     style={{
-                      backgroundColor: "#333333",
-                      borderColor: "#1a1a1a",
-                      left: "12px",
-                      right: "4px",
                       top: `${position.top}%`,
                       height: `${position.height}%`,
-                      minHeight: isShortBlock ? "24px" : "40px",
+                      minHeight: isShortBlock ? "24px" : "36px",
                     }}
+                    title={isDelay ? "🔶 RETARD" : undefined}
                   >
-                    {isShortBlock ? (
-                      <div className="px-2 py-0.5 text-[10px] font-semibold flex items-center justify-center h-full whitespace-nowrap overflow-hidden group-hover:scale-110 transition-transform">
-                        {log.start} → {log.end}
-                      </div>
-                    ) : (
-                      <div className="px-2 py-1 text-xs font-bold flex flex-col items-center justify-center h-full">
-                        <User size={14} className="mb-1" />
-                        <div className="text-center leading-tight">
-                          <div>{log.start}</div>
-                          <div className="opacity-75 text-[10px]">-</div>
-                          <div>{log.end}</div>
-                        </div>
-                      </div>
-                    )}
+                    <div className="text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1 justify-center flex-wrap h-full">
+                      {isDelay && <span className="flex-shrink-0" title="Retard">🔶</span>}
+                      <span className="flex-shrink-0">{log.start}</span>
+                      <span className="flex-shrink-0"> → </span>
+                      <span className="flex-shrink-0">{log.end}</span>
+                    </div>
                   </div>
                 );
               })}
@@ -231,15 +223,11 @@ function DayTimeline({
 
                   return (
                     <div
-                      className="absolute text-white shadow-xl rounded-lg z-20 border-2 transition-all duration-1000"
+                      className="absolute left-3 right-1 bg-black text-white shadow-xl rounded-lg z-20 transition-all duration-1000"
                       style={{
-                        backgroundColor: "#333333",
-                        borderColor: "#1a1a1a",
-                        left: "12px",
-                        right: "4px",
                         top: `${position.top}%`,
                         height: `${Math.max(position.height, 5)}%`,
-                        minHeight: isShortBlock ? "24px" : "40px",
+                        minHeight: isShortBlock ? "24px" : "36px",
                         backgroundImage:
                           "linear-gradient(135deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent)",
                         backgroundSize: "20px 20px",
@@ -389,8 +377,7 @@ export default function WeeklyCalendar({
           </div>
           <div className="flex items-center gap-2">
             <div
-              className="w-4 h-4 rounded flex items-center justify-center border-2"
-              style={{ backgroundColor: "#333333", borderColor: "#1a1a1a" }}
+              className="w-4 h-4 rounded flex items-center justify-center bg-black"
             >
               <User size={10} className="text-white" />
             </div>
@@ -398,8 +385,15 @@ export default function WeeklyCalendar({
           </div>
           <div className="flex items-center gap-2">
             <div
-              className="w-4 h-4 rounded border-2 relative overflow-hidden"
-              style={{ backgroundColor: "#333333", borderColor: "#1a1a1a" }}
+              className="w-4 h-4 rounded flex items-center justify-center bg-orange-500"
+            >
+              <span className="text-[8px]">🔶</span>
+            </div>
+            <span className="text-gray-600">Retard</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 rounded bg-black relative overflow-hidden"
             >
               <div
                 className="absolute inset-0 animate-pulse"

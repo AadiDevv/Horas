@@ -27,6 +27,7 @@ export interface UserFormData {
 export interface TimeLog {
   start: string;
   end?: string;
+  status?: 'normal' | 'retard' | 'absence';
 }
 
 export type DayKey = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
