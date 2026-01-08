@@ -1,4 +1,5 @@
 import { UserX } from "lucide-react";
+import { getAbsenceColorFromLabelOrType } from '../config/timelineStylesConfig';
 
 interface Absence {
   employeNom: string;
@@ -16,18 +17,6 @@ export default function AbsencesCard({
   absences = [],
   absencesEnAttente = 0,
 }: AbsencesCardProps) {
-  const getTypeColor = (type: string) => {
-
-    const colors: Record<string, string> = {
-      "Congés payés": "#3b82f6",
-      Maladie: "#ef4444",
-      Formation: "#8b5cf6",
-      Télétravail: "#10b981",
-      "Congés sans solde": "#f59e0b",
-      Autre: "#6b7280",
-    };
-    return colors[type] || "#333333";
-  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -74,7 +63,7 @@ export default function AbsencesCard({
               <div className="flex items-center gap-3">
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                  style={{ backgroundColor: getTypeColor(absence.type) }}
+                  style={{ backgroundColor: getAbsenceColorFromLabelOrType(absence.type) }}
                 >
                   {absence.employeNom
                     .split(" ")

@@ -69,29 +69,11 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
 }
 
 export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<Horaire[]>> {
-  if (USE_MOCK) {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const equipe = mockEquipes.find(e => e.id === equipeId);
-    const horaires = equipe?.horaires || [];
-
-    console.log('🔍 Mock GET horaires pour équipe ' + equipeId);
-    console.log('✅ Horaires:', horaires);
-
-    return {
-      success: true,
-      data: horaires,
-      message: "Horaires récupérés avec succès",
-      timestamp: new Date().toISOString()
-    };
-  }
 
   try {
-    console.log('🔍 GET /api/teams/' + equipeId);
-
     const res = await apiClient.get(`${API_BASE_URL}/api/teams/${equipeId}`);
 
     if (!res.ok) {
-      console.error('❌ Erreur récupération équipe:', res.status);
       return {
         success: false,
         data: [],
@@ -101,12 +83,10 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
     }
 
     const response = await res.json();
-    console.log('📦 Réponse backend équipe:', response);
 
     const team = response.data || response;
 
     if (!team.schedule) {
-      console.warn('⚠️ Équipe sans schedule');
       return {
         success: true,
         data: [],
@@ -115,40 +95,16 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
       };
     }
 
-    const schedule = team.schedule;
-    console.log('📦 Schedule récupéré depuis team:', schedule);
 
-    const jourMapping: Record<number, string> = {
-      1: 'Lundi',
-      2: 'Mardi',
-      3: 'Mercredi',
-      4: 'Jeudi',
-      5: 'Vendredi',
-      6: 'Samedi',
-      7: 'Dimanche'
-    };
-
-    const formatTime = (time: string) => {
-      if (!time) return '09:00';
-      return time.substring(0, 5);
-    };
-
-    const horaires: Horaire[] = (schedule.activeDays || []).map((day: number) => ({
-      jour: jourMapping[day],
-      heureDebut: formatTime(schedule.startHour),
-      heureFin: formatTime(schedule.endHour)
-    }));
-
-    console.log('✅ Horaires transformés:', horaires);
+    const schedule = formatSchedule(team.schedule);
 
     return {
       success: true,
-      data: horaires,
+      data: schedule,
       message: "Horaires récupérés avec succès",
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Erreur getEquipeHoraires:', error);
     return {
       success: false,
       data: [],
@@ -156,4 +112,64 @@ export async function getEquipeHoraires(equipeId: number): Promise<ApiResponse<H
       timestamp: new Date().toISOString()
     };
   }
+}
+
+export async function getUserSchedule(userId: number): Promise<ApiResponse<Horaire[]>> {
+  try {
+    const res = await apiClient.get(`${API_BASE_URL}/api/users/${userId}/schedule`);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        data: [],
+        message: `Erreur ${res.status}`,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    const schedule = await res.json();
+    const formattedSchedule = formatSchedule(schedule.data  || schedule);
+
+    return {
+      success: true,
+      data: formattedSchedule,
+      message: "Horaires récupérés avec succès",
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    return {
+      success: false,
+      data: [],
+      message: (error as Error).message,
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+function formatSchedule(schedule: any): Horaire[] {
+
+  const jourMapping: Record<number, string> = {
+    1: 'Lundi',
+    2: 'Mardi',
+    3: 'Mercredi',
+    4: 'Jeudi',
+    5: 'Vendredi',
+    6: 'Samedi',
+    7: 'Dimanche'
+  };
+
+  const formatTime = (time: string) => {
+    if (!time) return '09:00';
+    return time.substring(0, 5);
+  };
+
+  const horaires: Horaire[] = (schedule.activeDays || []).map((day: number) => ({
+    jour: jourMapping[day],
+    heureDebut: formatTime(schedule.startHour),
+    heureFin: formatTime(schedule.endHour)
+  }));
+
+
+  return horaires;
+
 }

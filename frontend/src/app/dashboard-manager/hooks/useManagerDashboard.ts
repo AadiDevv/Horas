@@ -42,7 +42,8 @@ export function useAgentManager() {
     email: '',
     telephone: '',
     role: 'employe',
-    equipeId: ''
+    equipeId: '',
+    customScheduleId: null
   });
 
   useEffect(() => {
@@ -174,7 +175,8 @@ export function useAgentManager() {
       email: agent.email,
       role: agent.role,
       telephone: agent.telephone || '',
-      equipeId: agent.equipeId?.toString() || ''
+      equipeId: agent.equipeId?.toString() || '',
+      customScheduleId: agent.scheduleId || null
     });
     setShowModal(true);
   };
@@ -186,7 +188,8 @@ export function useAgentManager() {
       email: '',
       telephone: '',
       role: 'employe',
-      equipeId: ''
+      equipeId: '',
+      customScheduleId: null
     });
     setEditingAgent(null);
   };

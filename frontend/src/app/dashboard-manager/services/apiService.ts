@@ -792,3 +792,35 @@ export async function deleteSchedule(scheduleId: number): Promise<ApiResponse<vo
     };
   }
 }
+
+/**
+ * Assigne un custom schedule à un agent
+ * @param userId - ID de l'agent
+ * @param scheduleId - ID du schedule (ou null pour retirer le custom schedule)
+ */
+export async function assignCustomScheduleToUser(
+  userId: number,
+  scheduleId: number | null
+): Promise<ApiResponse<Agent>> {
+  console.log('🚀 PATCH /api/users/assign/schedule/' + userId);
+  console.log('📦 Data:', { scheduleId });
+
+  const res = await fetch(`${API_BASE_URL}/api/users/assign/schedule/${userId}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ scheduleId })
+  });
+
+  if (!res.ok) {
+    await handleHttpError(res);
+  }
+
+  const response = await res.json();
+  console.log('✅ Custom schedule assigned:', response);
+
+  return {
+    success: response.success,
+    data: transformAgentFromBackend(response.data),
+    message: response.message
+  };
+}

@@ -16,7 +16,7 @@ import {
   validateAbsence,
   createAbsence,
 } from "../services/absenceService";
-import { getEquipeHoraires } from "@/app/dashboard-agent/services/equipeService";
+import { getUserSchedule } from "@/app/dashboard-agent/services/equipeService";
 import WeeklyTimeline from "./WeeklyTimeline";
 import BlockModal, { BlockData } from "./BlockModal";
 import AbsenceModal, { AbsenceFormData } from "./AbsenceModal";
@@ -219,18 +219,15 @@ export default function PointagesManagement({
 
   const loadTeamSchedule = async () => {
     if (!selectedAgent?.equipeId) {
-      console.log("⚠️ Agent sans équipe, pas d'horaires à charger");
       setTeamSchedule([]);
       return;
     }
 
     try {
-      const response = await getEquipeHoraires(selectedAgent.equipeId);
+      const response = await getUserSchedule(selectedAgent.id);
       if (response.success && response.data) {
         setTeamSchedule(response.data);
-        console.log("✅ Horaires équipe chargés:", response.data);
       } else {
-        console.error("❌ Erreur chargement horaires:", response.message);
         setTeamSchedule([]);
       }
     } catch (error) {
