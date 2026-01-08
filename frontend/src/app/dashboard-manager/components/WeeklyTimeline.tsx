@@ -7,6 +7,16 @@ import {
   extractTimeLocal,
 } from "@/app/utils/dateUtils";
 import { Horaire } from "@/app/dashboard-agent/types";
+import {
+  getTimesheetBlockStyle,
+  getOrphanBlockStyle,
+  getAbsenceHybridStyle,
+  getAbsenceTypeLabel,
+  TIMELINE_UI_STYLES,
+  type TimesheetStatus,
+  type AbsenceStatus,
+  type AbsenceType,
+} from '../config/timelineStylesConfig';
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
@@ -210,7 +220,7 @@ export default function WeeklyTimeline({
             <div key={dayIndex} className="col-span-1 relative">
               <div
                 className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-t-lg ${
-                  isToday ? "bg-black text-white" : "bg-gray-100 text-gray-900"
+                  isToday ? TIMELINE_UI_STYLES.dayHeader.today : TIMELINE_UI_STYLES.dayHeader.other
                 }`}
               >
                 <div className="text-[10px] sm:text-xs font-medium">
@@ -219,11 +229,11 @@ export default function WeeklyTimeline({
                 <div className="text-base sm:text-lg font-bold">{day.getDate()}</div>
               </div>
 
-              <div className="relative h-[816px] sm:h-[1088px] bg-gray-50 border border-gray-200 rounded-b-lg overflow-hidden">
+              <div className={`relative h-[816px] sm:h-[1088px] ${TIMELINE_UI_STYLES.grid.background} border ${TIMELINE_UI_STYLES.grid.border} rounded-b-lg overflow-hidden`}>
                 {hours.map((hour, hourIndex) => (
                   <div
                     key={hourIndex}
-                    className="absolute left-0 right-0 h-12 sm:h-16 border-b border-gray-200 z-0"
+                    className={`absolute left-0 right-0 h-12 sm:h-16 border-b ${TIMELINE_UI_STYLES.grid.border} z-0`}
                     style={{ top: `${hourIndex * 48}px`, height: '48px' }}
                     data-sm-top={`${hourIndex * 64}px`}
                   />
@@ -233,13 +243,12 @@ export default function WeeklyTimeline({
                   <div
                     className="absolute left-0 right-0 rounded-lg z-5"
                     style={{
-                      backgroundColor: "rgba(51, 51, 51, 0.15)",
-                      // borderColor: "rgba(51, 51, 51, 0.3)",
+                      backgroundColor: TIMELINE_UI_STYLES.teamSchedule.bgColor,
                       top: `${timeToPosition(teamHoraire.heureDebut)}%`,
                       height: `${timeToPosition(teamHoraire.heureFin) - timeToPosition(teamHoraire.heureDebut)}%`,
                     }}
                   >
-                    <div className="px-1 sm:px-2 py-1 text-[10px] sm:text-xs font-semibold flex flex-col items-center justify-center h-full text-gray-700">
+                    <div className={`px-1 sm:px-2 py-1 text-[10px] sm:text-xs font-semibold flex flex-col items-center justify-center h-full ${TIMELINE_UI_STYLES.teamSchedule.textColor}`}>
                       <Clock size={12} className="mb-1 sm:hidden" />
                       <Clock size={14} className="mb-1 hidden sm:block" />
                       <div className="text-center leading-tight">
@@ -252,7 +261,7 @@ export default function WeeklyTimeline({
                 )}
 
                 <div
-                  className="absolute inset-0 hover:bg-blue-50/50 transition-colors cursor-pointer z-10"
+                  className={`absolute inset-0 ${TIMELINE_UI_STYLES.creationOverlay} transition-colors cursor-pointer z-10`}
                   onClick={async (e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const y = e.clientY - rect.top;
@@ -287,15 +296,16 @@ export default function WeeklyTimeline({
                     const hasOutOfBounds =
                       entryOutOfBounds.isOut || exitOutOfBounds.isOut;
 
+                    const style = getTimesheetBlockStyle(pair.entry.status as TimesheetStatus);
+                    const bgColorClass = style.bgColor;
                     const isDelay =
                       pair.entry.status === "retard" ||
-                      pair.entry.status === "delay";
-                    const bgColorClass = isDelay ? "bg-orange-500" : "bg-black";
+                      pair.entry.status === "absence";
 
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColorClass} text-white rounded-md sm:rounded-lg p-1 sm:p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? "border border-yellow-400 sm:border-2" : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColorClass} ${style.textColor} rounded-md sm:rounded-lg p-1 sm:p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? TIMELINE_UI_STYLES.outOfBounds.border : ""}`}
                         style={{
                           top: `${startPos}%`,
                           height: `${height}%`,
@@ -316,7 +326,7 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry, pair.exit);
                           }}
-                          className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+                          className={`absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-4 h-4 sm:w-5 sm:h-5 ${TIMELINE_UI_STYLES.deleteButton} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer`}
                           title="Supprimer le bloc"
                         >
                           <X size={12} className="sm:hidden" />
@@ -327,7 +337,7 @@ export default function WeeklyTimeline({
                           {isDelay && <span title="Retard">🔶</span>}
                           {entryOutOfBounds.isOut && (
                             <span
-                              className="text-yellow-300"
+                              className={TIMELINE_UI_STYLES.outOfBounds.iconColor}
                               title="Début hors limites"
                             >
                               ⬆
@@ -339,7 +349,7 @@ export default function WeeklyTimeline({
                           <span className="truncate">{endTime}</span>
                           {exitOutOfBounds.isOut && (
                             <span
-                              className="text-yellow-300"
+                              className={TIMELINE_UI_STYLES.outOfBounds.iconColor}
                               title="Fin hors limites"
                             >
                               ⬇
@@ -350,20 +360,14 @@ export default function WeeklyTimeline({
                     );
                   } else {
                     const isEntry = pair.entry.clockin;
-                    const isDelay =
-                      pair.entry.status === "retard" ||
-                      pair.entry.status === "delay";
-                    const bgColor = isDelay
-                      ? "bg-orange-500"
-                      : isEntry
-                        ? "bg-gray-400"
-                        : "bg-gray-500";
+                    const style = getOrphanBlockStyle(isEntry, pair.entry.status as TimesheetStatus);
+                    const bgColor = style.bgColor;
                     const outOfBounds = isOutOfBounds(pair.entry.timestamp);
 
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColor} text-white rounded-md sm:rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 group cursor-pointer hover:opacity-80 transition-opacity ${outOfBounds.isOut ? "border border-yellow-400 sm:border-2" : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColor} ${style.textColor} rounded-md sm:rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 group cursor-pointer hover:opacity-80 transition-opacity ${outOfBounds.isOut ? TIMELINE_UI_STYLES.outOfBounds.border : ""}`}
                         style={{
                           top: `${startPos}%`,
                           height: "24px",
@@ -377,7 +381,7 @@ export default function WeeklyTimeline({
                             e.stopPropagation();
                             onDelete(pair.entry);
                           }}
-                          className="absolute top-0.5 right-0.5 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer"
+                          className={`absolute top-0.5 right-0.5 w-3 h-3 sm:w-4 sm:h-4 ${TIMELINE_UI_STYLES.deleteButton} rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer`}
                           title="Supprimer le pointage"
                         >
                           <X size={8} className="sm:hidden" />
@@ -387,7 +391,7 @@ export default function WeeklyTimeline({
                         <div className="text-[9px] sm:text-xs italic flex items-center gap-0.5 sm:gap-1 truncate">
                           {outOfBounds.isOut && (
                             <span
-                              className="text-yellow-300 font-bold flex-shrink-0"
+                              className={`${TIMELINE_UI_STYLES.outOfBounds.iconColor} font-bold flex-shrink-0`}
                               title={
                                 outOfBounds.position === "before"
                                   ? "Avant 6h"
@@ -409,21 +413,11 @@ export default function WeeklyTimeline({
                 {getAbsencesForDay(dateStr).map((absence, absenceIndex) => {
                   if (!teamHoraire) return null;
 
-                  const statusColors = {
-                    en_attente: "bg-orange-400/90 border-orange-600",
-                    approuve: "bg-red-400/90 border-red-600",
-                    refuse: "bg-gray-400/90 border-gray-600",
-                    annule: "bg-gray-300/90 border-gray-500",
-                  };
-
-                  const typeLabels: Record<string, string> = {
-                    conges_payes: "Congés payés",
-                    conges_sans_solde: "Congés sans solde",
-                    maladie: "Maladie",
-                    formation: "Formation",
-                    teletravail: "Télétravail",
-                    autre: "Autre",
-                  };
+                  // Système HYBRIDE: TYPE détermine le fond, STATUT détermine la bordure
+                  const absenceStyle = getAbsenceHybridStyle(
+                    absence.type as AbsenceType,
+                    absence.status as AbsenceStatus
+                  );
 
                   const topPos = timeToPosition(teamHoraire.heureDebut);
                   const heightPos =
@@ -432,7 +426,7 @@ export default function WeeklyTimeline({
                   return (
                     <div
                       key={`absence-${absenceIndex}`}
-                      className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 text-white rounded-md sm:rounded-lg p-1.5 sm:p-3 border sm:border-2 cursor-pointer hover:shadow-lg transition-shadow ${statusColors[absence.status]}`}
+                      className={`absolute left-0 right-0 ${absenceStyle.textColor} rounded-md sm:rounded-lg p-1.5 sm:p-3 cursor-pointer hover:shadow-lg transition-shadow ${absenceStyle.bgColor} ${absenceStyle.borderColor}`}
                       style={{
                         top: `${topPos}%`,
                         height: `${heightPos}%`,
@@ -440,12 +434,12 @@ export default function WeeklyTimeline({
                         opacity: 0.9,
                       }}
                       onClick={() => onAbsenceClick?.(absence)}
-                      title={`Absence: ${typeLabels[absence.type]} - ${absence.status}`}
+                      title={`Absence: ${getAbsenceTypeLabel(absence.type as AbsenceType)} - ${absence.status}`}
                     >
                       <div className="text-center">
                         <div className="text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1">ABSENCE</div>
                         <div className="text-[9px] sm:text-xs font-semibold leading-tight">
-                          {typeLabels[absence.type]}
+                          {getAbsenceTypeLabel(absence.type as AbsenceType)}
                         </div>
                         {absence.status === "en_attente" && (
                           <div className="text-[9px] sm:text-xs mt-0.5 sm:mt-1 font-medium">
