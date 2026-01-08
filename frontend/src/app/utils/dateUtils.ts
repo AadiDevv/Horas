@@ -8,7 +8,10 @@ export function formatDateLocal(date: Date = new Date()): string {
 }
 
 export function formatDateTimeUTC(date: string, time: string): string {
-  return `${date}T${time}:00.000Z`;
+  // Crée une date locale puis la convertit en ISO UTC
+  // Ex: 14:30 local (GMT+1) → "2026-01-08T13:30:00.000Z" (13:30 UTC)
+  const localDate = new Date(`${date}T${time}:00`);
+  return localDate.toISOString();
 }
 
 export function extractDateLocal(isoString: string): string {
@@ -16,7 +19,12 @@ export function extractDateLocal(isoString: string): string {
 }
 
 export function extractTimeLocal(isoString: string): string {
-  return isoString.substring(11, 16);
+  // TOUJOURS convertir en heure locale car Prisma stocke en UTC
+  // Même si le timestamp semble être en "faux UTC", Prisma l'a converti
+  const date = new Date(isoString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 export function getMonday(date: Date = new Date()): Date {

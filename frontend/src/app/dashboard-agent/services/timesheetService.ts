@@ -7,7 +7,7 @@ export interface Timesheet {
   employeId: number;
   timestamp: string;
   clockin: boolean;
-  status: 'normal' | 'retard' | 'absence';
+  status: 'normal' | 'retard' | 'absence' | 'delay';
   createdAt: string;
   updatedAt: string;
 }
