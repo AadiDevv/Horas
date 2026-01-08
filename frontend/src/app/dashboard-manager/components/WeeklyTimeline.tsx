@@ -329,23 +329,22 @@ export default function WeeklyTimeline({
                           <X size={14} className="hidden sm:block" />
                         </button>
 
-                        <div className="text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1">
-                          {isDelay && <span title="Retard">🔶</span>}
+                        <div className="text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1 justify-center flex-wrap">
+                          {isDelay && <span className="flex-shrink-0" title="Retard">🔶</span>}
                           {entryOutOfBounds.isOut && (
                             <span
-                              className="text-yellow-300"
+                              className="text-yellow-300 flex-shrink-0"
                               title="Début hors limites"
                             >
                               ⬆
                             </span>
                           )}
-                          <span className="truncate">{startTime}</span>
-                          <span className="hidden sm:inline"> → </span>
-                          <span className="sm:hidden">→</span>
-                          <span className="truncate">{endTime}</span>
+                          <span className="flex-shrink-0">{startTime}</span>
+                          <span className="flex-shrink-0"> → </span>
+                          <span className="flex-shrink-0">{endTime}</span>
                           {exitOutOfBounds.isOut && (
                             <span
-                              className="text-yellow-300"
+                              className="text-yellow-300 flex-shrink-0"
                               title="Fin hors limites"
                             >
                               ⬇
@@ -390,7 +389,7 @@ export default function WeeklyTimeline({
                           <X size={10} className="hidden sm:block" />
                         </button>
 
-                        <div className="text-[9px] sm:text-xs italic flex items-center gap-0.5 sm:gap-1 truncate">
+                        <div className="text-[9px] sm:text-xs italic flex items-center gap-0.5 sm:gap-1 justify-center flex-wrap">
                           {outOfBounds.isOut && (
                             <span
                               className="text-yellow-300 font-bold flex-shrink-0"
@@ -404,8 +403,8 @@ export default function WeeklyTimeline({
                             </span>
                           )}
                           <span className="flex-shrink-0">{isEntry ? "→" : "←"}</span>
-                          <span className="truncate">{startTime}</span>
-                          <span className="hidden sm:inline truncate">{isEntry ? "(entrée seule)" : "(sortie seule)"}</span>
+                          <span className="flex-shrink-0">{startTime}</span>
+                          <span className="hidden sm:inline flex-shrink-0">{isEntry ? "(entrée seule)" : "(sortie seule)"}</span>
                         </div>
                       </div>
                     );

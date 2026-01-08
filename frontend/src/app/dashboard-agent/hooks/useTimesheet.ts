@@ -13,6 +13,7 @@ import {
 export function useTimesheet() {
   const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
   const [weekDays, setWeekDays] = useState<Date[]>([]);
+  const [weekTimesheets, setWeekTimesheets] = useState<Timesheet[]>([]);
   const [timeLogs, setTimeLogs] = useState<Record<DayKey, TimeLog[]>>({
     Mon: [],
     Tue: [],
@@ -177,22 +178,24 @@ export function useTimesheet() {
     }
   };
 
-  const loadWeekTimesheets = async () => {
+  const loadWeekTimesheets = async (): Promise<Timesheet[]> => {
     try {
       const monday = getMonday(selectedWeek);
       const response = await getWeekTimesheets(monday);
 
       if (!response.success || !response.data) {
         console.error('❌ Erreur chargement timesheets semaine:', response.error);
-        return;
+        return [];
       }
 
-      const weekTimesheets = response.data || [];
+      const weekTimesheetsData = response.data || [];
 
-      if (!Array.isArray(weekTimesheets)) {
-        console.error('❌ weekTimesheets n\'est pas un array:', weekTimesheets);
-        return;
+      if (!Array.isArray(weekTimesheetsData)) {
+        console.error('❌ weekTimesheets n\'est pas un array:', weekTimesheetsData);
+        return [];
       }
+
+      setWeekTimesheets(weekTimesheetsData);
 
       const newTimeLogs: Record<DayKey, TimeLog[]> = {
         Mon: [],
@@ -205,7 +208,7 @@ export function useTimesheet() {
       };
 
       const timesheetsByDate: Record<string, Timesheet[]> = {};
-      weekTimesheets.forEach(t => {
+      weekTimesheetsData.forEach(t => {
         const date = t.timestamp.substring(0, 10);
         if (!timesheetsByDate[date]) {
           timesheetsByDate[date] = [];
@@ -255,71 +258,71 @@ export function useTimesheet() {
 
       setTimeLogs(newTimeLogs);
       console.log('✅ Timesheets de la semaine chargés:', newTimeLogs);
+      return weekTimesheetsData;
     } catch (error) {
       console.error('❌ Erreur chargement timesheets semaine:', error);
+      return [];
     }
   };
 
-  const checkTodayTimesheets = async () => {
+  const checkTodayTimesheets = async (timesheetsData?: Timesheet[]) => {
     try {
-
-      await loadWeekTimesheets();
-
-      await loadStats();
-
+      console.log('🔍 checkTodayTimesheets - DEBUT');
       const today = new Date();
       const selectedMonday = getMonday(selectedWeek);
       const currentMonday = getMonday(today);
 
       const isCurrentWeek = selectedMonday.toDateString() === currentMonday.toDateString();
+      console.log('📅 isCurrentWeek:', isCurrentWeek);
 
       if (!isCurrentWeek) {
-        console.log('📅 Semaine sélectionnée n\'est pas la semaine en cours, pas de clock-in actif');
+        console.log('⚠️ Pas la semaine en cours, reset states');
         setLastClockIn(null);
         setIsClockingIn(false);
         setCurrentDayLogs({ start: '' });
         return;
       }
 
-      const response = await getTodayTimesheets();
+      const timesheetsToUse = timesheetsData || weekTimesheets;
+      const todayStr = today.toISOString().split('T')[0];
+      console.log('📅 Recherche des timesheets pour:', todayStr);
+      console.log('📦 Timesheets disponibles:', timesheetsToUse.length);
 
-      if (!response.success || !response.data) {
-        console.log('⚠️ Aucun timesheet aujourd\'hui');
-        setLastClockIn(null);
-        setIsClockingIn(false);
-        setCurrentDayLogs({ start: '' });
-        return;
-      }
+      const todayTimesheets = timesheetsToUse.filter(t => {
+        const tsDate = t.timestamp.substring(0, 10);
+        return tsDate === todayStr;
+      });
 
-      const todayTimesheets = response.data;
+      console.log(`📊 ${todayTimesheets.length} timesheets trouvés pour aujourd'hui:`, todayTimesheets);
 
       if (todayTimesheets.length > 0) {
-
         const sortedTimesheets = [...todayTimesheets].sort((a, b) => {
           return a.timestamp.localeCompare(b.timestamp);
         });
         const lastTimesheet = sortedTimesheets[sortedTimesheets.length - 1];
+        console.log('🔍 Dernier timesheet:', lastTimesheet);
+        console.log('🔍 lastTimesheet.clockin:', lastTimesheet.clockin);
 
         if (lastTimesheet.clockin === true) {
+          console.log('✅ Clock-in actif détecté!');
           setLastClockIn(lastTimesheet);
           setIsClockingIn(true);
           const time = lastTimesheet.timestamp ? new Date(lastTimesheet.timestamp).toTimeString().substring(0, 5) : '00:00';
           setCurrentDayLogs({ start: time });
-          console.log('✅ Statut: pointé depuis', time);
+          console.log('✅ States mis à jour: isClockingIn=true, start=', time);
         } else {
-
+          console.log('ℹ️ Dernier timesheet est un clock-out');
           setLastClockIn(null);
           setIsClockingIn(false);
           setCurrentDayLogs({ start: '' });
-          console.log('✅ Statut: non pointé');
         }
       } else {
-
+        console.log('ℹ️ Aucun timesheet aujourd\'hui');
         setLastClockIn(null);
         setIsClockingIn(false);
         setCurrentDayLogs({ start: '' });
-        console.log('✅ Statut: aucun pointage aujourd\'hui');
       }
+      console.log('🔍 checkTodayTimesheets - FIN');
     } catch (error) {
       console.error('❌ Erreur vérification timesheets:', error);
     }
@@ -413,14 +416,21 @@ export function useTimesheet() {
     const isCurrentWeek = monday.toDateString() === currentMonday.toDateString();
 
     if (!isCurrentWeek) {
-
       setIsClockingIn(false);
       setCurrentDayLogs({ start: '' });
       setLastClockIn(null);
     }
 
-    loadWeekTimesheets();
-    loadStats();
+    const loadData = async () => {
+      const timesheets = await loadWeekTimesheets();
+      await loadStats();
+
+      if (isCurrentWeek) {
+        await checkTodayTimesheets(timesheets);
+      }
+    };
+
+    loadData();
   }, [selectedWeek]);
 
   const previousWeek = () => {

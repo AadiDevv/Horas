@@ -52,7 +52,7 @@ export default function LoginPage() {
         axios.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${accessToken}`;
-        
+
         toast.success("Connexion réussie ! Redirection...");
         setIsLoggedIn(true);
         setError("");
@@ -81,39 +81,54 @@ export default function LoginPage() {
   }, [isLoggedIn, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f3f6f4]">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#333333] mb-2">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#f3f6f4]">
+      {/* Animated background shapes - subtle */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-gray-300/10 to-gray-400/10 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
+      <div className="w-full max-w-md px-6 relative z-10 animate-fadeIn">
+        <div className="text-center mb-8 animate-slideDown">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
             Bienvenue sur Horas
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 text-lg mb-4">
             Connectez-vous pour continuer
           </p>
           <button
             onClick={() => router.push("/")}
-            className="mt-4 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200 cursor-pointer"
+            className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-all duration-200 cursor-pointer hover:underline underline-offset-4"
           >
-            Retour à l'accueil
+            ← Retour à l'accueil
           </button>
         </div>
+
         {!isLoggedIn && error && (
-          <p className="mt-4 text-sm text-red-600">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-sm animate-shake">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-sm text-red-700 font-medium">{error}</p>
+            </div>
+          </div>
         )}
 
-        <div className="bg-[#F5F5F0] rounded-lg shadow-lg p-8 border">
+        {/* Login Card */}
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 animate-scaleIn">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            {/* Email Field */}
+            <div className="transform transition-all duration-200 hover:translate-x-1">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-[#333333] mb-2"
+                className="block text-sm font-semibold text-gray-800 mb-2"
               >
                 Adresse email
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-200"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -132,23 +147,24 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border dark:border-gray-600 rounded-lg bg-[#F5F5F0] text-gray-900 dark:text-black placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-grey-500 focus:border-transparent transition duration-200"
+                  className="block w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl bg-[#F5F5F0] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-300"
                   placeholder="exemple@email.com"
                 />
               </div>
             </div>
 
-            <div>
+            {/* Password Field */}
+            <div className="transform transition-all duration-200 hover:translate-x-1">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-[#333333] mb-2"
+                className="block text-sm font-semibold text-gray-800 mb-2"
               >
                 Mot de passe
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-gray-400"
+                    className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-200"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -167,13 +183,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border dark:border-gray-600 rounded-lg bg-[#F5F5F0] text-gray-900 dark:text-black placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-grey-500 focus:border-transparent transition duration-200"
+                  className="block w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl bg-[#F5F5F0] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-300"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition duration-200 cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-700 transition-colors duration-200 cursor-pointer"
                 >
                   {showPassword ? (
                     <svg
@@ -213,10 +229,12 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-[#333333] hover:bg-[#555555] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200 cursor-pointer active:scale-95"
+              className="w-full flex items-center justify-center px-6 py-4 rounded-xl text-white font-semibold text-base bg-[#333333] hover:bg-[#555555] focus:outline-none focus:ring-4 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               {isLoading ? (
                 <>
@@ -243,22 +261,82 @@ export default function LoginPage() {
                   Connexion en cours...
                 </>
               ) : (
-                "Se connecter"
+                <>
+                  Se connecter
+                  <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
               )}
             </button>
           </form>
         </div>
 
-        {/*<p className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+        {/*<p className="mt-8 text-center text-sm text-gray-600">
           Vous n'avez pas de compte ?{" "}
           <button
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition duration-200"
+            className="font-semibold text-gray-900 hover:text-gray-700 transition-colors duration-200 hover:underline underline-offset-4"
             onClick={() => router.push("/signup")}
           >
             Créer un compte
           </button>
         </p>*/}
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-slideDown {
+          animation: slideDown 0.6s ease-out;
+        }
+
+        .animate-scaleIn {
+          animation: scaleIn 0.5s ease-out 0.1s both;
+        }
+
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 }

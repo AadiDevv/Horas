@@ -174,7 +174,7 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
               <p className="text-xs text-gray-500 capitalize">{user.role}</p>
             </div>
 
-            <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base flex-shrink-0">
+            <div className="w-9 h-9 md:w-10 md:h-10 bg-black rounded-full flex items-center justify-center text-white font-semibold text-sm md:text-base flex-shrink-0">
               {user.firstName.charAt(0).toUpperCase()}
               {user.lastName.charAt(0).toUpperCase()}
             </div>

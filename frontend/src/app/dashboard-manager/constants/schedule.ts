@@ -46,9 +46,9 @@ export const DURATION_COLOR_THRESHOLDS = {
  * Couleurs associées aux durées
  */
 export const DURATION_COLORS = {
-  long: '#000000',    // Noir pour >= 8h
-  medium: '#3b82f6',  // Bleu pour 6-8h
-  short: '#8b5cf6'    // Violet pour < 6h
+  long: 'oklch(30.2% 0.056 229.695)',    // Noir pour >= 8h
+  medium: 'oklch(39.8% 0.07 227.392)',  // Bleu pour 6-8h
+  short: 'oklch(45% 0.085 224.283)'    // Violet pour < 6h
 } as const;
 
 /**

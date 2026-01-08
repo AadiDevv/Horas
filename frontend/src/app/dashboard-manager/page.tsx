@@ -369,6 +369,7 @@ function ManagerDashboard() {
           loading={loadingEquipes}
           availableAgents={agents}
           allEquipes={enrichedEquipes}
+          availableSchedules={schedules}
           onMoveAgent={async (agentId: number, newTeamId: number) => {
             // Déplacer l'agent vers la nouvelle équipe
             const result = await api.assignUserToTeam(agentId, newTeamId);
