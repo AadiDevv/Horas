@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { X, Save, Calendar as CalendarIcon, UserX } from "lucide-react";
+import { X, Save, Calendar as CalendarIcon, UserX, Trash2 } from "lucide-react";
 import { Absence } from "../services/absenceService";
 
 interface AbsenceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: AbsenceFormData) => Promise<void>;
+  onDelete?: (id: number) => Promise<void>;
   absence?: Absence | null;
   employeeId: number;
   employeeName: string;
@@ -40,6 +41,7 @@ export default function AbsenceModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   absence,
   employeeId,
   employeeName,
@@ -55,6 +57,7 @@ export default function AbsenceModal({
     status: "en_attente",
   });
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [localError, setLocalError] = useState("");
 
   useEffect(() => {
@@ -114,6 +117,26 @@ export default function AbsenceModal({
       setLocalError("Une erreur est survenue lors de la sauvegarde");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!absence?.id || !onDelete) return;
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette absence ?')) {
+      return;
+    }
+
+    setDeleting(true);
+    setLocalError("");
+    try {
+      await onDelete(absence.id);
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      setLocalError("Une erreur est survenue lors de la suppression");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -249,31 +272,54 @@ export default function AbsenceModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors cursor-pointer active:scale-95"
-            disabled={saving}
-          >
-            Annuler
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={saving}
-            className="px-6 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-          >
-            {saving ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Enregistrement...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                {isEditing ? "Enregistrer" : "Créer"}
-              </>
+        <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200">
+          <div>
+            {isEditing && onDelete && absence?.id && (
+              <button
+                onClick={handleDelete}
+                disabled={deleting || saving}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+              >
+                {deleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Suppression...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={18} />
+                    Supprimer
+                  </>
+                )}
+              </button>
             )}
-          </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-xl font-medium transition-colors cursor-pointer active:scale-95"
+              disabled={saving || deleting}
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={saving || deleting}
+              className="px-6 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+            >
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  {isEditing ? "Enregistrer" : "Créer"}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

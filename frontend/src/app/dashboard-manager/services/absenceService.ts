@@ -214,3 +214,40 @@ export async function validateAbsence(
   }
 }
 
+export async function deleteAbsence(id: number): Promise<ApiResponse<void>> {
+  try {
+    const token = localStorage.getItem('token');
+
+    console.log(`🗑️ DELETE /api/absences/${id}`);
+
+    const res = await fetch(`${API_BASE_URL}/api/absences/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Erreur backend DELETE:', errorData);
+      console.error('❌ Status:', res.status);
+      console.error('❌ StatusText:', res.statusText);
+      throw new Error(errorData.message || `HTTP ${res.status}`);
+    }
+
+    console.log(`✅ DELETE /api/absences/${id} - Absence supprimée`);
+
+    return {
+      success: true,
+      message: 'Absence supprimée avec succès'
+    };
+  } catch (error) {
+    console.error(`❌ Erreur deleteAbsence(${id}):`, error);
+    return {
+      success: false,
+      error: (error as Error).message
+    };
+  }
+}
+

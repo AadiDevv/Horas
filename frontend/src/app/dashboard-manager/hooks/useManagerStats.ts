@@ -5,6 +5,7 @@ import { Agent, Equipe } from '../types';
 import { formatDateLocal, getMonday, getSunday } from '@/app/utils/dateUtils';
 
 export interface AbsenceInfo {
+  id: number;
   employeNom: string;
   type: string;
   dateDebut: string;
@@ -193,6 +194,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       };
 
       return {
+        id: a.id,
         employeNom: agent ? `${agent.prenom} ${agent.nom}` : 'Inconnu',
         type: typeMap[a.type] || a.type,
         dateDebut,

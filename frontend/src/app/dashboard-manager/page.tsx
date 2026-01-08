@@ -32,6 +32,7 @@ import { useManagerSettings } from "./hooks/useManagerSettings";
 import { useManagerStats } from "./hooks/useManagerStats";
 import * as api from "./services/apiService";
 import { useScheduleManager } from "./hooks/useScheduleManager";
+import { deleteAbsence } from "./services/absenceService";
 
 function ManagerDashboard() {
   const { currentPage, setCurrentPage, formattedDate } = useManagerDashboard();
@@ -180,6 +181,21 @@ function ManagerDashboard() {
     setShowScheduleModal(true);
   };
 
+  const handleDeleteAbsence = async (id: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette absence ?')) {
+      return;
+    }
+
+    const result = await deleteAbsence(id);
+    if (result.success) {
+      console.log('✅ Absence supprimée avec succès');
+      refreshStats(); // Rafraîchir les statistiques
+    } else {
+      console.error('❌ Erreur lors de la suppression de l\'absence:', result.error);
+      alert('Erreur lors de la suppression de l\'absence');
+    }
+  };
+
   // ==================== RENDER ====================
   return (
     <RoleProtection allowedRoles={["manager", "admin"]}>
@@ -274,6 +290,7 @@ function ManagerDashboard() {
                     <AbsencesCard
                       absences={stats.absencesDetail}
                       absencesEnAttente={stats.absencesEnAttente}
+                      onDeleteAbsence={handleDeleteAbsence}
                     />
                   </div>
                 )}
