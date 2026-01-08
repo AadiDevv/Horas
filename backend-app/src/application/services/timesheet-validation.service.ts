@@ -115,8 +115,6 @@ export class TimesheetValidationService {
     validateTimestampChronology(lastTimesheet: Timesheet_Core | null, timestamp: Date): void {
         if (!lastTimesheet) return;
 
-        // Comparer uniquement la partie date/heure (ignorer les millisecondes)
-        // car le système stocke les heures locales marquées comme UTC
         const lastMinutes = Math.floor(lastTimesheet.timestamp.getTime() / 60000);
         const newMinutes = Math.floor(timestamp.getTime() / 60000);
 
