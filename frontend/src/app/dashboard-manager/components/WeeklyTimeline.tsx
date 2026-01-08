@@ -6,13 +6,7 @@ import {
   formatDateTimeUTC,
   extractTimeLocal,
 } from "@/app/utils/dateUtils";
-
-interface Horaire {
-  id: number;
-  jour: string;
-  heureDebut: string;
-  heureFin: string;
-}
+import { Horaire } from "@/app/dashboard-agent/types";
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
@@ -237,10 +231,10 @@ export default function WeeklyTimeline({
 
                 {teamHoraire && (
                   <div
-                    className="absolute left-0 right-0 rounded-lg border-2 z-5"
+                    className="absolute left-0 right-0 rounded-lg z-5"
                     style={{
                       backgroundColor: "rgba(51, 51, 51, 0.15)",
-                      borderColor: "rgba(51, 51, 51, 0.3)",
+                      // borderColor: "rgba(51, 51, 51, 0.3)",
                       top: `${timeToPosition(teamHoraire.heureDebut)}%`,
                       height: `${timeToPosition(teamHoraire.heureFin) - timeToPosition(teamHoraire.heureDebut)}%`,
                     }}
