@@ -29,6 +29,7 @@ export interface Agent {
     nom: string;
     heureDebut: string;
     heureFin: string;
+    activeDays?: number[];
   };
 }
 
@@ -92,6 +93,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
+  error?: string;
   timestamp?: string;
 }
 

@@ -1,20 +1,32 @@
 
 
-import { TimesheetReadDTO } from '../../types/backend-generated';
+import { TimesheetReadDTO as TimesheetReadDTO_Backend } from '../../types/backend-generated';
+import { PointageReadDTO } from '../types';
 import { API_CONFIG } from '@/constants/config';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 const USE_MOCK = API_CONFIG.USE_MOCK;
 
+function extractHeureFromTimestamp(timestamp: string): string {
+  return timestamp.split('T')[1]?.substring(0, 8) || '00:00:00';
+}
+
+function transformToPointageReadDTO(data: TimesheetReadDTO_Backend): PointageReadDTO {
+  return {
+    ...data,
+    heure: extractHeureFromTimestamp(data.timestamp)
+  };
+}
+
 export type ClockResponse = {
   success: boolean;
-  data?: TimesheetReadDTO;
+  data?: PointageReadDTO;
   message?: string;
   error?: string;
   timestamp?: string;
 };
 
-export const mockPointages: TimesheetReadDTO[] = [];
+export const mockPointages: PointageReadDTO[] = [];
 
 export async function clockIn(): Promise<ClockResponse> {
   if (USE_MOCK) {
@@ -36,10 +48,11 @@ export async function clockIn(): Promise<ClockResponse> {
       isClockIn = !lastTimesheet.clockin;
     }
 
-    const newTimesheet: TimesheetReadDTO = {
+    const newTimesheet: PointageReadDTO = {
       id: mockPointages.length + 1,
       employeId: 1,
       timestamp: now.toISOString(),
+      heure: extractHeureFromTimestamp(now.toISOString()),
       clockin: isClockIn,
       status: 'normal',
       createdAt: now.toISOString(),
@@ -80,15 +93,16 @@ export async function clockIn(): Promise<ClockResponse> {
   }
 
   const data = await res.json();
+  const backendData = data.data || data;
   return {
     success: true,
-    data: data.data || data,
+    data: backendData ? transformToPointageReadDTO(backendData) : undefined,
     message: data.message,
     timestamp: new Date().toISOString()
   };
 }
 
-export async function getTodayPointages(): Promise<TimesheetReadDTO[]> {
+export async function getTodayPointages(): Promise<PointageReadDTO[]> {
   if (USE_MOCK) {
     const now = new Date();
     const todayStart = new Date(now);
@@ -108,10 +122,11 @@ export async function getTodayPointages(): Promise<TimesheetReadDTO[]> {
     }
   });
   const response = await res.json();
-  return response.data || [];
+  const backendData: TimesheetReadDTO_Backend[] = response.data || [];
+  return backendData.map(transformToPointageReadDTO);
 }
 
-export async function getWeekPointages(): Promise<TimesheetReadDTO[]> {
+export async function getWeekPointages(): Promise<PointageReadDTO[]> {
   if (USE_MOCK) {
 
     const today = new Date();
@@ -155,5 +170,6 @@ export async function getWeekPointages(): Promise<TimesheetReadDTO[]> {
     }
   });
   const response = await res.json();
-  return response.data || [];
+  const backendData: TimesheetReadDTO_Backend[] = response.data || [];
+  return backendData.map(transformToPointageReadDTO);
 }

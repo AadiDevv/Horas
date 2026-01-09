@@ -1,5 +1,3 @@
-
-
 import { apiClient } from '@/app/utils/apiClient';
 import { formatDateLocal, getSunday } from '@/app/utils/dateUtils';
 import { API_CONFIG } from '@/constants/config';
@@ -78,7 +76,8 @@ export async function updateTimesheet(
 ): Promise<ApiResponse<Timesheet>> {
   console.log(`🔧 PATCH /api/timesheets/${id}`, updates);
 
-  const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/${id}`, updates);
+  const res = await apiClient.patch(`${API_BASE_URL}/api/timesheets/${id}`, updates);
+  const data = await res.json();
 
   console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour`);
 
@@ -98,7 +97,8 @@ export async function updateTimesheetPair(pairData: {
 }): Promise<ApiResponse<{ entry: Timesheet; exit: Timesheet }>> {
   console.log('🔧 PATCH /api/timesheets/pair', pairData);
 
-  const data = await apiClient.patch(`${API_BASE_URL}/api/timesheets/pair`, pairData);
+  const res = await apiClient.patch(`${API_BASE_URL}/api/timesheets/pair`, pairData);
+  const data = await res.json();
 
   console.log('✅ PATCH /api/timesheets/pair - Paire mise à jour');
 
