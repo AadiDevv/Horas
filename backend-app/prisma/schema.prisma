@@ -28,11 +28,6 @@ enum TimesheetStatus {
   incomplete
 }
 
-enum ScheduleTypes {
-  equipe
-  employe
-  general
-}
 
 enum AbsenceType {
   conges_payes      // Congés payés
@@ -119,7 +114,6 @@ model Schedule {
   startHour    DateTime  @db.Time
   endHour      DateTime  @db.Time
   activeDays   Json
-  typeSchedule ScheduleTypes
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now())
   

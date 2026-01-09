@@ -1,7 +1,7 @@
 import { X, Loader2, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Agent, AgentFormData, Equipe, Schedule, ScheduleFormData } from "../types";
-import { DAYS, getDayName } from "../constants/schedule";
+import { DAYS, getDayName, EMPLOYEE_SCHEDULE_PREFIX } from "../constants/schedule";
 import * as api from "../services/apiService";
 import { handleApiError, showSuccess } from "@/app/utils/errorHandler";
 
@@ -46,7 +46,7 @@ export default function AgentModal({
       const sanitize = (str: string) => str.trim().replace(/\s+/g, '_');
       setCustomScheduleData(prev => ({
         ...prev,
-        name: `employe_${sanitize(formData.prenom)}_${sanitize(formData.nom)}`
+        name: `${EMPLOYEE_SCHEDULE_PREFIX}${sanitize(formData.prenom)}_${sanitize(formData.nom)}`
       }));
     }
   }, [formData.prenom, formData.nom, scheduleMode]);
@@ -426,7 +426,7 @@ export default function AgentModal({
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-600"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Nom généré automatiquement : employe_{formData.prenom}_{formData.nom}
+                      Nom généré automatiquement : {EMPLOYEE_SCHEDULE_PREFIX}{formData.prenom}_{formData.nom}
                     </p>
                   </div>
 
