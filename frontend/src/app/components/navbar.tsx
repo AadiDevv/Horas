@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
+import Image from "next/image";
+import HorasTitleLogo from "@/app/assets/HorasTitleLogo.svg";
 
 interface User {
   id: number;
@@ -90,12 +92,19 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
   return (
     <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 px-3 py-3 md:px-8 md:py-6 flex items-center justify-between transition-all duration-300">
       <div className="flex items-center gap-2 md:gap-6">
-        <h1
+        <div
           onClick={() => router.push("/")}
-          className="text-lg md:text-2xl font-bold tracking-tight cursor-pointer"
+          className="cursor-pointer flex items-center"
         >
-          Horas.
-        </h1>
+          <Image
+            src={HorasTitleLogo}
+            alt="Horas"
+            width={100}
+            height={32}
+            className="h-6 md:h-8 w-auto"
+            priority
+          />
+        </div>
 
         {isAuthenticated && (user?.role === "manager" || user?.role === "admin") && setSidebarOpen && (
           <button

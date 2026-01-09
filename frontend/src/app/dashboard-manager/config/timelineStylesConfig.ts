@@ -242,7 +242,7 @@ export const TAILWIND_TO_HEX: Record<string, string> = {
   'bg-gray-400/90': '#9ca3af',
   'bg-orange-500': '#f97316',
   'bg-yellow-400': '#fbbf24',
-  'bg-black': '#000000',
+  'bg-black': '#1a1a1a',
 };
 
 /**

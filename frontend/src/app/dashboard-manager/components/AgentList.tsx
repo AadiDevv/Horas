@@ -49,7 +49,7 @@ export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, on
                 className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-6 bg-gray-50 rounded-xl sm:rounded-2xl hover:bg-gray-100 transition-all"
               >
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center text-white font-semibold text-base sm:text-lg flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-gray-800 to-black rounded-full flex items-center justify-center text-white font-semibold text-base sm:text-lg flex-shrink-0">
                     {agent.prenom.charAt(0)}{agent.nom.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ export default function AgentList({ agents, equipes, onAddAgent, onEditAgent, on
                       {agent.equipeId && (
                         <>
                           <span className="text-gray-300 hidden sm:inline">•</span>
-                          <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">
+                          <div className="flex items-center gap-1 text-xs text-gray-900 bg-gray-100 px-2 py-1 rounded-lg">
                             <Users size={12} />
                             <span className="truncate max-w-[120px] sm:max-w-none">{getEquipeName(equipes, agent.equipeId)}</span>
                           </div>

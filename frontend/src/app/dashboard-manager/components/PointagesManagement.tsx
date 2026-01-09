@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Search, Calendar, Edit2, Trash2, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { Agent, Equipe } from "../types";
+import LoadingLogo from "@/app/components/LoadingLogo";
 import {
   getEmployeeWeekTimesheets,
   Timesheet,
@@ -544,7 +546,7 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Zone du planning */}
         <div
@@ -596,7 +598,7 @@ export default function PointagesManagement({
               {loading ? (
                 <div className="border border-gray-200 rounded-xl p-8 text-center">
                   <div className="text-gray-400">
-                    <Clock size={48} className="mx-auto mb-2 animate-spin" />
+                    <LoadingLogo size={48} className="mx-auto mb-2" />
                     <p className="text-lg font-medium">Chargement...</p>
                   </div>
                 </div>
@@ -627,7 +629,7 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {selectedAgent && (
