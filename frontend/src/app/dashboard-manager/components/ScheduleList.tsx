@@ -42,7 +42,7 @@ export default function ScheduleList({
         <h2 className="text-3xl font-semibold">Gestion des Horaires</h2>
         <button
           onClick={onAddSchedule}
-          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all"
+          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-2xl font-semibold hover:bg-gray-900 transition-all cursor-pointer"
         >
           <Plus size={20} />
           Créer un horaire
@@ -170,7 +170,7 @@ export default function ScheduleList({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onEditSchedule(schedule)}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all cursor-pointer"
                       >
                         <Edit2 size={16} />
                         Modifier
@@ -181,7 +181,7 @@ export default function ScheduleList({
                             onDeleteSchedule(schedule.id);
                           }
                         }}
-                        className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-all"
+                        className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-all cursor-pointer"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -299,11 +299,11 @@ export default function ScheduleList({
               <div className="flex gap-3 pt-6 border-t border-gray-200">
                 <button
                   onClick={() => onEditSchedule(selectedSchedule)}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-stone-800 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-stone-800 transition-all cursor-pointer"
                 >
                   <Edit2 size={18} />
                   Modifier
-                </button>ss
+                </button>
                 <button
                   onClick={() => {
                     if (confirm('Êtes-vous sûr de vouloir supprimer cet horaire ?')) {
@@ -311,7 +311,7 @@ export default function ScheduleList({
                       setSelectedSchedule(null);
                     }
                   }}
-                  className="px-6 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-all"
+                  className="px-6 py-3 bg-red-50 text-red-600 rounded-xl font-semibold hover:bg-red-100 transition-all cursor-pointer"
                 >
                   <Trash2 size={18} />
                 </button>

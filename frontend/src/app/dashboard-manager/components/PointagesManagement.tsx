@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Search, Calendar, Edit2, Trash2, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { Agent, Equipe } from "../types";
+import LoadingLogo from "@/app/components/LoadingLogo";
 import {
   getEmployeeWeekTimesheets,
   Timesheet,
@@ -424,8 +426,12 @@ export default function PointagesManagement({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 relative">
         {/* Sidebar des agents */}
-        <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+        <motion.div
+          layout
+          transition={{
+            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
+          }}
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 ${
             sidebarCollapsed
               ? "lg:col-span-1"
               : "lg:col-span-3"
@@ -544,11 +550,15 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Zone du planning */}
-        <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+        <motion.div
+          layout
+          transition={{
+            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
+          }}
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 ${
             sidebarCollapsed
               ? "lg:col-span-11"
               : "lg:col-span-9"
@@ -600,7 +610,7 @@ export default function PointagesManagement({
               {loading ? (
                 <div className="border border-gray-200 rounded-xl p-8 text-center">
                   <div className="text-gray-400">
-                    <Clock size={48} className="mx-auto mb-2 animate-spin" />
+                    <LoadingLogo size={48} className="mx-auto mb-2" />
                     <p className="text-lg font-medium">Chargement...</p>
                   </div>
                 </div>
@@ -631,7 +641,7 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {selectedAgent && (

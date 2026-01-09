@@ -1,4 +1,4 @@
-import { UserX, Trash2 } from "lucide-react";
+import { UserX } from "lucide-react";
 import { getAbsenceColorFromLabelOrType } from '../config/timelineStylesConfig';
 
 interface Absence {
@@ -12,13 +12,11 @@ interface Absence {
 interface AbsencesCardProps {
   absences: Absence[];
   absencesEnAttente: number;
-  onDeleteAbsence?: (id: number) => void;
 }
 
 export default function AbsencesCard({
   absences = [],
   absencesEnAttente = 0,
-  onDeleteAbsence,
 }: AbsencesCardProps) {
 
   const formatDate = (dateStr: string) => {
@@ -64,10 +62,7 @@ export default function AbsencesCard({
               className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                  style={{ backgroundColor: getAbsenceColorFromLabelOrType(absence.type) }}
-                >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold bg-gradient-to-br from-gray-800 to-black">
                   {absence.employeNom
                     .split(" ")
                     .map((n) => n[0])
@@ -81,21 +76,10 @@ export default function AbsencesCard({
                   <span className="text-xs text-gray-500">{absence.type}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {formatDate(absence.dateDebut)} -{" "}
-                  {formatDate(absence.dateFin)}
-                </span>
-                {onDeleteAbsence && absence.id && (
-                  <button
-                    onClick={() => onDeleteAbsence(absence.id!)}
-                    className="ml-2 p-1.5 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95"
-                    title="Supprimer l'absence"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
+              <span className="text-xs text-gray-500">
+                {formatDate(absence.dateDebut)} -{" "}
+                {formatDate(absence.dateFin)}
+              </span>
             </div>
           ))}
           {absences.length > 3 && (
