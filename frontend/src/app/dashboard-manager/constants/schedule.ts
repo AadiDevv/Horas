@@ -70,3 +70,43 @@ export function getDayInitial(dayNumber: number): string {
   const day = DAYS.find(d => d.number === dayNumber);
   return day?.initial || '';
 }
+
+// ==================== CONFIGURATION CONVENTION NOMMAGE ====================
+
+/**
+ * Préfixe utilisé pour identifier les horaires personnalisés d'employés
+ *
+ * Les horaires custom créés pour un employé spécifique suivent le format:
+ * `${EMPLOYEE_SCHEDULE_PREFIX}${prenom}_${nom}`
+ *
+ * Exemple: "employe_Jean_Dupont"
+ *
+ * IMPORTANT: Modifier cette valeur changera la convention pour TOUTE l'application.
+ * Si vous changez ce préfixe, les horaires existants avec l'ancien préfixe
+ * seront considérés comme des horaires d'équipe.
+ */
+export const EMPLOYEE_SCHEDULE_PREFIX = 'employe_' as const;
+
+/**
+ * Fonctions utilitaires pour identifier le type d'horaire
+ */
+
+/**
+ * Vérifie si un nom d'horaire correspond à un horaire personnalisé d'employé
+ *
+ * @param scheduleName - Nom de l'horaire à tester
+ * @returns true si c'est un horaire employé (commence par le préfixe)
+ */
+export function isEmployeeSchedule(scheduleName: string): boolean {
+  return scheduleName.startsWith(EMPLOYEE_SCHEDULE_PREFIX);
+}
+
+/**
+ * Vérifie si un nom d'horaire correspond à un horaire d'équipe
+ *
+ * @param scheduleName - Nom de l'horaire à tester
+ * @returns true si c'est un horaire d'équipe (ne commence PAS par le préfixe)
+ */
+export function isTeamSchedule(scheduleName: string): boolean {
+  return !isEmployeeSchedule(scheduleName);
+}

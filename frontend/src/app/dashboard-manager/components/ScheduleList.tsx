@@ -2,7 +2,7 @@ import { Search, Plus, Clock, Edit2, Trash2, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Schedule } from '../types';
 import ScheduleVisualizer from './ScheduleVisualizer';
-import { getDayName, getDayInitial, ALL_DAY_NUMBERS } from '../constants/schedule';
+import { getDayName, getDayInitial, ALL_DAY_NUMBERS, isTeamSchedule } from '../constants/schedule';
 
 interface ScheduleListProps {
   schedules: Schedule[];
@@ -19,6 +19,7 @@ export default function ScheduleList({
 }: ScheduleListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const [activeTab, setActiveTab] = useState<'team' | 'employee'>('team');
 
   // Synchronize selectedSchedule with updated schedules data
   useEffect(() => {
@@ -30,10 +31,19 @@ export default function ScheduleList({
     }
   }, [schedules]);
 
-  // Filter schedules
-  const filteredSchedules = schedules.filter(schedule =>
-    schedule.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter schedules by tab + search
+  const filteredSchedules = schedules
+    .filter(schedule => {
+      // Step 1: Filter by tab (team vs employee)
+      const matchesTab = activeTab === 'team'
+        ? isTeamSchedule(schedule.name)  // Horaires d'équipe (PAS employe_)
+        : !isTeamSchedule(schedule.name); // Horaires employés (employe_)
+
+      // Step 2: Filter by search term
+      const matchesSearch = schedule.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchesTab && matchesSearch;
+    });
 
   return (
     <>
@@ -53,6 +63,30 @@ export default function ScheduleList({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT SIDEBAR - Compact schedule list */}
         <div className="lg:col-span-3 bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
+          {/* Tabs - discrets et élégants */}
+          <div className="flex justify-evenly gap-1 mb-3 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('team')}
+              className={`px-3 py-2 text-sm font-medium transition-all ${
+                activeTab === 'team'
+                  ? 'text-black border-b-2 border-black -mb-px'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Horaires
+            </button>
+            <button
+              onClick={() => setActiveTab('employee')}
+              className={`px-3 py-2 text-sm font-medium transition-all ${
+                activeTab === 'employee'
+                  ? 'text-black border-b-2 border-black -mb-px'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Employee
+            </button>
+          </div>
+
           {/* Search input */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -69,7 +103,11 @@ export default function ScheduleList({
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredSchedules.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm">
-                {searchTerm ? 'Aucun horaire trouvé' : 'Aucun horaire'}
+                {searchTerm
+                  ? 'Aucun horaire trouvé'
+                  : activeTab === 'team'
+                    ? 'Aucun horaire d\'équipe'
+                    : 'Aucun horaire employé'}
               </div>
             ) : (
               filteredSchedules.map((schedule) => (
@@ -127,7 +165,7 @@ export default function ScheduleList({
                   </button>
 
                   {/* Mobile: Card with all info + action buttons */}
-                  <div className="lg:hidden bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+                  <div className="lg:hidden bg-white rounded-2xl p-4 border border-gray-200 shadow-sm space-y-2">
                     {/* Header */}
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
