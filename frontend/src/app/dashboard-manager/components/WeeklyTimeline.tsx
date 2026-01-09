@@ -402,7 +402,7 @@ export default function WeeklyTimeline({
                           )}
                           <span className="flex-shrink-0">{isEntry ? "→" : "←"}</span>
                           <span className="flex-shrink-0">{startTime}</span>
-                          <span className="hidden sm:inline flex-shrink-0">{isEntry ? "(entrée seule)" : "(sortie seule)"}</span>
+                          <span className="hidden sm:inline flex-shrink-0">{isEntry ? "(entrée)" : "(sortie)"}</span>
                         </div>
                       </div>
                     );

@@ -422,13 +422,13 @@ export default function PointagesManagement({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 relative">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 relative">
         {/* Sidebar des agents */}
         <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 flex-shrink-0 ${
             sidebarCollapsed
-              ? "lg:col-span-1"
-              : "lg:col-span-3"
+              ? "lg:w-[96px]"
+              : "lg:w-[260px]"
           }`}
         >
           {!sidebarCollapsed ? (
@@ -548,11 +548,7 @@ export default function PointagesManagement({
 
         {/* Zone du planning */}
         <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
-            sidebarCollapsed
-              ? "lg:col-span-11"
-              : "lg:col-span-9"
-          }`}
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 lg:flex-1 lg:min-w-0`}
         >
           {selectedAgent ? (
             <>
