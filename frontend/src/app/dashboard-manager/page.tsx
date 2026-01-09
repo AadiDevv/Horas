@@ -243,7 +243,7 @@ function ManagerDashboard() {
                 {/* KPIs en haut */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   <KpiCard
-                    title="Employés en ligne"
+                    title="Employés actifs"
                     value={agents.filter((a) => a.isActive).length}
                     subtitle={`sur ${agents.length} total`}
                     icon={Users}
@@ -357,13 +357,16 @@ function ManagerDashboard() {
           loading={loadingAgents}
           onCustomScheduleAssign={async (agentId, scheduleId) => {
             try {
-              const result = await api.assignCustomScheduleToUser(agentId, scheduleId);
+              const result = await api.assignCustomScheduleToUser(
+                agentId,
+                scheduleId,
+              );
               if (result.success) {
                 await loadAgents();
                 await loadSchedules();
               }
             } catch (error) {
-              console.error('Erreur lors de l\'assignation du schedule:', error);
+              console.error("Erreur lors de l'assignation du schedule:", error);
             }
           }}
         />
