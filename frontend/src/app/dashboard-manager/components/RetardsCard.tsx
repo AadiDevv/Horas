@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { getRetardDurationStyle } from '../config/timelineStylesConfig';
 
 interface Retard {
   employeNom: string;
@@ -12,12 +13,6 @@ interface RetardsCardProps {
 }
 
 export default function RetardsCard({ retards, retardMoyen }: RetardsCardProps) {
-  const getRetardColor = (minutes: number) => {
-
-    if (minutes >= 30) return "#333333";
-    if (minutes >= 15) return "#666666";
-    return "#999999";
-  };
 
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200">
@@ -56,7 +51,7 @@ export default function RetardsCard({ retards, retardMoyen }: RetardsCardProps) 
                 <span className="font-medium" style={{ color: '#333333' }}>{retard.employeNom}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold" style={{ color: getRetardColor(retard.minutes) }}>
+                <span className="text-sm font-semibold" style={{ color: getRetardDurationStyle(retard.minutes).hexColor }}>
                   +{retard.minutes} min
                 </span>
                 <span className="text-xs text-gray-500">({retard.heureArrivee})</span>

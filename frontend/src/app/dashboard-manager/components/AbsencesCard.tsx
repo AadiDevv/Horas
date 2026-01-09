@@ -1,6 +1,8 @@
 import { UserX } from "lucide-react";
+import { getAbsenceColorFromLabelOrType } from '../config/timelineStylesConfig';
 
 interface Absence {
+  id?: number;
   employeNom: string;
   type: string;
   dateDebut: string;
@@ -16,18 +18,6 @@ export default function AbsencesCard({
   absences = [],
   absencesEnAttente = 0,
 }: AbsencesCardProps) {
-  const getTypeColor = (type: string) => {
-
-    const colors: Record<string, string> = {
-      "Congés payés": "#3b82f6",
-      Maladie: "#ef4444",
-      Formation: "#8b5cf6",
-      Télétravail: "#10b981",
-      "Congés sans solde": "#f59e0b",
-      Autre: "#6b7280",
-    };
-    return colors[type] || "#333333";
-  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -72,10 +62,7 @@ export default function AbsencesCard({
               className="flex items-center justify-between p-3 bg-gray-50 rounded-xl"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-                  style={{ backgroundColor: getTypeColor(absence.type) }}
-                >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold bg-gradient-to-br from-gray-800 to-black">
                   {absence.employeNom
                     .split(" ")
                     .map((n) => n[0])
@@ -89,12 +76,10 @@ export default function AbsencesCard({
                   <span className="text-xs text-gray-500">{absence.type}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {formatDate(absence.dateDebut)} -{" "}
-                  {formatDate(absence.dateFin)}
-                </span>
-              </div>
+              <span className="text-xs text-gray-500">
+                {formatDate(absence.dateDebut)} -{" "}
+                {formatDate(absence.dateFin)}
+              </span>
             </div>
           ))}
           {absences.length > 3 && (

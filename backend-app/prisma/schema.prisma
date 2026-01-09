@@ -28,6 +28,7 @@ enum TimesheetStatus {
   incomplete
 }
 
+
 enum AbsenceType {
   conges_payes      // Congés payés
   conges_sans_solde // Congés sans solde

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Search, Calendar, Edit2, Trash2, Clock, Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { Agent, Equipe } from "../types";
+import LoadingLogo from "@/app/components/LoadingLogo";
 import {
   getEmployeeWeekTimesheets,
   Timesheet,
@@ -15,8 +17,9 @@ import {
   Absence,
   validateAbsence,
   createAbsence,
+  deleteAbsence,
 } from "../services/absenceService";
-import { getEquipeHoraires } from "@/app/dashboard-agent/services/equipeService";
+import { getUserSchedule } from "@/app/dashboard-agent/services/equipeService";
 import WeeklyTimeline from "./WeeklyTimeline";
 import BlockModal, { BlockData } from "./BlockModal";
 import AbsenceModal, { AbsenceFormData } from "./AbsenceModal";
@@ -219,18 +222,15 @@ export default function PointagesManagement({
 
   const loadTeamSchedule = async () => {
     if (!selectedAgent?.equipeId) {
-      console.log("⚠️ Agent sans équipe, pas d'horaires à charger");
       setTeamSchedule([]);
       return;
     }
 
     try {
-      const response = await getEquipeHoraires(selectedAgent.equipeId);
+      const response = await getUserSchedule(selectedAgent.id);
       if (response.success && response.data) {
         setTeamSchedule(response.data);
-        console.log("✅ Horaires équipe chargés:", response.data);
       } else {
-        console.error("❌ Erreur chargement horaires:", response.message);
         setTeamSchedule([]);
       }
     } catch (error) {
@@ -363,6 +363,23 @@ export default function PointagesManagement({
     }
   };
 
+  const handleDeleteAbsence = async (id: number) => {
+    try {
+      const result = await deleteAbsence(id);
+      if (result.success) {
+        await loadAbsences();
+        await loadPendingAbsences();
+        onRefresh();
+        setShowAbsenceModal(false);
+      } else {
+        throw new Error(result.error || 'Erreur de suppression');
+      }
+    } catch (error) {
+      console.error("Erreur suppression absence:", error);
+      throw error;
+    }
+  };
+
   const handleSaveAbsenceFromBlockModal = async (data: any) => {
     try {
       await createAbsence({
@@ -407,13 +424,13 @@ export default function PointagesManagement({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 relative">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 relative">
         {/* Sidebar des agents */}
-        <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
+        <motion.div
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 flex-shrink-0 ${
             sidebarCollapsed
-              ? "lg:col-span-1"
-              : "lg:col-span-3"
+              ? "lg:w-[96px]"
+              : "lg:w-[260px]"
           }`}
         >
           {!sidebarCollapsed ? (
@@ -529,15 +546,11 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Zone du planning */}
-        <div
-          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 ${
-            sidebarCollapsed
-              ? "lg:col-span-11"
-              : "lg:col-span-9"
-          }`}
+        <motion.div
+          className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 lg:flex-1 lg:min-w-0`}
         >
           {selectedAgent ? (
             <>
@@ -585,7 +598,7 @@ export default function PointagesManagement({
               {loading ? (
                 <div className="border border-gray-200 rounded-xl p-8 text-center">
                   <div className="text-gray-400">
-                    <Clock size={48} className="mx-auto mb-2 animate-spin" />
+                    <LoadingLogo size={48} className="mx-auto mb-2" />
                     <p className="text-lg font-medium">Chargement...</p>
                   </div>
                 </div>
@@ -616,7 +629,7 @@ export default function PointagesManagement({
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {selectedAgent && (
@@ -644,6 +657,7 @@ export default function PointagesManagement({
               setEditingAbsence(null);
             }}
             onSave={handleSaveAbsence}
+            onDelete={handleDeleteAbsence}
             absence={editingAbsence}
             employeeId={selectedAgent.id}
             employeeName={`${selectedAgent.prenom} ${selectedAgent.nom}`}

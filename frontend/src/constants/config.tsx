@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
-  USE_MOCK: process.env.NEXT_PUBLIC_USE_MOCK === 'true' || true,
+  USE_MOCK: process.env.NEXT_PUBLIC_USE_MOCK === "true" || false,
   TIMEOUT: 5000
 };
 

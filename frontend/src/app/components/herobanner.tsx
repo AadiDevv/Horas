@@ -56,7 +56,7 @@ export default function Hero() {
       <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full max-w-7xl mx-auto gap-10">
         <div className="w-full lg:w-1/2 text-center lg:text-left">
           <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
-            Gérez votre temps efficacement
+            Votre temps, notre priorité.
           </h1>
           <p className="text-gray-700 text-lg sm:text-xl mb-8 max-w-lg">
             Horas vous permet de suivre vos équipes et émarger avec simplicité.

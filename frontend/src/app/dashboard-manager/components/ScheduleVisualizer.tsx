@@ -81,14 +81,6 @@ export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps
         {/* Horloge responsive */}
         <div className="flex items-center justify-center mb-6 md:mb-8">
           <div className="relative">
-            <motion.div
-              className="absolute inset-0 blur-2xl opacity-20 scale-95"
-              style={{ background: arcColor }}
-              initial={false}
-              animate={{ background: arcColor }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-            />
-
             <svg
               width="160"
               height="160"

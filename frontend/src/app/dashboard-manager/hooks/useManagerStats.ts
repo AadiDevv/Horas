@@ -5,6 +5,7 @@ import { Agent, Equipe } from '../types';
 import { formatDateLocal, getMonday, getSunday } from '@/app/utils/dateUtils';
 
 export interface AbsenceInfo {
+  id: number;
   employeNom: string;
   type: string;
   dateDebut: string;
@@ -118,13 +119,17 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
         console.warn('⚠️ Aucun timesheet récupéré');
       }
 
-      const absences = absencesResponse.data || [];
+      // Filtrer les absences pour ne garder que celles des employés gérés par ce manager
+      const agentIds = agents.map(a => a.id);
+      const allAbsences = absencesResponse.data || [];
+      const absences = allAbsences.filter(a => agentIds.includes(a.employeId));
+
       const timesheets = (timesheetsResponse.data || []).map(ts => ({
         ...ts,
         status: ts.status === 'delay' ? 'retard' : ts.status
       })) as any[];
 
-      console.log(`📊 ${absences.length} absences et ${timesheets.length} timesheets récupérés pour les stats`);
+      console.log(`📊 ${absences.length}/${allAbsences.length} absences (filtrées) et ${timesheets.length} timesheets récupérés pour les stats`);
 
       // Calculer les statistiques
       const calculatedStats = calculateAllStats(absences, timesheets, agents, equipes, today);
@@ -193,6 +198,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       };
 
       return {
+        id: a.id,
         employeNom: agent ? `${agent.prenom} ${agent.nom}` : 'Inconnu',
         type: typeMap[a.type] || a.type,
         dateDebut,

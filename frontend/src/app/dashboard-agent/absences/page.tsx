@@ -9,12 +9,14 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import Navbar from "@/app/components/navbar";
 import RoleProtection from "@/app/middleware/roleProtection";
 import {
   getAbsences,
   createAbsence,
+  deleteAbsence,
   Absence,
   AbsenceType,
 } from "@/app/dashboard-manager/services/absenceService";
@@ -103,6 +105,26 @@ export default function MesAbsencesPage() {
     }
   };
 
+  const handleDeleteAbsence = async (id: number) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette demande d'absence ?")) {
+      return;
+    }
+
+    try {
+      const result = await deleteAbsence(id);
+      if (result.success) {
+        console.log("✅ Absence supprimée avec succès");
+        await loadAbsences();
+      } else {
+        console.error("❌ Erreur lors de la suppression:", result.error);
+        alert("Erreur lors de la suppression de l'absence");
+      }
+    } catch (error) {
+      console.error("❌ Erreur suppression absence:", error);
+      alert("Erreur lors de la suppression de l'absence");
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "en_attente":
@@ -157,7 +179,7 @@ export default function MesAbsencesPage() {
               </div>
               <button
                 onClick={handleCreateAbsence}
-                className="px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                className="px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <Plus size={20} />
                 Nouvelle demande
@@ -280,6 +302,17 @@ export default function MesAbsencesPage() {
                             </div>
                           )}
                         </div>
+
+                        {/* Bouton de suppression pour les absences en attente */}
+                        {absence.status === "en_attente" && (
+                          <button
+                            onClick={() => handleDeleteAbsence(absence.id)}
+                            className="ml-4 p-2 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95"
+                            title="Supprimer la demande"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -447,7 +480,7 @@ function AbsenceRequestModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-medium transition-colors text-sm"
+              className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-medium transition-colors text-sm cursor-pointer"
               disabled={saving}
             >
               Annuler
@@ -455,7 +488,7 @@ function AbsenceRequestModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex-1 px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer"
             >
               {saving ? "Envoi..." : "Envoyer la demande"}
             </button>

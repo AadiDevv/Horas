@@ -40,7 +40,7 @@ export default function HeuresChart({ equipes }: HeuresChartProps) {
             <TrendingUp size={24} style={{ color: "#333333" }} />
           </div>
           <h3 className="text-xl font-bold" style={{ color: "#333333" }}>
-            Heures / Semaine
+            Heures cumulées par semaine
           </h3>
         </div>
       </div>

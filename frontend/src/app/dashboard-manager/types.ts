@@ -59,6 +59,7 @@ export interface AgentFormData {
   role: string;
   equipeId: string;
   password?: string;
+  customScheduleId?: number | null;
 }
 
 export interface EquipeFormData {
