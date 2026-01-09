@@ -803,8 +803,7 @@ export async function assignCustomScheduleToUser(
   userId: number,
   scheduleId: number | null
 ): Promise<ApiResponse<Agent>> {
-  console.log('🚀 PATCH /api/users/assign/schedule/' + userId);
-  console.log('📦 Data:', { scheduleId });
+
 
   const res = await fetch(`${API_BASE_URL}/api/users/assign/schedule/${userId}`, {
     method: 'PATCH',

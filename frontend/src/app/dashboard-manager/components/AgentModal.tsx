@@ -122,22 +122,28 @@ export default function AgentModal({
       // Step 1: Save the agent
       await onSave();
 
-      // Step 2: Handle custom schedule if agent exists (edit mode)
       if (agent && onCustomScheduleAssign) {
         if (scheduleMode === 'custom') {
-          // Create the schedule
-          console.log('🔄 Création du custom schedule pour', agent.id);
-          const scheduleResult = await api.createSchedule(customScheduleData);
+          if (agent.customScheduleId) {
+            console.log('🔄 Mise à jour du custom schedule', agent.customScheduleId);
+            await api.updateSchedule(agent.customScheduleId, customScheduleData);
+          } else {
+            console.log('🔄 Création du custom schedule pour', agent.id);
+            const scheduleResult = await api.createSchedule(customScheduleData);
 
-          if (scheduleResult.success && scheduleResult.data) {
-            console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
-            // Assign to agent
-            await onCustomScheduleAssign(agent.id, scheduleResult.data.id);
+            if (scheduleResult.success && scheduleResult.data) {
+              console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
+              await onCustomScheduleAssign(agent.id, scheduleResult.data.id);
+            }
           }
-        } else if (scheduleMode === 'team' && agent.scheduleId) {
-          // Remove custom schedule (revert to team)
+        } else if (scheduleMode === 'team' && agent.customScheduleId) {
           console.log('🔄 Retrait du custom schedule pour', agent.id);
+
+          const oldScheduleId = agent.customScheduleId;
           await onCustomScheduleAssign(agent.id, null);
+
+          console.log('🗑️ Suppression du schedule', oldScheduleId);
+          await api.deleteSchedule(oldScheduleId);
         }
       }
 
