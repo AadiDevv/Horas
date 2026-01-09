@@ -7,7 +7,7 @@ export interface Agent {
   telephone?: string;
   equipeId?: number;
   managerId?: number;
-  scheduleId?: number;
+  customScheduleId?: number | null;
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;
@@ -24,11 +24,12 @@ export interface Agent {
     id: number;
     nom: string;
   };
-  schedule?: {
+  customSchedule?: {
     id: number;
     nom: string;
     heureDebut: string;
     heureFin: string;
+    activeDays: number[];
   };
 }
 
@@ -92,6 +93,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message?: string;
+  error?: string;
   timestamp?: string;
 }
 
