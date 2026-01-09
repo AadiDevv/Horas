@@ -42,7 +42,7 @@ const transformAgentFromBackend = (data: any): Agent => ({
   telephone: data.phone || '',
   equipeId: data.teamId,
   managerId: data.managerId,
-  scheduleId: data.scheduleId,
+  customScheduleId: data.customScheduleId,
   isActive: data.isActive ?? true,
   createdAt: data.createdAt || new Date().toISOString(),
   updatedAt: data.updatedAt,
@@ -59,11 +59,12 @@ const transformAgentFromBackend = (data: any): Agent => ({
     id: data.team.id,
     nom: data.team.name
   } : undefined,
-  schedule: data.schedule ? {
-    id: data.schedule.id,
-    nom: data.schedule.name,
-    heureDebut: data.schedule.startHour,
-    heureFin: data.schedule.endHour
+  customSchedule: data.customSchedule ? {
+    id: data.customSchedule.id,
+    nom: data.customSchedule.name,
+    heureDebut: data.customSchedule.startHour,
+    heureFin: data.customSchedule.endHour,
+    activeDays: data.customSchedule.activeDays || []
   } : undefined
 });
 

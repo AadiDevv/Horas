@@ -51,22 +51,35 @@ export default function AgentModal({
     }
   }, [formData.prenom, formData.nom, scheduleMode]);
 
-  // Initialize mode when editing
   useEffect(() => {
-    if (agent) {
-      setScheduleMode(agent.scheduleId ? 'custom' : 'team');
+    const loadCustomSchedule = async () => {
+      if (!isOpen) return;
 
-      // If custom schedule exists, load its data
-      if (agent.schedule) {
-        setCustomScheduleData({
-          name: agent.schedule.nom,
-          startHour: agent.schedule.heureDebut,
-          endHour: agent.schedule.heureFin,
-          activeDays: agent.schedule.activeDays || []
-        });
+      setActiveTab('info');
+
+      const hasCustomSchedule = formData.customScheduleId !== null && formData.customScheduleId !== undefined;
+      setScheduleMode(hasCustomSchedule ? 'custom' : 'team');
+
+      if (hasCustomSchedule && formData.customScheduleId) {
+        try {
+          const response = await api.getScheduleById(formData.customScheduleId);
+          if (response.success && response.data) {
+            const scheduleData = response.data;
+            setCustomScheduleData({
+              name: scheduleData.name,
+              startHour: scheduleData.startHour,
+              endHour: scheduleData.endHour,
+              activeDays: scheduleData.activeDays || []
+            });
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement du schedule personnalisé:', error);
+        }
       }
-    }
-  }, [agent]);
+    };
+
+    loadCustomSchedule();
+  }, [isOpen, formData.customScheduleId]);
 
   if (!isOpen) return null;
 

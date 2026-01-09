@@ -176,7 +176,7 @@ export function useAgentManager() {
       role: agent.role,
       telephone: agent.telephone || '',
       equipeId: agent.equipeId?.toString() || '',
-      customScheduleId: agent.scheduleId || null
+      customScheduleId: agent.customScheduleId || null
     });
     setShowModal(true);
   };
