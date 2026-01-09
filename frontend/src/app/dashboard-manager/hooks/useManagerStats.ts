@@ -124,10 +124,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const allAbsences = absencesResponse.data || [];
       const absences = allAbsences.filter(a => agentIds.includes(a.employeId));
 
-      const timesheets = (timesheetsResponse.data || []).map(ts => ({
-        ...ts,
-        status: ts.status === 'delay' ? 'retard' : ts.status
-      })) as any[];
+      const timesheets = (timesheetsResponse.data || []) as any[];
 
       console.log(`📊 ${absences.length}/${allAbsences.length} absences (filtrées) et ${timesheets.length} timesheets récupérés pour les stats`);
 

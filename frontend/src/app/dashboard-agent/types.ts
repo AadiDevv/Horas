@@ -48,8 +48,12 @@ export interface ApiResponse<T> {
 
 export type {
   PointageStatus,
-  PointageReadDTO,
+  PointageReadDTO as PointageReadDTO_Backend,
   PointageCreateDTO,
   ApiSuccessResponse,
   UserReadDTO
 } from '../types/backend-generated';
+
+export interface PointageReadDTO extends Omit<import('../types/backend-generated').PointageReadDTO, never> {
+  heure: string;
+}

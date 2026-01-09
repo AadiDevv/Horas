@@ -186,11 +186,7 @@ export default function PointagesManagement({
         monday,
       );
       if (response.success && response.data) {
-        const mappedTimesheets = response.data.map((ts) => ({
-          ...ts,
-          status: ts.status === "delay" ? "retard" : ts.status,
-        })) as any[];
-        setTimesheets(mappedTimesheets);
+        setTimesheets(response.data as any[]);
       }
     } catch (error) {
       console.error("❌ Erreur chargement timesheets:", error);
@@ -266,7 +262,7 @@ export default function PointagesManagement({
 
     const backendStatus = data.status === "retard" ? "delay" : data.status;
 
-    if (data.entryId && data.exitId) {
+    if (data.entryId && data.exitId && data.endTime) {
       const exitTimestamp = formatDateTimeUTC(data.date, data.endTime);
       await updateTimesheetPair({
         entryId: data.entryId,
@@ -281,7 +277,7 @@ export default function PointagesManagement({
         timestamp: entryTimestamp,
         status: backendStatus as any,
       });
-    } else {
+    } else if (data.endTime) {
       const exitTimestamp = formatDateTimeUTC(data.date, data.endTime);
       await createTimesheet({
         employeId: data.employeId,

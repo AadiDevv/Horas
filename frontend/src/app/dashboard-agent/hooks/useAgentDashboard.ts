@@ -172,7 +172,7 @@ export function useTimeClock() {
   const [pointageLoading, setPointageLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [lastClockIn, setLastClockIn] = useState<TimesheetReadDTO | null>(null);
+  const [lastClockIn, setLastClockIn] = useState<PointageReadDTO | null>(null);
 
   const getDayKey = (): DayKey => {
     const days: DayKey[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

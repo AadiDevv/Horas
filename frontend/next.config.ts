@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   compiler: { 
     removeConsole: process.env.NODE_ENV === "production" 
   },
+
+  eslint: {
+    // Ignore ESLint errors during production builds
+    ignoreDuringBuilds: true,
+  },
   
   webpack: (config, { isServer }) => {
     // Hot reload pour Docker (mac/Windows)

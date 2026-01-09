@@ -51,22 +51,35 @@ export default function AgentModal({
     }
   }, [formData.prenom, formData.nom, scheduleMode]);
 
-  // Initialize mode when editing
   useEffect(() => {
-    if (agent) {
-      setScheduleMode(agent.scheduleId ? 'custom' : 'team');
+    const loadCustomSchedule = async () => {
+      if (!isOpen) return;
 
-      // If custom schedule exists, load its data
-      if (agent.schedule) {
-        setCustomScheduleData({
-          name: agent.schedule.nom,
-          startHour: agent.schedule.heureDebut,
-          endHour: agent.schedule.heureFin,
-          activeDays: agent.schedule.activeDays || []
-        });
+      setActiveTab('info');
+
+      const hasCustomSchedule = formData.customScheduleId !== null && formData.customScheduleId !== undefined;
+      setScheduleMode(hasCustomSchedule ? 'custom' : 'team');
+
+      if (hasCustomSchedule && formData.customScheduleId) {
+        try {
+          const response = await api.getScheduleById(formData.customScheduleId);
+          if (response.success && response.data) {
+            const scheduleData = response.data;
+            setCustomScheduleData({
+              name: scheduleData.name,
+              startHour: scheduleData.startHour,
+              endHour: scheduleData.endHour,
+              activeDays: scheduleData.activeDays || []
+            });
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement du schedule personnalisé:', error);
+        }
       }
-    }
-  }, [agent]);
+    };
+
+    loadCustomSchedule();
+  }, [isOpen, formData.customScheduleId]);
 
   if (!isOpen) return null;
 
@@ -109,22 +122,28 @@ export default function AgentModal({
       // Step 1: Save the agent
       await onSave();
 
-      // Step 2: Handle custom schedule if agent exists (edit mode)
       if (agent && onCustomScheduleAssign) {
         if (scheduleMode === 'custom') {
-          // Create the schedule
-          console.log('🔄 Création du custom schedule pour', agent.id);
-          const scheduleResult = await api.createSchedule(customScheduleData);
+          if (agent.customScheduleId) {
+            console.log('🔄 Mise à jour du custom schedule', agent.customScheduleId);
+            await api.updateSchedule(agent.customScheduleId, customScheduleData);
+          } else {
+            console.log('🔄 Création du custom schedule pour', agent.id);
+            const scheduleResult = await api.createSchedule(customScheduleData);
 
-          if (scheduleResult.success && scheduleResult.data) {
-            console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
-            // Assign to agent
-            await onCustomScheduleAssign(agent.id, scheduleResult.data.id);
+            if (scheduleResult.success && scheduleResult.data) {
+              console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
+              await onCustomScheduleAssign(agent.id, scheduleResult.data.id);
+            }
           }
-        } else if (scheduleMode === 'team' && agent.scheduleId) {
-          // Remove custom schedule (revert to team)
+        } else if (scheduleMode === 'team' && agent.customScheduleId) {
           console.log('🔄 Retrait du custom schedule pour', agent.id);
+
+          const oldScheduleId = agent.customScheduleId;
           await onCustomScheduleAssign(agent.id, null);
+
+          console.log('🗑️ Suppression du schedule', oldScheduleId);
+          await api.deleteSchedule(oldScheduleId);
         }
       }
 

@@ -45,7 +45,7 @@ export interface BlockData {
   date: string;
   startTime: string;
   endTime?: string;
-  status: "normal" | "retard";
+  status: "normal" | "retard" | "absence" | "incomplet";
   mode: "pair" | "single";
 }
 

@@ -1,6 +1,6 @@
-import { UserProps } from '../../../../backend-app/src/domain/types/entitiyProps';
+import { Agent } from '@/app/dashboard-manager/types';
 
-export const mockAgents: UserProps[] = [
+export const mockAgents: Agent[] = [
   {
     id: 1,
     prenom: "John",
@@ -10,8 +10,8 @@ export const mockAgents: UserProps[] = [
     telephone: "+33 6 12 34 56 78",
     equipeId: 1,
     isActive: true,
-    createdAt: new Date("2025-01-01T12:00:00.000Z"),
-    hashedPassword: "mockedHashedPassword123"
+    createdAt: "2025-01-01T12:00:00.000Z",
+    
   },
 
 ];

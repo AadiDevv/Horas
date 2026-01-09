@@ -25,7 +25,7 @@ export interface AbsenceFormData {
   startDateTime: string;
   endDateTime: string;
   comments?: string;
-  status?: "en_attente" | "approuve" | "refuse";
+  status?: "en_attente" | "approuve" | "refuse" | "annule";
 }
 
 const ABSENCE_TYPES = [
