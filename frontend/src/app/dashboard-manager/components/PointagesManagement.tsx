@@ -426,7 +426,7 @@ export default function PointagesManagement({
 
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 relative">
         {/* Sidebar des agents */}
-        <div
+        <motion.div
           className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 flex-shrink-0 ${
             sidebarCollapsed
               ? "lg:w-[96px]"
@@ -549,7 +549,7 @@ export default function PointagesManagement({
         </motion.div>
 
         {/* Zone du planning */}
-        <div
+        <motion.div
           className={`bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-200 transition-all duration-300 lg:flex-1 lg:min-w-0`}
         >
           {selectedAgent ? (
