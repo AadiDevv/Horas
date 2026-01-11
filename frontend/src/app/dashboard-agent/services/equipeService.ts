@@ -47,8 +47,6 @@ export async function getEquipe(equipeId: number): Promise<ApiResponse<Equipe>> 
     await new Promise(resolve => setTimeout(resolve, 300));
     const equipe = mockEquipes.find(e => e.id === equipeId);
 
-    console.log('🔍 Mock GET /api/equipes/' + equipeId);
-    console.log('✅ Réponse:', equipe);
 
     return {
       success: true,

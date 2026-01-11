@@ -11,7 +11,6 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, currentPage, onPageChange, onClose }: SidebarProps) {
   const handlePageChange = (page: DashboardPage) => {
     onPageChange(page);
-    // Fermer la sidebar sur mobile après sélection
     if (onClose && window.innerWidth < 1024) {
       onClose();
     }

@@ -155,11 +155,6 @@ export default function PointagesManagement({
           activeAgentIds.includes(absence.employeId),
         );
 
-        console.log("📊 Absences en attente:", {
-          total: response.data.length,
-          filtered: filteredAbsences.length,
-          activeAgents: activeAgentIds.length,
-        });
 
         setPendingAbsencesCount(filteredAbsences.length);
 
@@ -172,7 +167,6 @@ export default function PointagesManagement({
         setPendingAbsencesByAgent(byAgent);
       }
     } catch (error) {
-      console.error("❌ Erreur chargement absences en attente:", error);
     }
   };
 
@@ -189,7 +183,6 @@ export default function PointagesManagement({
         setTimesheets(response.data as any[]);
       }
     } catch (error) {
-      console.error("❌ Erreur chargement timesheets:", error);
     } finally {
       setLoading(false);
     }
@@ -212,7 +205,6 @@ export default function PointagesManagement({
         setAbsences(response.data);
       }
     } catch (error) {
-      console.error("❌ Erreur chargement absences:", error);
     }
   };
 
@@ -230,7 +222,6 @@ export default function PointagesManagement({
         setTeamSchedule([]);
       }
     } catch (error) {
-      console.error("❌ Erreur chargement horaires équipe:", error);
       setTeamSchedule([]);
     }
   };
@@ -257,7 +248,6 @@ export default function PointagesManagement({
   };
 
   const handleSaveBlock = async (data: BlockData) => {
-    // Utiliser formatDateTimeUTC pour convertir l'heure locale en UTC
     const entryTimestamp = formatDateTimeUTC(data.date, data.startTime);
 
     const backendStatus = data.status === "retard" ? "delay" : data.status;
@@ -314,7 +304,6 @@ export default function PointagesManagement({
       setShowDeleteModal(false);
       setDeletingPair(null);
     } catch (error) {
-      console.log("Erreur gérée par apiClient:", error);
     } finally {
       setDeleting(false);
     }
@@ -354,7 +343,6 @@ export default function PointagesManagement({
       onRefresh();
       setShowAbsenceModal(false);
     } catch (error) {
-      console.error("Erreur sauvegarde absence:", error);
       throw error;
     }
   };
@@ -371,7 +359,6 @@ export default function PointagesManagement({
         throw new Error(result.error || 'Erreur de suppression');
       }
     } catch (error) {
-      console.error("Erreur suppression absence:", error);
       throw error;
     }
   };
@@ -392,7 +379,6 @@ export default function PointagesManagement({
 
       onRefresh();
     } catch (error) {
-      console.error("Erreur sauvegarde absence:", error);
       throw error;
     }
   };

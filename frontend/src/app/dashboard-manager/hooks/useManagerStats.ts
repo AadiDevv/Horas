@@ -42,10 +42,6 @@ export interface ManagerStats {
   scoreGlobal: number;
 }
 
-/**
- * Hook pour calculer les statistiques du dashboard manager
- * à partir des absences et timesheets
- */
 export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
   const [stats, setStats] = useState<ManagerStats>({
     retardsAujourdhui: 0,
@@ -61,23 +57,16 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
   });
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Calcule la durée en heures entre deux timestamps
-   */
   const calculateHours = (startISO: string, endISO: string): number => {
     const start = new Date(startISO);
     const end = new Date(endISO);
     const diffMs = end.getTime() - start.getTime();
     const hours = diffMs / (1000 * 60 * 60);
 
-    // Validation
     if (hours < 0 || hours > 24) return 0;
     return hours;
   };
 
-  /**
-   * Charge et calcule toutes les statistiques
-   */
   const loadStats = async () => {
     if (agents.length === 0) {
       setStats({
@@ -105,44 +94,32 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const dateDebut = formatDateLocal(monday);
       const dateFin = formatDateLocal(sunday);
 
-      // Récupérer toutes les absences de la semaine
       const absencesResponse = await getAbsences({ startDate: dateDebut, endDate: dateFin });
 
-      // Récupérer tous les timesheets de la semaine pour les heures travaillées
       const timesheetsResponse = await getTimesheets({ dateDebut, dateFin });
 
       if (!absencesResponse.success || !absencesResponse.data) {
-        console.warn('⚠️ Aucune absence récupérée');
       }
 
       if (!timesheetsResponse.success || !timesheetsResponse.data) {
-        console.warn('⚠️ Aucun timesheet récupéré');
       }
 
-      // Filtrer les absences pour ne garder que celles des employés gérés par ce manager
       const agentIds = agents.map(a => a.id);
       const allAbsences = absencesResponse.data || [];
       const absences = allAbsences.filter(a => agentIds.includes(a.employeId));
 
       const timesheets = (timesheetsResponse.data || []) as any[];
 
-      console.log(`📊 ${absences.length}/${allAbsences.length} absences (filtrées) et ${timesheets.length} timesheets récupérés pour les stats`);
 
-      // Calculer les statistiques
       const calculatedStats = calculateAllStats(absences, timesheets, agents, equipes, today);
       setStats(calculatedStats);
 
-      console.log('✅ Stats calculées:', calculatedStats);
     } catch (error) {
-      console.error('❌ Erreur loadStats:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Calcule le lundi de la semaine
-   */
   const getMonday = (date: Date): Date => {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -152,9 +129,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     return d;
   };
 
-  /**
-   * Calcule toutes les statistiques à partir des absences et timesheets
-   */
   const calculateAllStats = (
     absences: Absence[],
     timesheets: Timesheet[],
@@ -165,17 +139,14 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     const todayStr = formatDateLocal(today);
     const monday = getMonday(today);
 
-    // 1. Retards aujourd'hui
     const retardsToday = timesheets.filter(t => {
       const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
       return date === todayStr && t.status === 'retard' && t.clockin === true;
     });
 
-    // 2. Absences aujourd'hui
     const absencesToday = absences.filter(a => {
       const startDate = a.startDateTime.substring(0, 10); // "YYYY-MM-DD"
       const endDate = a.endDateTime.substring(0, 10); // "YYYY-MM-DD"
-      // Une absence est "aujourd'hui" si aujourd'hui est entre startDate et endDate
       return todayStr >= startDate && todayStr <= endDate && a.status === 'approuve';
     });
 
@@ -184,7 +155,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const dateDebut = a.startDateTime.substring(0, 10);
       const dateFin = a.endDateTime.substring(0, 10);
 
-      // Mapper les types d'absence en français
       const typeMap: Record<string, string> = {
         'conges_payes': 'Congés payés',
         'conges_sans_solde': 'Congés sans solde',
@@ -203,15 +173,12 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       };
     });
 
-    // 3. Absences en attente de validation
     const absencesEnAttente = absences.filter(a => a.status === 'en_attente').length;
 
-    // 4. Heures travaillées par équipe
     const heuresParEquipe: EquipeHeures[] = equipes.map(equipe => {
       const membresIds = agents.filter(a => a.equipeId === equipe.id).map(a => a.id);
       const timesheetsEquipe = timesheets.filter(t => membresIds.includes(t.employeId));
 
-      // Grouper par employé et date
       const heuresByEmployeDate: Record<string, Timesheet[]> = {};
       timesheetsEquipe.forEach(t => {
         const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
@@ -222,7 +189,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
 
       let totalHeures = 0;
 
-      // Calculer les heures pour chaque employé/jour
       Object.values(heuresByEmployeDate).forEach(dayTimesheets => {
         const sorted = [...dayTimesheets].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
@@ -245,7 +211,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       };
     });
 
-    // 5. Absences par jour de la semaine
     const jours = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
     const absencesParJour: AbsenceJour[] = [];
 
@@ -255,7 +220,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const dateStr = formatDateLocal(date);
       const jourIndex = date.getDay();
 
-      // Compter les absences qui touchent ce jour (approuvées uniquement)
       const absencesJour = absences.filter(a => {
         const startDate = a.startDateTime.substring(0, 10);
         const endDate = a.endDateTime.substring(0, 10);
@@ -271,19 +235,14 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
 
     const totalAbsencesSemaine = absencesParJour.reduce((sum, j) => sum + j.count, 0);
 
-    // 5. Score de ponctualité par équipe (basé sur les retards)
     const scoreParEquipe: EquipeScore[] = equipes.map(equipe => {
       const membresIds = agents.filter(a => a.equipeId === equipe.id).map(a => a.id);
       const timesheetsEquipe = timesheets.filter(t => membresIds.includes(t.employeId));
 
-      // Compter les pointages de la semaine (clockin uniquement)
       const totalClockins = timesheetsEquipe.filter(t => t.clockin === true).length;
 
-      // Compter les retards de la semaine
       const retardsEquipe = timesheetsEquipe.filter(t => t.clockin === true && t.status === 'retard').length;
 
-      // Score de ponctualité = % de pointages à l'heure (sans retard)
-      // Plus il y a de retards, plus le score baisse
       const score = totalClockins > 0
         ? Math.max(0, Math.round(((totalClockins - retardsEquipe) / totalClockins) * 100))
         : 100;
@@ -312,7 +271,6 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     };
   };
 
-  // Charger les stats au montage et quand agents/equipes changent
   useEffect(() => {
     loadStats();
   }, [agents.length, equipes.length]);

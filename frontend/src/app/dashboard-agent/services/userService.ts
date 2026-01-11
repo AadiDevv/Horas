@@ -70,8 +70,6 @@ export async function getUser(userId: number): Promise<ApiResponse<User>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const user = mockUsers.find(u => u.id === userId);
-    console.log('🔍 Mock GET /api/users/' + userId);
-    console.log('✅ Réponse:', user);
 
     return {
       success: true,
@@ -106,9 +104,6 @@ export async function updateUser(userId: number, updates: Partial<User>): Promis
     };
     mockUsers[userIndex] = updatedUser;
 
-    console.log('🔄 Mock PATCH /api/users/' + userId);
-    console.log('📝 Données envoyées:', updates);
-    console.log('✅ Utilisateur mis à jour:', updatedUser);
 
     return {
       success: true,
@@ -142,8 +137,6 @@ export async function changePassword(
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    console.log('🔒 Mock PATCH /api/users/' + userId + '/password');
-    console.log('📝 Changement de mot de passe simulé');
 
     const user = mockUsers.find(u => u.id === userId);
     if (user && user.oldPassword !== oldPassword) {

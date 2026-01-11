@@ -112,14 +112,9 @@ export default function Page() {
           });
 
           setAbsences(filteredAbsences);
-          console.log(
-            "✅ Absences chargées pour la semaine:",
-            filteredAbsences,
-          );
         }
       }
     } catch (error) {
-      console.error("❌ Erreur chargement absences:", error);
     }
   };
 
@@ -130,7 +125,6 @@ export default function Page() {
   }, [selectedWeek, weekDays]);
 
   useEffect(() => {
-    // Calculer la position initiale du bouton
     const calculateInitialPosition = () => {
       const placeholder = document.getElementById('button-placeholder');
       if (placeholder) {
@@ -147,7 +141,6 @@ export default function Page() {
       }
     };
 
-    // Calculer au chargement et au resize
     setTimeout(calculateInitialPosition, 100);
     window.addEventListener('resize', calculateInitialPosition);
 
@@ -165,7 +158,6 @@ export default function Page() {
   }, [mounted]);
 
   const handleLogout = () => {
-    console.log("🚪 Déconnexion...");
     window.location.href = "/login";
   };
 
