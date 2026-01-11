@@ -56,24 +56,18 @@ export function useAgentManager() {
   }, [searchTerm, agents]);
 
   const loadAgents = async () => {
-    console.log('📋 Début du chargement des agents...');
     setLoadingAgents(true);
     try {
       const result = await api.getAgents();
-      console.log('📋 Résultat getAgents:', result);
       if (result.success && result.data) {
-        console.log('📋 Nombre d\'agents reçus:', result.data.length);
-        console.log('📋 Agents:', result.data);
         setAgents(result.data);
         setFilteredAgents(result.data);
       } else {
-        console.warn('⚠️ Pas de données d\'agents ou échec');
       }
     } catch (error) {
       handleApiError(error, 'Erreur lors du chargement des agents');
     }
     setLoadingAgents(false);
-    console.log('📋 Fin du chargement des agents');
   };
 
   const handleCreate = async () => {
@@ -118,16 +112,13 @@ export function useAgentManager() {
         const oldTeamId = editingAgent.equipeId || null;
 
         if (newTeamId !== oldTeamId) {
-          console.log('🔄 Changement d\'équipe détecté:', { oldTeamId, newTeamId });
 
           if (newTeamId) {
 
-            console.log('➕ Assignation à l\'équipe', newTeamId);
             await api.assignUserToTeam(editingAgent.id, newTeamId);
             showSuccess('Agent mis à jour avec succès');
           } else {
 
-            console.warn('⚠️ Le backend ne supporte pas le retrait d\'une équipe. L\'agent reste dans son équipe actuelle.');
             handleApiError(
               new Error('Le retrait d\'une équipe n\'est pas supporté. Veuillez assigner l\'agent à une autre équipe si nécessaire.'),
               'Impossible de retirer l\'agent de son équipe'
@@ -150,7 +141,6 @@ export function useAgentManager() {
       }
     } catch (error) {
 
-      console.log('Erreur gérée par apiClient:', error);
     }
   };
 
@@ -251,11 +241,9 @@ export function useEquipeManager() {
       if (result.success) {
 
         if (formData.agents.length > 0 && result.data) {
-          console.log('🔄 Assignation des agents à l\'équipe', result.data.id);
           for (const agentId of formData.agents) {
             try {
               await api.assignUserToTeam(agentId, result.data.id);
-              console.log('✅ Agent', agentId, 'assigné à l\'équipe', result.data.id);
             } catch (error) {
               handleApiError(error, `Erreur lors de l'assignation de l'agent ${agentId}`);
             }
@@ -263,10 +251,8 @@ export function useEquipeManager() {
         }
 
         if (formData.scheduleId && result.data) {
-          console.log('⏰ Assignation du schedule', formData.scheduleId, 'à l\'équipe', result.data.id);
           try {
             await api.assignScheduleToTeam(result.data.id, formData.scheduleId);
-            console.log('✅ Schedule assigné avec succès');
           } catch (error) {
             handleApiError(error, 'Erreur lors de l\'assignation du schedule');
           }
@@ -299,30 +285,22 @@ export function useEquipeManager() {
         const newAgentIds = formData.agents.filter(id => !currentAgentIds.includes(id));
 
         if (newAgentIds.length > 0) {
-          console.log('🔄 Assignation des nouveaux agents à l\'équipe', editingEquipe.id);
-          console.log('📋 Agents déjà dans l\'équipe:', currentAgentIds);
-          console.log('➕ Nouveaux agents à assigner:', newAgentIds);
 
           for (const agentId of newAgentIds) {
             try {
               await api.assignUserToTeam(agentId, editingEquipe.id);
-              console.log('✅ Agent', agentId, 'assigné à l\'équipe', editingEquipe.id);
             } catch (error) {
               handleApiError(error, `Erreur lors de l'assignation de l'agent ${agentId}`);
             }
           }
         } else {
-          console.log('ℹ️ Aucun nouvel agent à assigner');
         }
 
         if (formData.scheduleId !== editingEquipe.scheduleId) {
-          console.log('⏰ Changement de schedule détecté');
-          console.log('Ancien:', editingEquipe.scheduleId, '→ Nouveau:', formData.scheduleId);
 
           if (formData.scheduleId) {
             try {
               await api.assignScheduleToTeam(editingEquipe.id, formData.scheduleId);
-              console.log('✅ Schedule mis à jour avec succès');
             } catch (error) {
               handleApiError(error, 'Erreur lors de l\'assignation du schedule');
             }

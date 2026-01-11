@@ -41,7 +41,6 @@ export function useManagerSettings() {
           confirmPassword: ''
         });
       } catch (e) {
-        console.error('Erreur lors du parsing des données utilisateur:', e);
       }
     }
   };
@@ -98,7 +97,6 @@ export function useManagerSettings() {
       }, 2000);
 
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
       setErrorMessage('Erreur lors de la sauvegarde des paramètres');
     } finally {
       setSaving(false);

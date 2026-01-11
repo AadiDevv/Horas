@@ -13,14 +13,12 @@ interface ScheduleVisualizerProps {
 }
 
 export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps) {
-  // Calcul durée
   const [startH, startM] = schedule.startHour.split(':').map(Number);
   const [endH, endM] = schedule.endHour.split(':').map(Number);
   const durationMinutes = (endH * 60 + endM) - (startH * 60 + startM);
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
 
-  // Conversion des angles pour l'horloge
   const timeToAngle = (time: string): number => {
     const [h, m] = time.split(':').map(Number);
     const totalMinutes = h * 60 + m;
@@ -30,7 +28,6 @@ export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps
   const startAngle = timeToAngle(schedule.startHour);
   const endAngle = timeToAngle(schedule.endHour);
 
-  // Calcul arc SVG
   const { radius, centerX, centerY } = CLOCK_CONFIG;
 
   const startRad = (startAngle * Math.PI) / 180;
@@ -43,7 +40,6 @@ export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps
 
   const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
 
-  // Couleur dynamique basée sur la durée
   const getColorFromDuration = () => {
     if (hours >= DURATION_COLOR_THRESHOLDS.long) return DURATION_COLORS.long;
     if (hours >= DURATION_COLOR_THRESHOLDS.medium) return DURATION_COLORS.medium;
@@ -52,13 +48,11 @@ export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps
 
   const arcColor = getColorFromDuration();
 
-  // Animation springs pour les coordonnées
   const animatedStartX = useSpring(targetStartX, { stiffness: 100, damping: 20 });
   const animatedStartY = useSpring(targetStartY, { stiffness: 100, damping: 20 });
   const animatedEndX = useSpring(targetEndX, { stiffness: 100, damping: 20 });
   const animatedEndY = useSpring(targetEndY, { stiffness: 100, damping: 20 });
 
-  // Mettre à jour les springs quand les valeurs changent
   useEffect(() => {
     animatedStartX.set(targetStartX);
     animatedStartY.set(targetStartY);
@@ -66,7 +60,6 @@ export default function ScheduleVisualizer({ schedule }: ScheduleVisualizerProps
     animatedEndY.set(targetEndY);
   }, [targetStartX, targetStartY, targetEndX, targetEndY, animatedStartX, animatedStartY, animatedEndX, animatedEndY]);
 
-  // Transformer les motion values en path string
   const pathD = useTransform(
     [animatedStartX, animatedStartY, animatedEndX, animatedEndY],
     ([sX, sY, eX, eY]: number[]) => `M ${sX} ${sY} A ${radius} ${radius} 0 ${largeArc} 1 ${eX} ${eY}`

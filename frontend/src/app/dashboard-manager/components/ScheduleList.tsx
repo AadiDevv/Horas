@@ -21,7 +21,6 @@ export default function ScheduleList({
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [activeTab, setActiveTab] = useState<'team' | 'employee'>('team');
 
-  // Synchronize selectedSchedule with updated schedules data
   useEffect(() => {
     if (selectedSchedule) {
       const updatedSchedule = schedules.find(s => s.id === selectedSchedule.id);
@@ -31,15 +30,12 @@ export default function ScheduleList({
     }
   }, [schedules]);
 
-  // Filter schedules by tab + search
   const filteredSchedules = schedules
     .filter(schedule => {
-      // Step 1: Filter by tab (team vs employee)
       const matchesTab = activeTab === 'team'
         ? isTeamSchedule(schedule.name)  // Horaires d'équipe (PAS employe_)
         : !isTeamSchedule(schedule.name); // Horaires employés (employe_)
 
-      // Step 2: Filter by search term
       const matchesSearch = schedule.name.toLowerCase().includes(searchTerm.toLowerCase());
 
       return matchesTab && matchesSearch;
@@ -356,7 +352,6 @@ export default function ScheduleList({
               </div>
             </div>
           ) : (
-            // Empty state
             <div className="flex flex-col items-center justify-center h-full text-gray-400 py-20">
               <Clock size={64} className="mb-4 opacity-50" />
               <p className="text-lg font-medium">Sélectionnez un horaire</p>

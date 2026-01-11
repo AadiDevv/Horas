@@ -114,7 +114,6 @@ function ManagerDashboard() {
     resetForm: resetScheduleForm,
   } = useScheduleManager();
 
-  // ==================== EFFECTS ====================
   useEffect(() => {
     loadAgents();
     loadSchedules();
@@ -180,7 +179,6 @@ function ManagerDashboard() {
     setShowScheduleModal(true);
   };
 
-  // ==================== RENDER ====================
   return (
     <RoleProtection allowedRoles={["manager", "admin"]}>
       <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
@@ -366,7 +364,6 @@ function ManagerDashboard() {
                 await loadSchedules();
               }
             } catch (error) {
-              console.error("Erreur lors de l'assignation du schedule:", error);
             }
           }}
         />
@@ -386,10 +383,8 @@ function ManagerDashboard() {
           allEquipes={enrichedEquipes}
           availableSchedules={schedules}
           onMoveAgent={async (agentId: number, newTeamId: number) => {
-            // Déplacer l'agent vers la nouvelle équipe
             const result = await api.assignUserToTeam(agentId, newTeamId);
             if (result.success) {
-              // Recharger les agents et équipes pour mettre à jour l'UI
               await loadAgents();
               await loadEquipes();
             }

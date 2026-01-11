@@ -37,7 +37,6 @@ export async function getTimesheets(params: {
     const queryString = searchParams.toString();
     const url = `${API_BASE_URL}/api/timesheets${queryString ? `?${queryString}` : ''}`;
 
-    console.log('🔍 GET timesheets:', { url, params });
 
     const res = await fetch(url, {
       method: 'GET',
@@ -54,14 +53,12 @@ export async function getTimesheets(params: {
     const data = await res.json();
     const timesheets = Array.isArray(data) ? data : (data.data || []);
 
-    console.log(`✅ GET /api/timesheets - ${timesheets.length} timesheets récupérés`, timesheets);
 
     return {
       success: true,
       data: timesheets
     };
   } catch (error) {
-    console.error('❌ Erreur getTimesheets:', error);
     return {
       success: false,
       data: [],
@@ -74,12 +71,10 @@ export async function updateTimesheet(
   id: number,
   updates: Partial<Pick<Timesheet, 'timestamp' | 'clockin' | 'status'>>
 ): Promise<ApiResponse<Timesheet>> {
-  console.log(`🔧 PATCH /api/timesheets/${id}`, updates);
 
   const res = await apiClient.patch(`${API_BASE_URL}/api/timesheets/${id}`, updates);
   const data = await res.json();
 
-  console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour`);
 
   return {
     success: true,
@@ -95,12 +90,10 @@ export async function updateTimesheetPair(pairData: {
   exitTimestamp: string;
   status?: 'normal' | 'retard' | 'absence';
 }): Promise<ApiResponse<{ entry: Timesheet; exit: Timesheet }>> {
-  console.log('🔧 PATCH /api/timesheets/pair', pairData);
 
   const res = await apiClient.patch(`${API_BASE_URL}/api/timesheets/pair`, pairData);
   const data = await res.json();
 
-  console.log('✅ PATCH /api/timesheets/pair - Paire mise à jour');
 
   return {
     success: true,
@@ -113,7 +106,6 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
 
   await apiClient.delete(`${API_BASE_URL}/api/timesheets/${id}`);
 
-  console.log(`✅ DELETE /api/timesheets/${id} - Timesheet supprimé`);
 
   return {
     success: true,
@@ -134,8 +126,6 @@ export async function createTimesheet(timesheet: {
   });
 
   const data = await res.json();
-  console.log('✅ POST /api/timesheets/ - Timesheet créé', data);
-  console.log('📝 Données du timesheet créé:', JSON.stringify(data, null, 2));
 
   return {
     success: true,

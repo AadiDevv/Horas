@@ -34,9 +34,6 @@ export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
 
     const body = { };
 
-    console.log('🔄 POST /api/timesheets/ - Tentative de pointage...');
-    console.log('📝 Token présent:', !!token);
-    console.log('📅 Body (minimal):', body);
 
     const res = await fetch(`${API_BASE_URL}/api/timesheets/`, {
       method: 'POST',
@@ -47,23 +44,16 @@ export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
       body: JSON.stringify(body)
     });
 
-    console.log('📡 Response status:', res.status);
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      console.error('❌ Erreur API:', errorData);
       throw new Error(errorData.message || errorData.error || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
-    console.log('✅ POST /api/timesheets/ - Réponse complète:', JSON.stringify(data, null, 2));
-    console.log('📊 Type de data:', typeof data);
-    console.log('🔍 data.data existe?', !!data.data);
-    console.log('🔍 data.clockin existe?', !!data.clockin);
 
     const timesheet = data.data || data;
 
-    console.log('📦 Timesheet extrait:', timesheet);
 
     return {
       success: true,
@@ -72,7 +62,6 @@ export async function clockInOut(): Promise<ApiResponse<Timesheet>> {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Erreur clockInOut:', error);
     return {
       success: false,
       error: (error as Error).message,
@@ -95,7 +84,6 @@ export async function getTimesheets(
     const queryString = params.toString();
     const url = `${API_BASE_URL}/api/timesheets${queryString ? `?${queryString}` : ''}`;
 
-    console.log(`🔍 GET /api/timesheets - URL: ${url}`);
 
     const res = await fetch(url, {
       method: 'GET',
@@ -114,7 +102,6 @@ export async function getTimesheets(
 
     const timesheets = Array.isArray(data) ? data : (data.data || []);
 
-    console.log(`✅ GET /api/timesheets - ${timesheets.length || 0} timesheets récupérés`, timesheets);
 
     return {
       success: true,
@@ -122,7 +109,6 @@ export async function getTimesheets(
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Erreur getTimesheets:', error);
     return {
       success: false,
       data: [],
@@ -149,7 +135,6 @@ export async function getTimesheet(id: number): Promise<ApiResponse<Timesheet>> 
     }
 
     const data = await res.json();
-    console.log(`✅ GET /api/timesheets/${id} - Timesheet récupéré:`, data);
 
     return {
       success: true,
@@ -157,7 +142,6 @@ export async function getTimesheet(id: number): Promise<ApiResponse<Timesheet>> 
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`❌ Erreur getTimesheet(${id}):`, error);
     return {
       success: false,
       error: (error as Error).message,
@@ -187,7 +171,6 @@ export async function updateTimesheet(
     }
 
     const data = await res.json();
-    console.log(`✅ PATCH /api/timesheets/${id} - Timesheet mis à jour:`, data);
 
     return {
       success: true,
@@ -196,7 +179,6 @@ export async function updateTimesheet(
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`❌ Erreur updateTimesheet(${id}):`, error);
     return {
       success: false,
       error: (error as Error).message,
@@ -221,7 +203,6 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
       throw new Error(errorData.message || `HTTP ${res.status}`);
     }
 
-    console.log(`✅ DELETE /api/timesheets/${id} - Timesheet supprimé`);
 
     return {
       success: true,
@@ -229,7 +210,6 @@ export async function deleteTimesheet(id: number): Promise<ApiResponse<void>> {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`❌ Erreur deleteTimesheet(${id}):`, error);
     return {
       success: false,
       error: (error as Error).message,
@@ -251,7 +231,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      console.warn(`⚠️ Stats API returned ${res.status}, using default values`);
 
       return {
         success: true,
@@ -267,7 +246,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
     }
 
     const data = await res.json();
-    console.log('✅ GET /api/timesheets/stats - Statistiques récupérées:', data);
 
     return {
       success: true,
@@ -275,7 +253,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Erreur getTimesheetStats:', error);
 
     return {
       success: true,
@@ -293,7 +270,6 @@ export async function getTimesheetStats(): Promise<ApiResponse<TimesheetStats>> 
 
 export async function getTodayTimesheets(): Promise<ApiResponse<Timesheet[]>> {
   const today = new Date().toISOString().split('T')[0];
-  console.log(`📅 Récupération des timesheets du jour: ${today}`);
   return getTimesheets(today, today);
 }
 
@@ -320,7 +296,6 @@ export async function getWeekTimesheets(weekStart?: Date): Promise<ApiResponse<T
   const dateDebut = monday.toISOString().split('T')[0];
   const dateFin = sunday.toISOString().split('T')[0];
 
-  console.log(`📅 Récupération des timesheets de ${dateDebut} à ${dateFin}`);
 
   return getTimesheets(dateDebut, dateFin);
 }

@@ -35,13 +35,10 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      console.log("email", email);
-      console.log("password", password);
       const response = await axios.post<LoginResponse>(`${API_CONFIG.BASE_URL}/api/auth/login`, {
         email,
         password,
       });
-      console.log("response", response);
       if (response.status === 200) {
         const { accessToken, user, role } = response.data.data;
 
@@ -272,15 +269,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/*<p className="mt-8 text-center text-sm text-gray-600">
-          Vous n'avez pas de compte ?{" "}
-          <button
-            className="font-semibold text-gray-900 hover:text-gray-700 transition-colors duration-200 hover:underline underline-offset-4"
-            onClick={() => router.push("/signup")}
-          >
-            Créer un compte
-          </button>
-        </p>*/}
       </div>
 
       <style jsx>{`
