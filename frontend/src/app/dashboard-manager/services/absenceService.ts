@@ -48,6 +48,7 @@ export async function getAbsences(params: {
     const queryString = searchParams.toString();
     const url = `${API_BASE_URL}/api/absences${queryString ? `?${queryString}` : ''}`;
 
+    console.log('🔍 GET absences:', { url, params });
 
     const res = await fetch(url, {
       method: 'GET',
@@ -64,12 +65,14 @@ export async function getAbsences(params: {
     const data = await res.json();
     const absences = Array.isArray(data) ? data : (data.data || []);
 
+    console.log(`✅ GET /api/absences - ${absences.length} absences récupérées`, absences);
 
     return {
       success: true,
       data: absences
     };
   } catch (error) {
+    console.error('❌ Erreur getAbsences:', error);
     return {
       success: false,
       data: [],
@@ -83,6 +86,7 @@ export async function getPendingAbsences(): Promise<ApiResponse<Absence[]>> {
     const token = localStorage.getItem('token');
     const url = `${API_BASE_URL}/api/absences/pending`;
 
+    console.log('🔍 GET pending absences:', url);
 
     const res = await fetch(url, {
       method: 'GET',
@@ -99,12 +103,14 @@ export async function getPendingAbsences(): Promise<ApiResponse<Absence[]>> {
     const data = await res.json();
     const absences = Array.isArray(data) ? data : (data.data || []);
 
+    console.log(`✅ GET /api/absences/pending - ${absences.length} absences en attente`, absences);
 
     return {
       success: true,
       data: absences
     };
   } catch (error) {
+    console.error('❌ Erreur getPendingAbsences:', error);
     return {
       success: false,
       data: [],
@@ -124,6 +130,7 @@ export async function createAbsence(absence: {
   try {
     const token = localStorage.getItem('token');
 
+    console.log('📝 POST /api/absences', absence);
 
     const res = await fetch(`${API_BASE_URL}/api/absences`, {
       method: 'POST',
@@ -144,10 +151,12 @@ export async function createAbsence(absence: {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Erreur backend POST:', { status: res.status, errorData });
       throw new Error(errorData.message || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
+    console.log('✅ POST /api/absences - Absence créée', data);
 
     return {
       success: true,
@@ -155,6 +164,7 @@ export async function createAbsence(absence: {
       message: 'Absence créée avec succès'
     };
   } catch (error) {
+    console.error('❌ Erreur createAbsence:', error);
     return {
       success: false,
       error: (error as Error).message
@@ -170,6 +180,7 @@ export async function validateAbsence(
   try {
     const token = localStorage.getItem('token');
 
+    console.log(`🔧 PATCH /api/absences/${id}/validate`, { status, comments });
 
     const res = await fetch(`${API_BASE_URL}/api/absences/${id}/validate`, {
       method: 'PATCH',
@@ -182,10 +193,12 @@ export async function validateAbsence(
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Erreur backend PATCH:', { status: res.status, errorData });
       throw new Error(errorData.message || `HTTP ${res.status}`);
     }
 
     const data = await res.json();
+    console.log(`✅ PATCH /api/absences/${id}/validate - Absence validée`);
 
     return {
       success: true,
@@ -193,6 +206,7 @@ export async function validateAbsence(
       message: 'Absence validée avec succès'
     };
   } catch (error) {
+    console.error(`❌ Erreur validateAbsence(${id}):`, error);
     return {
       success: false,
       error: (error as Error).message
@@ -204,6 +218,7 @@ export async function deleteAbsence(id: number): Promise<ApiResponse<void>> {
   try {
     const token = localStorage.getItem('token');
 
+    console.log(`🗑️ DELETE /api/absences/${id}`);
 
     const res = await fetch(`${API_BASE_URL}/api/absences/${id}`, {
       method: 'DELETE',
@@ -215,15 +230,20 @@ export async function deleteAbsence(id: number): Promise<ApiResponse<void>> {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
+      console.error('❌ Erreur backend DELETE:', errorData);
+      console.error('❌ Status:', res.status);
+      console.error('❌ StatusText:', res.statusText);
       throw new Error(errorData.message || `HTTP ${res.status}`);
     }
 
+    console.log(`✅ DELETE /api/absences/${id} - Absence supprimée`);
 
     return {
       success: true,
       message: 'Absence supprimée avec succès'
     };
   } catch (error) {
+    console.error(`❌ Erreur deleteAbsence(${id}):`, error);
     return {
       success: false,
       error: (error as Error).message

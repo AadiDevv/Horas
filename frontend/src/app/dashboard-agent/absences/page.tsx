@@ -33,8 +33,10 @@ export default function MesAbsencesPage() {
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
+        console.log("👤 User récupéré:", user);
         setEmployeeId(user.id);
       } catch (error) {
+        console.error("Erreur parsing user:", error);
       }
     }
   }, []);
@@ -54,6 +56,7 @@ export default function MesAbsencesPage() {
         setAbsences(sorted);
       }
     } catch (error) {
+      console.error("Erreur chargement absences:", error);
     } finally {
       setLoading(false);
     }
@@ -76,9 +79,11 @@ export default function MesAbsencesPage() {
     comments?: string;
   }) => {
     if (!employeeId) {
+      console.error("❌ Pas d'employeeId");
       return;
     }
 
+    console.log("📝 Création absence pour employé:", employeeId, data);
 
     try {
       const result = await createAbsence({
@@ -90,10 +95,12 @@ export default function MesAbsencesPage() {
         status: "en_attente",
       });
 
+      console.log("✅ Absence créée:", result);
 
       await loadAbsences();
       setShowModal(false);
     } catch (error) {
+      console.error("❌ Erreur création absence:", error);
       throw error;
     }
   };
@@ -106,11 +113,14 @@ export default function MesAbsencesPage() {
     try {
       const result = await deleteAbsence(id);
       if (result.success) {
+        console.log("✅ Absence supprimée avec succès");
         await loadAbsences();
       } else {
+        console.error("❌ Erreur lors de la suppression:", result.error);
         alert("Erreur lors de la suppression de l'absence");
       }
     } catch (error) {
+      console.error("❌ Erreur suppression absence:", error);
       alert("Erreur lors de la suppression de l'absence");
     }
   };
@@ -335,6 +345,7 @@ export default function MesAbsencesPage() {
   );
 }
 
+// Composant modal temporaire (on va le créer dans un fichier séparé après)
 function AbsenceRequestModal({
   isOpen,
   onClose,

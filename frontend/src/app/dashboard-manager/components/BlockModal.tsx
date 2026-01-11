@@ -166,6 +166,7 @@ export default function BlockModal({
       await onSave(formData);
       onClose();
     } catch (err) {
+      console.log("Erreur gérée par ErrorModal global:", err);
     } finally {
       setSaving(false);
     }
@@ -203,6 +204,7 @@ export default function BlockModal({
       }
       onClose();
     } catch (err) {
+      console.log("Erreur gérée par ErrorModal global:", err);
     } finally {
       setSaving(false);
     }

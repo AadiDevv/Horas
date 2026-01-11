@@ -17,6 +17,7 @@ export async function secureFetch(
   const token = getStoredToken();
 
   if (token && isTokenExpired(token)) {
+    console.error('⚠️ Token expiré détecté avant requête API - Déconnexion');
     logout();
 
     if (typeof window !== 'undefined') {

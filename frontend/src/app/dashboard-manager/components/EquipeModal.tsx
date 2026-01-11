@@ -59,6 +59,7 @@ export default function EquipeModal({
         agents: formData.agents.filter((id) => id !== agentId),
       });
     } catch (error) {
+      console.error("Erreur lors du déplacement de l'agent:", error);
     } finally {
       setMovingAgent(null);
     }
@@ -319,6 +320,11 @@ export default function EquipeModal({
               })()}
 
               {/* Lien vers la gestion des horaires */}
+              {/* <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-xs text-blue-800">
+                  💡 Pour créer ou modifier des horaires, utilisez l&apos;onglet <strong>&quot;Horaires&quot;</strong> dans le menu de gauche.
+                </p>
+              </div> */}
             </div>
           )}
         </div>

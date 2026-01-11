@@ -18,6 +18,7 @@ export function useTokenExpiration() {
       }
 
       if (isTokenExpired(token)) {
+        console.log('⚠️ Token expiré détecté - Déconnexion automatique');
 
         logout();
 

@@ -17,6 +17,7 @@ export function decodeToken(token: string): JWTPayload | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {
+      console.error('Token JWT invalide: format incorrect');
       return null;
     }
 
@@ -28,6 +29,7 @@ export function decodeToken(token: string): JWTPayload | null {
 
     return JSON.parse(decoded) as JWTPayload;
   } catch (error) {
+    console.error('Erreur lors du décodage du token:', error);
     return null;
   }
 }
@@ -69,6 +71,7 @@ export function logout(): void {
   localStorage.removeItem('user');
   localStorage.removeItem('role');
 
+  console.log('🔒 Déconnexion effectuée - localStorage nettoyé');
 }
 
 export function isAuthenticated(): boolean {

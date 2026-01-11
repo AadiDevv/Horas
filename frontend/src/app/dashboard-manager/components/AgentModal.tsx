@@ -40,6 +40,7 @@ export default function AgentModal({
   });
   const [savingSchedule, setSavingSchedule] = useState(false);
 
+  // Auto-generate schedule name when prenom/nom changes
   useEffect(() => {
     if (formData.prenom && formData.nom && scheduleMode === 'custom') {
       const sanitize = (str: string) => str.trim().replace(/\s+/g, '_');
@@ -72,6 +73,7 @@ export default function AgentModal({
             });
           }
         } catch (error) {
+          console.error('Erreur lors du chargement du schedule personnalisé:', error);
         }
       }
     };
@@ -98,6 +100,7 @@ export default function AgentModal({
   };
 
   const handleSaveWithSchedule = async () => {
+    // Validation
     if (scheduleMode === 'custom') {
       if (!formData.prenom.trim() || !formData.nom.trim()) {
         handleApiError(new Error('Prénom et nom requis pour créer un horaire personnalisé'), '');
@@ -116,24 +119,30 @@ export default function AgentModal({
     try {
       setSavingSchedule(true);
 
+      // Step 1: Save the agent
       await onSave();
 
       if (agent && onCustomScheduleAssign) {
         if (scheduleMode === 'custom') {
           if (agent.customScheduleId) {
+            console.log('🔄 Mise à jour du custom schedule', agent.customScheduleId);
             await api.updateSchedule(agent.customScheduleId, customScheduleData);
           } else {
+            console.log('🔄 Création du custom schedule pour', agent.id);
             const scheduleResult = await api.createSchedule(customScheduleData);
 
             if (scheduleResult.success && scheduleResult.data) {
+              console.log('✅ Schedule créé avec ID:', scheduleResult.data.id);
               await onCustomScheduleAssign(agent.id, scheduleResult.data.id);
             }
           }
         } else if (scheduleMode === 'team' && agent.customScheduleId) {
+          console.log('🔄 Retrait du custom schedule pour', agent.id);
 
           const oldScheduleId = agent.customScheduleId;
           await onCustomScheduleAssign(agent.id, null);
 
+          console.log('🗑️ Suppression du schedule', oldScheduleId);
           await api.deleteSchedule(oldScheduleId);
         }
       }
@@ -142,6 +151,7 @@ export default function AgentModal({
       onClose();
 
     } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde:', error);
       handleApiError(error, 'Erreur lors de la sauvegarde de l\'agent');
     } finally {
       setSavingSchedule(false);

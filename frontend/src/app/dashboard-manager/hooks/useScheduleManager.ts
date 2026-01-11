@@ -15,6 +15,7 @@ export function useScheduleManager() {
     activeDays: []
   });
 
+  // ==================== LOAD SCHEDULES ====================
   const loadSchedules = async () => {
     setLoadingSchedules(true);
     try {
@@ -25,12 +26,15 @@ export function useScheduleManager() {
         toast.error('Impossible de charger les horaires');
       }
     } catch (error) {
+      console.error('Erreur lors du chargement des horaires:', error);
       toast.error('Une erreur est survenue lors du chargement des horaires');
     }
     setLoadingSchedules(false);
   };
 
+  // ==================== CREATE SCHEDULE ====================
   const handleCreate = async () => {
+    // Validation
     if (!formData.name.trim()) {
       toast.error('Le nom est requis');
       return;
@@ -62,15 +66,18 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de créer l\'horaire');
       }
     } catch (error) {
+      console.error('❌ Erreur lors de la création:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la création: ${message}`);
     }
     setLoadingSchedules(false);
   };
 
+  // ==================== UPDATE SCHEDULE ====================
   const handleUpdate = async () => {
     if (!editingSchedule) return;
 
+    // Validation
     if (!formData.name.trim()) {
       toast.error('Le nom est requis');
       return;
@@ -102,12 +109,14 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de modifier l\'horaire');
       }
     } catch (error) {
+      console.error('❌ Erreur lors de la mise à jour:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la modification: ${message}`);
     }
     setLoadingSchedules(false);
   };
 
+  // ==================== DELETE SCHEDULE ====================
   const handleDelete = async (id: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet horaire ? Cette action est irréversible.')) {
       return;
@@ -123,12 +132,14 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de supprimer l\'horaire');
       }
     } catch (error) {
+      console.error('❌ Erreur lors de la suppression:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la suppression: ${message}`);
     }
     setLoadingSchedules(false);
   };
 
+  // ==================== MODAL MANAGEMENT ====================
   const openEditModal = (schedule: Schedule) => {
     setEditingSchedule(schedule);
     setFormData({

@@ -62,6 +62,8 @@ export async function clockIn(): Promise<ClockResponse> {
     mockPointages.push(newTimesheet);
 
     const action = isClockIn ? 'entrée' : 'sortie';
+    console.log(`✅ Mock POST /api/timesheets/ (${action})`);
+    console.log('📝 Nouveau timesheet:', newTimesheet);
 
     return {
       success: true,
@@ -138,11 +140,13 @@ export async function getWeekPointages(): Promise<PointageReadDTO[]> {
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
+    console.log(`🔍 Récupération des timesheets de ${monday.toISOString()} à ${sunday.toISOString()}`);
 
     const weekTimesheets = mockPointages.filter(p => {
       const pDate = new Date(p.timestamp);
       return pDate >= monday && pDate <= sunday;
     });
+    console.log(`✅ ${weekTimesheets.length} timesheets trouvés pour la semaine`);
 
     return weekTimesheets;
   }
