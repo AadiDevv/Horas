@@ -1,6 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.front.prod"
+dockerignorePath = ".dockerignore.frontend"
 
 [deploy]
 startCommand = "npm start"

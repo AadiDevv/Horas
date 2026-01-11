@@ -1,0 +1,62 @@
+# .dockerignore for frontend deployment from monorepo root
+
+# Ignore backend
+backend-app/
+
+# Ignore nginx
+nginx/
+
+# Ignore git
+.git
+.gitignore
+.gitattributes
+
+# Ignore GitHub workflows
+.github/
+
+# Ignore IDE
+.vscode
+.idea
+.cursor
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore documentation
+*.md
+!frontend/README.md
+
+# Ignore root package files
+/package.json
+/package-lock.json
+
+# Ignore compose files
+docker-compose*.yml
+compose*.yml
+
+# Frontend specific ignores
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/coverage
+frontend/.env
+frontend/.env.*
+frontend/.env.local
+frontend/.env.development
+frontend/.env.test
+frontend/.env.production
+frontend/**/__tests__
+frontend/**/*.test.ts
+frontend/**/*.test.tsx
+frontend/**/*.spec.ts
+frontend/**/*.spec.tsx
+frontend/*.log
+frontend/Dockerfile.dev
+frontend/.turbo
+
+# Ignore other dockerignore files
+.dockerignore.backend
