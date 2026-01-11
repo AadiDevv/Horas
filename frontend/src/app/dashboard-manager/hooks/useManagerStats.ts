@@ -112,11 +112,9 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const timesheetsResponse = await getTimesheets({ dateDebut, dateFin });
 
       if (!absencesResponse.success || !absencesResponse.data) {
-        console.warn('⚠️ Aucune absence récupérée');
       }
 
       if (!timesheetsResponse.success || !timesheetsResponse.data) {
-        console.warn('⚠️ Aucun timesheet récupéré');
       }
 
       // Filtrer les absences pour ne garder que celles des employés gérés par ce manager
@@ -129,15 +127,12 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
         status: ts.status === 'delay' ? 'retard' : ts.status
       })) as any[];
 
-      console.log(`📊 ${absences.length}/${allAbsences.length} absences (filtrées) et ${timesheets.length} timesheets récupérés pour les stats`);
 
       // Calculer les statistiques
       const calculatedStats = calculateAllStats(absences, timesheets, agents, equipes, today);
       setStats(calculatedStats);
 
-      console.log('✅ Stats calculées:', calculatedStats);
     } catch (error) {
-      console.error('❌ Erreur loadStats:', error);
     } finally {
       setLoading(false);
     }

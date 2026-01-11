@@ -366,7 +366,6 @@ function ManagerDashboard() {
                 await loadSchedules();
               }
             } catch (error) {
-              console.error("Erreur lors de l'assignation du schedule:", error);
             }
           }}
         />

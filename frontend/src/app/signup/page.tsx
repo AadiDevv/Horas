@@ -56,7 +56,6 @@ export default function SignupPage() {
       );
 
       if (response.status === 201 || response.status === 200) {
-        console.log("Inscription réussie !");
         router.push("/login");
       }
     } catch (err: any) {

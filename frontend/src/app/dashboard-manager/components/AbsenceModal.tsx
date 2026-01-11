@@ -113,7 +113,6 @@ export default function AbsenceModal({
 
       onClose();
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
       setLocalError("Une erreur est survenue lors de la sauvegarde");
     } finally {
       setSaving(false);
@@ -133,7 +132,6 @@ export default function AbsenceModal({
       await onDelete(absence.id);
       onClose();
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
       setLocalError("Une erreur est survenue lors de la suppression");
     } finally {
       setDeleting(false);

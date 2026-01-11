@@ -26,7 +26,6 @@ export function useScheduleManager() {
         toast.error('Impossible de charger les horaires');
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des horaires:', error);
       toast.error('Une erreur est survenue lors du chargement des horaires');
     }
     setLoadingSchedules(false);
@@ -66,7 +65,6 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de créer l\'horaire');
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la création:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la création: ${message}`);
     }
@@ -109,7 +107,6 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de modifier l\'horaire');
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la mise à jour:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la modification: ${message}`);
     }
@@ -132,7 +129,6 @@ export function useScheduleManager() {
         toast.error(result.error || 'Impossible de supprimer l\'horaire');
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la suppression:', error);
       const message = error instanceof Error ? error.message : 'Une erreur est survenue';
       toast.error(`Erreur lors de la suppression: ${message}`);
     }

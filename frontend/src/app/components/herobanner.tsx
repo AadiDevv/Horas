@@ -30,7 +30,6 @@ export default function Hero() {
         const userData = JSON.parse(userStr);
         setUser(userData);
       } catch (e) {
-        console.error("Erreur lors du parsing des données utilisateur:", e);
         setUser(null);
       }
     } else {

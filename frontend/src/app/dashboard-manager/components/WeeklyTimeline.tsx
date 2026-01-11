@@ -101,9 +101,6 @@ export default function WeeklyTimeline({
     const used = new Set<number>();
 
     if (dayTimesheets.length > 0) {
-      console.log(
-        `📅 Timesheets pour ${date}:`,
-        sorted.map((ts) => ({
           id: ts.id,
           timestamp: ts.timestamp,
           clockin: ts.clockin,
@@ -125,9 +122,6 @@ export default function WeeklyTimeline({
           used.add(ts.id);
           used.add(nextExit.id);
         } else {
-          console.log(
-            `⚠️ Entrée orpheline détectée - ID ${ts.id} à ${ts.timestamp}`,
-          );
           pairs.push({ entry: ts });
           used.add(ts.id);
         }
@@ -136,15 +130,11 @@ export default function WeeklyTimeline({
 
     for (const ts of sorted) {
       if (!used.has(ts.id) && ts.clockin === false) {
-        console.log(
-          `⚠️ Sortie orpheline détectée - ID ${ts.id} à ${ts.timestamp}`,
-        );
         pairs.push({ entry: ts });
         used.add(ts.id);
       }
     }
 
-    console.log(`✅ Paires créées pour ${date}:`, pairs.length);
     return pairs;
   };
 
@@ -279,9 +269,6 @@ export default function WeeklyTimeline({
                   const startTime = extractTimeLocal(pair.entry.timestamp);
 
                   if (!pair.exit) {
-                    console.log(
-                      `🎯 Position orphelin ID ${pair.entry.id}: ${startPos}% à ${startTime}`,
-                    );
                   }
 
                   if (pair.exit) {

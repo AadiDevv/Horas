@@ -59,7 +59,6 @@ export default function EquipeModal({
         agents: formData.agents.filter((id) => id !== agentId),
       });
     } catch (error) {
-      console.error("Erreur lors du déplacement de l'agent:", error);
     } finally {
       setMovingAgent(null);
     }
