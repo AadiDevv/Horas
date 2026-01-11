@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-COPY prod.conf /etc/nginx/nginx.conf
+COPY nginx/prod.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 
