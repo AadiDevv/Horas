@@ -1,15 +1,21 @@
-
-
 export function formatDateLocal(date: Date = new Date()): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Convertit une date et heure locale en timestamp ISO UTC
+ * Ex: "2026-01-12" + "18:00" en France (UTC+1) → "2026-01-12T17:00:00.000Z"
+ * Utilisé pour envoyer les timestamps au backend
+ * @param date - Date au format "YYYY-MM-DD"
+ * @param time - Heure locale au format "HH:mm"
+ * @returns Timestamp ISO UTC
+ */
 export function formatDateTimeUTC(date: string, time: string): string {
   // Crée une date locale puis la convertit en ISO UTC
-  // Ex: 14:30 local (GMT+1) → "2026-01-08T13:30:00.000Z" (13:30 UTC)
+  // Ex: 18:00 local (France UTC+1) → "17:00:00.000Z" (UTC)
   const localDate = new Date(`${date}T${time}:00`);
   return localDate.toISOString();
 }
@@ -19,11 +25,11 @@ export function extractDateLocal(isoString: string): string {
 }
 
 export function extractTimeLocal(isoString: string): string {
-  // TOUJOURS convertir en heure locale car Prisma stocke en UTC
-  // Même si le timestamp semble être en "faux UTC", Prisma l'a converti
+  // Convertit UTC → heure locale (pour employés)
+  // Ex: "2026-01-12T17:00:00.000Z" en UTC+1 → "18:00" local
   const date = new Date(isoString);
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 }
 

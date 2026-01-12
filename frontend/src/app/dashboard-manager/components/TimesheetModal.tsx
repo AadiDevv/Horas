@@ -83,7 +83,10 @@ export default function TimesheetModal({
   const getTimeFromTimestamp = () => {
     if (!formData.timestamp) return "";
     const date = new Date(formData.timestamp);
-    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+    return `${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const updateDateTime = (dateStr?: string, timeStr?: string) => {
