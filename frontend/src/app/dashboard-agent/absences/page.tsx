@@ -27,7 +27,6 @@ export default function MesAbsencesPage() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [employeeId, setEmployeeId] = useState<number | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const userStr = localStorage.getItem("user");
@@ -156,102 +155,98 @@ export default function MesAbsencesPage() {
   return (
     <RoleProtection allowedRoles={["employe"]}>
       <div className="min-h-screen bg-white">
-        <Navbar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
+        <Navbar />
 
         <div className="flex">
-          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <div className="flex-1 px-4 sm:px-8 py-4 sm:py-8 bg-gray-50">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <Sidebar />
+          <div className="flex-1 px-8 py-8 bg-gray-50">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
                   Mes Absences
                 </h1>
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-gray-600">
                   Gérez vos demandes d'absence et consultez leur statut
                 </p>
               </div>
               <button
                 onClick={handleCreateAbsence}
-                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-black hover:bg-gray-900 text-white rounded-lg sm:rounded-xl text-sm sm:text-base font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                className="px-6 py-3 bg-black hover:bg-gray-900 text-white rounded-xl font-semibold transition-colors flex items-center gap-2 cursor-pointer"
               >
-                <Plus size={18} className="sm:hidden" />
-                <Plus size={20} className="hidden sm:block" />
+                <Plus size={20} />
                 Nouvelle demande
               </button>
             </div>
 
             {/* Stats rapides */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-200">
-                <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <AlertCircle className="text-orange-500" size={20} />
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertCircle className="text-orange-500" size={24} />
+                  <h3 className="text-lg font-semibold text-gray-900">
                     En attente
                   </h3>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900">
                   {absences.filter((a) => a.status === "en_attente").length}
                 </p>
               </div>
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-200">
-                <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <CheckCircle className="text-green-500" size={20} />
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="text-green-500" size={24} />
+                  <h3 className="text-lg font-semibold text-gray-900">
                     Approuvées
                   </h3>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900">
                   {absences.filter((a) => a.status === "approuve").length}
                 </p>
               </div>
-              <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-gray-200">
-                <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                  <XCircle className="text-red-500" size={20} />
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              <div className="bg-white rounded-2xl p-6 border border-gray-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <XCircle className="text-red-500" size={24} />
+                  <h3 className="text-lg font-semibold text-gray-900">
                     Refusées
                   </h3>
                 </div>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-gray-900">
                   {absences.filter((a) => a.status === "refuse").length}
                 </p>
               </div>
             </div>
 
             {/* Liste des absences */}
-            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden">
-              <div className="p-4 sm:p-6 border-b border-gray-200">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900">
                   Historique des demandes
                 </h2>
               </div>
 
               {loading ? (
-                <div className="p-8 sm:p-12 text-center">
+                <div className="p-12 text-center">
                   <Clock
                     className="mx-auto mb-4 animate-spin text-gray-400"
-                    size={40}
+                    size={48}
                   />
-                  <p className="text-sm sm:text-base text-gray-500">Chargement...</p>
+                  <p className="text-gray-500">Chargement...</p>
                 </div>
               ) : absences.length > 0 ? (
                 <div className="divide-y divide-gray-200">
                   {absences.map((absence) => (
                     <div
                       key={absence.id}
-                      className="p-4 sm:p-6 hover:bg-gray-50 transition-colors"
+                      className="p-6 hover:bg-gray-50 transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
                             {getStatusIcon(absence.status)}
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-gray-900">
                               {typeLabels[absence.type]}
                             </h3>
                             <span
-                              className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium ${
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
                                 absence.status === "en_attente"
                                   ? "bg-orange-100 text-orange-700"
                                   : absence.status === "approuve"
@@ -263,23 +258,25 @@ export default function MesAbsencesPage() {
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-2">
-                            <CalendarIcon size={14} className="flex-shrink-0" />
-                            <span className="truncate">
-                              Du{" "}
-                              {new Date(
-                                absence.startDateTime,
-                              ).toLocaleDateString("fr-FR")}
-                              {" au "}
-                              {new Date(
-                                absence.endDateTime,
-                              ).toLocaleDateString("fr-FR")}
-                            </span>
+                          <div className="flex items-center gap-6 text-sm text-gray-600 mb-2">
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon size={16} />
+                              <span>
+                                Du{" "}
+                                {new Date(
+                                  absence.startDateTime,
+                                ).toLocaleDateString("fr-FR")}
+                                {" au "}
+                                {new Date(
+                                  absence.endDateTime,
+                                ).toLocaleDateString("fr-FR")}
+                              </span>
+                            </div>
                           </div>
 
                           {absence.comments && (
-                            <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
-                              <p className="text-xs sm:text-sm text-gray-700">
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                              <p className="text-sm text-gray-700">
                                 <span className="font-medium">
                                   Commentaire :{" "}
                                 </span>
@@ -302,11 +299,10 @@ export default function MesAbsencesPage() {
                         {absence.status === "en_attente" && (
                           <button
                             onClick={() => handleDeleteAbsence(absence.id)}
-                            className="p-1.5 sm:p-2 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95 flex-shrink-0"
+                            className="ml-4 p-2 hover:bg-red-50 rounded-lg transition text-red-600 cursor-pointer active:scale-95"
                             title="Supprimer la demande"
                           >
-                            <Trash2 size={18} className="sm:hidden" />
-                            <Trash2 size={20} className="hidden sm:block" />
+                            <Trash2 size={20} />
                           </button>
                         )}
                       </div>
@@ -314,12 +310,12 @@ export default function MesAbsencesPage() {
                   ))}
                 </div>
               ) : (
-                <div className="p-8 sm:p-12 text-center">
-                  <UserX className="mx-auto mb-4 text-gray-400" size={40} />
-                  <p className="text-base sm:text-lg text-gray-500 font-medium mb-2">
+                <div className="p-12 text-center">
+                  <UserX className="mx-auto mb-4 text-gray-400" size={48} />
+                  <p className="text-gray-500 text-lg font-medium mb-2">
                     Aucune absence
                   </p>
-                  <p className="text-xs sm:text-sm text-gray-400">
+                  <p className="text-gray-400 text-sm">
                     Vous n'avez pas encore fait de demande d'absence
                   </p>
                 </div>
@@ -390,20 +386,20 @@ function AbsenceRequestModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl max-h-[95vh] overflow-y-auto">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Nouvelle demande d'absence
         </h2>
 
         {error && (
-          <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-lg sm:rounded-xl text-red-700 text-xs sm:text-sm">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Type d'absence
             </label>
             <select
@@ -414,7 +410,7 @@ function AbsenceRequestModal({
                   type: e.target.value as AbsenceType,
                 })
               }
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               required
             >
               <option value="conges_payes">Congés payés</option>
@@ -426,9 +422,9 @@ function AbsenceRequestModal({
             </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Date de début
               </label>
               <input
@@ -437,12 +433,12 @@ function AbsenceRequestModal({
                 onChange={(e) =>
                   setFormData({ ...formData, startDateTime: e.target.value })
                 }
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Date de fin
               </label>
               <input
@@ -451,14 +447,14 @@ function AbsenceRequestModal({
                 onChange={(e) =>
                   setFormData({ ...formData, endDateTime: e.target.value })
                 }
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Commentaires (optionnel)
             </label>
             <textarea
@@ -467,16 +463,16 @@ function AbsenceRequestModal({
                 setFormData({ ...formData, comments: e.target.value })
               }
               rows={3}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-black resize-none"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black resize-none"
               placeholder="Précisez la raison de votre absence..."
             />
           </div>
 
-          <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-2">
+          <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-3 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg sm:rounded-xl font-medium transition-colors text-xs sm:text-sm cursor-pointer active:scale-95"
+              className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl font-medium transition-colors text-sm cursor-pointer"
               disabled={saving}
             >
               Annuler
@@ -484,9 +480,9 @@ function AbsenceRequestModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-3 sm:px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-lg sm:rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm cursor-pointer active:scale-95"
+              className="flex-1 px-4 py-2 bg-black hover:bg-gray-900 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm cursor-pointer"
             >
-              {saving ? "Envoi..." : "Envoyer"}
+              {saving ? "Envoi..." : "Envoyer la demande"}
             </button>
           </div>
         </form>
