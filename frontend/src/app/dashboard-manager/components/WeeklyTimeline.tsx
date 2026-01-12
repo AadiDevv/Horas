@@ -16,7 +16,7 @@ import {
   type TimesheetStatus,
   type AbsenceStatus,
   type AbsenceType,
-} from '../config/timelineStylesConfig';
+} from "../config/timelineStylesConfig";
 
 interface WeeklyTimelineProps {
   timesheets: Timesheet[];
@@ -71,7 +71,7 @@ export default function WeeklyTimeline({
   const timeToPosition = (
     time: string,
     minHour: number = 6,
-    maxHour: number = 22,
+    maxHour: number = 22
   ): number => {
     const [hours, minutes] = time.split(":").map(Number);
     const totalMinutes = hours * 60 + minutes;
@@ -80,26 +80,22 @@ export default function WeeklyTimeline({
     return ((totalMinutes - minMinutes) / (maxMinutes - minMinutes)) * 100;
   };
 
-  const timesheetsByDate = timesheets.reduce(
-    (acc, ts) => {
-      const date = ts.timestamp.substring(0, 10);
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(ts);
-      return acc;
-    },
-    {} as Record<string, Timesheet[]>,
-  );
+  const timesheetsByDate = timesheets.reduce((acc, ts) => {
+    const date = ts.timestamp.substring(0, 10);
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(ts);
+    return acc;
+  }, {} as Record<string, Timesheet[]>);
 
   const getTimesheetPairs = (
-    date: string,
+    date: string
   ): Array<{ entry: Timesheet; exit?: Timesheet }> => {
     const dayTimesheets = timesheetsByDate[date] || [];
     const sorted = [...dayTimesheets].sort((a, b) =>
-      a.timestamp.localeCompare(b.timestamp),
+      a.timestamp.localeCompare(b.timestamp)
     );
     const pairs: Array<{ entry: Timesheet; exit?: Timesheet }> = [];
     const used = new Set<number>();
-
 
     for (let i = 0; i < sorted.length; i++) {
       if (used.has(sorted[i].id)) continue;
@@ -149,7 +145,7 @@ export default function WeeklyTimeline({
   };
 
   const isOutOfBounds = (
-    isoTime: string,
+    isoTime: string
   ): { isOut: boolean; position: "before" | "after" | null } => {
     const date = new Date(isoTime);
     const hour = date.getHours() + date.getMinutes() / 60;
@@ -167,7 +163,12 @@ export default function WeeklyTimeline({
     const minutes = Math.floor((hour - hours) * 60);
 
     const dateStr = formatDateLocal(dayDate);
-    const timeStr = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    const timeStr = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+
+    // Convertir l'heure locale en UTC pour le backend
+    // Si on clique à 18h (heure française), on envoie "17:00 UTC" au backend
     return formatDateTimeUTC(dateStr, timeStr);
   };
 
@@ -202,21 +203,27 @@ export default function WeeklyTimeline({
             <div key={dayIndex} className="col-span-1 relative">
               <div
                 className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-t-lg ${
-                  isToday ? TIMELINE_UI_STYLES.dayHeader.today : TIMELINE_UI_STYLES.dayHeader.other
+                  isToday
+                    ? TIMELINE_UI_STYLES.dayHeader.today
+                    : TIMELINE_UI_STYLES.dayHeader.other
                 }`}
               >
                 <div className="text-[10px] sm:text-xs font-medium">
                   {day.toLocaleDateString("fr-FR", { weekday: "short" })}
                 </div>
-                <div className="text-base sm:text-lg font-bold">{day.getDate()}</div>
+                <div className="text-base sm:text-lg font-bold">
+                  {day.getDate()}
+                </div>
               </div>
 
-              <div className={`relative h-[816px] sm:h-[1088px] ${TIMELINE_UI_STYLES.grid.background} border ${TIMELINE_UI_STYLES.grid.border} rounded-b-lg overflow-hidden`}>
+              <div
+                className={`relative h-[816px] sm:h-[1088px] ${TIMELINE_UI_STYLES.grid.background} border ${TIMELINE_UI_STYLES.grid.border} rounded-b-lg overflow-hidden`}
+              >
                 {hours.map((hour, hourIndex) => (
                   <div
                     key={hourIndex}
                     className={`absolute left-0 right-0 h-12 sm:h-16 border-b ${TIMELINE_UI_STYLES.grid.border} z-0`}
-                    style={{ top: `${hourIndex * 48}px`, height: '48px' }}
+                    style={{ top: `${hourIndex * 48}px`, height: "48px" }}
                     data-sm-top={`${hourIndex * 64}px`}
                   />
                 ))}
@@ -227,15 +234,22 @@ export default function WeeklyTimeline({
                     style={{
                       backgroundColor: TIMELINE_UI_STYLES.teamSchedule.bgColor,
                       top: `${timeToPosition(teamHoraire.heureDebut)}%`,
-                      height: `${timeToPosition(teamHoraire.heureFin) - timeToPosition(teamHoraire.heureDebut)}%`,
+                      height: `${
+                        timeToPosition(teamHoraire.heureFin) -
+                        timeToPosition(teamHoraire.heureDebut)
+                      }%`,
                     }}
                   >
-                    <div className={`px-1 sm:px-2 py-1 text-[10px] sm:text-xs font-semibold flex flex-col items-center justify-center h-full ${TIMELINE_UI_STYLES.teamSchedule.textColor}`}>
+                    <div
+                      className={`px-1 sm:px-2 py-1 text-[10px] sm:text-xs font-semibold flex flex-col items-center justify-center h-full ${TIMELINE_UI_STYLES.teamSchedule.textColor}`}
+                    >
                       <Clock size={12} className="mb-1 sm:hidden" />
                       <Clock size={14} className="mb-1 hidden sm:block" />
                       <div className="text-center leading-tight">
                         <div>{teamHoraire.heureDebut}</div>
-                        <div className="opacity-75 text-[8px] sm:text-[10px]">-</div>
+                        <div className="opacity-75 text-[8px] sm:text-[10px]">
+                          -
+                        </div>
                         <div>{teamHoraire.heureFin}</div>
                       </div>
                     </div>
@@ -258,22 +272,25 @@ export default function WeeklyTimeline({
                 {pairs.map((pair, pairIndex) => {
                   const startPos = getTimePosition(pair.entry.timestamp);
 
+                  // Extraire l'heure locale (avec conversion timezone UTC+1)
                   const startTime = extractTimeLocal(pair.entry.timestamp);
-
 
                   if (pair.exit) {
                     const endPos = getTimePosition(pair.exit.timestamp);
                     const height = endPos - startPos;
 
+                    // Extraire l'heure locale (avec conversion timezone UTC+1)
                     const endTime = extractTimeLocal(pair.exit.timestamp);
                     const entryOutOfBounds = isOutOfBounds(
-                      pair.entry.timestamp,
+                      pair.entry.timestamp
                     );
                     const exitOutOfBounds = isOutOfBounds(pair.exit.timestamp);
                     const hasOutOfBounds =
                       entryOutOfBounds.isOut || exitOutOfBounds.isOut;
 
-                    const style = getTimesheetBlockStyle(pair.entry.status as TimesheetStatus);
+                    const style = getTimesheetBlockStyle(
+                      pair.entry.status as TimesheetStatus
+                    );
                     const bgColorClass = style.bgColor;
                     const isDelay =
                       pair.entry.status === "retard" ||
@@ -282,7 +299,13 @@ export default function WeeklyTimeline({
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColorClass} ${style.textColor} rounded-md sm:rounded-lg p-1 sm:p-2 hover:shadow-lg transition-shadow group cursor-pointer ${hasOutOfBounds ? TIMELINE_UI_STYLES.outOfBounds.border : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColorClass} ${
+                          style.textColor
+                        } rounded-md sm:rounded-lg p-1 sm:p-2 hover:shadow-lg transition-shadow group cursor-pointer ${
+                          hasOutOfBounds
+                            ? TIMELINE_UI_STYLES.outOfBounds.border
+                            : ""
+                        }`}
                         style={{
                           top: `${startPos}%`,
                           height: `${height}%`,
@@ -292,10 +315,14 @@ export default function WeeklyTimeline({
                         onClick={() => onEditPair(pair.entry, pair.exit)}
                         title={
                           isDelay
-                            ? `🔶 RETARD ${hasOutOfBounds ? "- Bloc partiellement hors limites (6h-23h)" : ""}`
+                            ? `🔶 RETARD ${
+                                hasOutOfBounds
+                                  ? "- Bloc partiellement hors limites (6h-23h)"
+                                  : ""
+                              }`
                             : hasOutOfBounds
-                              ? `⚠️ Bloc partiellement hors limites (6h-23h)`
-                              : undefined
+                            ? `⚠️ Bloc partiellement hors limites (6h-23h)`
+                            : undefined
                         }
                       >
                         <button
@@ -311,10 +338,16 @@ export default function WeeklyTimeline({
                         </button>
 
                         <div className="text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1 justify-center flex-wrap">
-                          {isDelay && <span className="flex-shrink-0" title="Retard">🔶</span>}
+                          {isDelay && (
+                            <span className="flex-shrink-0" title="Retard">
+                              🔶
+                            </span>
+                          )}
                           {entryOutOfBounds.isOut && (
                             <span
-                              className={TIMELINE_UI_STYLES.outOfBounds.iconColor}
+                              className={
+                                TIMELINE_UI_STYLES.outOfBounds.iconColor
+                              }
                               title="Début hors limites"
                             >
                               ⬆
@@ -325,7 +358,9 @@ export default function WeeklyTimeline({
                           <span className="flex-shrink-0">{endTime}</span>
                           {exitOutOfBounds.isOut && (
                             <span
-                              className={TIMELINE_UI_STYLES.outOfBounds.iconColor}
+                              className={
+                                TIMELINE_UI_STYLES.outOfBounds.iconColor
+                              }
                               title="Fin hors limites"
                             >
                               ⬇
@@ -336,21 +371,40 @@ export default function WeeklyTimeline({
                     );
                   } else {
                     const isEntry = pair.entry.clockin;
-                    const style = getOrphanBlockStyle(isEntry, pair.entry.status as TimesheetStatus);
+                    const style = getOrphanBlockStyle(
+                      isEntry,
+                      pair.entry.status as TimesheetStatus
+                    );
                     const bgColor = style.bgColor;
                     const outOfBounds = isOutOfBounds(pair.entry.timestamp);
 
                     return (
                       <div
                         key={pairIndex}
-                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColor} ${style.textColor} rounded-md sm:rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 group cursor-pointer hover:opacity-80 transition-opacity ${outOfBounds.isOut ? TIMELINE_UI_STYLES.outOfBounds.border : ""}`}
+                        className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 ${bgColor} ${
+                          style.textColor
+                        } rounded-md sm:rounded-lg px-1 sm:px-2 py-0.5 sm:py-1 group cursor-pointer hover:opacity-80 transition-opacity ${
+                          outOfBounds.isOut
+                            ? TIMELINE_UI_STYLES.outOfBounds.border
+                            : ""
+                        }`}
                         style={{
                           top: `${startPos}%`,
                           height: "24px",
                           zIndex: 15,
                         }}
                         onClick={() => onEditPair(pair.entry)}
-                        title={`Pointage ${isEntry ? "entrée" : "sortie"} orphelin - Cliquer pour modifier${outOfBounds.isOut ? ` - HORS LIMITES (${outOfBounds.position === "before" ? "avant 6h" : "après 23h"})` : ""}`}
+                        title={`Pointage ${
+                          isEntry ? "entrée" : "sortie"
+                        } orphelin - Cliquer pour modifier${
+                          outOfBounds.isOut
+                            ? ` - HORS LIMITES (${
+                                outOfBounds.position === "before"
+                                  ? "avant 6h"
+                                  : "après 23h"
+                              })`
+                            : ""
+                        }`}
                       >
                         <button
                           onClick={(e) => {
@@ -377,9 +431,13 @@ export default function WeeklyTimeline({
                               {outOfBounds.position === "before" ? "⬆" : "⬇"}
                             </span>
                           )}
-                          <span className="flex-shrink-0">{isEntry ? "→" : "←"}</span>
+                          <span className="flex-shrink-0">
+                            {isEntry ? "→" : "←"}
+                          </span>
                           <span className="flex-shrink-0">{startTime}</span>
-                          <span className="hidden sm:inline flex-shrink-0">{isEntry ? "(entrée)" : "(sortie)"}</span>
+                          <span className="hidden sm:inline flex-shrink-0">
+                            {isEntry ? "(entrée)" : "(sortie)"}
+                          </span>
                         </div>
                       </div>
                     );
@@ -410,10 +468,14 @@ export default function WeeklyTimeline({
                         opacity: 0.9,
                       }}
                       onClick={() => onAbsenceClick?.(absence)}
-                      title={`Absence: ${getAbsenceTypeLabel(absence.type as AbsenceType)} - ${absence.status}`}
+                      title={`Absence: ${getAbsenceTypeLabel(
+                        absence.type as AbsenceType
+                      )} - ${absence.status}`}
                     >
                       <div className="text-center">
-                        <div className="text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1">ABSENCE</div>
+                        <div className="text-[10px] sm:text-sm font-bold mb-0.5 sm:mb-1">
+                          ABSENCE
+                        </div>
                         <div className="text-[9px] sm:text-xs font-semibold leading-tight">
                           {getAbsenceTypeLabel(absence.type as AbsenceType)}
                         </div>

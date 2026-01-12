@@ -14,7 +14,11 @@ import {
   AbsenceType,
   createAbsence,
 } from "../services/absenceService";
-import { formatDateLocal } from "@/app/utils/dateUtils";
+import {
+  formatDateLocal,
+  extractTimeLocal,
+  extractDateLocal,
+} from "@/app/utils/dateUtils";
 
 interface BlockModalProps {
   isOpen: boolean;
@@ -86,10 +90,10 @@ export default function BlockModal({
 
   useEffect(() => {
     if (entryTimesheet && exitTimesheet) {
-      const date = entryTimesheet.timestamp.substring(0, 10);
-
-      const startTime = entryTimesheet.timestamp.substring(11, 16);
-      const endTime = exitTimesheet.timestamp.substring(11, 16);
+      // Extraire la date et les heures locales (avec conversion timezone UTC+1)
+      const date = extractDateLocal(entryTimesheet.timestamp);
+      const startTime = extractTimeLocal(entryTimesheet.timestamp);
+      const endTime = extractTimeLocal(exitTimesheet.timestamp);
 
       setFormData({
         entryId: entryTimesheet.id,
@@ -106,6 +110,7 @@ export default function BlockModal({
       let startTime = "09:00";
 
       if (initialStartTime) {
+        // Extraire l'heure locale (avec conversion timezone UTC+1)
         const d = new Date(initialStartTime);
         startTime = `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
       }

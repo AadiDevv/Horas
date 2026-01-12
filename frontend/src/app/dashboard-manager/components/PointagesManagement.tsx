@@ -251,7 +251,8 @@ export default function PointagesManagement({
   };
 
   const handleSaveBlock = async (data: BlockData) => {
-    // Utiliser formatDateTimeUTC pour convertir l'heure locale en UTC
+    // Convertir l'heure locale en UTC pour le backend
+    // Si le manager saisit 18h (heure française), on envoie "17:00 UTC" au backend
     const entryTimestamp = formatDateTimeUTC(data.date, data.startTime);
 
     const backendStatus = data.status === "retard" ? "delay" : data.status;
