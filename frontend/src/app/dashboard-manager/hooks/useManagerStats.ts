@@ -166,7 +166,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
     // 1. Retards aujourd'hui
     const retardsToday = timesheets.filter(t => {
       const date = t.timestamp.substring(0, 10); // "YYYY-MM-DD"
-      return date === todayStr && t.status === 'retard' && t.clockin === true;
+      return date === todayStr && (t.status === 'retard' || t.status === 'delay') && t.clockin === true;
     });
 
     // 2. Absences aujourd'hui
@@ -278,7 +278,7 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
       const totalClockins = timesheetsEquipe.filter(t => t.clockin === true).length;
 
       // Compter les retards de la semaine
-      const retardsEquipe = timesheetsEquipe.filter(t => t.clockin === true && t.status === 'retard').length;
+      const retardsEquipe = timesheetsEquipe.filter(t => t.clockin === true && (t.status === 'retard' || t.status === 'delay')).length;
 
       // Score de ponctualité = % de pointages à l'heure (sans retard)
       // Plus il y a de retards, plus le score baisse
