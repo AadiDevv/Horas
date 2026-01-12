@@ -67,7 +67,6 @@ export function useTimesheet() {
     const hours = diffMs / (1000 * 60 * 60);
 
     if (hours < 0 || hours > 24) {
-      console.warn(`⚠️ Calcul d'heures invalide: ${startISO} → ${endISO} = ${hours}h`);
       return 0;
     }
 
@@ -91,8 +90,6 @@ export function useTimesheet() {
       byDate[date].push(t);
     });
 
-    console.log('📊 Calcul des stats pour les dates:', Object.keys(byDate));
-    console.log('📅 Aujourd\'hui:', today);
 
     Object.entries(byDate).forEach(([date, dayTimesheets]) => {
       const sorted = [...dayTimesheets].sort((a, b) => {
@@ -107,48 +104,33 @@ export function useTimesheet() {
           const nextTs = sorted[i + 1];
           if (nextTs && nextTs.clockin === false) {
             const hours = calculateHours(ts.timestamp, nextTs.timestamp);
-            console.log(`  ⏱️ ${date} - Paire ${ts.timestamp} → ${nextTs.timestamp} = ${hours.toFixed(2)}h`);
             dayHours += hours;
             i++;
           } else if (date === today) {
 
             const hours = calculateHours(ts.timestamp, now.toISOString());
-            console.log(`  ⏱️ ${date} - Clock-in actif ${ts.timestamp} → maintenant = ${hours.toFixed(2)}h`);
             dayHours += hours;
           }
         }
       }
 
-      console.log(`  📊 ${date} - Total du jour: ${dayHours.toFixed(2)}h`);
 
       if (date === today) {
         heuresJour = dayHours;
-        console.log(`  ✅ C'est aujourd'hui! heuresJour = ${heuresJour.toFixed(2)}h`);
       }
 
       heuresSemaine += dayHours;
-      console.log(`  ✅ Ajout à heuresSemaine: ${dayHours.toFixed(2)}h, total = ${heuresSemaine.toFixed(2)}h`);
 
       if (date >= firstDayOfMonth) {
         // Compter les retards (clockin uniquement)
         const retards = sorted.filter(t => {
           const isRetard = (t.status === 'retard' || t.status === 'delay') && t.clockin === true;
-          if (isRetard) {
-            console.log(`  🔶 Retard détecté: ${t.timestamp} (status: ${t.status})`);
-          }
           return isRetard;
         });
         retardsMois += retards.length;
-        console.log(`  📊 ${date} - Retards ce jour: ${retards.length}, total mois: ${retardsMois}`);
       }
     });
 
-    console.log('📈 Stats finales:', {
-      heuresJour,
-      heuresSemaine,
-      retardsMois,
-      moyenneHebdo: heuresSemaine / 7
-    });
 
     return {
       heuresJour,
@@ -169,20 +151,17 @@ export function useTimesheet() {
 
   const loadStats = async () => {
     try {
-      console.log('🔄 Chargement des statistiques...');
 
       const monday = getMonday(selectedWeek);
       const weekResponse = await getWeekTimesheets(monday);
       if (weekResponse.success && weekResponse.data) {
-        console.log('📊 Calcul des stats à partir de', weekResponse.data.length, 'timesheets');
         const calculatedStats = calculateStatsFromTimesheets(weekResponse.data);
         setStats(calculatedStats);
-        console.log('✅ Statistiques calculées:', calculatedStats);
       } else {
-        console.warn('⚠️ Impossible de récupérer les timesheets');
+        // Warning: Impossible de récupérer les timesheets
       }
     } catch (error) {
-      console.error('❌ Erreur loadStats:', error);
+      // Silent error
     }
   };
 
@@ -192,14 +171,12 @@ export function useTimesheet() {
       const response = await getWeekTimesheets(monday);
 
       if (!response.success || !response.data) {
-        console.error('❌ Erreur chargement timesheets semaine:', response.error);
         return [];
       }
 
       const weekTimesheetsData = response.data || [];
 
       if (!Array.isArray(weekTimesheetsData)) {
-        console.error('❌ weekTimesheets n\'est pas un array:', weekTimesheetsData);
         return [];
       }
 
@@ -224,7 +201,6 @@ export function useTimesheet() {
         timesheetsByDate[date].push(t);
       });
 
-      console.log('📊 Timesheets groupés par date:', timesheetsByDate);
 
       Object.entries(timesheetsByDate).forEach(([date, timesheets]) => {
         const dayKey = dateToDayKey(date);
@@ -234,7 +210,6 @@ export function useTimesheet() {
           return a.timestamp.localeCompare(b.timestamp);
         });
 
-        console.log(`🔍 Traitement du ${date} (${dayKey}):`, sortedTimesheets);
 
         for (let i = 0; i < sortedTimesheets.length; i++) {
           const timesheet = sortedTimesheets[i];
@@ -245,47 +220,38 @@ export function useTimesheet() {
 
             const start = extractTimeLocal(timesheet.timestamp);
 
-            console.log(`  ➡️ Entrée trouvée à ${start}`);
 
             if (nextTimesheet && nextTimesheet.clockin === false) {
 
               const end = extractTimeLocal(nextTimesheet.timestamp);
               const normalizedStatus = timesheet.status === 'delay' ? 'retard' : timesheet.status;
               dayLogs.push({ start, end, status: normalizedStatus });
-              console.log(`  ✅ Paire complète: ${start} - ${end}, statut: ${normalizedStatus}`);
               i++;
             } else {
 
-              console.log(`  ⏳ Entrée sans sortie (en cours ou incomplet)`);
             }
           }
         }
 
-        console.log(`📝 Logs pour ${dayKey}:`, dayLogs);
         newTimeLogs[dayKey] = dayLogs;
       });
 
       setTimeLogs(newTimeLogs);
-      console.log('✅ Timesheets de la semaine chargés:', newTimeLogs);
       return weekTimesheetsData;
     } catch (error) {
-      console.error('❌ Erreur chargement timesheets semaine:', error);
       return [];
     }
   };
 
   const checkTodayTimesheets = async (timesheetsData?: Timesheet[]) => {
     try {
-      console.log('🔍 checkTodayTimesheets - DEBUT');
       const today = new Date();
       const selectedMonday = getMonday(selectedWeek);
       const currentMonday = getMonday(today);
 
       const isCurrentWeek = selectedMonday.toDateString() === currentMonday.toDateString();
-      console.log('📅 isCurrentWeek:', isCurrentWeek);
 
       if (!isCurrentWeek) {
-        console.log('⚠️ Pas la semaine en cours, reset states');
         setLastClockIn(null);
         setIsClockingIn(false);
         setCurrentDayLogs({ start: '' });
@@ -294,53 +260,42 @@ export function useTimesheet() {
 
       const timesheetsToUse = timesheetsData || weekTimesheets;
       const todayStr = today.toISOString().split('T')[0];
-      console.log('📅 Recherche des timesheets pour:', todayStr);
-      console.log('📦 Timesheets disponibles:', timesheetsToUse.length);
 
       const todayTimesheets = timesheetsToUse.filter(t => {
         const tsDate = t.timestamp.substring(0, 10);
         return tsDate === todayStr;
       });
 
-      console.log(`📊 ${todayTimesheets.length} timesheets trouvés pour aujourd'hui:`, todayTimesheets);
 
       if (todayTimesheets.length > 0) {
         const sortedTimesheets = [...todayTimesheets].sort((a, b) => {
           return a.timestamp.localeCompare(b.timestamp);
         });
         const lastTimesheet = sortedTimesheets[sortedTimesheets.length - 1];
-        console.log('🔍 Dernier timesheet:', lastTimesheet);
-        console.log('🔍 lastTimesheet.clockin:', lastTimesheet.clockin);
 
         if (lastTimesheet.clockin === true) {
-          console.log('✅ Clock-in actif détecté!');
           setLastClockIn(lastTimesheet);
           setIsClockingIn(true);
           const time = extractTimeLocal(lastTimesheet.timestamp);
           setCurrentDayLogs({ start: time });
-          console.log('✅ States mis à jour: isClockingIn=true, start=', time);
         } else {
-          console.log('ℹ️ Dernier timesheet est un clock-out');
           setLastClockIn(null);
           setIsClockingIn(false);
           setCurrentDayLogs({ start: '' });
         }
       } else {
-        console.log('ℹ️ Aucun timesheet aujourd\'hui');
         setLastClockIn(null);
         setIsClockingIn(false);
         setCurrentDayLogs({ start: '' });
       }
-      console.log('🔍 checkTodayTimesheets - FIN');
     } catch (error) {
-      console.error('❌ Erreur vérification timesheets:', error);
+      // Silent error
     }
   };
 
   const handleClockToggle = async () => {
 
     if (pointageLoading) {
-      console.log('⚠️ Pointage déjà en cours, ignoré');
       return;
     }
 
@@ -354,7 +309,6 @@ export function useTimesheet() {
       const selectedMonday = getMonday(selectedWeek);
 
       if (currentMonday.toDateString() !== selectedMonday.toDateString()) {
-        console.log('📅 Retour à la semaine en cours pour pointer');
         setSelectedWeek(today);
 
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -362,21 +316,17 @@ export function useTimesheet() {
 
       const response = await clockInOut();
 
-      console.log('📦 Réponse clockInOut:', response);
 
       if (response.success && response.data) {
-        console.log('✅ Data reçue:', response.data);
 
         const time = response.data.timestamp ? extractTimeLocal(response.data.timestamp) : '00:00';
 
-        console.log(`⏰ Heure extraite: ${time}, clockin: ${response.data.clockin}`);
 
         if (response.data.clockin === true) {
           setLastClockIn(response.data);
           setIsClockingIn(true);
           setCurrentDayLogs({ start: time });
           setSuccessMessage('✅ Pointage d\'entrée enregistré avec succès !');
-          console.log('🟢 État mis à jour: isClockingIn = true, start =', time);
 
           setTimeout(() => {
             loadStats();
@@ -384,7 +334,6 @@ export function useTimesheet() {
         }
 
         else {
-          console.log('🔵 Pointage de sortie détecté, mise à jour de l\'état...');
 
           setIsClockingIn(false);
           setCurrentDayLogs({ start: '' });
@@ -399,11 +348,9 @@ export function useTimesheet() {
 
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        console.error('❌ Erreur dans la réponse:', response);
         setErrorMessage(response.error || '❌ Erreur lors du pointage');
       }
     } catch (error) {
-      console.error('❌ Erreur pointage:', error);
       setErrorMessage('❌ Erreur lors du pointage : ' + (error as Error).message);
     } finally {
       setPointageLoading(false);
@@ -506,3 +453,4 @@ export function useTimesheet() {
     formatWeekButtonText
   };
 }
+

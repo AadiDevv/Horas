@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Clock, AlertCircle, Calendar, UserX } from "lucide-react";
-import { motion } from "framer-motion";
 import Navbar from "../components/navbar";
 import RoleProtection from "../middleware/roleProtection";
 import {
@@ -28,10 +27,6 @@ export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
   const [absences, setAbsences] = useState<Absence[]>([]);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
-  const [buttonSize, setButtonSize] = useState({ width: 200, height: 60 });
-  const [isInitialized, setIsInitialized] = useState(false);
 
   const { userData, setUserData, formData, setFormData, loadUserData } =
     useUserData();
@@ -112,14 +107,10 @@ export default function Page() {
           });
 
           setAbsences(filteredAbsences);
-          console.log(
-            "✅ Absences chargées pour la semaine:",
-            filteredAbsences,
-          );
         }
       }
     } catch (error) {
-      console.error("❌ Erreur chargement absences:", error);
+      // Silent error
     }
   };
 
@@ -129,43 +120,8 @@ export default function Page() {
     }
   }, [selectedWeek, weekDays]);
 
-  useEffect(() => {
-    // Calculer la position initiale du bouton
-    const calculateInitialPosition = () => {
-      const placeholder = document.getElementById('button-placeholder');
-      if (placeholder) {
-        const rect = placeholder.getBoundingClientRect();
-        setInitialPosition({
-          x: rect.left,
-          y: rect.top,
-        });
-        setButtonSize({
-          width: rect.width,
-          height: rect.height,
-        });
-        setIsInitialized(true);
-      }
-    };
-
-    // Calculer au chargement et au resize
-    setTimeout(calculateInitialPosition, 100);
-    window.addEventListener('resize', calculateInitialPosition);
-
-    const handleScroll = () => {
-      const scrollThreshold = 200;
-      setIsScrolled(window.scrollY > scrollThreshold);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener('resize', calculateInitialPosition);
-    };
-  }, [mounted]);
 
   const handleLogout = () => {
-    console.log("🚪 Déconnexion...");
     window.location.href = "/login";
   };
 
@@ -221,61 +177,14 @@ export default function Page() {
                     : "Chargement..."}
                 </p>
               </div>
-              {/* Placeholder pour calculer la position et garder l'espace */}
-              <div
-                id="button-placeholder"
-                className="w-full md:w-auto flex justify-center md:justify-end"
-                style={{ visibility: isScrolled ? 'hidden' : 'visible' }}
-              >
-                <div style={{ opacity: 0, pointerEvents: 'none' }}>
-                  <ClockButton
-                    isClockingIn={false}
-                    onClockIn={() => {}}
-                    onClockOut={() => {}}
-                    pointageLoading={false}
-                  />
-                </div>
+              <div className="w-full md:w-auto flex justify-center md:justify-end">
+                <ClockButton
+                  isClockingIn={isClockingIn}
+                  onClockIn={handleClockToggle}
+                  onClockOut={handleClockToggle}
+                  pointageLoading={pointageLoading}
+                />
               </div>
-
-              {/* Bouton animé avec Framer Motion */}
-              {isInitialized && (
-                <motion.div
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    zIndex: 40,
-                  }}
-                  initial={{
-                    x: initialPosition.x,
-                    y: initialPosition.y,
-                  }}
-                  animate={
-                    isScrolled
-                      ? {
-                          x: window.innerWidth - buttonSize.width - 24,
-                          y: window.innerHeight - buttonSize.height - 24,
-                        }
-                      : {
-                          x: initialPosition.x,
-                          y: initialPosition.y,
-                        }
-                  }
-                  transition={{
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 25,
-                    mass: 0.5,
-                  }}
-                >
-                  <ClockButton
-                    isClockingIn={isClockingIn}
-                    onClockIn={handleClockToggle}
-                    onClockOut={handleClockToggle}
-                    pointageLoading={pointageLoading}
-                  />
-                </motion.div>
-              )}
             </div>
 
             {/* Stats Cards */}

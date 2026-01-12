@@ -71,7 +71,6 @@ export function logout(): void {
   localStorage.removeItem('user');
   localStorage.removeItem('role');
 
-  console.log('🔒 Déconnexion effectuée - localStorage nettoyé');
 }
 
 export function isAuthenticated(): boolean {

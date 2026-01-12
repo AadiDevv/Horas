@@ -46,7 +46,6 @@ const server = app.listen(PORT, () => {
 process.on('SIGTERM', async () => {
   await shutdownApp();
   server.close(() => {
-    console.log('Server closed');
     process.exit(0);
   });
 });

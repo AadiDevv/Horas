@@ -117,7 +117,7 @@ function DayTimeline({
         {!hasContent ? (
           <div className="flex items-center justify-center h-full">
             <span className="text-gray-400 text-xs text-center">
-              Aucune heure
+              Jour de repos
             </span>
           </div>
         ) : (
