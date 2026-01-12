@@ -103,7 +103,7 @@ export class UserRepository implements IAuth, IUser {
       throw new NotFoundError(`Error fetching manager by id: ${error}`);
     }
   }
- 
+
   async getUser_ById(id: number): Promise<User_Core> {
     try {
       const user = await prisma.user.findUnique({
@@ -131,7 +131,7 @@ export class UserRepository implements IAuth, IUser {
   /**
    * Récupère tous les employés d'un manager spécifique
    * JOIN : User (manager) → Team (managerId) → User (members via teamId)
-   * 
+   *
    * @param managerId - ID du manager
    * @returns Liste des employés appartenant aux équipes du manager
    */
@@ -154,7 +154,6 @@ export class UserRepository implements IAuth, IUser {
     });
 
     employees.forEach((employee, index) => {
-      console.log(`employee ${index}:`, employee);
     });
     return employees.map(employee => new UserEmployee_Core({
       ...employee,
@@ -208,7 +207,7 @@ export class UserRepository implements IAuth, IUser {
         ...USER_EMPLOYEE_CORE_SELECT,
       }
     });
-    
+
     return new UserEmployee_Core({
       ...updatedUser,
       managerId: updatedUser.managerId!,
@@ -239,7 +238,7 @@ export class UserRepository implements IAuth, IUser {
   /**
    * Suppression logique (soft delete) d'un utilisateur
    * Met à jour le champ deletedAt au lieu de supprimer physiquement
-   * 
+   *
    * @param id - ID de l'utilisateur à supprimer
    * @returns L'utilisateur avec deletedAt défini
    */
@@ -299,6 +298,3 @@ export class UserRepository implements IAuth, IUser {
 
   // #endregion
 }
-
-
-

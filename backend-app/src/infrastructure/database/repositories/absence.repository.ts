@@ -153,7 +153,6 @@ export class AbsenceRepository implements IAbsence {
     // #region Create
 
     async createAbsence(absence: Absence_Core): Promise<Absence_Core> {
-        console.log('createAbsence', absence);
         const { id, ...absenceData } = absence;
 
         const createdAbsence = await prisma.absence.create({

@@ -112,14 +112,10 @@ export default function Page() {
           });
 
           setAbsences(filteredAbsences);
-          console.log(
-            "✅ Absences chargées pour la semaine:",
-            filteredAbsences,
-          );
         }
       }
     } catch (error) {
-      console.error("❌ Erreur chargement absences:", error);
+      // Silent error
     }
   };
 
@@ -165,7 +161,6 @@ export default function Page() {
   }, [mounted]);
 
   const handleLogout = () => {
-    console.log("🚪 Déconnexion...");
     window.location.href = "/login";
   };
 

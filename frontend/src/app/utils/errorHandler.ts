@@ -189,7 +189,6 @@ export function displayError(error: ApiError): ApiError | null {
 
     case DisplayStrategy.SILENT:
 
-      console.log('ℹ️ Erreur silencieuse:', error.message);
       return null;
 
     default:
@@ -233,7 +232,6 @@ export function handleApiError(error: unknown, context?: string): string {
 }
 
 export function showSuccess(message: string, description?: string): void {
-  console.log('✅ Succès:', message);
   toast.success(message, {
     description,
     duration: 3000
@@ -241,7 +239,6 @@ export function showSuccess(message: string, description?: string): void {
 }
 
 export function showInfo(message: string, description?: string): void {
-  console.log('ℹ️ Info:', message);
   toast.info(message, {
     description,
     duration: 4000
@@ -249,7 +246,6 @@ export function showInfo(message: string, description?: string): void {
 }
 
 export function showWarning(message: string, description?: string): void {
-  console.log('⚠️ Warning:', message);
   toast.warning(message, {
     description,
     duration: 4000

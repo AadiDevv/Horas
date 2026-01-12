@@ -15,16 +15,16 @@ export class TeamUseCase {
     // #region Read
     /**
      * Récupère les équipes selon le rôle de l'utilisateur
-     * 
+     *
      * Logique métier :
      * - Manager SANS managerId fourni → retourne SES équipes (userId utilisé)
      * - Manager AVEC managerId fourni → vérifie que c'est son ID, sinon 403
      * - Admin SANS managerId → erreur 400 (doit spécifier le managerId)
      * - Admin AVEC managerId → retourne les équipes du manager spécifié
      * - Employé → 403 (déjà géré par le middleware managerOrAdmin)
-     * 
+     *
      * Résultat : on obtient toujours un managerId unique pour interroger le repository
-     * 
+     *
      * @param userRole - Rôle de l'utilisateur connecté (depuis JWT)
      * @param userId - ID de l'utilisateur connecté (depuis JWT)
      * @param filter - Filtres optionnels (managerId)
@@ -32,7 +32,6 @@ export class TeamUseCase {
      */
     async getTeams(userRole: string, userId: number, filter?: TeamFilterDTO): Promise<Team_L1[]> {
         let managerId: number;
-        console.log("IN USECASE : filter : ", filter);
         // #region - Détermination du managerId selon le rôle et les filtres
         if (userRole === "manager") {
             // CAS MANAGER
@@ -73,7 +72,7 @@ export class TeamUseCase {
     /**
      * Récupère une équipe par son ID
      * Le repository charge automatiquement le manager et les members via includes
-     * 
+     *
      * @param id - ID de l'équipe
      * @returns L'équipe avec ses relations chargées
      * @throws NotFoundError si l'équipe n'existe pas
@@ -92,18 +91,16 @@ export class TeamUseCase {
     /**
      * Crée une nouvelle équipe
      * Le managerId est fourni dans le DTO (récupéré du JWT dans le contrôleur)
-     * 
+     *
      * Logique métier :
      * - Validation des données via l'entité
      * - Création de l'équipe dans le repository
-     * 
+     *
      * @param dto - Données de création
      * @returns L'équipe créée
      * @throws ValidationError si les données sont invalides
      */
     async createTeam(dto: TeamCreateDTO, userId: number): Promise<Team_Core> {
-        console.log("managerId from dto : ", dto.managerId);
-        console.log("userId from jwt : ", userId);
         if (dto.managerId !== userId) {
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui de l'utilisateur connecté");
         }
@@ -119,11 +116,11 @@ export class TeamUseCase {
     // #region Update
     /**
      * Met à jour une équipe existante
-     * 
+     *
      * Règles métier :
      * - Le managerId ne peut PAS être modifié (une équipe reste liée à son manager)
      * - Seuls lastName, description et scheduleId peuvent être modifiés
-     * 
+     *
      * @param id - ID de l'équipe à modifier
      * @param dto - Données de mise à jour
      * @returns L'équipe mise à jour
@@ -139,8 +136,6 @@ export class TeamUseCase {
         const teamManagerId: number = existingTeam?.managerId ?? 0;
 
         if (teamManagerId !== userId) {
-            console.log("dto.managerId : ", teamManagerId);
-            console.log("userId : ", userId);
             throw new ValidationError("Le managerId passé dans le DTO doit être le même que celui del'utilisateur connecté");
         }
 
@@ -157,14 +152,14 @@ export class TeamUseCase {
     }
     /**
  * Assigne un utilisateur à une équipe
- * 
+ *
  * Règles métier :
  * @Admin : peut assigner n'importe quel utilisateur à n'importe quelle équipe
  * @Manager : peut uniquement assigner ses propres employés à ses équipes
- * 
+ *
  * @param scheduleId - ID de l'utilisateur à assigner
  * @param teamId - ID de l'équipe de destination
- * 
+ *
  * @returns L'utilisateur mis à jour
  * @throws NotFoundError si l'utilisateur n'existe pas
  * @throws ForbiddenError si l'utilisateur n'a pas les droits
@@ -197,11 +192,11 @@ export class TeamUseCase {
     // #region Delete
     /**
      * Suppression logique (soft delete) d'une équipe
-     * 
+     *
      * Règles métier :
      * - Une équipe contenant des members ne peut PAS être supprimée
      * - Les members doivent d'abord être déplacés vers une autre équipe
-     * 
+     *
      * @param id - ID de l'équipe à supprimer
      * @throws NotFoundError si l'équipe n'existe pas
      * @throws ValidationError si l'équipe contient des members
@@ -227,4 +222,3 @@ export class TeamUseCase {
     }
     // #endregion
 }
-

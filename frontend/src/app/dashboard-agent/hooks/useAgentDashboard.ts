@@ -23,7 +23,6 @@ export function useUserData() {
 
       const userStr = localStorage.getItem('user');
       if (!userStr) {
-        console.error('❌ Utilisateur non connecté (localStorage vide)');
         setLoading(false);
         return;
       }
@@ -45,7 +44,7 @@ export function useUserData() {
         });
       }
     } catch (error) {
-      console.error('❌ Erreur chargement utilisateur:', error);
+      // Silent error
     } finally {
       setLoading(false);
     }
@@ -102,7 +101,6 @@ export function useSettings(userData: User | null, formData: UserFormData) {
         }, 1500);
       }
     } catch (error) {
-      console.error('❌ Erreur sauvegarde:', error);
       setErrorMessage('❌ Erreur lors de la sauvegarde : ' + (error as Error).message);
     } finally {
       setSaving(false);
@@ -126,7 +124,6 @@ export function useTeamSchedule(userData: User | null) {
 
   const loadTeamSchedule = async () => {
     if (!userData?.equipeId) {
-      console.log('⚠️ Aucune équipe associée à l\'utilisateur');
       setTeamSchedule([]);
       return;
     }
@@ -137,13 +134,10 @@ export function useTeamSchedule(userData: User | null) {
 
       if (response.success && response.data) {
         setTeamSchedule(response.data);
-        console.log('✅ Horaires de l\'équipe chargés:', response.data);
       } else {
-        console.error('❌ Erreur chargement horaires:', response.message);
         setTeamSchedule([]);
       }
     } catch (error) {
-      console.error('❌ Erreur chargement horaires équipe:', error);
       setTeamSchedule([]);
     } finally {
       setLoading(false);
@@ -209,7 +203,6 @@ export function useTimeClock() {
         pointagesByDate[date].push(p);
       });
 
-      console.log('📊 Pointages groupés par date:', pointagesByDate);
 
       Object.entries(pointagesByDate).forEach(([date, pointages]) => {
         const dayKey = dateToDayKey(date);
@@ -219,7 +212,6 @@ export function useTimeClock() {
           a.heure.localeCompare(b.heure)
         );
 
-        console.log(`🔍 Traitement du ${date} (${dayKey}):`, sortedPointages);
 
         for (let i = 0; i < sortedPointages.length; i++) {
           const pointage = sortedPointages[i];
@@ -229,29 +221,24 @@ export function useTimeClock() {
             const nextPointage = sortedPointages[i + 1];
             const start = pointage.heure.substring(0, 5);
 
-            console.log(`  ➡️ Entrée trouvée à ${start}`);
 
             if (nextPointage && nextPointage.clockin === false) {
 
               const end = nextPointage.heure.substring(0, 5);
               dayLogs.push({ start, end });
-              console.log(`  ✅ Paire complète: ${start} - ${end}`);
               i++;
             } else {
 
-              console.log(`  ⏳ Entrée sans sortie (en cours ou incomplet)`);
             }
           }
         }
 
-        console.log(`📝 Logs pour ${dayKey}:`, dayLogs);
         newTimeLogs[dayKey] = dayLogs;
       });
 
       setTimeLogs(newTimeLogs);
-      console.log('✅ Pointages de la semaine chargés:', newTimeLogs);
     } catch (error) {
-      console.error('❌ Erreur chargement pointages semaine:', error);
+      // Silent error
     }
   };
 
@@ -288,7 +275,7 @@ export function useTimeClock() {
         setCurrentDayLogs({ start: '' });
       }
     } catch (error) {
-      console.error('❌ Erreur vérification pointages:', error);
+      // Silent error
     }
   };
 
@@ -328,7 +315,6 @@ export function useTimeClock() {
         setErrorMessage(response.error || '❌ Erreur lors du pointage');
       }
     } catch (error) {
-      console.error('❌ Erreur pointage:', error);
       setErrorMessage('❌ Erreur lors du pointage : ' + (error as Error).message);
     } finally {
       setPointageLoading(false);
