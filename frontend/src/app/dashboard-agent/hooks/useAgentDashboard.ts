@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { DayKey, TimeLog, User, UserFormData, Horaire, PointageReadDTO } from '../types';
-import { getUser, updateUser, changePassword } from '../services/userService';
-import { getEquipeHoraires } from '../services/equipeService';
+import { getUser, updateUser, changePassword, getUserSchedule } from '../services/userService';
 
 export { useTimesheet } from './useTimesheet';
 
@@ -125,25 +124,21 @@ export function useTeamSchedule(userData: User | null) {
   const [loading, setLoading] = useState(false);
 
   const loadTeamSchedule = async () => {
-    if (!userData?.equipeId) {
-      console.log('⚠️ Aucune équipe associée à l\'utilisateur');
+    if (!userData?.id) {
       setTeamSchedule([]);
       return;
     }
 
     try {
       setLoading(true);
-      const response = await getEquipeHoraires(userData.equipeId);
+      const response = await getUserSchedule(userData.id);
 
       if (response.success && response.data) {
         setTeamSchedule(response.data);
-        console.log('✅ Horaires de l\'équipe chargés:', response.data);
       } else {
-        console.error('❌ Erreur chargement horaires:', response.message);
         setTeamSchedule([]);
       }
     } catch (error) {
-      console.error('❌ Erreur chargement horaires équipe:', error);
       setTeamSchedule([]);
     } finally {
       setLoading(false);

@@ -1,4 +1,4 @@
-import { User, ApiResponse } from '../types';
+import { User, ApiResponse, Horaire } from '../types';
 import { apiClient } from '../../utils/apiClient';
 import { API_CONFIG } from '@/constants/config';
 
@@ -181,4 +181,38 @@ export async function changePassword(
   }
 
   return response;
+}
+
+export async function getUserSchedule(userId: number): Promise<ApiResponse<Horaire[]>> {
+  const requete = await apiClient.get(`${API_BASE_URL}/api/users/${userId}/schedule`);
+  const response = await requete.json();
+
+  if (!response.success || !response.data) {
+    throw new Error(response.message || "Erreur récupération horaire utilisateur");
+  }
+
+  const schedule = response.data;
+
+  // Mapper les numéros de jours aux noms en français
+  const dayNames: Record<number, string> = {
+    1: 'Lundi',
+    2: 'Mardi',
+    3: 'Mercredi',
+    4: 'Jeudi',
+    5: 'Vendredi',
+    6: 'Samedi',
+    0: 'Dimanche'
+  };
+
+  // Transformer l'objet schedule en tableau d'horaires par jour
+  const scheduleData: Horaire[] = schedule.activeDays?.map((dayNum: number) => ({
+    jour: dayNames[dayNum],
+    heureDebut: schedule.startHour,
+    heureFin: schedule.endHour
+  })) || [];
+
+  return {
+    ...response,
+    data: scheduleData
+  };
 }

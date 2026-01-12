@@ -145,10 +145,9 @@ function DayTimeline({
             <div className="absolute inset-0">
               {teamHoraire && (
                 <div
-                  className="absolute left-0 right-0 rounded-lg border-2"
+                  className="absolute left-0 right-0 rounded-lg"
                   style={{
                     backgroundColor: "rgba(51, 51, 51, 0.3)",
-                    borderColor: "#333333",
                     top: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).top}%`,
                     height: `${calculateBlockPosition(teamHoraire.heureDebut, teamHoraire.heureFin, minTime, maxTime).height}%`,
                   }}
@@ -321,12 +320,14 @@ export default function WeeklyCalendar({
     Sun: null,
   };
 
-  teamSchedule.forEach((horaire) => {
-    const dayKey = jourMapping[horaire.jour];
-    if (dayKey) {
-      scheduleByDay[dayKey] = horaire;
-    }
-  });
+  if (Array.isArray(teamSchedule)) {
+    teamSchedule.forEach((horaire) => {
+      const dayKey = jourMapping[horaire.jour];
+      if (dayKey) {
+        scheduleByDay[dayKey] = horaire;
+      }
+    });
+  }
 
   const absencesByDay: Record<DayKey, Absence[]> = {
     Mon: [],
