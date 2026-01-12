@@ -8,7 +8,6 @@ export { infra, app, controllers };
 export const initializeApp = ():void => {
     infra.initDb();
     controllers.AuthController()
-    console.log('Dipendencies injection done chef !');
 };
 
 export const shutdownApp = async (): Promise<void> => {

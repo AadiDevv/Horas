@@ -154,16 +154,12 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
     return { success: true, data: mockAgents };
   }
 
-  console.log('🚀 Envoi de la requête GET /api/users/my-employees');
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/users/my-employees`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText );
-  console.log('auth headers:', getAuthHeaders());
   if (!res.ok) {
     const errorText = await res.text();
     console.error('❌ Erreur du serveur:', errorText);
@@ -171,15 +167,10 @@ export async function getAgents(): Promise<ApiResponse<Agent[]>> {
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
-  console.log('📊 Nombre d\'employés dans response.data:', response.data?.length || 0);
 
-  if (response.data && response.data.length > 0) {
-    console.log('🔍 Premier employé brut:', response.data[0]);
-  }
+
 
   const transformedData = response.data.map(transformAgentFromBackend);
-  console.log('🔄 Données transformées:', transformedData);
 
   return {
     success: response.success,
@@ -198,15 +189,11 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
       createdAt: new Date().toISOString()
     } as Agent;
     mockAgents.push(newAgent);
-    console.log('✅ Agent créé:', newAgent);
     return { success: true, data: newAgent };
   }
 
   const backendData = transformAgentToBackend(agent);
 
-  console.log('🚀 Envoi de la requête POST /api/auth/register/employe');
-  console.log('📦 Données envoyées:', backendData);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/auth/register/employe`, {
     method: 'POST',
@@ -214,7 +201,6 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
     body: JSON.stringify(backendData)
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -229,7 +215,6 @@ export async function createAgent(agent: Partial<Agent> & { password?: string })
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   return {
     success: response.success,
@@ -243,21 +228,16 @@ export async function updateAgent(id: number, updates: Partial<Agent>): Promise<
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockAgents.findIndex(a => a.id === id);
     mockAgents[index] = { ...mockAgents[index], ...updates };
-    console.log('✅ Agent modifié:', mockAgents[index]);
     return { success: true, data: mockAgents[index] };
   }
 
   const backendData = transformAgentUpdateToBackend(updates);
 
-  console.log('🚀 Envoi de la requête PATCH /api/users/' + id);
-  console.log('📦 Données envoyées:', backendData);
 
   const res = await apiClient.patch(`${API_BASE_URL}/api/users/${id}`, backendData);
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   return {
     success: response.success,
@@ -271,26 +251,21 @@ export async function deleteAgent(id: number): Promise<ApiResponse<void>> {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockAgents.findIndex(a => a.id === id);
     mockAgents.splice(index, 1);
-    console.log('🗑️ Agent supprimé:', id);
     return { success: true };
   }
 
-  console.log('🚀 Envoi de la requête DELETE /api/users/' + id);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     await handleHttpError(res);
   }
 
   const response = await res.json();
-  console.log('✅ Agent supprimé:', response);
 
   return {
     success: response.success,
@@ -308,15 +283,12 @@ export async function getUserById(id: number): Promise<ApiResponse<Agent>> {
     return { success: true, data: agent };
   }
 
-  console.log('🚀 Envoi de la requête GET /api/users/' + id);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/users/${id}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -325,7 +297,6 @@ export async function getUserById(id: number): Promise<ApiResponse<Agent>> {
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   return {
     success: response.success,
@@ -342,13 +313,9 @@ export async function assignUserToTeam(userId: number, teamId: number): Promise<
       throw new Error('Agent non trouvé');
     }
     mockAgents[index].equipeId = teamId;
-    console.log('✅ Agent assigné à l\'équipe:', mockAgents[index]);
     return { success: true, data: mockAgents[index] };
   }
 
-  console.log('🚀 Envoi de la requête PATCH /api/users/assign/team/' + userId);
-  console.log('📦 Données envoyées:', { teamId });
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/users/assign/team/${userId}`, {
     method: 'PATCH',
@@ -356,14 +323,12 @@ export async function assignUserToTeam(userId: number, teamId: number): Promise<
     body: JSON.stringify({ teamId })
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     await handleHttpError(res);
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   return {
     success: response.success,
@@ -375,12 +340,9 @@ export async function assignUserToTeam(userId: number, teamId: number): Promise<
 export async function changeUserPassword(userId: number, oldPassword: string, newPassword: string): Promise<ApiResponse<void>> {
   if (USE_MOCK) {
     await new Promise(resolve => setTimeout(resolve, 500));
-    console.log('✅ Mot de passe modifié (mock)');
     return { success: true, message: 'Mot de passe modifié avec succès' };
   }
 
-  console.log('🚀 Envoi de la requête PATCH /api/users/' + userId + '/password');
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
     method: 'PATCH',
@@ -388,14 +350,12 @@ export async function changeUserPassword(userId: number, oldPassword: string, ne
     body: JSON.stringify({ oldPassword, newPassword })
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     await handleHttpError(res);
   }
 
   const response = await res.json();
-  console.log('✅ Mot de passe modifié:', response);
 
   return {
     success: response.success,
@@ -409,14 +369,12 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
     return { success: true, data: mockEquipes };
   }
 
-  console.log('🚀 Envoi de la requête GET /api/teams');
 
   const res = await fetch(`${API_BASE_URL}/api/teams`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -425,17 +383,11 @@ export async function getEquipes(): Promise<ApiResponse<Equipe[]>> {
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
-  if (response.data && response.data.length > 0) {
-    console.log('🔍 Première équipe brute du backend:', response.data[0]);
-  }
 
   const allEquipes = response.data.map(transformEquipeFromBackend);
-  console.log('🔄 Première équipe transformée:', allEquipes[0]);
   const activeEquipes = allEquipes.filter((equipe: Equipe) => !equipe.deletedAt);
 
-  console.log('📊 Équipes totales:', allEquipes.length, '| Actives:', activeEquipes.length);
 
   return {
     success: response.success,
@@ -462,15 +414,11 @@ export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
       createdAt: new Date().toISOString()
     } as Equipe;
     mockEquipes.push(newEquipe);
-    console.log('✅ Équipe créée:', newEquipe);
     return { success: true, data: newEquipe };
   }
 
   const backendData = transformEquipeToBackend(equipe);
 
-  console.log('🚀 Envoi de la requête POST /api/teams');
-  console.log('📦 Données envoyées:', backendData);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/teams`, {
     method: 'POST',
@@ -478,7 +426,6 @@ export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
     body: JSON.stringify(backendData)
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -493,7 +440,6 @@ export async function createEquipe(equipe: any): Promise<ApiResponse<Equipe>> {
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   if (equipe.agents && equipe.agents.length > 0) {
     console.warn('⚠️ Les agents ne sont pas assignés automatiquement lors de la création.');
@@ -525,7 +471,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
       agentCount: agentObjects?.length || 0
     };
     mockEquipes[index] = updatedEquipe;
-    console.log('✅ Équipe modifiée:', mockEquipes[index]);
     return { success: true, data: mockEquipes[index] };
   }
 
@@ -536,11 +481,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
   const userStr = localStorage.getItem('user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
 
-  console.log('🚀 Envoi de la requête PATCH /api/teams/' + id);
-  console.log('👤 User connecté:', currentUser);
-  console.log('📦 Updates reçus:', updates);
-  console.log('📦 Données transformées envoyées:', backendData);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/teams/${id}`, {
     method: 'PATCH',
@@ -548,7 +488,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
     body: JSON.stringify(backendData)
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -563,7 +502,6 @@ export async function updateEquipe(id: number, updates: any): Promise<ApiRespons
   }
 
   const response = await res.json();
-  console.log('✅ Réponse du serveur:', response);
 
   if (updates.agents && updates.agents.length > 0) {
     console.warn('⚠️ Les agents doivent être mis à jour séparément via PATCH /api/users/:id avec teamId');
@@ -581,19 +519,15 @@ export async function deleteEquipe(id: number): Promise<ApiResponse<void>> {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockEquipes.findIndex(e => e.id === id);
     mockEquipes.splice(index, 1);
-    console.log('🗑️ Équipe supprimée:', id);
     return { success: true };
   }
 
-  console.log('🚀 Envoi de la requête DELETE /api/teams/' + id);
-  console.log('🔑 Headers:', getAuthHeaders());
 
   const res = await fetch(`${API_BASE_URL}/api/teams/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -608,7 +542,6 @@ export async function deleteEquipe(id: number): Promise<ApiResponse<void>> {
   }
 
   const response = await res.json();
-  console.log('✅ Équipe supprimée:', response);
 
   return {
     success: response.success,
@@ -617,8 +550,6 @@ export async function deleteEquipe(id: number): Promise<ApiResponse<void>> {
 }
 
 export async function createSchedule(schedule: { name: string; startHour: string; endHour: string; activeDays: number[] }): Promise<ApiResponse<any>> {
-  console.log('🚀 Envoi de la requête POST /api/schedules');
-  console.log('📦 Données envoyées:', schedule);
 
   const res = await fetch(`${API_BASE_URL}/api/schedules`, {
     method: 'POST',
@@ -626,7 +557,6 @@ export async function createSchedule(schedule: { name: string; startHour: string
     body: JSON.stringify(schedule)
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -635,7 +565,6 @@ export async function createSchedule(schedule: { name: string; startHour: string
   }
 
   const response = await res.json();
-  console.log('✅ Schedule créé:', response);
 
   return {
     success: response.success,
@@ -645,8 +574,6 @@ export async function createSchedule(schedule: { name: string; startHour: string
 }
 
 export async function assignScheduleToTeam(teamId: number, scheduleId: number): Promise<ApiResponse<Equipe>> {
-  console.log('🚀 Envoi de la requête PATCH /api/teams/' + teamId);
-  console.log('📦 Données envoyées:', { scheduleId });
 
   const res = await fetch(`${API_BASE_URL}/api/teams/${teamId}`, {
     method: 'PATCH',
@@ -654,7 +581,6 @@ export async function assignScheduleToTeam(teamId: number, scheduleId: number): 
     body: JSON.stringify({ scheduleId })
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -663,7 +589,6 @@ export async function assignScheduleToTeam(teamId: number, scheduleId: number): 
   }
 
   const response = await res.json();
-  console.log('✅ Schedule assigné à l\'équipe:', response);
 
   return {
     success: response.success,
@@ -673,14 +598,12 @@ export async function assignScheduleToTeam(teamId: number, scheduleId: number): 
 }
 
 export async function getScheduleById(scheduleId: number): Promise<ApiResponse<any>> {
-  console.log('🚀 Envoi de la requête GET /api/schedules/' + scheduleId);
 
   const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
     method: 'GET',
     headers: getAuthHeaders()
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -689,7 +612,6 @@ export async function getScheduleById(scheduleId: number): Promise<ApiResponse<a
   }
 
   const response = await res.json();
-  console.log('✅ Schedule récupéré:', response);
 
   return {
     success: response.success,
@@ -699,8 +621,6 @@ export async function getScheduleById(scheduleId: number): Promise<ApiResponse<a
 }
 
 export async function updateSchedule(scheduleId: number, updates: { name?: string; startHour?: string; endHour?: string; activeDays?: number[] }): Promise<ApiResponse<any>> {
-  console.log('🚀 Envoi de la requête PATCH /api/schedules/' + scheduleId);
-  console.log('📦 Données envoyées:', updates);
 
   const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
     method: 'PATCH',
@@ -708,7 +628,6 @@ export async function updateSchedule(scheduleId: number, updates: { name?: strin
     body: JSON.stringify(updates)
   });
 
-  console.log('📡 Statut de la réponse:', res.status, res.statusText);
 
   if (!res.ok) {
     const errorText = await res.text();
@@ -717,7 +636,6 @@ export async function updateSchedule(scheduleId: number, updates: { name?: strin
   }
 
   const response = await res.json();
-  console.log('✅ Schedule mis à jour:', response);
 
   return {
     success: response.success,
@@ -733,8 +651,6 @@ export async function updateSchedule(scheduleId: number, updates: { name?: strin
  */
 export async function getSchedules(): Promise<ApiResponse<any[]>> {
   try {
-    console.log('🚀 GET /api/schedules');
-
     const res = await fetch(`${API_BASE_URL}/api/schedules`, {
       method: 'GET',
       headers: getAuthHeaders()
@@ -747,7 +663,6 @@ export async function getSchedules(): Promise<ApiResponse<any[]>> {
     const data = await res.json();
     const schedules = Array.isArray(data) ? data : (data.data || []);
 
-    console.log(`✅ GET /api/schedules - ${schedules.length} schedules retrieved`);
 
     return {
       success: true,
@@ -768,7 +683,6 @@ export async function getSchedules(): Promise<ApiResponse<any[]>> {
  */
 export async function deleteSchedule(scheduleId: number): Promise<ApiResponse<void>> {
   try {
-    console.log('🚀 DELETE /api/schedules/:id', scheduleId);
 
     const res = await fetch(`${API_BASE_URL}/api/schedules/${scheduleId}`, {
       method: 'DELETE',
@@ -779,7 +693,6 @@ export async function deleteSchedule(scheduleId: number): Promise<ApiResponse<vo
       throw new Error(`HTTP ${res.status}`);
     }
 
-    console.log(`✅ DELETE /api/schedules/${scheduleId} - Schedule deleted`);
 
     return {
       success: true,
@@ -816,7 +729,6 @@ export async function assignCustomScheduleToUser(
   }
 
   const response = await res.json();
-  console.log('✅ Custom schedule assigned:', response);
 
   return {
     success: response.success,

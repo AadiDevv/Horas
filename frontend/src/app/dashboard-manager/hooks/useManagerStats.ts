@@ -126,13 +126,11 @@ export function useManagerStats(agents: Agent[], equipes: Equipe[]) {
 
       const timesheets = (timesheetsResponse.data || []) as any[];
 
-      console.log(`📊 ${absences.length}/${allAbsences.length} absences (filtrées) et ${timesheets.length} timesheets récupérés pour les stats`);
 
       // Calculer les statistiques
       const calculatedStats = calculateAllStats(absences, timesheets, agents, equipes, today);
       setStats(calculatedStats);
 
-      console.log('✅ Stats calculées:', calculatedStats);
     } catch (error) {
       console.error('❌ Erreur loadStats:', error);
     } finally {

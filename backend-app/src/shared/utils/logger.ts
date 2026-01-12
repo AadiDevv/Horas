@@ -1,6 +1,5 @@
 export class Logger {
   static info(message: string, ...args: any[]): void {
-    console.log(`[INFO] ${new Date().toISOString()}: ${message}`, ...args);
   }
 
   static error(message: string, ...args: any[]): void {

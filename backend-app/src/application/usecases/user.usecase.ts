@@ -8,7 +8,7 @@ import { UserMapper } from "../mappers/user";
 /**
  * Use Case pour la gestion des utilisateurs (CRUD)
  * Contient la logique métier et les règles de gestion
- * 
+ *
  * Note : Les opérations d'authentification (register/login) sont dans AuthUseCase
  */
 export class UserUseCase {
@@ -57,11 +57,11 @@ export class UserUseCase {
     /**
      * Récupère tous les employés gérés par un manager
      * Effectue un JOIN : User.id → Team.managerId → Team.members
-     * 
+     *
      * Logique métier :
      * - Manager : peut voir ses propres employés (managerId = userId depuis JWT)
      * - Admin : peut voir les employés de n'importe quel manager
-     * 
+     *
      * @param managerId - ID du manager
      * @param requestingUserId - ID de l'utilisateur qui fait la requête (depuis JWT)
      * @param requestingUserRole - Rôle de l'utilisateur (depuis JWT)
@@ -84,17 +84,17 @@ export class UserUseCase {
 
     /**
      * Récupère le schedule effectif d'un utilisateur
-     * 
+     *
      * Logique :
      * 1. Si l'utilisateur a un customSchedule → retourner customSchedule
      * 2. Sinon, si l'utilisateur a une team avec un schedule → retourner team.schedule
      * 3. Sinon → null (pas de schedule défini)
-     * 
+     *
      * Règles métier :
      * - Employé : peut voir son propre schedule
      * - Manager : peut voir les schedules de ses propres employés
      * - Admin : peut voir tous les schedules
-     * 
+     *
      * @param userId - ID de l'utilisateur dont on veut le schedule
      * @param requestingUser - Utilisateur qui fait la requête (depuis JWT)
      * @returns Le schedule effectif de l'utilisateur (customSchedule ou team.schedule)
@@ -143,12 +143,12 @@ export class UserUseCase {
     // #region Update
     /**
      * Met à jour un utilisateur existant
-     * 
+     *
      * Règles métier :
      * - L'email ne peut pas être changé s'il est déjà utilisé par un autre utilisateur
      * - Les données sont validées via l'entité
      * - Restrictions basées sur le rôle de l'utilisateur connecté
-     * 
+     *
      * @param id - ID de l'utilisateur à modifier
      * @param dtoUserProfile - Données de mise à jour
      * @param requestingUserId - ID de l'utilisateur qui fait la requête
@@ -188,12 +188,12 @@ export class UserUseCase {
 
     /**
      * Valide les permissions de mise à jour selon le rôle
-     * 
+     *
      * Règles métier :
      * - Admin : peut tout modifier (firstName, lastName, email, phone, role, isActive, teamId, customScheduleId)
      * - Manager : peut modifier son profil (firstName, lastName, email, phone uniquement)
      * - Employé : peut modifier son profil (firstName, lastName, email, phone uniquement)
-     * 
+     *
      * Note : teamId et customScheduleId sont autorisés pour les admins via les routes dédiées
      */
     private async validateUpdateProfilePermissions(
@@ -201,18 +201,15 @@ export class UserUseCase {
         dto: UserUpdateDTO,
         requestingUser: UserAuthDTO,
     ): Promise<void> {
-        
+
         // ADMIN
         if (requestingUser.role === 'admin') {
             return;
         }
-        console.log('dto.role : ', dto.role);
-        console.log('dto.role true ?: ', (dto.role && dto.role !== targetUser.role));
         // MANAGER OR EMPLOYEE : Champs interdits pour manager/employé
         const forbiddenFields: string[] = [];
 
         if (dto.role && dto.role !== targetUser.role) {
-            console.log('dans la condition');
             forbiddenFields.push('role');
         }
 
@@ -234,7 +231,7 @@ export class UserUseCase {
             if (targetUser.id !== requestingUser.id) {
                 throw new ForbiddenError("Vous ne pouvez modifier que votre propre profil");
             }
-        } 
+        }
         // MANAGER
         else if (requestingUser.role === 'manager') {
 
@@ -245,7 +242,7 @@ export class UserUseCase {
                 if (targetUser.role !== 'employe') {
                     throw new ForbiddenError("Vous ne pouvez modifier que des employés");
                 }
-                // Si Le targetUser n'est pas un employé du manager 
+                // Si Le targetUser n'est pas un employé du manager
                 const employee: UserEmployee_Core = await this.getEmployeeCore_ById(targetUser.id);
                 if (employee.managerId !== requestingUser.id) {
                     throw new ForbiddenError("L'utilisateur ne figure pas parmis vos employés");
@@ -381,11 +378,11 @@ export class UserUseCase {
     /**
      * Suppression logique (soft delete) d'un utilisateur
      * Met à jour le champ deletedAt
-     * 
+     *
      * Règles métier :
      * - Manager ou Admin uniquement
      * - Suppression logique (pas de suppression physique en BDD)
-     * 
+     *
      * @param id - ID de l'utilisateur à supprimer
      * @throws NotFoundError si l'utilisateur n'existe pas
      */
