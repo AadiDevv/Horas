@@ -99,9 +99,17 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
           <Image
             src={HorasTitleLogo}
             alt="Horas"
-            width={100}
+            width={76}
+            height={24}
+            className="md:hidden"
+            priority
+          />
+          <Image
+            src={HorasTitleLogo}
+            alt="Horas"
+            width={102}
             height={32}
-            className="h-6 md:h-8 w-auto"
+            className="hidden md:block"
             priority
           />
         </div>
