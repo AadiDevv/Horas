@@ -114,7 +114,7 @@ export default function Navbar({ onOpenSettings, onLogout, sidebarOpen, setSideb
           />
         </div>
 
-        {isAuthenticated && (user?.role === "manager" || user?.role === "admin") && setSidebarOpen && (
+        {isAuthenticated && (user?.role === "manager" || user?.role === "admin" || user?.role === "employe") && setSidebarOpen && (
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-gray-100 rounded-lg transition cursor-pointer active:scale-95"

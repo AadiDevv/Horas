@@ -27,6 +27,7 @@ export default function Page() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [mounted, setMounted] = useState(false);
   const [absences, setAbsences] = useState<Absence[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { userData, setUserData, formData, setFormData, loadUserData } =
     useUserData();
@@ -147,7 +148,11 @@ export default function Page() {
           </div>
         )}
 
-        <Navbar onOpenSettings={handleOpenSettings} />
+        <Navbar
+          onOpenSettings={handleOpenSettings}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
 
         {userData && (
           <SettingsModal
@@ -164,7 +169,7 @@ export default function Page() {
         )}
 
         <div className="flex">
-          <Sidebar />
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <main className="flex-1 p-4 md:p-8 w-full overflow-hidden">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12 gap-6">
               <div>

@@ -1,5 +1,7 @@
 import { Users, Folder, Settings, Clock, Calendar, X } from 'lucide-react';
 import { DashboardPage } from '../types';
+import Image from 'next/image';
+import HorasTitleLogo from '@/app/assets/HorasTitleLogo.svg';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -55,7 +57,13 @@ export default function Sidebar({ isOpen, currentPage, onPageChange, onClose }: 
       }`}>
         {/* Bouton fermer mobile uniquement */}
         <div className="lg:hidden flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">Horas.</h2>
+          <Image
+            src={HorasTitleLogo}
+            alt="Horas"
+            width={76}
+            height={24}
+            priority
+          />
           {onClose && (
             <button
               onClick={onClose}
